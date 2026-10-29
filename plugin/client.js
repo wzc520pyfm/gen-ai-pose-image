@@ -128,18 +128,44 @@ window.__ModuleLoader__.load({ id: "gen-ai-pose-image", factory: (require) => {
     );
   }
 
+  function PosePanelIcon(props) {
+    var size = props && props.size ? props.size : 16;
+    return h("svg", {
+      width: size,
+      height: size,
+      viewBox: "0 0 16 16",
+      fill: "none",
+      "aria-hidden": "true",
+    },
+      h("circle", { cx: "8", cy: "3.1", r: "1.35", stroke: "currentColor", strokeWidth: "1.3" }),
+      h("path", {
+        d: "M8 4.7v3.4M5.1 7.1h5.8M6.1 13.4 8 8.1l1.9 5.3",
+        stroke: "currentColor",
+        strokeWidth: "1.3",
+        strokeLinecap: "round",
+        strokeLinejoin: "round",
+      })
+    );
+  }
+
   exports.name = "gen-ai-pose-image";
   exports.inject = ["slots"];
   exports.apply = function (ctx) {
     if (!ctx.slots || typeof ctx.slots.inject !== "function" || typeof ctx.slots.register !== "function") return;
     var register = ctx.slots.register.bind(ctx.slots);
-    ctx.slots.inject("conversation.view", function () {
+    ctx.slots.inject("main", function () {
       return register({
-        name: "conversation.view",
-        id: "pose-muse",
-        order: 30,
-        label: function () { return "姿势"; },
+        name: "main",
+        key: "pose-muse",
       }, PoseStudio);
+    });
+    ctx.slots.inject("sidebar.panellist", function () {
+      return register({
+        name: "sidebar.panellist",
+        id: "pose-muse",
+        order: 20,
+        label: function () { return "姿势"; },
+      }, PosePanelIcon);
     });
   };
 
