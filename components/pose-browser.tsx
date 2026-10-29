@@ -132,7 +132,7 @@ export function PoseBrowser({
   return (
     <section className="flex min-h-0 flex-col">
       <div className="sticky top-0 z-10 border-b bg-white/95 px-4 py-3 backdrop-blur md:px-6">
-        <div className="flex gap-2 overflow-x-auto pb-2">
+        <div className="flex flex-wrap gap-2">
           {catalog?.systems.map((item) => {
             const active = item.id === system?.id
             return (
@@ -148,11 +148,11 @@ export function PoseBrowser({
                   setSystemId(item.id)
                   setCategory("全部")
                 }}
-                className={`shrink-0 rounded-full px-3 py-1.5 text-sm ${active ? "bg-primary text-primary-foreground" : "bg-white text-foreground ring-1 ring-border"}`}
+                className={`inline-flex items-center gap-1.5 whitespace-nowrap rounded-full px-3 py-1.5 text-sm leading-5 ${active ? "bg-primary text-primary-foreground" : "bg-white text-foreground ring-1 ring-border"}`}
               >
-                {SHORT_SYSTEM[item.id] ?? item.name}
-                <span className={`ml-1.5 text-xs ${active ? "text-primary-foreground/80" : "text-muted-foreground"}`}>{item.poseCount}</span>
-                {item.adult ? <span className={`ml-1 text-[10px] ${active ? "text-primary-foreground/80" : "text-amber-700"}`}>成人向</span> : null}
+                <span>{SHORT_SYSTEM[item.id] ?? item.name}</span>
+                <span className={`text-xs ${active ? "text-primary-foreground/80" : "text-muted-foreground"}`}>{item.poseCount}</span>
+                {item.adult ? <span className={`text-[10px] ${active ? "text-primary-foreground/80" : "text-amber-700"}`}>成人向</span> : null}
               </button>
             )
           })}
@@ -173,13 +173,13 @@ export function PoseBrowser({
             </button>
           ) : null}
         </div>
-        <div className="mt-2 flex gap-1.5 overflow-x-auto">
+        <div className="mt-2 flex flex-wrap gap-1.5">
           <FilterChip active={angle === ""} onClick={() => setAngle("")}>全部视角</FilterChip>
           {ANGLES.map((item) => (
             <FilterChip key={item} active={angle === item} onClick={() => setAngle(item)}>{item}</FilterChip>
           ))}
         </div>
-        <div className="mt-2 flex gap-1.5 overflow-x-auto">
+        <div className="mt-2 flex flex-wrap gap-1.5">
           {categories.map((item) => (
             <FilterChip key={item} active={category === item} onClick={() => setCategory(item)}>{item}</FilterChip>
           ))}
@@ -275,7 +275,7 @@ function FilterChip({ active, onClick, children }: { active: boolean; onClick: (
     <button
       type="button"
       onClick={onClick}
-      className={`shrink-0 rounded-full px-2.5 py-1 text-xs ${active ? "bg-foreground text-background" : "bg-white text-muted-foreground ring-1 ring-border"}`}
+      className={`inline-flex items-center whitespace-nowrap rounded-full px-2.5 py-1 text-xs leading-5 ${active ? "bg-foreground text-background" : "bg-white text-muted-foreground ring-1 ring-border"}`}
     >
       {children}
     </button>

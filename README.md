@@ -2,7 +2,7 @@
 
 DeepSeek Harness 插件，也是一个可以单独打开的姿势工作室。从 [ai-pose-gallery-zh](https://github.com/anhao/ai-pose-gallery-zh) 的 288 组、1439 张姿势线稿里选一个或多个姿势，生成同一位模特的图。
 
-默认模特是 **大飞鱼**：社区鲸鱼娘的成年形象，长波浪蓝发、鲸耳、蓝鲸尾，穿海军蓝与白色女仆装。参考图用的是 [deepseek-whale-girl](https://github.com/TreapGoGo/deepseek-whale-girl) 里的 `dafeiyu-mature-character-sheet.png`。可以导入最多三张别的模特照片，用来替换脸和衣服。姿势图只提供身体姿态，默认不会把线稿里的空白身体画进成图。
+默认模特是 **大肥鱼**：社区鲸鱼娘的成年形象，长波浪蓝发、鲸耳、蓝鲸尾，穿海军蓝与白色女仆装。参考图用的是 [deepseek-whale-girl](https://github.com/TreapGoGo/deepseek-whale-girl) 里的 `dafeiyu-mature-character-sheet.png`。可以导入最多三张别的模特照片，用来替换脸和衣服。姿势图只提供身体姿态，默认不会把线稿里的空白身体画进成图。
 
 姿势线稿不在这个仓库里。页面会按需读取公开图床 `https://ai-pose-gallery.anhao.app`。图片与原始数据的著作权归ギア所有，中文译名来自 Anhao 的图库。
 
@@ -21,7 +21,7 @@ npm run dev
 
 1. 在中间点选姿势，可以多选。标准全身是默认页；性感系和双人姿势需要明确打开「成人向」。
 2. 切到「服装」可以单选一套衣服。春夏秋冬和派对默认可见；内衣、泳装、性感需要打开「成人向」。
-3. 左侧可以导入其他模特，或继续用大飞鱼。选了服装之后，「保持服装」会暂时让位给这套衣服。
+3. 左侧可以导入其他模特，或继续用大肥鱼。选了服装之后，「保持服装」会暂时让位给这套衣服。
 4. 右上角「生图设置」里填写 Gemini 或 OpenAI 兼容接口的密钥。密钥只留在这台浏览器里。
 5. 没有密钥时，右侧仍会写出每一张图的提示词，可以复制到已安装的 `dsh-image-gen` 里生图。选了服装时，参考图顺序是角色、没有人物的衣服、姿势线稿。
 
@@ -66,4 +66,4 @@ npm run typecheck
 
 澜姿自己的程序使用 MIT License，版权所有 (c) 2026 wzc520pyfm。数据来源和各自的版权写在 `shared/license.mjs`，并附在 `LICENSE` 末尾。
 
-这份 MIT 许可不覆盖姿势线稿、原始姿势数据、服装图，也不授予 DeepSeek 商标。线稿和原始数据的著作权归ギア所有，中文译名由 Anhao 维护，图片按需读取、不放进仓库。服装图同样来自ギア的衣装集，仓库里只有编号和关键词。大飞鱼设定图来自 [TreapGoGo/deepseek-whale-girl](https://github.com/TreapGoGo/deepseek-whale-girl)，版权所有 (c) 2026 TreapGoGo，按该仓库的 MIT 许可使用，不代表深度求索。
+这份 MIT 许可不覆盖姿势线稿、原始姿势数据、服装图，也不授予 DeepSeek 商标。线稿和原始数据的著作权归ギア所有，中文译名由 Anhao 维护，图片按需读取、不放进仓库。服装图同样来自ギア的衣装集，仓库里只有编号和关键词。大肥鱼设定图来自 [TreapGoGo/deepseek-whale-girl](https://github.com/TreapGoGo/deepseek-whale-girl)，版权所有 (c) 2026 TreapGoGo，按该仓库的 MIT 许可使用，不代表深度求索。

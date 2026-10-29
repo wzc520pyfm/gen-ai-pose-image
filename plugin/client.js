@@ -94,7 +94,7 @@ window.__ModuleLoader__.load({ id: "gen-ai-pose-image", factory: (require) => {
 
     return h("div", { style: { height: "100%", overflow: "auto", padding: 16, background: "#f6f1e8", color: "#1c2433", font: "14px/1.5 sans-serif" } },
       h("h2", { style: { margin: "0 0 4px", fontFamily: "serif", fontSize: 28 } }, "澜姿"),
-      h("p", { style: { margin: "0 0 12px", color: "#5c6880" } }, "默认模特是成年鲸鱼娘大飞鱼。这里先选标准全身姿势；完整画廊在独立工作室里。"),
+      h("p", { style: { margin: "0 0 12px", color: "#5c6880" } }, "默认模特是成年鲸鱼娘大肥鱼。这里先选标准全身姿势；完整画廊在独立工作室里。"),
       error ? h("p", null, error) : null,
       h("input", {
         value: query,

@@ -25,7 +25,7 @@ export const THIRD_PARTY_NOTICES = [
   },
   {
     id: "muse",
-    title: "默认模特大飞鱼",
+    title: "默认模特大肥鱼",
     holder: "TreapGoGo",
     source: "https://github.com/TreapGoGo/deepseek-whale-girl",
     included: "public/muse/dafeiyu-sheet.png 是该仓库的 dafeiyu-mature-character-sheet.png。public/muse/dafeiyu-portrait.jpg 是同一张设定图的界面裁切。",

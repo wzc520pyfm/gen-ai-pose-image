@@ -10,7 +10,7 @@ const outfit = Outfit({
 
 export const metadata: Metadata = {
   title: "澜姿 · 姿势参考生图",
-  description: "从中文姿势图库里选择姿势，也可以换成衣装集里的衣服，用社区鲸鱼娘大飞鱼的成年形象或你导入的模特生成图片。",
+  description: "从中文姿势图库里选择姿势，也可以换成衣装集里的衣服，用社区鲸鱼娘大肥鱼的成年形象或你导入的模特生成图片。",
 }
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {

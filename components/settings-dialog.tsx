@@ -57,7 +57,7 @@ export function SettingsDialog({
                 : "会先把模特图和姿势线稿交给 images/edits。接口不支持编辑时，自动改走文生图，并在结果上标明。"}
           </p>
           <Field label="API Key">
-            <Input type="password" autoComplete="off" value={settings.apiKey} onChange={(event) => patch({ apiKey: event.target.value })} placeholder={settings.provider === "seedream" ? "留空则用服务器上的密钥" : "sk-… 或 AIza…"} />
+            <Input type="password" autoComplete="off" value={settings.apiKey} onChange={(event) => patch({ apiKey: event.target.value })} placeholder={settings.provider === "seedream" ? "填入火山方舟 API Key" : "填入 API Key"} />
           </Field>
           <Field label="接口根地址">
             <Input
