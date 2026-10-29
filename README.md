@@ -22,13 +22,17 @@ npm run dev
 3. 右上角「生图设置」里填写 Gemini 或 OpenAI 兼容接口的密钥。密钥只留在这台浏览器里。
 4. 没有密钥时，右侧仍会写出每一张图的提示词，可以复制到已安装的 `dsh-image-gen` 里生图。
 
-也可以不把密钥放进浏览器，启动前设置：
+Seedream 走火山方舟 `https://ark.cn-beijing.volces.com/api/v3`，默认模型 `doubao-seedream-5-0-flash-260915`，会把模特图和姿势线稿一起提交。Gemini 默认模型是 `gemini-2.5-flash-image`。OpenAI 兼容接口会先走 `images/edits`；接口不支持编辑时，会退回纯文生图，并在结果上说明参考图没有送出。
+
+服务器若已配置密钥，可以不把密钥放进浏览器：
 
 ```bash
-POSE_MUSE_API_KEY=你的密钥 npm run dev
+POSE_MUSE_PROVIDER=seedream \
+POSE_MUSE_MODEL=doubao-seedream-5-0-flash-260915 \
+POSE_MUSE_BASE_URL=https://ark.cn-beijing.volces.com/api/v3 \
+POSE_MUSE_API_KEY=你的密钥 \
+npm run dev
 ```
-
-Gemini 默认模型是 `gemini-2.5-flash-image`。OpenAI 兼容接口会先走 `images/edits` 把模特图和姿势线稿一起送去；接口不支持编辑时，会退回纯文生图，并在结果上说明参考图没有送出。
 
 ## 装进 DeepSeek Harness
 

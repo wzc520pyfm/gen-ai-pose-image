@@ -30,7 +30,7 @@ export function loadSettings(): StudioSettings {
     const raw = window.localStorage.getItem(KEY)
     if (!raw) return DEFAULT_SETTINGS
     const parsed = JSON.parse(raw) as Partial<StudioSettings>
-    const provider = parsed.provider === "openai" ? "openai" : "gemini"
+    const provider = parsed.provider === "openai" || parsed.provider === "seedream" ? parsed.provider : "gemini"
     const aspect = parsed.aspectRatio
     const aspectRatio = aspect === "1:1" || aspect === "3:4" || aspect === "4:3" || aspect === "9:16" || aspect === "16:9" ? aspect : "3:4"
     return {
@@ -53,5 +53,13 @@ export function saveSettings(settings: StudioSettings) {
 }
 
 export function modelFor(provider: ProviderId) {
-  return provider === "gemini" ? "gemini-2.5-flash-image" : "gpt-image-1"
+  if (provider === "gemini") return "gemini-2.5-flash-image"
+  if (provider === "seedream") return "doubao-seedream-5-0-flash-260915"
+  return "gpt-image-1"
+}
+
+export function baseURLFor(provider: ProviderId) {
+  if (provider === "seedream") return "https://ark.cn-beijing.volces.com/api/v3"
+  if (provider === "openai") return "https://api.openai.com/v1"
+  return ""
 }

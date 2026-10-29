@@ -26,6 +26,7 @@ export function Composer({
   characters,
   extraPrompt,
   onExtraPrompt,
+  providerLabel,
   aspectRatio,
   mode,
   keepOutfit,
@@ -47,6 +48,7 @@ export function Composer({
   characters: StoredCharacter[]
   extraPrompt: string
   onExtraPrompt: (value: string) => void
+  providerLabel: string
   aspectRatio: AspectRatio
   mode: GenerateMode
   keepOutfit: boolean
@@ -144,7 +146,7 @@ export function Composer({
       </label>
 
       <p className="text-xs leading-5 text-muted-foreground">
-        {ASPECT_LABEL[aspectRatio]} · {mode === "sheet" ? `拼成一张（最多 ${limit} 个）` : `逐张出图（最多 ${limit} 张）`} · {keepOutfit ? "保持服装" : "允许换衣服"}
+        {providerLabel} · {ASPECT_LABEL[aspectRatio]} · {mode === "sheet" ? `拼成一张（最多 ${limit} 个）` : `逐张出图（最多 ${limit} 张）`} · {keepOutfit ? "保持服装" : "允许换衣服"}
         {" · "}
         <button type="button" className="text-primary underline-offset-2 hover:underline" onClick={onOpenSettings}>改设置</button>
       </p>

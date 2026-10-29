@@ -60,7 +60,7 @@ export function decodeCharacterImage(input) {
 }
 
 export function planRequest(input = {}) {
-  const provider = input.provider === "openai" ? "openai" : input.provider === "gemini" ? "gemini" : null
+  const provider = input.provider === "openai" || input.provider === "gemini" || input.provider === "seedream" ? input.provider : null
   if (!provider) throw new Error("不支持的生图接口")
   const mode = input.mode === "sheet" ? "sheet" : "each"
   const rawIds = Array.isArray(input.viewIds) ? input.viewIds : []
@@ -133,7 +133,7 @@ export async function resolveCharacterImages(plan) {
 
 export async function runGeneration(input, deps = {}) {
   const plan = planRequest(input)
-  if (!plan.apiKey) throw new Error("还没有填写 API Key。可以先在右侧看提示词，或到设置里填入 Gemini / OpenAI 兼容接口的密钥。")
+  if (!plan.apiKey) throw new Error("还没有填写 API Key。可以先在右侧看提示词，或到设置里填入 Seedream、Gemini 或 OpenAI 兼容接口的密钥。")
   const fetchPose = deps.fetchPose ?? fetchPoseBytes
   const generate = deps.generate ?? generateImage
   const characterImages = await resolveCharacterImages(plan)

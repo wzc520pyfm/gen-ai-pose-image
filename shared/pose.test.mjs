@@ -2,7 +2,7 @@ import assert from "node:assert/strict"
 import { test } from "node:test"
 import { DEFAULT_CHARACTER } from "./character.mjs"
 import { getCatalog, resolveView, searchPoses } from "./catalog.mjs"
-import { extractGeminiImage, extractOpenAIImage, openAISize, redact } from "./generate.mjs"
+import { extractGeminiImage, extractOpenAIImage, openAISize, redact, seedreamSize } from "./generate.mjs"
 import { isSafePosePath, planRequest, promptCards } from "./jobs.mjs"
 import { composePrompt } from "./prompt.mjs"
 
@@ -78,6 +78,8 @@ test("image helpers stay inside the public gallery", () => {
   assert.equal(isSafePosePath("../.env"), false)
   assert.equal(isSafePosePath("https://evil.example/a.jpg"), false)
   assert.equal(openAISize("3:4"), "1024x1536")
+  assert.equal(seedreamSize("3:4"), "1728x2304")
+  assert.equal(seedreamSize("16:9"), "2848x1600")
   assert.equal(openAISize("16:9"), "1536x1024")
   assert.equal(redact("key sk-test failed", "sk-test"), "key *** failed")
   const gemini = extractGeminiImage({ candidates: [{ content: { parts: [{ inlineData: { mimeType: "image/png", data: "aaaa" } }] } }] })

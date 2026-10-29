@@ -11,7 +11,7 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } f
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet"
 import { WhaleMark } from "@/components/whale-mark"
 import { readStoredCharacters, writeStoredCharacters, type StoredCharacter } from "@/lib/characters"
-import { DEFAULT_SETTINGS, loadSettings, saveSettings, type StudioSettings } from "@/lib/settings"
+import { baseURLFor, DEFAULT_SETTINGS, loadSettings, modelFor, saveSettings, type StudioSettings } from "@/lib/settings"
 import type { Catalog, Pose, PoseView, PromptCard } from "@/lib/types"
 
 type Selection = Record<string, string>
@@ -54,13 +54,30 @@ export function Studio() {
   }, [])
 
   useEffect(() => { loadCatalog() }, [loadCatalog])
-  useEffect(() => { setSettings(loadSettings()) }, [])
   useEffect(() => {
-    readStoredCharacters().then(setCharacters).catch(() => {})
+    const local = loadSettings()
     fetch("/api/status")
       .then((response) => response.json())
-      .then((payload: { keyConfigured?: boolean }) => setServerKey(Boolean(payload.keyConfigured)))
-      .catch(() => {})
+      .then((payload: { keyConfigured?: boolean; provider?: string; model?: string; baseURL?: string }) => {
+        setServerKey(Boolean(payload.keyConfigured))
+        const untouched = local.provider === "gemini" && local.apiKey.trim() === "" && (local.model === modelFor("gemini") || local.model.trim() === "")
+        if (untouched && payload.provider === "seedream") {
+          const next = {
+            ...local,
+            provider: "seedream" as const,
+            model: payload.model || modelFor("seedream"),
+            baseURL: payload.baseURL || baseURLFor("seedream"),
+          }
+          setSettings(next)
+          saveSettings(next)
+          return
+        }
+        setSettings(local)
+      })
+      .catch(() => setSettings(local))
+  }, [])
+  useEffect(() => {
+    readStoredCharacters().then(setCharacters).catch(() => {})
   }, [])
 
   function updateSettings(next: StudioSettings) {
@@ -208,6 +225,7 @@ export function Studio() {
       characters={characters}
       extraPrompt={extraPrompt}
       onExtraPrompt={setExtraPrompt}
+      providerLabel={settings.provider === "seedream" ? "Seedream" : settings.provider === "openai" ? "OpenAI" : "Gemini"}
       aspectRatio={settings.aspectRatio}
       mode={settings.mode}
       keepOutfit={settings.keepOutfit}

@@ -1,13 +1,27 @@
 const BLOCKED_HOSTS = new Set(["169.254.169.254", "metadata.google.internal"])
 
 export function defaultModel(provider) {
-  return provider === "gemini" ? "gemini-2.5-flash-image" : "gpt-image-1"
+  if (provider === "gemini") return "gemini-2.5-flash-image"
+  if (provider === "seedream") return "doubao-seedream-5-0-flash-260915"
+  return "gpt-image-1"
 }
 
 export function defaultBaseURL(provider) {
-  return provider === "gemini"
-    ? "https://generativelanguage.googleapis.com/v1beta"
-    : "https://api.openai.com/v1"
+  if (provider === "gemini") return "https://generativelanguage.googleapis.com/v1beta"
+  if (provider === "seedream") return "https://ark.cn-beijing.volces.com/api/v3"
+  return "https://api.openai.com/v1"
+}
+
+const SEEDREAM_SIZE = {
+  "1:1": "2048x2048",
+  "3:4": "1728x2304",
+  "4:3": "2304x1728",
+  "9:16": "1600x2848",
+  "16:9": "2848x1600",
+}
+
+export function seedreamSize(aspectRatio) {
+  return SEEDREAM_SIZE[aspectRatio] || SEEDREAM_SIZE["3:4"]
 }
 
 export function openAISize(aspectRatio) {
@@ -117,7 +131,56 @@ export async function generateImage({
   if (provider === "gemini") {
     return generateGemini({ apiKey, baseURL, model: chosenModel, prompt, images, aspectRatio, signal, fetchImpl })
   }
+  if (provider === "seedream") {
+    return generateSeedream({ apiKey, baseURL, model: chosenModel, prompt, images, aspectRatio, signal, fetchImpl })
+  }
   return generateOpenAI({ apiKey, baseURL, model: chosenModel, prompt, images, aspectRatio, signal, fetchImpl })
+}
+
+async function generateSeedream({ apiKey, baseURL, model, prompt, images, aspectRatio, signal, fetchImpl }) {
+  const root = (baseURL || defaultBaseURL("seedream")).replace(/\/$/, "")
+  const send = async (withReferences) => {
+    const body = {
+      model,
+      prompt,
+      size: seedreamSize(aspectRatio),
+      response_format: "url",
+      stream: false,
+      watermark: true,
+    }
+    if (withReferences && images.length > 0) {
+      body.image = images.map((image) => `data:${image.mediaType};base64,${image.buffer.toString("base64")}`)
+    }
+    const response = await fetchImpl(`${root}/images/generations`, {
+      method: "POST",
+      headers: {
+        authorization: `Bearer ${apiKey}`,
+        "content-type": "application/json",
+      },
+      body: JSON.stringify(body),
+      signal,
+    })
+    const payload = await readPayload(response, apiKey)
+    return { response, payload }
+  }
+  let usedReferences = images.length > 0
+  let { response, payload } = await send(usedReferences)
+  if (!response.ok && usedReferences) {
+    const message = payload?.error?.message || ""
+    if (/image|reference|参考图|参考图片/i.test(message)) {
+      usedReferences = false
+      ;({ response, payload } = await send(false))
+    }
+  }
+  if (!response.ok) fail(payload, response, apiKey, "Seedream 生图失败")
+  const extracted = extractOpenAIImage(payload)
+  const image = await asBuffer(extracted, apiKey, signal)
+  return {
+    ...image,
+    referencesSent: usedReferences,
+    warning: usedReferences ? undefined : "Seedream 这次没有收下参考图，成图只按文字描述，角色和姿势可能对不齐。",
+    model,
+  }
 }
 
 async function generateGemini({ apiKey, baseURL, model, prompt, images, aspectRatio, signal, fetchImpl }) {

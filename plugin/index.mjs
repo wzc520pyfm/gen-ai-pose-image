@@ -152,7 +152,7 @@ export function apply(ctx, config = {}) {
       keep_outfit: { type: "boolean", description: "Keep 澜's white jacket and navy outfit. Default true." },
       aspect_ratio: { type: "string", enum: ["1:1", "3:4", "4:3", "9:16", "16:9"], description: "Default 3:4." },
       mode: { type: "string", enum: ["each", "sheet"], description: "each makes one image per pose. sheet puts up to 4 poses in one image." },
-      provider: { type: "string", enum: ["gemini", "openai"], description: "Omit to use the plugin default." },
+      provider: { type: "string", enum: ["seedream", "gemini", "openai"], description: "Omit to use the plugin default. seedream calls Volcengine Ark." },
       model: { type: "string", description: "Optional model override." },
     },
     output: {
