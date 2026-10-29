@@ -1,6 +1,6 @@
 - insert:
     - id: pose-muse
-      name: dsh-pose-muse
+      name: gen-ai-pose-image
       config:
         provider: gemini
         model: ""
