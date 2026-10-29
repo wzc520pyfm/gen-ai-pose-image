@@ -1,0 +1,91 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-10-29T13:10:00Z",
+  "title": "Design System: 澜姿",
+  "extensions": {
+    "colorMeta": {
+      "page": { "role": "neutral", "displayName": "页面底", "canonical": "oklch(0.975 0.004 260)", "tonalRamp": ["#1c2433", "#3a4250", "#5c6573", "#8b93a0", "#c5cad3", "#e4e7ec", "#f7f8fb", "#ffffff"] },
+      "primary": { "role": "primary", "displayName": "主蓝", "canonical": "#2563eb", "tonalRamp": ["#1e3a8a", "#1d4ed8", "#2563eb", "#3b82f6", "#60a5fa", "#93c5fd", "#bfdbfe", "#eff6ff"] },
+      "rail": { "role": "neutral", "displayName": "模特栏", "canonical": "#0f172a", "tonalRamp": ["#020617", "#0f172a", "#1e293b", "#334155", "#64748b", "#94a3b8", "#cbd5e1", "#e2e8f0"] }
+    },
+    "typographyMeta": {
+      "body": { "displayName": "正文", "purpose": "说明、卡片标题和按钮共用这一套无衬线。" },
+      "title": { "displayName": "标题", "purpose": "顶栏名称和栏目标题，只加重，不换字体。" }
+    },
+    "shadows": [
+      { "name": "card", "value": "0 1px 2px rgba(15, 23, 42, 0.06)", "purpose": "白卡片和页面底分开。" }
+    ],
+    "motion": [
+      { "name": "ease-standard", "value": "cubic-bezier(0.2, 0, 0, 1)", "purpose": "选中和悬停的颜色变化。" }
+    ],
+    "breakpoints": [
+      { "name": "sm", "value": "640px" },
+      { "name": "lg", "value": "1024px" }
+    ]
+  },
+  "components": [
+    {
+      "name": "Primary Button",
+      "kind": "button",
+      "refersTo": "button-primary",
+      "description": "按所选姿势生图。",
+      "html": "<button class=\"ds-btn-primary\">按所选姿势生图</button>",
+      "css": ".ds-btn-primary { background: #2563eb; color: #f8fafc; border: 0; border-radius: 12px; padding: 10px 16px; height: 44px; font: 600 14px/1.2 Outfit, sans-serif; } .ds-btn-primary:hover { background: #1d4ed8; } .ds-btn-primary:focus-visible { outline: 2px solid #93c5fd; outline-offset: 2px; }"
+    },
+    {
+      "name": "Search",
+      "kind": "input",
+      "refersTo": "card",
+      "description": "搜索姿势或服装。",
+      "html": "<input class=\"ds-input\" placeholder=\"搜索编号或英文关键词\" />",
+      "css": ".ds-input { width: 100%; height: 40px; border: 1px solid #e4e7ec; border-radius: 12px; padding: 0 12px; background: #fff; color: #1c2433; font: 400 14px/1.5 sans-serif; } .ds-input::placeholder { color: #5c6573; } .ds-input:focus-visible { outline: 2px solid #93c5fd; outline-offset: 2px; }"
+    },
+    {
+      "name": "Library switch",
+      "kind": "nav",
+      "refersTo": "chip-selected",
+      "description": "姿势和服装的分段控制。",
+      "html": "<div class=\"ds-nav\"><button class=\"ds-nav-on\">姿势</button><button>服装</button></div>",
+      "css": ".ds-nav { display: inline-flex; gap: 4px; padding: 4px; background: #f1f3f6; border-radius: 10px; } .ds-nav button { border: 0; background: transparent; color: #5c6573; border-radius: 8px; padding: 4px 12px; font: 400 14px/1.4 sans-serif; } .ds-nav .ds-nav-on { background: #fff; color: #1c2433; font-weight: 600; box-shadow: 0 1px 2px rgba(15, 23, 42, 0.06); }"
+    },
+    {
+      "name": "Filter chip",
+      "kind": "chip",
+      "refersTo": "chip-selected",
+      "description": "当前分类。",
+      "html": "<button class=\"ds-chip\">春装 215</button>",
+      "css": ".ds-chip { border: 0; background: #2563eb; color: #f8fafc; border-radius: 999px; padding: 6px 12px; font: 500 14px/1.2 sans-serif; } .ds-chip:hover { background: #1d4ed8; } .ds-chip:focus-visible { outline: 2px solid #93c5fd; outline-offset: 2px; }"
+    },
+    {
+      "name": "Gallery card",
+      "kind": "card",
+      "refersTo": "card",
+      "description": "一张姿势或一套衣服。选中时加蓝色描边。",
+      "html": "<article class=\"ds-card\"><div class=\"ds-card-media\"></div><p>SPR-0001</p></article>",
+      "css": ".ds-card { background: #fff; color: #1c2433; border: 1px solid #2563eb; border-radius: 12px; box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.25); overflow: hidden; } .ds-card-media { height: 160px; background: #f8fafc; } .ds-card p { margin: 12px; font: 600 14px/1.4 sans-serif; }"
+    }
+  ],
+  "narrative": {
+    "northStar": "白天的出图工作台",
+    "overview": "澜姿给一个人在浏览器里选姿势、换一套衣服、生成仍是同一位成年角色的图。界面按这类工具的普通做法做：看一眼就知道左边是模特，中间是图库，右边是这次要画的内容。白天、桌前、屏幕光。所以页面是浅的，蓝色只用来表示当前选择和主操作，左边一条深蓝栏放角色。",
+    "keyCharacteristics": [
+      "一种无衬线字体，标题靠字重而不是另一套字体。",
+      "白卡片、细边框、轻阴影。",
+      "选中是蓝色描边加圆点标签。",
+      "顶栏一行放下名称、姿势/服装切换和设置。"
+    ],
+    "rules": [
+      { "name": "The One Blue Rule", "body": "蓝色表示现在选中或下一步动作，不拿来做装饰。", "section": "colors" }
+    ],
+    "dos": [
+      "让选姿势、换装、出图留在同一屏。",
+      "用蓝色标出当前分类、已选卡片和生图按钮。",
+      "成人向分类在确认前保持可点但未展开。"
+    ],
+    "donts": [
+      "换成纸色、衬线大标题或另一套主题皮肤。",
+      "在标题上方再加一行小标签。",
+      "用等宽字装饰界面；编号跟正文用同一套字体。"
+    ]
+  }
+}

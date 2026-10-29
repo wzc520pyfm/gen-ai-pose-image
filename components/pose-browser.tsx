@@ -131,7 +131,7 @@ export function PoseBrowser({
 
   return (
     <section className="flex min-h-0 flex-col">
-      <div className="sticky top-0 z-10 border-b border-foreground/10 bg-[#f4eadc]/90 px-4 py-3 backdrop-blur md:px-6">
+      <div className="sticky top-0 z-10 border-b bg-white/95 px-4 py-3 backdrop-blur md:px-6">
         <div className="flex gap-2 overflow-x-auto pb-2">
           {catalog?.systems.map((item) => {
             const active = item.id === system?.id
@@ -148,11 +148,11 @@ export function PoseBrowser({
                   setSystemId(item.id)
                   setCategory("全部")
                 }}
-                className={`shrink-0 border-b-2 px-1 py-1 text-sm ${active ? "border-primary font-medium text-foreground" : "border-transparent text-muted-foreground"}`}
+                className={`shrink-0 rounded-full px-3 py-1.5 text-sm ${active ? "bg-primary text-primary-foreground" : "bg-white text-foreground ring-1 ring-border"}`}
               >
                 {SHORT_SYSTEM[item.id] ?? item.name}
-                <span className="ml-1.5 font-mono text-[10px] text-muted-foreground">{item.poseCount}</span>
-                {item.adult ? <span className="ml-1 text-[10px] text-primary">成人向</span> : null}
+                <span className={`ml-1.5 text-xs ${active ? "text-primary-foreground/80" : "text-muted-foreground"}`}>{item.poseCount}</span>
+                {item.adult ? <span className={`ml-1 text-[10px] ${active ? "text-primary-foreground/80" : "text-amber-700"}`}>成人向</span> : null}
               </button>
             )
           })}
@@ -196,7 +196,7 @@ export function PoseBrowser({
         ) : null}
         {!loading && !error && poses.length === 0 ? (
           <div className="rounded-2xl border border-dashed border-border bg-card px-4 py-12 text-center">
-            <p className="font-display text-lg">没有对上的姿势</p>
+            <p className="text-lg font-semibold">没有对上的姿势</p>
             <p className="mt-1 text-sm text-muted-foreground">
               {hiddenAdult > 0 && !showAdult ? `这一体系里有 ${hiddenAdult} 个成人向姿势被收着。` : "换个词，或把分类、视角清掉。"}
             </p>
@@ -210,14 +210,14 @@ export function PoseBrowser({
             const view = displayView(pose, selected[pose.id], angle)
             if (!view) return null
             return (
-              <article key={pose.id} className={`overflow-hidden border bg-card transition ${selected[pose.id] ? "border-primary" : "border-foreground/12 hover:border-foreground/35"}`}>
+              <article key={pose.id} className={`overflow-hidden rounded-xl border bg-card shadow-sm transition ${selected[pose.id] ? "border-primary ring-2 ring-primary/25" : "border-border hover:border-primary/40"}`}>
                 <button type="button" className="block w-full text-left" onClick={() => onToggle(pose, view)} aria-pressed={Boolean(selected[pose.id])}>
                   <div className="relative aspect-[3/4] bg-white">
                     <PoseFigure view={view} alt={`${pose.name}，${view.angle}`} />
                     {selected[pose.id] ? (
-                      <span className="absolute top-2 left-2 bg-primary px-1.5 py-0.5 font-mono text-[10px] tracking-wide text-primary-foreground">已选</span>
+                      <span className="absolute top-2 left-2 rounded-full bg-primary px-2 py-0.5 text-[11px] text-primary-foreground">已选</span>
                     ) : null}
-                    <span className="absolute right-2 bottom-2 bg-foreground/80 px-1.5 py-0.5 font-mono text-[10px] text-[#f6efe4]">{view.angle}</span>
+                    <span className="absolute right-2 bottom-2 rounded-full bg-black/60 px-2 py-0.5 text-[11px] text-white">{view.angle}</span>
                   </div>
                   <div className="space-y-1 px-3 py-2.5">
                     <h3 className="line-clamp-2 text-sm leading-5 font-medium">{pose.name}</h3>
@@ -275,7 +275,7 @@ function FilterChip({ active, onClick, children }: { active: boolean; onClick: (
     <button
       type="button"
       onClick={onClick}
-      className={`shrink-0 px-1 py-0.5 text-xs ${active ? "bg-foreground text-background" : "text-muted-foreground"}`}
+      className={`shrink-0 rounded-full px-2.5 py-1 text-xs ${active ? "bg-foreground text-background" : "bg-white text-muted-foreground ring-1 ring-border"}`}
     >
       {children}
     </button>

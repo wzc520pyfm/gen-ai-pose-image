@@ -85,7 +85,7 @@ export function CostumeBrowser({
 
   return (
     <section>
-      <div className="sticky top-0 z-10 border-b border-foreground/10 bg-[#f4eadc]/90 px-4 py-3 backdrop-blur md:px-6">
+      <div className="sticky top-0 z-10 border-b bg-white/95 px-4 py-3 backdrop-blur md:px-6">
         <p className="mb-2 text-sm text-muted-foreground">这些图里没有人物。选一套之后，大飞鱼会换上这身衣服，脸、头发、鲸耳和鲸尾保持不变。</p>
         <div className="flex gap-2 overflow-x-auto pb-2">
           {catalog?.categories.map((item) => (
@@ -99,10 +99,10 @@ export function CostumeBrowser({
                 }
                 setCategory(item.id)
               }}
-              className={`shrink-0 border-b-2 px-1 py-1 text-sm ${category === item.id ? "border-primary font-medium" : "border-transparent text-muted-foreground"}`}
+              className={`shrink-0 rounded-full px-3 py-1.5 text-sm ${category === item.id ? "bg-primary text-primary-foreground" : "bg-white ring-1 ring-border"}`}
             >
               {item.label}
-              <span className="ml-1.5 font-mono text-[10px] text-muted-foreground">{item.count}</span>
+              <span className={`ml-1.5 text-xs ${category === item.id ? "text-primary-foreground/80" : "text-muted-foreground"}`}>{item.count}</span>
               {item.adult ? <span className="ml-1 text-[10px]">成人向</span> : null}
             </button>
           ))}
@@ -145,7 +145,7 @@ export function CostumeBrowser({
                 type="button"
                 onClick={() => onSelect(costume)}
                 aria-pressed={selected}
-                className={`overflow-hidden border bg-card text-left ${selected ? "border-primary" : "border-foreground/12 hover:border-foreground/35"}`}
+                className={`overflow-hidden rounded-xl border bg-card text-left shadow-sm ${selected ? "border-primary ring-2 ring-primary/25" : "border-border hover:border-primary/40"}`}
               >
                 <div className="relative aspect-[2/3] bg-white">
                   <img
@@ -154,7 +154,7 @@ export function CostumeBrowser({
                     loading="lazy"
                     className="h-full w-full object-contain"
                   />
-                  {selected ? <span className="absolute top-2 left-2 bg-primary px-1.5 py-0.5 font-mono text-[10px] tracking-wide text-primary-foreground">换这套</span> : null}
+                  {selected ? <span className="absolute top-2 left-2 rounded-full bg-primary px-2 py-0.5 text-[11px] text-primary-foreground">换这套</span> : null}
                 </div>
                 <div className="space-y-1 px-3 py-2.5">
                   <p className="text-sm font-medium">{costume.id}</p>

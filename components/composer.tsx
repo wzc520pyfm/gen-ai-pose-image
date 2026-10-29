@@ -77,8 +77,7 @@ export function Composer({
     <div className="flex flex-col gap-4">
       <div className="flex items-end justify-between gap-3">
         <div>
-          <p className="font-mono text-[10px] tracking-[0.28em] text-muted-foreground">这次要画</p>
-          <h2 className="font-display text-3xl leading-none">已选 {selected.length} 个姿势</h2>
+          <h2 className="text-lg font-semibold">已选 {selected.length} 个姿势</h2>
         </div>
         {selected.length > 0 ? (
           <button type="button" className="text-xs text-muted-foreground underline-offset-2 hover:underline" onClick={onClear}>清空</button>
@@ -86,7 +85,7 @@ export function Composer({
       </div>
 
       {costume ? (
-        <div className="flex items-center gap-2 border border-primary/50 bg-card px-2 py-1.5">
+        <div className="flex items-center gap-2 rounded-xl border border-primary/40 bg-card px-2 py-1.5">
           <img src={`/api/costume-image?id=${encodeURIComponent(costume.id)}&size=thumb`} alt="" className="h-14 w-10 rounded-md bg-white object-contain" />
           <span className="min-w-0 flex-1">
             <span className="block truncate text-sm">换成 {costume.id}</span>
@@ -97,13 +96,13 @@ export function Composer({
       ) : null}
 
       {selected.length === 0 ? (
-        <p className="border border-dashed border-foreground/20 px-3 py-4 text-sm leading-6 text-muted-foreground">
+        <p className="rounded-xl bg-muted px-3 py-4 text-sm leading-6 text-muted-foreground">
           从中间点选一个或多个姿势。每一张成图都会带上{characters.length ? "你导入的模特" : "大飞鱼"}，只把身体换成对应的线稿姿势。要换衣服，先到「服装」里点一套。
         </p>
       ) : (
         <ul className="flex max-h-40 flex-col gap-2 overflow-auto">
           {selected.map((item) => (
-            <li key={item.poseId} className="flex items-center gap-2 border border-foreground/12 bg-card px-2 py-1.5">
+            <li key={item.poseId} className="flex items-center gap-2 rounded-xl border bg-card px-2 py-1.5">
               <img src={`/api/pose-image?id=${encodeURIComponent(item.viewId)}&size=thumb`} alt="" className="h-12 w-9 rounded-md bg-white object-contain" />
               <span className="min-w-0 flex-1">
                 <span className="block truncate text-sm">{item.title}</span>
@@ -116,25 +115,25 @@ export function Composer({
       )}
 
       {selected[0] ? (
-        <div className="border border-foreground/12 bg-card p-3">
-          <p className="font-mono text-[10px] tracking-[0.18em] text-muted-foreground">对照 · {selected[0].title}</p>
+        <div className="rounded-xl border bg-card p-3">
+          <p className="text-xs text-muted-foreground">参考对照 · {selected[0].title}</p>
           <div className={`mt-2 grid items-center gap-2 ${costume ? "grid-cols-3" : "grid-cols-[1fr_auto_1fr]"}`}>
-            <img src={characterSrc} alt={characters.length ? "导入的模特" : "大飞鱼的成年三视图"} className="aspect-[3/4] bg-[#fbf6ee] object-contain" />
+            <img src={characterSrc} alt={characters.length ? "导入的模特" : "大飞鱼的成年三视图"} className="aspect-[3/4] rounded-lg bg-[#f8fafc] object-contain" />
             {costume ? (
-              <img src={`/api/costume-image?id=${encodeURIComponent(costume.id)}&size=thumb`} alt={`${costume.id} 的服装参考，图中没有人物`} className="aspect-[3/4] bg-white object-contain" />
+              <img src={`/api/costume-image?id=${encodeURIComponent(costume.id)}&size=thumb`} alt={`${costume.id} 的服装参考，图中没有人物`} className="aspect-[3/4] rounded-lg bg-white object-contain" />
             ) : (
               <span className="text-lg text-muted-foreground" aria-hidden="true">→</span>
             )}
-            <img src={`/api/pose-image?id=${encodeURIComponent(selected[0].viewId)}&size=thumb`} alt={`${selected[0].title} 的姿势线稿`} className="aspect-[3/4] bg-white object-contain" />
+            <img src={`/api/pose-image?id=${encodeURIComponent(selected[0].viewId)}&size=thumb`} alt={`${selected[0].title} 的姿势线稿`} className="aspect-[3/4] rounded-lg bg-white object-contain" />
           </div>
           <p className="mt-2 text-xs leading-5 text-muted-foreground">
             {costume ? "左边锁脸和鲸尾，中间是没有人物的衣服，右边只提供姿势。这还不是成图。" : "左边锁脸和衣服，右边只提供姿势。这还不是成图。"}
           </p>
         </div>
       ) : costume ? (
-        <div className="border border-foreground/12 bg-card p-3">
+        <div className="rounded-xl border bg-card p-3">
           <p className="text-xs text-muted-foreground">已选服装 · {costume.id}</p>
-          <img src={`/api/costume-image?id=${encodeURIComponent(costume.id)}&size=thumb`} alt={`${costume.id}，${costume.keywords}`} className="mt-2 aspect-[2/3] max-h-48 bg-white object-contain" />
+          <img src={`/api/costume-image?id=${encodeURIComponent(costume.id)}&size=thumb`} alt={`${costume.id}，${costume.keywords}`} className="mt-2 aspect-[2/3] max-h-48 rounded-lg bg-white object-contain" />
           <p className="mt-2 text-xs leading-5 text-muted-foreground">还没选姿势。选好姿势后，角色会穿上这套衣服出图。</p>
         </div>
       ) : null}
@@ -194,7 +193,7 @@ export function Composer({
         <div className="grid gap-3">
           <h3 className="text-sm font-medium">成图</h3>
           {results.map((item) => (
-            <article key={item.key} className="overflow-hidden border border-foreground/15 bg-card">
+            <article key={item.key} className="overflow-hidden rounded-xl border bg-card">
               {item.ok && item.src ? <img src={item.src} alt={item.title} className="w-full bg-[#f7f4ee] object-contain" /> : null}
               <div className="space-y-2 px-3 py-3">
                 <p className="text-sm font-medium">{item.title}</p>

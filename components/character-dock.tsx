@@ -50,27 +50,24 @@ export function CharacterDock({
   }
 
   return (
-    <aside className="dock order-2 flex min-h-0 flex-col gap-4 border-foreground/10 px-4 py-5 text-foreground lg:order-none lg:h-full lg:overflow-y-auto lg:border-r">
+    <aside className="dock order-2 flex min-h-0 flex-col gap-4 px-4 py-5 text-[#e2e8f0] lg:order-none lg:h-full lg:overflow-y-auto">
       <div>
-        <p className="font-mono text-[10px] tracking-[0.28em] text-muted-foreground">模特</p>
-        <h2 className="font-display mt-1 text-4xl leading-none">{custom ? "导入的模特" : "大飞鱼"}</h2>
-        <p className="mt-2 text-sm leading-6 text-muted-foreground">{custom ? "生图时改用你导入的参考图。" : "社区鲸鱼娘的成年形象，不是 DeepSeek 官方吉祥物。"}</p>
+        <h2 className="text-2xl font-semibold text-white">{custom ? "导入的模特" : "大飞鱼"}</h2>
+        <p className="mt-2 text-sm leading-6 text-[#cbd5e1]">{custom ? "生图时改用你导入的参考图。" : "社区鲸鱼娘的成年形象，不是 DeepSeek 官方吉祥物。"}</p>
       </div>
-      <div className="border border-foreground/70 bg-[#fbf6ee] p-1.5">
-        <img src={portrait} alt={custom ? "导入的模特头像" : "大飞鱼的正面全身像，蓝发、鲸耳、蓝白女仆装"} className="aspect-[3/4] w-full object-cover object-top" />
-      </div>
-      <p className="text-sm leading-6 text-foreground/80">
+      <img src={portrait} alt={custom ? "导入的模特头像" : "大飞鱼的正面全身像，蓝发、鲸耳、蓝白女仆装"} className="aspect-[3/4] w-full rounded-xl object-cover object-top" />
+      <p className="text-sm leading-6 text-[#cbd5e1]">
         {custom
           ? "参考图会和姿势线稿一起交给模型。请使用成年人物的图片。"
           : "长波浪蓝发、鲸耳和蓝鲸尾。三视图锁住脸和鲸尾，衣服可以换成衣装集里的一套。"}
       </p>
       {!custom ? (
-        <img src={full} alt="大飞鱼的成年三视图：正面、侧面、背面，以及头饰和裙摆细节" className="max-h-56 border border-foreground/10 bg-[#fbf6ee] object-contain" />
+        <img src={full} alt="大飞鱼的成年三视图：正面、侧面、背面，以及头饰和裙摆细节" className="max-h-56 rounded-xl bg-white object-contain" />
       ) : (
         <div className="grid grid-cols-3 gap-2">
           {images.map((image) => (
             <div key={image.id} className="relative">
-              <img src={`data:${image.mediaType};base64,${image.dataBase64}`} alt="导入的模特参考" className="aspect-[3/4] w-full object-cover" />
+              <img src={`data:${image.mediaType};base64,${image.dataBase64}`} alt="导入的模特参考" className="aspect-[3/4] w-full rounded-lg object-cover" />
               <button
                 type="button"
                 className="absolute top-1 right-1 rounded-full bg-black/60 px-1.5 text-[10px] text-white"
@@ -92,7 +89,7 @@ export function CharacterDock({
       />
       <Button
         variant="outline"
-        className="border-foreground/20 bg-transparent"
+        className="border-white/20 bg-white/10 text-white hover:bg-white/15 hover:text-white"
         disabled={busy || images.length >= 3}
         onClick={() => inputRef.current?.click()}
       >
@@ -100,16 +97,16 @@ export function CharacterDock({
         {busy ? "正在读图" : images.length ? "再加一张参考" : "导入其他模特"}
       </Button>
       {custom ? (
-        <Button variant="ghost" onClick={() => onChange([])}>
+        <Button variant="ghost" className="text-[#e2e8f0] hover:bg-white/10 hover:text-white" onClick={() => onChange([])}>
           <RotateCcw />
           恢复默认模特大飞鱼
         </Button>
       ) : null}
-      {error ? <p className="text-sm text-destructive">{error}</p> : null}
-      <label className="flex items-center justify-between gap-3 border border-foreground/15 bg-card/70 px-3 py-3 text-sm">
+      {error ? <p className="text-sm text-[#fecaca]">{error}</p> : null}
+      <label className="mt-auto flex items-center justify-between gap-3 rounded-xl bg-white/10 px-3 py-3 text-sm">
         <span>
-          <span className="block">保持服装</span>
-          <span className="mt-0.5 block text-xs leading-5 text-muted-foreground">
+          <span className="block text-white">保持服装</span>
+          <span className="mt-1 block text-xs leading-5 text-[#cbd5e1]">
             {outfitLocked
               ? "已经选了一套衣服，生图会换成它。取消这套之后，这里的开关重新生效。"
               : "只借姿势，不借线稿里的身体。关掉后可在补充描述里换衣服。"}

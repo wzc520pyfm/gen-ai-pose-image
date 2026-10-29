@@ -256,29 +256,16 @@ export function Studio() {
 
   return (
     <div className="min-h-dvh text-foreground lg:flex lg:h-dvh lg:flex-col lg:overflow-hidden">
-      <header className="shrink-0 border-b border-foreground/15 px-4 pt-4 pb-0 md:px-6">
-        <div className="flex items-end justify-between gap-3">
-          <div className="flex min-w-0 items-end gap-3">
-            <WhaleMark className="mb-1 size-9" />
-            <div className="min-w-0">
-              <p className="font-mono text-[10px] tracking-[0.28em] text-muted-foreground">姿势与服装</p>
-              <h1 className="font-display text-4xl leading-none">澜姿</h1>
-            </div>
-          </div>
-          <div className="flex items-center gap-2 pb-1">
-            <Button variant="outline" size="sm" onClick={() => setInstallOpen(true)}>装进 Harness</Button>
-            <Button variant="outline" size="icon" aria-label="生图设置" onClick={() => setSettingsOpen(true)}>
-              <Settings />
-            </Button>
-          </div>
-        </div>
-        <div className="mt-3 flex items-end gap-6" role="tablist" aria-label="图库">
+      <header className="flex h-14 shrink-0 items-center gap-3 border-b bg-white px-4 md:px-5">
+        <WhaleMark className="size-8 shrink-0" />
+        <h1 className="shrink-0 text-base font-semibold">澜姿</h1>
+        <div className="flex shrink-0 rounded-lg bg-muted p-1" role="tablist" aria-label="图库">
           <button
             type="button"
             role="tab"
             aria-selected={library === "poses"}
             onClick={() => setLibrary("poses")}
-            className={`border-b-2 px-0.5 pb-2 text-sm ${library === "poses" ? "border-foreground font-medium" : "border-transparent text-muted-foreground"}`}
+            className={`rounded-md px-3 py-1 text-sm whitespace-nowrap ${library === "poses" ? "bg-white font-medium shadow-sm" : "text-muted-foreground"}`}
           >
             姿势
           </button>
@@ -287,11 +274,17 @@ export function Studio() {
             role="tab"
             aria-selected={library === "costumes"}
             onClick={() => setLibrary("costumes")}
-            className={`border-b-2 px-0.5 pb-2 text-sm ${library === "costumes" ? "border-foreground font-medium" : "border-transparent text-muted-foreground"}`}
+            className={`rounded-md px-3 py-1 text-sm whitespace-nowrap ${library === "costumes" ? "bg-white font-medium shadow-sm" : "text-muted-foreground"}`}
           >
             服装
           </button>
-          {costume ? <span className="mb-2 ml-auto font-mono text-[11px] tracking-wide text-primary">{costume.id}</span> : null}
+        </div>
+        {costume ? <span className="hidden min-w-0 truncate text-sm text-primary sm:inline">{costume.id}</span> : null}
+        <div className="ml-auto flex shrink-0 items-center gap-2">
+          <Button variant="outline" size="sm" className="max-sm:hidden" onClick={() => setInstallOpen(true)}>装进 Harness</Button>
+          <Button variant="outline" size="icon" aria-label="生图设置" onClick={() => setSettingsOpen(true)}>
+            <Settings />
+          </Button>
         </div>
       </header>
       <div className="flex min-h-0 flex-1 flex-col lg:grid lg:h-full lg:grid-cols-[300px_minmax(0,1fr)_340px] lg:grid-rows-[minmax(0,1fr)]">
@@ -327,11 +320,11 @@ export function Studio() {
             />
           )}
         </main>
-        <aside className="ticket hidden min-h-0 border-l border-foreground/10 px-4 py-5 lg:block lg:overflow-y-auto">
+        <aside className="hidden min-h-0 border-l bg-white px-4 py-5 lg:block lg:overflow-y-auto">
           {composer}
         </aside>
       </div>
-      <div className="fixed inset-x-0 bottom-0 z-20 border-t border-foreground/15 bg-[#f6efe4]/95 p-3 backdrop-blur lg:hidden">
+      <div className="fixed inset-x-0 bottom-0 z-20 border-t bg-white/95 p-3 backdrop-blur lg:hidden">
         <Button className="h-11 w-full" onClick={() => setSheetOpen(true)}>
           已选 {chosen.length} 个姿势{costume ? ` · ${costume.id}` : ""} · 去生图
         </Button>
