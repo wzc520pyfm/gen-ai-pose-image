@@ -62,4 +62,6 @@ npm run typecheck
 
 ## 许可
 
-插件代码使用 Apache License 2.0。该许可不覆盖姿势线稿、译名数据、服装图、DeepSeek 的商标，也不覆盖大飞鱼设定图。设定图来自社区仓库 [TreapGoGo/deepseek-whale-girl](https://github.com/TreapGoGo/deepseek-whale-girl)，著作权归原作者。服装图来自衣装集，本仓库不收录图片文件。
+澜姿自己的程序使用 MIT License，版权所有 (c) 2026 wzc520pyfm。数据来源和各自的版权写在 `shared/license.mjs`，并附在 `LICENSE` 末尾。
+
+这份 MIT 许可不覆盖姿势线稿、原始姿势数据、服装图，也不授予 DeepSeek 商标。线稿和原始数据的著作权归ギア所有，中文译名由 Anhao 维护，图片按需读取、不放进仓库。服装图同样来自ギア的衣装集，仓库里只有编号和关键词。大飞鱼设定图来自 [TreapGoGo/deepseek-whale-girl](https://github.com/TreapGoGo/deepseek-whale-girl)，版权所有 (c) 2026 TreapGoGo，按该仓库的 MIT 许可使用，不代表深度求索。
