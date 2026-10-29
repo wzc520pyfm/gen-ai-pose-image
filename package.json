@@ -1,12 +1,12 @@
 {
   "name": "gen-ai-pose-image",
-  "version": "0.1.7",
+  "version": "0.1.8",
   "license": "MIT",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/wzc520pyfm/gen-ai-pose-image.git"
   },
-  "description": "DeepSeek Harness 姿势参考生图插件。从 ai-pose-gallery-zh 选择姿势，可从衣装集换装，默认模特是社区鲸鱼娘大肥鱼，也可以导入其他模特。",
+  "description": "澜姿：从姿势线稿和衣装集给社区鲸鱼娘大肥鱼出图，也可装进 DeepSeek Harness。Lanpose generates images of the community whale-girl Dafeiyu from pose sketches and costumes, and installs into DeepSeek Harness.",
   "type": "module",
   "main": "./plugin/index.mjs",
   "exports": {
@@ -22,6 +22,7 @@
     "public/muse",
     "cordis.patch.yml",
     "README.md",
+    "README.en.md",
     "docs",
     "LICENSE"
   ],
