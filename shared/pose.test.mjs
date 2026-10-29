@@ -160,6 +160,14 @@ test("pose thumbs load from the public gallery path", async () => {
   await assert.rejects(() => fetchPoseBytes("../.env", async () => new Response(jpeg)), /姿势图路径无效/)
 })
 
+test("the browser module id matches the npm package name", () => {
+  const pkg = JSON.parse(readFileSync(new URL("../package.json", import.meta.url), "utf8"))
+  const client = readFileSync(new URL("../plugin/client.js", import.meta.url), "utf8")
+  assert.match(client, new RegExp(`__ModuleLoader__\\.load\\(\\{ id: "${pkg.name}"`))
+  assert.match(client, new RegExp(`exports\\.name = "${pkg.name}"`))
+  assert.ok(pkg.dsh.client.inject.every((name) => name.startsWith("@deepseek-ai/")))
+})
+
 test("tool output schemas declare whether extra fields are allowed", () => {
   const source = readFileSync(new URL("../plugin/index.mjs", import.meta.url), "utf8")
   const schemas = [...source.matchAll(/schema:\s*\{([^}]+)\}/g)].map((match) => match[1])
