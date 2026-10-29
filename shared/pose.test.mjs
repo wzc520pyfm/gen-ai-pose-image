@@ -8,7 +8,8 @@ import { DEFAULT_CHARACTER } from "./character.mjs"
 import { getCatalog, resolveView, searchPoses } from "./catalog.mjs"
 import { getCostume, isSafeCostumePath, searchCostumes } from "./costumes.mjs"
 import { extractGeminiImage, extractOpenAIImage, openAISize, redact, seedreamSize } from "./generate.mjs"
-import { isSafePosePath, modelImage, planRequest, promptCards } from "./jobs.mjs"
+import { modelImage, planRequest, promptCards } from "./jobs.mjs"
+import { fetchPoseBytes, isSafePosePath } from "./poses.mjs"
 import { composePrompt } from "./prompt.mjs"
 import { PROJECT_LICENSE, licenseNotices } from "./license.mjs"
 
@@ -149,6 +150,14 @@ test("project license is MIT and names every outside source", () => {
   assert.match(notices, /TreapGoGo/)
   assert.match(notices, /DeepSeek/)
   assert.ok(license.endsWith(`${notices}\n`))
+})
+
+test("pose thumbs load from the public gallery path", async () => {
+  const jpeg = Buffer.concat([Buffer.from([0xff, 0xd8, 0xff, 0xd9]), Buffer.alloc(64)])
+  const image = await fetchPoseBytes("thumbs/full_single_P001_front.jpg", async () => new Response(jpeg, { status: 200 }))
+  assert.equal(image.mediaType, "image/jpeg")
+  assert.equal(image.role, "pose")
+  await assert.rejects(() => fetchPoseBytes("../.env", async () => new Response(jpeg)), /姿势图路径无效/)
 })
 
 test("image helpers stay inside the public gallery", () => {

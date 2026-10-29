@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server"
 import { resolveView } from "@/shared/catalog.mjs"
-import { fetchPoseBytes, poseFileFor } from "@/shared/jobs.mjs"
+import { fetchPoseBytes, poseFileFor } from "@/shared/poses.mjs"
 
 export async function GET(request: Request) {
   const url = new URL(request.url)
