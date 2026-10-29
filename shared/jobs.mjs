@@ -3,6 +3,7 @@ import { dirname, join } from "node:path"
 import { fileURLToPath } from "node:url"
 import { characterFromUploads, DEFAULT_CHARACTER } from "./character.mjs"
 import { resolveView } from "./catalog.mjs"
+import { costumeFile, fetchCostumeBytes, getCostume } from "./costumes.mjs"
 import { composePrompt } from "./prompt.mjs"
 import { assertBaseURL, defaultModel, generateImage } from "./generate.mjs"
 
@@ -90,14 +91,18 @@ export function planRequest(input = {}) {
   const characterCount = uploads.length || declaredCount
   if (characterCount > 3) throw new Error("模特参考图最多 3 张")
   const character = characterCount > 0 ? characterFromUploads(characterCount) : DEFAULT_CHARACTER
-  const keepOutfit = input.keepOutfit !== false
+  const costumeId = typeof input.costumeId === "string" ? input.costumeId.trim() : ""
+  const costume = costumeId ? getCostume(costumeId) : null
+  if (costumeId && !costume) throw new Error(`找不到服装 ${costumeId}`)
+  const keepOutfit = costume ? false : input.keepOutfit !== false
   const extraPrompt = typeof input.extraPrompt === "string" ? input.extraPrompt.replace(/[^\S\n]+/g, " ").trim().slice(0, 2000) : ""
   const aspectRatio = ASPECTS.has(input.aspectRatio) ? input.aspectRatio : "3:4"
-  const sheetPrompt = composePrompt({ character, poses: items.map((item) => item.pose), extraPrompt, keepOutfit, mode: "sheet" })
+  const costumePrompt = costume ? { id: costume.id, keywords: costume.keywords } : null
+  const sheetPrompt = composePrompt({ character, poses: items.map((item) => item.pose), extraPrompt, keepOutfit, mode: "sheet", costume: costumePrompt })
   for (const item of items) {
     item.prompt = mode === "sheet"
       ? sheetPrompt
-      : composePrompt({ character, poses: [item.pose], extraPrompt, keepOutfit, mode: "each" })
+      : composePrompt({ character, poses: [item.pose], extraPrompt, keepOutfit, mode: "each", costume: costumePrompt })
   }
   const modelText = typeof input.model === "string" ? input.model.trim() : ""
   if (modelText.length > 120) throw new Error("模型名过长")
@@ -109,6 +114,7 @@ export function planRequest(input = {}) {
     aspectRatio,
     mode,
     character,
+    costume,
     items,
     uploads,
     sheetPrompt,
@@ -137,6 +143,8 @@ export async function runGeneration(input, deps = {}) {
   const fetchPose = deps.fetchPose ?? fetchPoseBytes
   const generate = deps.generate ?? generateImage
   const characterImages = await resolveCharacterImages(plan)
+  const fetchCostume = deps.fetchCostume ?? fetchCostumeBytes
+  const costumeImages = plan.costume ? [await fetchCostume(costumeFile(plan.costume, "preview"))] : []
   const signal = deps.signal
   if (plan.mode === "sheet") {
     const poseImages = []
@@ -147,7 +155,7 @@ export async function runGeneration(input, deps = {}) {
       baseURL: plan.baseURL,
       model: plan.model,
       prompt: plan.sheetPrompt,
-      images: [...characterImages, ...poseImages],
+      images: [...characterImages, ...costumeImages, ...poseImages],
       aspectRatio: plan.aspectRatio,
       signal,
     })
@@ -175,7 +183,7 @@ export async function runGeneration(input, deps = {}) {
         baseURL: plan.baseURL,
         model: plan.model,
         prompt: item.prompt,
-        images: [...characterImages, poseImage],
+        images: [...characterImages, ...costumeImages, poseImage],
         aspectRatio: plan.aspectRatio,
         signal,
       })

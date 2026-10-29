@@ -4,4 +4,5 @@ export function composePrompt(input: {
   extraPrompt?: string
   keepOutfit?: boolean
   mode?: "each" | "sheet"
+  costume?: { id: string; keywords: string } | null
 }): string

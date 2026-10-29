@@ -2,7 +2,7 @@
   "name": "dsh-pose-muse",
   "version": "0.1.0",
   "private": true,
-  "description": "DeepSeek Harness 姿势参考生图插件。从 ai-pose-gallery-zh 选择一个或多个姿势，默认模特是原创的 DeepSeek 娘化形象澜，也可以导入其他模特。",
+  "description": "DeepSeek Harness 姿势参考生图插件。从 ai-pose-gallery-zh 选择姿势，可从衣装集换装，默认模特是社区鲸鱼娘大飞鱼，也可以导入其他模特。",
   "type": "module",
   "main": "./plugin/index.mjs",
   "exports": {
@@ -14,6 +14,7 @@
     "plugin",
     "shared",
     "data/catalog.json",
+    "data/costumes.json",
     "public/muse",
     "cordis.patch.yml",
     "README.md",

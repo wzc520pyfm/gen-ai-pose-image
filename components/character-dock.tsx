@@ -13,11 +13,13 @@ export function CharacterDock({
   onChange,
   keepOutfit,
   onKeepOutfit,
+  outfitLocked = false,
 }: {
   images: StoredCharacter[]
   onChange: (images: StoredCharacter[]) => void
   keepOutfit: boolean
   onKeepOutfit: (value: boolean) => void
+  outfitLocked?: boolean
 }) {
   const inputRef = useRef<HTMLInputElement>(null)
   const [error, setError] = useState("")
@@ -48,7 +50,7 @@ export function CharacterDock({
   }
 
   return (
-    <aside className="dock flex min-h-0 flex-col gap-4 px-4 py-5 text-[#e7eefc] lg:h-full lg:overflow-y-auto">
+    <aside className="dock order-2 flex min-h-0 flex-col gap-4 px-4 py-5 text-[#e7eefc] lg:order-none lg:h-full lg:overflow-y-auto">
       <div>
         <p className="text-[11px] tracking-[0.22em] text-[#9fb4d8]">默认模特</p>
         <h2 className="font-display mt-1 text-3xl text-white">{custom ? "导入的模特" : "大飞鱼"}</h2>
@@ -107,9 +109,13 @@ export function CharacterDock({
       <label className="flex items-center justify-between gap-3 rounded-2xl bg-white/10 px-3 py-3 text-sm">
         <span>
           <span className="block text-white">保持服装</span>
-          <span className="mt-0.5 block text-xs leading-5 text-[#b7c6e2]">只借姿势，不借线稿里的身体。关掉后可在补充描述里换衣服。</span>
+          <span className="mt-0.5 block text-xs leading-5 text-[#b7c6e2]">
+            {outfitLocked
+              ? "已经选了一套衣服，生图会换成它。取消这套之后，这里的开关重新生效。"
+              : "只借姿势，不借线稿里的身体。关掉后可在补充描述里换衣服。"}
+          </span>
         </span>
-        <Switch checked={keepOutfit} onCheckedChange={onKeepOutfit} aria-label="保持服装" />
+        <Switch checked={outfitLocked ? false : keepOutfit} onCheckedChange={onKeepOutfit} disabled={outfitLocked} aria-label="保持服装" />
       </label>
     </aside>
   )

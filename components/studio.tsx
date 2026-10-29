@@ -4,6 +4,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react"
 import { Settings } from "lucide-react"
 import { CharacterDock } from "@/components/character-dock"
 import { Composer, type ResultCard } from "@/components/composer"
+import { CostumeBrowser } from "@/components/costume-browser"
 import { PoseBrowser } from "@/components/pose-browser"
 import { SettingsDialog } from "@/components/settings-dialog"
 import { Button } from "@/components/ui/button"
@@ -15,12 +16,17 @@ import { baseURLFor, DEFAULT_SETTINGS, loadSettings, modelFor, saveSettings, typ
 import type { Catalog, Pose, PoseView, PromptCard } from "@/lib/types"
 
 type Selection = Record<string, string>
+type Library = "poses" | "costumes"
+type CostumePick = { id: string; label: string; keywords: string }
 
 export function Studio() {
   const [catalog, setCatalog] = useState<Catalog | null>(null)
   const [catalogError, setCatalogError] = useState("")
   const [loading, setLoading] = useState(true)
   const [settings, setSettings] = useState<StudioSettings>(DEFAULT_SETTINGS)
+  const [library, setLibrary] = useState<Library>("poses")
+  const [costume, setCostume] = useState<CostumePick | null>(null)
+  const [costumeFocus, setCostumeFocus] = useState<string | null>(null)
   const [requestedSystem, setRequestedSystem] = useState<string | null>(null)
   const [settingsOpen, setSettingsOpen] = useState(false)
   const [installOpen, setInstallOpen] = useState(false)
@@ -38,6 +44,7 @@ export function Studio() {
   const [serverKey, setServerKey] = useState(false)
   const [sheetOpen, setSheetOpen] = useState(false)
   const clearRequestedSystem = useCallback(() => setRequestedSystem(null), [])
+  const clearCostumeFocus = useCallback(() => setCostumeFocus(null), [])
   const abortRef = useRef<AbortController | null>(null)
 
   const loadCatalog = useCallback(() => {
@@ -125,6 +132,7 @@ export function Studio() {
           keepOutfit: settings.keepOutfit,
           extraPrompt,
           characterCount: characters.length,
+          costumeId: costume?.id ?? "",
         }),
         signal: controller.signal,
       })
@@ -143,7 +151,7 @@ export function Studio() {
       window.clearTimeout(timer)
       controller.abort()
     }
-  }, [selectionKey, extraPrompt, characters.length, settings.provider, settings.mode, settings.keepOutfit])
+  }, [selectionKey, extraPrompt, characters.length, costume?.id, settings.provider, settings.mode, settings.keepOutfit])
 
   function togglePose(pose: Pose, view: PoseView) {
     if (selected[pose.id] === view.id) {
@@ -186,6 +194,7 @@ export function Studio() {
       aspectRatio: settings.aspectRatio,
       keepOutfit: settings.keepOutfit,
       extraPrompt,
+      costumeId: costume?.id ?? "",
       characterImages: characters.map((image) => ({ mediaType: image.mediaType, dataBase64: image.dataBase64 })),
     }
     try {
@@ -229,6 +238,8 @@ export function Studio() {
       aspectRatio={settings.aspectRatio}
       mode={settings.mode}
       keepOutfit={settings.keepOutfit}
+      costume={costume}
+      onClearCostume={() => setCostume(null)}
       hasKey={Boolean(settings.apiKey.trim()) || serverKey}
       running={running}
       progress={progress}
@@ -249,33 +260,66 @@ export function Studio() {
         <WhaleMark />
         <div className="min-w-0 flex-1">
           <p className="font-display text-xl leading-none">澜姿</p>
-          <p className="mt-1 truncate text-xs text-muted-foreground">从姿势图库里挑一个或多个姿势，用大飞鱼或你自己的模特出图</p>
+          <p className="mt-1 truncate text-xs text-muted-foreground">挑一个或多个姿势，也可以换成衣装集里的衣服</p>
         </div>
         <Button variant="outline" size="sm" onClick={() => setInstallOpen(true)}>装进 Harness</Button>
         <Button variant="outline" size="icon" aria-label="生图设置" onClick={() => setSettingsOpen(true)}>
           <Settings />
         </Button>
       </header>
-      <div className="lg:grid lg:h-full lg:min-h-0 lg:flex-1 lg:grid-cols-[300px_minmax(0,1fr)_340px] lg:grid-rows-[minmax(0,1fr)]">
+      <div className="flex shrink-0 items-center gap-2 border-b border-border/80 px-4 py-2 md:px-6" role="tablist" aria-label="图库">
+        <button
+          type="button"
+          role="tab"
+          aria-selected={library === "poses"}
+          onClick={() => setLibrary("poses")}
+          className={`rounded-full px-3 py-1.5 text-sm ${library === "poses" ? "bg-primary text-primary-foreground" : "bg-card text-foreground ring-1 ring-border"}`}
+        >
+          姿势
+        </button>
+        <button
+          type="button"
+          role="tab"
+          aria-selected={library === "costumes"}
+          onClick={() => setLibrary("costumes")}
+          className={`rounded-full px-3 py-1.5 text-sm ${library === "costumes" ? "bg-primary text-primary-foreground" : "bg-card text-foreground ring-1 ring-border"}`}
+        >
+          服装
+        </button>
+        {costume ? <span className="ml-auto truncate text-xs text-muted-foreground">已选 {costume.id}</span> : null}
+      </div>
+      <div className="flex min-h-0 flex-1 flex-col lg:grid lg:h-full lg:grid-cols-[300px_minmax(0,1fr)_340px] lg:grid-rows-[minmax(0,1fr)]">
         <CharacterDock
           images={characters}
           onChange={updateCharacters}
           keepOutfit={settings.keepOutfit}
           onKeepOutfit={(keepOutfit) => updateSettings({ ...settings, keepOutfit })}
+          outfitLocked={Boolean(costume)}
         />
-        <main className="min-w-0 pb-24 lg:min-h-0 lg:overflow-y-auto lg:pb-8">
-          <PoseBrowser
-            catalog={catalog}
-            loading={loading}
-            error={catalogError}
-            onRetry={loadCatalog}
-            showAdult={settings.showAdult}
-            requestedSystem={requestedSystem}
-            onRequestedSystemApplied={clearRequestedSystem}
-            onRequestAdult={(systemId) => setAdultAsk(systemId)}
-            selected={selected}
-            onToggle={togglePose}
-          />
+        <main className="order-1 min-w-0 pb-24 lg:order-none lg:min-h-0 lg:overflow-y-auto lg:pb-8">
+          {library === "poses" ? (
+            <PoseBrowser
+              catalog={catalog}
+              loading={loading}
+              error={catalogError}
+              onRetry={loadCatalog}
+              showAdult={settings.showAdult}
+              requestedSystem={requestedSystem}
+              onRequestedSystemApplied={clearRequestedSystem}
+              onRequestAdult={(systemId) => setAdultAsk(systemId)}
+              selected={selected}
+              onToggle={togglePose}
+            />
+          ) : (
+            <CostumeBrowser
+              showAdult={settings.showAdult}
+              focusCategory={costumeFocus}
+              onFocusApplied={clearCostumeFocus}
+              onRequestAdult={(categoryId) => setAdultAsk(`costume:${categoryId}`)}
+              selectedId={costume?.id ?? null}
+              onSelect={(item) => setCostume((current) => current?.id === item.id ? null : { id: item.id, label: item.label, keywords: item.keywords })}
+            />
+          )}
         </main>
         <aside className="hidden min-h-0 border-l border-border/80 px-4 py-5 lg:block lg:overflow-y-auto">
           {composer}
@@ -283,7 +327,7 @@ export function Studio() {
       </div>
       <div className="fixed inset-x-0 bottom-0 z-20 border-t border-border bg-[var(--background)]/95 p-3 backdrop-blur lg:hidden">
         <Button className="h-11 w-full" onClick={() => setSheetOpen(true)}>
-          已选 {chosen.length} 个姿势 · 去生图
+          已选 {chosen.length} 个姿势{costume ? ` · ${costume.id}` : ""} · 去生图
         </Button>
       </div>
       <Sheet open={sheetOpen} onOpenChange={setSheetOpen}>
@@ -308,18 +352,25 @@ export function Studio() {
       <Dialog open={adultAsk !== null} onOpenChange={(open) => { if (!open) setAdultAsk(null) }}>
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
-            <DialogTitle>这些是成人向姿势</DialogTitle>
+            <DialogTitle>{adultAsk?.startsWith("costume:") ? "这些是成人向服装" : "这些是成人向姿势"}</DialogTitle>
             <DialogDescription>
-              来自原图库的性感系、双人缠绵，以及上半身里的大胆分类。画面仍是结构线稿。打开之后，生图默认继续保持模特的服装，只借用姿势。
+              {adultAsk?.startsWith("costume:")
+                ? "内衣、泳装和性感分类里的图仍然没有人物，只是衣服本身更暴露。打开之后可以点选。生图会换成这套衣服，并保留角色的脸、头发、鲸耳和鲸尾。"
+                : "来自原图库的性感系、双人缠绵，以及上半身里的大胆分类。画面仍是结构线稿。打开之后，生图默认继续保持模特的服装，只借用姿势。"}
             </DialogDescription>
           </DialogHeader>
           <div className="flex justify-end gap-2">
             <Button variant="outline" onClick={() => setAdultAsk(null)}>先不看</Button>
             <Button onClick={() => {
-              if (adultAsk) setRequestedSystem(adultAsk)
+              if (adultAsk?.startsWith("costume:")) {
+                setCostumeFocus(adultAsk.slice("costume:".length))
+                setLibrary("costumes")
+              } else if (adultAsk) {
+                setRequestedSystem(adultAsk)
+              }
               updateSettings({ ...settings, showAdult: true })
               setAdultAsk(null)
-            }}>显示成人向姿势</Button>
+            }}>{adultAsk?.startsWith("costume:") ? "显示成人向服装" : "显示成人向姿势"}</Button>
           </div>
         </DialogContent>
       </Dialog>

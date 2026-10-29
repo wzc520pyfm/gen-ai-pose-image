@@ -2,6 +2,7 @@ import assert from "node:assert/strict"
 import { test } from "node:test"
 import { DEFAULT_CHARACTER } from "./character.mjs"
 import { getCatalog, resolveView, searchPoses } from "./catalog.mjs"
+import { getCostume, isSafeCostumePath, searchCostumes } from "./costumes.mjs"
 import { extractGeminiImage, extractOpenAIImage, openAISize, redact, seedreamSize } from "./generate.mjs"
 import { isSafePosePath, planRequest, promptCards } from "./jobs.mjs"
 import { composePrompt } from "./prompt.mjs"
@@ -71,6 +72,45 @@ test("plan rejects unknown poses and builds one prompt per view", () => {
   assert.equal(plan.model, "gpt-image-1")
   assert.match(plan.items[0].prompt, /大飞鱼/)
   assert.equal(promptCards(plan).length, 2)
+})
+
+test("a chosen costume replaces the locked outfit", () => {
+  const costume = getCostume("SPR-0001")
+  assert.ok(costume)
+  assert.equal(costume.adult, false)
+  const text = composePrompt({
+    character: DEFAULT_CHARACTER,
+    poses: [{ name: "站立", category: "站姿", system: "全身单人・标准系", angle: "正面", people: 1 }],
+    keepOutfit: true,
+    costume: { id: costume.id, keywords: costume.keywords },
+  })
+  assert.match(text, /服装编号 SPR-0001/)
+  assert.match(text, /ivory frill knit/)
+  assert.match(text, /鲸耳/)
+  assert.match(text, /鲸尾/)
+  assert.match(text, /不要画出服装图里的人台/)
+  assert.match(text, /原服装，以及第一张参考图上的衣服，这次都不要保留/)
+  assert.doesNotMatch(text, /必须保留角色参考图中的服装/)
+  const plan = planRequest({
+    provider: "gemini",
+    viewIds: ["full_single_P001"],
+    costumeId: "SPR-0001",
+    keepOutfit: true,
+  })
+  assert.equal(plan.costume.id, "SPR-0001")
+  assert.match(plan.items[0].prompt, /服装编号 SPR-0001/)
+  assert.doesNotMatch(plan.items[0].prompt, /必须保留角色参考图中的服装/)
+  assert.throws(() => planRequest({ provider: "gemini", viewIds: ["full_single_P001"], costumeId: "NO-SUCH" }), /找不到服装/)
+  assert.equal(isSafeCostumePath("img/SPR-0001.webp"), true)
+  assert.equal(isSafeCostumePath("png/SWM-0001.png"), true)
+  assert.equal(isSafeCostumePath("../.env"), false)
+  const spring = searchCostumes({ category: "春", includeAdult: false, limit: 5 })
+  assert.equal(spring.length, 5)
+  assert.ok(spring.every((item) => item.adult === false && item.category === "春"))
+  assert.equal(searchCostumes({ category: "ランジェリー", includeAdult: false, limit: 5 }).length, 0)
+  const opened = searchCostumes({ category: "ランジェリー", includeAdult: true, limit: 3 })
+  assert.equal(opened.length, 3)
+  assert.ok(opened.every((item) => item.adult))
 })
 
 test("image helpers stay inside the public gallery", () => {

@@ -2,6 +2,7 @@ import { readFile } from "node:fs/promises"
 import { dirname, join } from "node:path"
 import { fileURLToPath } from "node:url"
 import { getCatalog, resolveView } from "../shared/catalog.mjs"
+import { costumeFile, fetchCostumeBytes, getCostume, getCostumeCatalog } from "../shared/costumes.mjs"
 import { fetchPoseBytes, planRequest, poseFileFor, promptCards, runGeneration } from "../shared/jobs.mjs"
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), "..")
@@ -42,6 +43,17 @@ export function createPoseHandler(getConfig) {
       let path = url.pathname
       if (path.startsWith("/dsh-pose-muse")) path = path.slice("/dsh-pose-muse".length) || "/"
       if (req.method === "GET" && path === "/api/catalog") return json(res, 200, getCatalog())
+      if (req.method === "GET" && path === "/api/costumes") return json(res, 200, getCostumeCatalog())
+      if (req.method === "GET" && path === "/api/costume-image") {
+        const costume = getCostume(url.searchParams.get("id") ?? "")
+        if (!costume) return json(res, 404, { error: "找不到服装" })
+        const requested = url.searchParams.get("size")
+        const size = requested === "full" ? "full" : requested === "preview" ? "preview" : "thumb"
+        const image = await fetchCostumeBytes(costumeFile(costume, size))
+        res.writeHead(200, { "content-type": image.mediaType, "cache-control": "public, max-age=86400" })
+        res.end(image.buffer)
+        return
+      }
       if (req.method === "GET" && path === "/api/status") {
         const config = getConfig()
         return json(res, 200, { keyConfigured: Boolean(process.env.POSE_MUSE_API_KEY || config.apiKey) })

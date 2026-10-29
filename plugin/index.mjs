@@ -2,6 +2,7 @@ import { mkdir, writeFile } from "node:fs/promises"
 import { join } from "node:path"
 import { createRequire } from "node:module"
 import { searchPoses } from "../shared/catalog.mjs"
+import { searchCostumes } from "../shared/costumes.mjs"
 import { planRequest, promptCards, runGeneration } from "../shared/jobs.mjs"
 import { createPoseHandler } from "./http.mjs"
 
@@ -98,6 +99,7 @@ export function apply(ctx, config = {}) {
         text: () => [
           "澜姿插件已安装。用户要按姿势参考出图时，先用 search_poses 查找姿势，再用 generate_pose_images，view_ids 传姿势 id 或具体视角 id。",
           "默认可一次选择多个姿势。默认模特是成年女性「大飞鱼」（社区 DeepSeek 鲸鱼娘的成年形象，蓝发、鲸耳、鲸尾、蓝白女仆装）。不要把角色画成未成年人或 Q 版。",
+          "要换衣服时，先用 search_costumes 找没有人物的服装图，再把返回的 id 作为 costume_id 传给 generate_pose_images。换装仍保留脸、发型、鲸耳和鲸尾。内衣、泳装和性感分类默认隐藏。",
           "没有 POSE_MUSE_API_KEY 时，generate_pose_images 会返回提示词；若 dsh-image-gen 可用，把提示词原样交给 edit_image 或 generate_image，并附上角色参考与姿势线稿。",
         ].join("\n"),
       }), "dsh-pose-muse prompt")
@@ -144,12 +146,47 @@ export function apply(ctx, config = {}) {
   }))
 
   ctx.tools.register(defineTool({
+    name: "search_costumes",
+    description: "Search clothing-only references from the costume gallery at ai-costume-gallery.pages.dev. Images contain garments, not people. Use a returned id as costume_id in generate_pose_images. Lingerie, swimwear, and sexy categories stay hidden unless include_adult is true.",
+    parameters: {
+      query: { type: "string", description: "Costume id such as SPR-0001, or English keywords such as denim coat." },
+      category: { type: "string", enum: ["春", "夏", "秋", "冬", "パーティ", "ランジェリー", "水着", "セクシー"], description: "春=spring, 夏=summer, 秋=autumn, 冬=winter, パーティ=party, ランジェリー=lingerie, 水着=swimwear, セクシー=sexy." },
+      include_adult: { type: "boolean", description: "Include lingerie, swimwear, and sexy outfits. Default false." },
+      limit: { type: "integer", description: "Max results, 1-30. Default 12." },
+    },
+    output: {
+      schema: { type: "object" },
+      render: (_args, value) => [{ type: "text", text: JSON.stringify(value) }],
+    },
+    async execute(args) {
+      const limit = Math.max(1, Math.min(30, Number(args.limit) || 12))
+      const costumes = searchCostumes({
+        query: args.query ?? "",
+        category: args.category ?? "",
+        includeAdult: args.include_adult === true,
+        limit,
+      })
+      return {
+        count: costumes.length,
+        costumes: costumes.map((costume) => ({
+          id: costume.id,
+          category: costume.category,
+          label: costume.label,
+          keywords: costume.keywords,
+          adult: costume.adult,
+        })),
+      }
+    },
+  }))
+
+  ctx.tools.register(defineTool({
     name: "generate_pose_images",
-    description: "Generate images of the default adult whale-girl 大飞鱼, or describe a wardrobe change, using one or more pose references from search_poses. Pass view ids (or pose ids, which use the front view). Keeps the character's maid outfit unless keep_outfit is false. One image per pose unless mode is sheet.",
+    description: "Generate images of the default adult whale-girl 大飞鱼, or describe a wardrobe change, using one or more pose references from search_poses. Pass view ids (or pose ids, which use the front view). Keeps the character's maid outfit unless keep_outfit is false or costume_id is set. costume_id swaps clothing from search_costumes while keeping the face, hair, whale ears, and whale tail. One image per pose unless mode is sheet.",
     parameters: {
       view_ids: { type: "array", items: { type: "string" }, required: true, description: "Pose or view ids from search_poses. Up to 8 for each, 4 for sheet." },
+      costume_id: { type: "string", description: "Optional costume id from search_costumes, such as SPR-0001. The clothing-only reference replaces the maid outfit." },
       extra_prompt: { type: "string", description: "Optional scene, lighting, or wardrobe note." },
-      keep_outfit: { type: "boolean", description: "Keep 大飞鱼's blue-and-white maid outfit, whale ears and tail. Default true." },
+      keep_outfit: { type: "boolean", description: "Keep 大飞鱼's blue-and-white maid outfit, whale ears and tail. Default true. Ignored when costume_id is set." },
       aspect_ratio: { type: "string", enum: ["1:1", "3:4", "4:3", "9:16", "16:9"], description: "Default 3:4." },
       mode: { type: "string", enum: ["each", "sheet"], description: "each makes one image per pose. sheet puts up to 4 poses in one image." },
       provider: { type: "string", enum: ["seedream", "gemini", "openai"], description: "Omit to use the plugin default. seedream calls Volcengine Ark." },
@@ -180,13 +217,16 @@ export function apply(ctx, config = {}) {
         keepOutfit: args.keep_outfit !== false,
         mode: args.mode === "sheet" ? "sheet" : "each",
         extraPrompt: args.extra_prompt || "",
+        costumeId: typeof args.costume_id === "string" ? args.costume_id : "",
         viewIds: Array.isArray(args.view_ids) ? args.view_ids : [],
       }
       if (!input.apiKey) {
         const plan = planRequest(input)
         return {
           generated: false,
-          message: "没有 POSE_MUSE_API_KEY。提示词已经按大飞鱼的成年形象和所选姿势写好。若安装了 dsh-image-gen，请把每段提示词交给 edit_image 或 generate_image，并附上角色参考图与姿势线稿。不要把角色改成未成年人或 Q 版。",
+          message: input.costumeId
+            ? "没有 POSE_MUSE_API_KEY。提示词已经按大飞鱼的成年形象、所选服装和姿势写好。若安装了 dsh-image-gen，请把每段提示词交给 edit_image 或 generate_image，并按顺序附上角色参考、没有人物的服装图和姿势线稿。不要把角色改成未成年人或 Q 版。"
+            : "没有 POSE_MUSE_API_KEY。提示词已经按大飞鱼的成年形象和所选姿势写好。若安装了 dsh-image-gen，请把每段提示词交给 edit_image 或 generate_image，并附上角色参考图与姿势线稿。不要把角色改成未成年人或 Q 版。",
           prompts: promptCards(plan),
         }
       }

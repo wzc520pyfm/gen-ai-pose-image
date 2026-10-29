@@ -30,6 +30,8 @@ export function Composer({
   aspectRatio,
   mode,
   keepOutfit,
+  costume,
+  onClearCostume,
   hasKey,
   running,
   progress,
@@ -52,6 +54,8 @@ export function Composer({
   aspectRatio: AspectRatio
   mode: GenerateMode
   keepOutfit: boolean
+  costume: { id: string; label: string; keywords: string } | null
+  onClearCostume: () => void
   hasKey: boolean
   running: boolean
   progress: string
@@ -81,9 +85,20 @@ export function Composer({
         ) : null}
       </div>
 
+      {costume ? (
+        <div className="flex items-center gap-2 rounded-xl bg-card px-2 py-1.5 ring-1 ring-primary/40">
+          <img src={`/api/costume-image?id=${encodeURIComponent(costume.id)}&size=thumb`} alt="" className="h-14 w-10 rounded-md bg-white object-contain" />
+          <span className="min-w-0 flex-1">
+            <span className="block truncate text-sm">换成 {costume.id}</span>
+            <span className="line-clamp-2 text-xs text-muted-foreground">{costume.label} · {costume.keywords}</span>
+          </span>
+          <button type="button" className="px-1 text-xs text-muted-foreground" onClick={onClearCostume} aria-label={`取消服装 ${costume.id}`}>取消</button>
+        </div>
+      ) : null}
+
       {selected.length === 0 ? (
         <p className="rounded-2xl bg-muted px-3 py-4 text-sm leading-6 text-muted-foreground">
-          从中间点选一个或多个姿势。每一张成图都会带上{characters.length ? "你导入的模特" : "大飞鱼"}，只把身体换成对应的线稿姿势。
+          从中间点选一个或多个姿势。每一张成图都会带上{characters.length ? "你导入的模特" : "大飞鱼"}，只把身体换成对应的线稿姿势。要换衣服，先到「服装」里点一套。
         </p>
       ) : (
         <ul className="flex max-h-40 flex-col gap-2 overflow-auto">
@@ -103,12 +118,24 @@ export function Composer({
       {selected[0] ? (
         <div className="rounded-2xl bg-card p-3 ring-1 ring-border">
           <p className="text-xs text-muted-foreground">参考对照 · {selected[0].title}</p>
-          <div className="mt-2 grid grid-cols-[1fr_auto_1fr] items-center gap-2">
+          <div className={`mt-2 grid items-center gap-2 ${costume ? "grid-cols-3" : "grid-cols-[1fr_auto_1fr]"}`}>
             <img src={characterSrc} alt={characters.length ? "导入的模特" : "大飞鱼的成年三视图"} className="aspect-[3/4] rounded-xl bg-[#f7f4ee] object-contain" />
-            <span className="text-lg text-muted-foreground" aria-hidden="true">→</span>
+            {costume ? (
+              <img src={`/api/costume-image?id=${encodeURIComponent(costume.id)}&size=thumb`} alt={`${costume.id} 的服装参考，图中没有人物`} className="aspect-[3/4] rounded-xl bg-white object-contain" />
+            ) : (
+              <span className="text-lg text-muted-foreground" aria-hidden="true">→</span>
+            )}
             <img src={`/api/pose-image?id=${encodeURIComponent(selected[0].viewId)}&size=thumb`} alt={`${selected[0].title} 的姿势线稿`} className="aspect-[3/4] rounded-xl bg-white object-contain" />
           </div>
-          <p className="mt-2 text-xs leading-5 text-muted-foreground">左边锁脸和衣服，右边只提供姿势。这还不是成图。</p>
+          <p className="mt-2 text-xs leading-5 text-muted-foreground">
+            {costume ? "左边锁脸和鲸尾，中间是没有人物的衣服，右边只提供姿势。这还不是成图。" : "左边锁脸和衣服，右边只提供姿势。这还不是成图。"}
+          </p>
+        </div>
+      ) : costume ? (
+        <div className="rounded-2xl bg-card p-3 ring-1 ring-border">
+          <p className="text-xs text-muted-foreground">已选服装 · {costume.id}</p>
+          <img src={`/api/costume-image?id=${encodeURIComponent(costume.id)}&size=thumb`} alt={`${costume.id}，${costume.keywords}`} className="mt-2 aspect-[2/3] max-h-48 rounded-xl bg-white object-contain" />
+          <p className="mt-2 text-xs leading-5 text-muted-foreground">还没选姿势。选好姿势后，角色会穿上这套衣服出图。</p>
         </div>
       ) : null}
 
@@ -146,7 +173,7 @@ export function Composer({
       </label>
 
       <p className="text-xs leading-5 text-muted-foreground">
-        {providerLabel} · {ASPECT_LABEL[aspectRatio]} · {mode === "sheet" ? `拼成一张（最多 ${limit} 个）` : `逐张出图（最多 ${limit} 张）`} · {keepOutfit ? "保持服装" : "允许换衣服"}
+        {providerLabel} · {ASPECT_LABEL[aspectRatio]} · {mode === "sheet" ? `拼成一张（最多 ${limit} 个）` : `逐张出图（最多 ${limit} 张）`} · {costume ? `换成 ${costume.id}` : keepOutfit ? "保持服装" : "允许换衣服"}
         {" · "}
         <button type="button" className="text-primary underline-offset-2 hover:underline" onClick={onOpenSettings}>改设置</button>
       </p>
