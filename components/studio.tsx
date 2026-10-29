@@ -255,8 +255,8 @@ export function Studio() {
   )
 
   return (
-    <div className="min-h-dvh text-foreground lg:flex lg:h-dvh lg:flex-col lg:overflow-hidden">
-      <header className="flex h-14 shrink-0 items-center gap-3 border-b bg-white px-4 md:px-5">
+    <div className="flex h-dvh flex-col overflow-hidden text-foreground">
+      <header className="flex min-h-14 shrink-0 flex-wrap items-center gap-x-3 gap-y-2 border-b bg-white px-3 py-2 sm:px-4 md:px-5">
         <WhaleMark className="size-8 shrink-0" />
         <h1 className="shrink-0 text-base font-semibold">澜姿</h1>
         <div className="flex shrink-0 rounded-lg bg-muted p-1" role="tablist" aria-label="图库">
@@ -287,7 +287,7 @@ export function Studio() {
           </Button>
         </div>
       </header>
-      <div className="flex min-h-0 flex-1 flex-col lg:grid lg:h-full lg:grid-cols-[300px_minmax(0,1fr)_340px] lg:grid-rows-[minmax(0,1fr)]">
+      <div className="flex min-h-0 flex-1 flex-col lg:grid lg:grid-cols-[300px_minmax(0,1fr)_340px] lg:grid-rows-[minmax(0,1fr)]">
         <CharacterDock
           images={characters}
           onChange={updateCharacters}
@@ -295,7 +295,7 @@ export function Studio() {
           onKeepOutfit={(keepOutfit) => updateSettings({ ...settings, keepOutfit })}
           outfitLocked={Boolean(costume)}
         />
-        <main className="order-1 min-w-0 pb-24 lg:order-none lg:min-h-0 lg:overflow-y-auto lg:pb-8">
+        <main className="order-2 min-h-0 min-w-0 flex-1 overflow-y-auto lg:order-none lg:pb-8">
           {library === "poses" ? (
             <PoseBrowser
               catalog={catalog}
@@ -324,7 +324,7 @@ export function Studio() {
           {composer}
         </aside>
       </div>
-      <div className="fixed inset-x-0 bottom-0 z-20 border-t bg-white/95 p-3 backdrop-blur lg:hidden">
+      <div className="shrink-0 border-t bg-white p-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] lg:hidden">
         <Button className="h-11 w-full" onClick={() => setSheetOpen(true)}>
           已选 {chosen.length} 个姿势{costume ? ` · ${costume.id}` : ""} · 去生图
         </Button>

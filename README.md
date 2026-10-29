@@ -2,11 +2,27 @@
 
 DeepSeek Harness 插件，也是一个可以单独打开的姿势工作室。从 [ai-pose-gallery-zh](https://github.com/anhao/ai-pose-gallery-zh) 的 288 组、1439 张姿势线稿里选一个或多个姿势，生成同一位模特的图。
 
-默认模特是 **大肥鱼**：社区鲸鱼娘的成年形象，长波浪蓝发、鲸耳、蓝鲸尾，穿海军蓝与白色女仆装。参考图用的是 [deepseek-whale-girl](https://github.com/TreapGoGo/deepseek-whale-girl) 里的 `dafeiyu-mature-character-sheet.png`。可以导入最多三张别的模特照片，用来替换脸和衣服。姿势图只提供身体姿态，默认不会把线稿里的空白身体画进成图。
+默认模特是 **大肥鱼**：社区鲸鱼娘的成年形象，长波浪蓝发、鲸耳、蓝鲸尾，穿海军蓝与白色女仆装。参考图用的是 [TreapGoGo](https://github.com/TreapGoGo) 的 [deepseek-whale-girl](https://github.com/TreapGoGo/deepseek-whale-girl) 里的 `dafeiyu-mature-character-sheet.png`。可以导入最多三张别的模特照片，用来替换脸和衣服。姿势图只提供身体姿态，默认不会把线稿里的空白身体画进成图。
 
-姿势线稿不在这个仓库里。页面会按需读取公开图床 `https://ai-pose-gallery.anhao.app`。图片与原始数据的著作权归ギア所有，中文译名来自 Anhao 的图库。
+姿势线稿不在这个仓库里。页面会按需读取公开图床 [ai-pose-gallery.anhao.app](https://ai-pose-gallery.anhao.app)。图片与原始数据的著作权归 [ギア](https://x.com/giaaibusi) 所有，中文译名来自 [Anhao](https://github.com/anhao) 的图库。
 
-服装来自 [衣装集 COSTUME-DB-01](https://ai-costume-gallery.pages.dev/)，共 1407 套，图里没有人物。页面按需读取该站点的缩略图，本仓库只保存编号和关键词。选中一套之后，生图会换成这身衣服，并保留角色的脸、发型、鲸耳和鲸尾。内衣、泳装和性感分类跟成人向姿势共用同一个开关。
+服装来自 [ギア](https://x.com/giaaibusi) 的 [衣装集 COSTUME-DB-01](https://ai-costume-gallery.pages.dev/)，共 1407 套，图里没有人物。页面按需读取该站点的缩略图，本仓库只保存编号和关键词。选中一套之后，生图会换成这身衣服，并保留角色的脸、发型、鲸耳和鲸尾。内衣、泳装和性感分类跟成人向姿势共用同一个开关。
+
+## 效果
+
+![澜姿工作室：左侧是大肥鱼，中间点选姿势线稿](docs/studio.jpg)
+
+窄屏时模特收在顶上，分类用下拉，出图按钮留在底部。
+
+![手机宽度下的姿势页](docs/studio-phone.jpg)
+
+服装分类会换行，卡片说明留在屏幕里。
+
+![手机宽度下的服装页](docs/studio-costumes.jpg)
+
+装进 Harness 之后，左侧栏的「姿势」按窗口宽度排成一到四列。补充描述和 API Key 收在底部，出图按钮一直看得到。
+
+![Harness 里的姿势页](docs/harness.jpg)
 
 ## 本地工作室
 
@@ -64,6 +80,11 @@ npm run typecheck
 
 ## 许可
 
-澜姿自己的程序使用 MIT License，版权所有 (c) 2026 wzc520pyfm。数据来源和各自的版权写在 `shared/license.mjs`，并附在 `LICENSE` 末尾。
+澜姿自己的程序使用 [MIT License](./LICENSE)，版权所有 (c) 2026 [wzc520pyfm](https://github.com/wzc520pyfm)。数据来源和各自的版权写在 [`shared/license.mjs`](./shared/license.mjs)，并附在 [`LICENSE`](./LICENSE) 末尾。
 
-这份 MIT 许可不覆盖姿势线稿、原始姿势数据、服装图，也不授予 DeepSeek 商标。线稿和原始数据的著作权归ギア所有，中文译名由 Anhao 维护，图片按需读取、不放进仓库。服装图同样来自ギア的衣装集，仓库里只有编号和关键词。大肥鱼设定图来自 [TreapGoGo/deepseek-whale-girl](https://github.com/TreapGoGo/deepseek-whale-girl)，版权所有 (c) 2026 TreapGoGo，按该仓库的 MIT 许可使用，不代表深度求索。
+这份 MIT 许可只覆盖程序。下面的作者和作品另外标注，图片按需读取、不放进仓库：
+
+- 姿势线稿和原始数据的著作权归 [ギア](https://x.com/giaaibusi)。作品是 [AI Pose Gallery](https://ai-pose-gallery.pages.dev/)；中文译名由 [Anhao](https://github.com/anhao) 维护在 [ai-pose-gallery-zh](https://github.com/anhao/ai-pose-gallery-zh)，图床是 [ai-pose-gallery.anhao.app](https://ai-pose-gallery.anhao.app)。上游说明这些图不得用于商业用途。
+- 服装图同样来自 [ギア](https://x.com/giaaibusi) 的 [衣装集 COSTUME-DB-01](https://ai-costume-gallery.pages.dev/)。仓库里只有编号和关键词。
+- [大肥鱼](https://github.com/TreapGoGo/deepseek-whale-girl) 设定图的作者是 [TreapGoGo](https://github.com/TreapGoGo)，版权所有 (c) 2026 TreapGoGo，按该仓库的 MIT 许可使用。这是社区形象，不代表深度求索。
+- [DeepSeek](https://www.deepseek.com/) 是深度求索的商标。这份许可不授予该商标。

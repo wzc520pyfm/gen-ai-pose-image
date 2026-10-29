@@ -1,6 +1,6 @@
 {
   "name": "gen-ai-pose-image",
-  "version": "0.1.4",
+  "version": "0.1.5",
   "license": "MIT",
   "repository": {
     "type": "git",
@@ -22,6 +22,7 @@
     "public/muse",
     "cordis.patch.yml",
     "README.md",
+    "docs",
     "LICENSE"
   ],
   "dsh": {

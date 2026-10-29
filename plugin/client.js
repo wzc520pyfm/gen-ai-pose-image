@@ -5,6 +5,33 @@ window.__ModuleLoader__.load({ id: "gen-ai-pose-image", factory: (require) => {
   var useEffect = React.useEffect;
   var useState = React.useState;
   var h = React.createElement;
+  var LANPOSE_CSS = [
+    ".lanpose,.lanpose *{box-sizing:border-box}",
+    ".lanpose{height:100%;min-width:0;display:flex;flex-direction:column;overflow:hidden;background:#f6f1e8;color:#1c2433;font:14px/1.5 ui-sans-serif,sans-serif;container-type:inline-size}",
+    ".lanpose-scroll{flex:1 1 auto;min-width:0;min-height:0;overflow:auto;padding:12px}",
+    ".lanpose h2{margin:0 0 4px;font-family:ui-serif,serif;font-size:22px;line-height:1.2}",
+    ".lanpose-lead{margin:0 0 10px;color:#5c6880;font-size:13px}",
+    ".lanpose-error{margin:0 0 8px}",
+    ".lanpose-search{display:block;width:100%;margin:0 0 10px;padding:8px 10px;border:1px solid #d9d1c4;border-radius:8px;background:#fff;color:inherit;font:inherit}",
+    ".lanpose-grid{display:grid;grid-template-columns:minmax(0,1fr);gap:8px}",
+    "@media (min-width:720px){.lanpose-grid{grid-template-columns:repeat(3,minmax(0,1fr))}}",
+    "@container (min-width:360px){.lanpose-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}",
+    "@container (min-width:680px){.lanpose-grid{grid-template-columns:repeat(3,minmax(0,1fr))}}",
+    "@container (min-width:980px){.lanpose-grid{grid-template-columns:repeat(4,minmax(0,1fr))}}",
+    ".lanpose-card{min-width:0;padding:6px;border:1px solid #e4dccf;border-radius:12px;background:#fff;color:inherit;font:inherit;text-align:left;cursor:pointer}",
+    ".lanpose-card.is-on{padding:5px;border:2px solid #2f5bff}",
+    ".lanpose-card img{display:block;width:100%;max-width:100%;aspect-ratio:3/4;object-fit:contain;background:#fff}",
+    ".lanpose-name{display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:2;overflow:hidden;margin-top:4px;min-height:2.6em;font-size:12px;line-height:1.3;overflow-wrap:anywhere}",
+    ".lanpose-foot{flex:none;min-width:0;display:grid;gap:8px;border-top:1px solid #e4dccf;background:#fffdf8;padding:10px 12px calc(10px + env(safe-area-inset-bottom))}",
+    ".lanpose-options{border:1px solid #e4dccf;border-radius:10px;background:#fff;padding:8px 10px}",
+    ".lanpose-options summary{cursor:pointer;font-size:13px}",
+    ".lanpose-options label{display:block;margin-top:8px;color:#5c6880;font-size:12px}",
+    ".lanpose-options textarea,.lanpose-options input{display:block;width:100%;margin-top:4px;padding:8px;border:1px solid #d9d1c4;border-radius:8px;background:#fff;color:#1c2433;font:inherit}",
+    ".lanpose-go{width:100%;padding:10px 14px;border:0;border-radius:10px;background:#2f5bff;color:#fff;font:inherit;cursor:pointer}",
+    ".lanpose-go:disabled{opacity:.65;cursor:default}",
+    ".lanpose-result{max-height:6.5em;margin:0;overflow:auto;white-space:pre-wrap;overflow-wrap:anywhere;font-size:12px}",
+    "@container (min-width:640px){.lanpose h2{font-size:28px}.lanpose-scroll{padding:16px}}"
+  ].join("");
 
   function PoseStudio() {
     var catalogState = useState(null);
@@ -33,6 +60,12 @@ window.__ModuleLoader__.load({ id: "gen-ai-pose-image", factory: (require) => {
     var setBusy = busyState[1];
 
     useEffect(function () {
+      if (!document.getElementById("lanpose-panel-style")) {
+        var style = document.createElement("style");
+        style.id = "lanpose-panel-style";
+        style.textContent = LANPOSE_CSS;
+        document.head.appendChild(style);
+      }
       var stored = "";
       try { stored = window.localStorage.getItem("lanpose-settings-v1") || ""; } catch (e) { stored = ""; }
       if (stored) {
@@ -92,39 +125,51 @@ window.__ModuleLoader__.load({ id: "gen-ai-pose-image", factory: (require) => {
         .then(function () { setBusy(false); });
     }
 
-    return h("div", { style: { height: "100%", overflow: "auto", padding: 16, background: "#f6f1e8", color: "#1c2433", font: "14px/1.5 sans-serif" } },
-      h("h2", { style: { margin: "0 0 4px", fontFamily: "serif", fontSize: 28 } }, "澜姿"),
-      h("p", { style: { margin: "0 0 12px", color: "#5c6880" } }, "默认模特是成年鲸鱼娘大肥鱼。这里先选标准全身姿势；完整画廊在独立工作室里。"),
-      error ? h("p", null, error) : null,
-      h("input", {
-        value: query,
-        placeholder: "搜索姿势，留空则显示标准全身",
-        onChange: function (event) { setQuery(event.target.value); },
-        style: { width: "100%", boxSizing: "border-box", marginBottom: 8, padding: 8, borderRadius: 8, border: "1px solid #d9d1c4" },
-      }),
-      h("div", { style: { display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(140px, 1fr))", gap: 8 } },
-        poses.map(function (pose) {
-          var view = pose.views.filter(function (item) { return item.angle === "正面"; })[0] || pose.views[0];
-          var on = Boolean(picked[pose.id]);
-          return h("button", {
-            key: pose.id,
-            type: "button",
-            onClick: function () { toggle(pose); },
-            style: { textAlign: "left", padding: 6, borderRadius: 12, border: on ? "2px solid #2f5bff" : "1px solid #e4dccf", background: "white" },
-          },
-            h("img", { src: "/dsh-pose-muse/api/pose-image?id=" + encodeURIComponent(view.id) + "&size=thumb", alt: pose.name, style: { width: "100%", aspectRatio: "3 / 4", objectFit: "contain", background: "#fff" } }),
-            h("span", { style: { display: "block", marginTop: 4 } }, pose.name)
-          );
-        })
+    var pickedCount = Object.keys(picked).length;
+
+    return h("div", { className: "lanpose" },
+      h("div", { className: "lanpose-scroll" },
+        h("h2", null, "澜姿"),
+        h("p", { className: "lanpose-lead" }, "默认模特是成年鲸鱼娘大肥鱼。这里先选标准全身姿势；完整画廊在独立工作室里。"),
+        error ? h("p", { className: "lanpose-error" }, error) : null,
+        h("input", {
+          className: "lanpose-search",
+          value: query,
+          placeholder: "搜索姿势，留空则显示标准全身",
+          onChange: function (event) { setQuery(event.target.value); },
+        }),
+        h("div", { className: "lanpose-grid" },
+          poses.map(function (pose) {
+            var view = pose.views.filter(function (item) { return item.angle === "正面"; })[0] || pose.views[0];
+            var on = Boolean(picked[pose.id]);
+            return h("button", {
+              key: pose.id,
+              type: "button",
+              className: on ? "lanpose-card is-on" : "lanpose-card",
+              onClick: function () { toggle(pose); },
+            },
+              h("img", { src: "/dsh-pose-muse/api/pose-image?id=" + encodeURIComponent(view.id) + "&size=thumb", alt: pose.name }),
+              h("span", { className: "lanpose-name", title: pose.name }, pose.name)
+            );
+          })
+        )
       ),
-      h("label", { style: { display: "block", marginTop: 12 } }, "补充描述",
-        h("textarea", { value: note, onChange: function (event) { setNote(event.target.value); }, style: { width: "100%", minHeight: 64, marginTop: 4 } })
-      ),
-      h("label", { style: { display: "block", marginTop: 8 } }, "API Key（留空则用服务器的 POSE_MUSE_API_KEY）",
-        h("input", { type: "password", value: apiKey, onChange: function (event) { setApiKey(event.target.value); }, style: { width: "100%", marginTop: 4, padding: 8 } })
-      ),
-      h("button", { type: "button", disabled: busy, onClick: generate, style: { marginTop: 12, padding: "10px 14px", border: 0, borderRadius: 10, background: "#2f5bff", color: "white" } }, busy ? "正在生图" : "按所选姿势生图"),
-      result ? h("pre", { style: { whiteSpace: "pre-wrap" } }, result) : null
+      h("form", {
+        className: "lanpose-foot",
+        onSubmit: function (event) { event.preventDefault(); if (!busy) generate(); },
+      },
+        h("details", { className: "lanpose-options" },
+          h("summary", null, "补充描述和 API Key"),
+          h("label", null, "补充描述",
+            h("textarea", { value: note, rows: 2, onChange: function (event) { setNote(event.target.value); } })
+          ),
+          h("label", null, "API Key（留空则用服务器的 POSE_MUSE_API_KEY）",
+            h("input", { type: "password", value: apiKey, autoComplete: "off", onChange: function (event) { setApiKey(event.target.value); } })
+          )
+        ),
+        h("button", { type: "submit", className: "lanpose-go", disabled: busy }, busy ? "正在生图" : (pickedCount ? "已选 " + pickedCount + " 个 · 按姿势生图" : "按所选姿势生图")),
+        result ? h("pre", { className: "lanpose-result" }, result) : null
+      )
     );
   }
 

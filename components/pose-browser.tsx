@@ -163,7 +163,7 @@ export function PoseBrowser({
             ref={searchRef}
             value={query}
             onChange={(event) => setQuery(event.target.value)}
-            placeholder="搜索姿势名、编号或分类，按 / 聚焦"
+            placeholder="搜索姿势名、编号或分类"
             aria-label="搜索姿势"
             className="h-10 bg-card pr-9 pl-8"
           />
@@ -179,7 +179,20 @@ export function PoseBrowser({
             <FilterChip key={item} active={angle === item} onClick={() => setAngle(item)}>{item}</FilterChip>
           ))}
         </div>
-        <div className="mt-2 flex flex-wrap gap-1.5">
+        <label className="mt-2 block text-xs text-muted-foreground md:hidden">
+          分类
+          <select
+            className="mt-1 h-10 w-full rounded-lg border bg-card px-2 text-sm text-foreground"
+            value={category}
+            aria-label="姿势分类"
+            onChange={(event) => setCategory(event.target.value)}
+          >
+            {categories.map((item) => (
+              <option key={item} value={item}>{item}</option>
+            ))}
+          </select>
+        </label>
+        <div className="mt-2 hidden flex-wrap gap-1.5 md:flex">
           {categories.map((item) => (
             <FilterChip key={item} active={category === item} onClick={() => setCategory(item)}>{item}</FilterChip>
           ))}
@@ -219,16 +232,16 @@ export function PoseBrowser({
                     ) : null}
                     <span className="absolute right-2 bottom-2 rounded-full bg-black/60 px-2 py-0.5 text-[11px] text-white">{view.angle}</span>
                   </div>
-                  <div className="space-y-1 px-3 py-2.5">
+                  <div className="space-y-1 px-2.5 py-2 sm:px-3 sm:py-2.5">
                     <h3 className="line-clamp-2 text-sm leading-5 font-medium">{pose.name}</h3>
-                    <p className="text-xs text-muted-foreground">{pose.code} · {pose.category}</p>
+                    <p className="truncate text-xs text-muted-foreground">{pose.code} · {pose.category}</p>
                   </div>
                 </button>
-                <div className="flex items-center justify-between px-3 pb-3">
-                  <button type="button" className="text-xs text-primary underline-offset-2 hover:underline" onClick={() => setPreview({ pose, view })}>
+                <div className="flex items-center justify-between gap-2 px-2.5 pb-2.5 sm:px-3 sm:pb-3">
+                  <button type="button" className="shrink-0 text-xs text-primary underline-offset-2 hover:underline" onClick={() => setPreview({ pose, view })}>
                     看线稿
                   </button>
-                  {selected[pose.id] ? <Badge variant="secondary">{pose.people === 2 ? "双人" : "单人"}</Badge> : <span className="text-[11px] text-muted-foreground">点卡片加入</span>}
+                  {selected[pose.id] ? <Badge variant="secondary">{pose.people === 2 ? "双人" : "单人"}</Badge> : <span className="truncate text-[11px] text-muted-foreground">点卡片加入</span>}
                 </div>
               </article>
             )
