@@ -118,7 +118,7 @@ export function apply(ctx, config = {}) {
       limit: { type: "integer", description: "Max results, 1-30. Default 12." },
     },
     output: {
-      schema: { type: "object" },
+      schema: { type: "object", additionalProperties: true },
       render: (_args, value) => [{ type: "text", text: JSON.stringify(value) }],
     },
     async execute(args) {
@@ -155,7 +155,7 @@ export function apply(ctx, config = {}) {
       limit: { type: "integer", description: "Max results, 1-30. Default 12." },
     },
     output: {
-      schema: { type: "object" },
+      schema: { type: "object", additionalProperties: true },
       render: (_args, value) => [{ type: "text", text: JSON.stringify(value) }],
     },
     async execute(args) {
@@ -193,7 +193,7 @@ export function apply(ctx, config = {}) {
       model: { type: "string", description: "Optional model override." },
     },
     output: {
-      schema: { type: "object" },
+      schema: { type: "object", additionalProperties: true },
       render: (_args, value) => {
         const images = Array.isArray(value.images) ? value.images : []
         const blocks = [{ type: "text", text: value.message || `生成了 ${images.filter((item) => item.ok).length} 张图。` }]

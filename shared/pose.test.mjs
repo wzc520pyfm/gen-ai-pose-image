@@ -160,6 +160,16 @@ test("pose thumbs load from the public gallery path", async () => {
   await assert.rejects(() => fetchPoseBytes("../.env", async () => new Response(jpeg)), /姿势图路径无效/)
 })
 
+test("tool output schemas declare whether extra fields are allowed", () => {
+  const source = readFileSync(new URL("../plugin/index.mjs", import.meta.url), "utf8")
+  const schemas = [...source.matchAll(/schema:\s*\{([^}]+)\}/g)].map((match) => match[1])
+  assert.equal(schemas.length, 3)
+  for (const schema of schemas) {
+    assert.match(schema, /type:\s*"object"/)
+    assert.match(schema, /additionalProperties:\s*true/)
+  }
+})
+
 test("image helpers stay inside the public gallery", () => {
   assert.equal(isSafePosePath("thumbs/full_single_P001_front.jpg"), true)
   assert.equal(isSafePosePath("../.env"), false)
