@@ -9,7 +9,7 @@ related_targets: ["components/composer.tsx","components/character-dock.tsx","com
 
 范围：浏览器里的姿势与服装工作室。模式：Operate。
 
-使用者在同一屏完成选姿势、可选一套衣服、出图。不动的部分：中文、大飞鱼、成人向确认、导入模特、生图设置。
+使用者在同一屏完成选姿势、可选一套衣服、出图。不动的部分：中文、大肥鱼、成人向确认、导入模特、生图设置。
 
 ## Direction contract
 

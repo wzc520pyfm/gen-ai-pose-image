@@ -86,7 +86,7 @@ export function CostumeBrowser({
   return (
     <section>
       <div className="sticky top-0 z-10 border-b bg-white/95 px-4 py-3 backdrop-blur md:px-6">
-        <p className="mb-2 text-sm text-muted-foreground">这些图里没有人物。选一套之后，大飞鱼会换上这身衣服，脸、头发、鲸耳和鲸尾保持不变。</p>
+        <p className="mb-2 text-sm text-muted-foreground">这些图里没有人物。选一套之后，大肥鱼会换上这身衣服，脸、头发、鲸耳和鲸尾保持不变。</p>
         <div className="flex gap-2 overflow-x-auto pb-2">
           {catalog?.categories.map((item) => (
             <button
