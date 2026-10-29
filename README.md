@@ -1,1 +1,0 @@
-# gen-ai-pose-image
