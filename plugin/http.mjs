@@ -3,7 +3,8 @@ import { dirname, join } from "node:path"
 import { fileURLToPath } from "node:url"
 import { getCatalog, resolveView } from "../shared/catalog.mjs"
 import { costumeFile, fetchCostumeBytes, getCostume, getCostumeCatalog } from "../shared/costumes.mjs"
-import { fetchPoseBytes, planRequest, poseFileFor, promptCards, runGeneration } from "../shared/jobs.mjs"
+import { planRequest, promptCards, runGeneration } from "../shared/jobs.mjs"
+import { fetchPoseBytes, poseFileFor } from "../shared/poses.mjs"
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), "..")
 const MAX_BODY = 12 * 1024 * 1024
