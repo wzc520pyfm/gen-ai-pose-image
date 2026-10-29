@@ -1,0 +1,7 @@
+export function composePrompt(input: {
+  character: { prompt: string }
+  poses: Array<{ name: string; category: string; system: string; angle: string; people: number }>
+  extraPrompt?: string
+  keepOutfit?: boolean
+  mode?: "each" | "sheet"
+}): string

@@ -1,0 +1,9 @@
+- insert:
+    - id: pose-muse
+      name: dsh-pose-muse
+      config:
+        provider: gemini
+        model: ""
+        baseURL: ""
+        aspectRatio: "3:4"
+        poseOrigin: https://ai-pose-gallery.anhao.app

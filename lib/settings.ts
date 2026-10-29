@@ -1,0 +1,57 @@
+import type { AspectRatio, GenerateMode, ProviderId } from "@/lib/types"
+
+export type StudioSettings = {
+  provider: ProviderId
+  apiKey: string
+  baseURL: string
+  model: string
+  aspectRatio: AspectRatio
+  keepOutfit: boolean
+  mode: GenerateMode
+  showAdult: boolean
+}
+
+export const DEFAULT_SETTINGS: StudioSettings = {
+  provider: "gemini",
+  apiKey: "",
+  baseURL: "",
+  model: "gemini-2.5-flash-image",
+  aspectRatio: "3:4",
+  keepOutfit: true,
+  mode: "each",
+  showAdult: false,
+}
+
+const KEY = "lanpose-settings-v1"
+
+export function loadSettings(): StudioSettings {
+  if (typeof window === "undefined") return DEFAULT_SETTINGS
+  try {
+    const raw = window.localStorage.getItem(KEY)
+    if (!raw) return DEFAULT_SETTINGS
+    const parsed = JSON.parse(raw) as Partial<StudioSettings>
+    const provider = parsed.provider === "openai" ? "openai" : "gemini"
+    const aspect = parsed.aspectRatio
+    const aspectRatio = aspect === "1:1" || aspect === "3:4" || aspect === "4:3" || aspect === "9:16" || aspect === "16:9" ? aspect : "3:4"
+    return {
+      provider,
+      apiKey: typeof parsed.apiKey === "string" ? parsed.apiKey : "",
+      baseURL: typeof parsed.baseURL === "string" ? parsed.baseURL : "",
+      model: typeof parsed.model === "string" && parsed.model.trim() ? parsed.model : DEFAULT_SETTINGS.model,
+      aspectRatio,
+      keepOutfit: parsed.keepOutfit !== false,
+      mode: parsed.mode === "sheet" ? "sheet" : "each",
+      showAdult: parsed.showAdult === true,
+    }
+  } catch {
+    return DEFAULT_SETTINGS
+  }
+}
+
+export function saveSettings(settings: StudioSettings) {
+  window.localStorage.setItem(KEY, JSON.stringify(settings))
+}
+
+export function modelFor(provider: ProviderId) {
+  return provider === "gemini" ? "gemini-2.5-flash-image" : "gpt-image-1"
+}
