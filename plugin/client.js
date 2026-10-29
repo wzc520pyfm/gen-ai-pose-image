@@ -1,4 +1,4 @@
-window.__ModuleLoader__.load({ id: "dsh-pose-muse", factory: (require) => {
+window.__ModuleLoader__.load({ id: "gen-ai-pose-image", factory: (require) => {
   var module = { exports: {} };
   var exports = module.exports;
   var React = require("react");
@@ -128,7 +128,7 @@ window.__ModuleLoader__.load({ id: "dsh-pose-muse", factory: (require) => {
     );
   }
 
-  exports.name = "dsh-pose-muse";
+  exports.name = "gen-ai-pose-image";
   exports.inject = ["slots"];
   exports.apply = function (ctx) {
     if (!ctx.slots || typeof ctx.slots.inject !== "function" || typeof ctx.slots.register !== "function") return;

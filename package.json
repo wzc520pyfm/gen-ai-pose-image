@@ -1,6 +1,6 @@
 {
   "name": "gen-ai-pose-image",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "license": "MIT",
   "repository": {
     "type": "git",
@@ -30,7 +30,7 @@
     },
     "client": {
       "inject": [
-        "slots"
+        "@deepseek-ai/dsh-client-ui-conversation"
       ],
       "platform": "web"
     }
