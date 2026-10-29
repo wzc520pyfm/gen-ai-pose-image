@@ -1,6 +1,7 @@
 import type { NextConfig } from "next"
 
 const nextConfig: NextConfig = {
+  serverExternalPackages: ["sharp"],
   outputFileTracingIncludes: {
     "/api/catalog": ["./data/catalog.json"],
     "/api/costumes": ["./data/costumes.json"],

@@ -1,4 +1,5 @@
 import { spawn } from "node:child_process"
+import sharp from "sharp"
 import { mkdtemp, readFile, rm, writeFile } from "node:fs/promises"
 import { tmpdir } from "node:os"
 import { dirname, join } from "node:path"
@@ -39,13 +40,7 @@ export async function fetchPoseBytes(relativePath, fetchImpl = fetch) {
   return value
 }
 
-async function webpToJpeg(buffer) {
-  try {
-    const sharp = (await import("sharp")).default
-    return await sharp(buffer).jpeg({ quality: 90 }).toBuffer()
-  } catch {
-    // Local installs can fall back to ffmpeg when sharp is absent.
-  }
+async function ffmpegWebpToJpeg(buffer) {
   const dir = await mkdtemp(join(tmpdir(), "pose-muse-"))
   try {
     const source = join(dir, "in.webp")
@@ -59,11 +54,21 @@ async function webpToJpeg(buffer) {
       child.on("exit", (code) => (code === 0 ? resolve() : reject(new Error(message.trim() || "服装图转成 JPEG 失败"))))
     })
     return await readFile(dest)
-  } catch (error) {
-    const message = error instanceof Error ? error.message : "服装图转成 JPEG 失败"
-    throw new Error(message.includes("ENOENT") ? "服装图转成 JPEG 失败" : message)
   } finally {
     await rm(dir, { recursive: true, force: true })
+  }
+}
+
+async function webpToJpeg(buffer) {
+  try {
+    return await sharp(buffer).jpeg({ quality: 90 }).toBuffer()
+  } catch (sharpError) {
+    try {
+      return await ffmpegWebpToJpeg(buffer)
+    } catch {
+      const message = sharpError instanceof Error ? sharpError.message : "服装图转成 JPEG 失败"
+      throw new Error(message)
+    }
   }
 }
 
