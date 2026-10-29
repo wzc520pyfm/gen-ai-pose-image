@@ -342,9 +342,9 @@ export function Studio() {
         <DialogContent className="sm:max-w-lg">
           <DialogHeader>
             <DialogTitle>装进 DeepSeek Harness</DialogTitle>
-            <DialogDescription>这个目录本身就是插件包。在 Harness 项目里执行下面的命令，重启后对话里会出现「姿势」页，Agent 也能直接调用姿势生图。</DialogDescription>
+            <DialogDescription>澜姿发布在 npm，包名是 gen-ai-pose-image。在已经装好 Harness 的机器上执行下面的命令，重启后对话里会出现「姿势」页，Agent 也能直接调用姿势生图。</DialogDescription>
           </DialogHeader>
-          <pre className="overflow-auto rounded-xl bg-muted p-3 text-xs leading-5">dsh plugin --profile web add /你的路径/dsh-pose-muse</pre>
+          <pre className="overflow-auto rounded-xl bg-muted p-3 text-xs leading-5">dsh plugin --profile web add gen-ai-pose-image</pre>
           <p className="text-xs leading-5 text-muted-foreground">密钥也可以不填在网页里，改成环境变量 POSE_MUSE_API_KEY，给对话里的 generate_pose_images 用。网页工作室和插件共用同一套姿势目录与提示词。</p>
         </DialogContent>
       </Dialog>

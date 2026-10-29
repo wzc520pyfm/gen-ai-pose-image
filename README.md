@@ -39,11 +39,13 @@ npm run dev
 
 ## 装进 DeepSeek Harness
 
-在 Harness 使用的目录里执行，把路径换成这个仓库的位置：
+在已经装好 DeepSeek Harness 的机器上执行：
 
 ```bash
-dsh plugin --profile web add /path/to/dsh-pose-muse
+dsh plugin --profile web add gen-ai-pose-image
 ```
+
+包名是 `gen-ai-pose-image`。还没发布、或要改本地代码时，把包名换成这个仓库的路径也行。
 
 重启对应 profile 后：
 
