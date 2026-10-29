@@ -39,14 +39,18 @@ export async function fetchPoseBytes(relativePath, fetchImpl = fetch) {
   return value
 }
 
-export async function modelImage(image) {
-  if (image.mediaType === "image/png" || image.mediaType === "image/jpeg") return image
-  if (image.mediaType !== "image/webp") throw new Error("参考图格式不支持")
+async function webpToJpeg(buffer) {
+  try {
+    const sharp = (await import("sharp")).default
+    return await sharp(buffer).jpeg({ quality: 90 }).toBuffer()
+  } catch {
+    // Local installs can fall back to ffmpeg when sharp is absent.
+  }
   const dir = await mkdtemp(join(tmpdir(), "pose-muse-"))
   try {
     const source = join(dir, "in.webp")
     const dest = join(dir, "out.jpg")
-    await writeFile(source, image.buffer)
+    await writeFile(source, buffer)
     await new Promise((resolve, reject) => {
       const child = spawn("ffmpeg", ["-hide_banner", "-loglevel", "error", "-y", "-i", source, "-q:v", "4", dest])
       let message = ""
@@ -54,10 +58,19 @@ export async function modelImage(image) {
       child.on("error", reject)
       child.on("exit", (code) => (code === 0 ? resolve() : reject(new Error(message.trim() || "服装图转成 JPEG 失败"))))
     })
-    return { mediaType: "image/jpeg", buffer: await readFile(dest), role: image.role }
+    return await readFile(dest)
+  } catch (error) {
+    const message = error instanceof Error ? error.message : "服装图转成 JPEG 失败"
+    throw new Error(message.includes("ENOENT") ? "服装图转成 JPEG 失败" : message)
   } finally {
     await rm(dir, { recursive: true, force: true })
   }
+}
+
+export async function modelImage(image) {
+  if (image.mediaType === "image/png" || image.mediaType === "image/jpeg") return image
+  if (image.mediaType !== "image/webp") throw new Error("参考图格式不支持")
+  return { mediaType: "image/jpeg", buffer: await webpToJpeg(image.buffer), role: image.role }
 }
 
 export async function loadDefaultCharacterImage() {
