@@ -10,7 +10,16 @@ DeepSeek Harness 插件，也是一个可以单独打开的姿势工作室。从
 
 ## 效果
 
-![澜姿工作室：左侧是大肥鱼，中间点选姿势线稿](docs/studio.jpg)
+同一套站立姿势「站立・对立式平衡・手扶腰」。第一张保持女仆装，第二张换成衣装集 SPR-0001。
+
+<p>
+<img src="docs/result-pose.jpg" alt="保持服装：大肥鱼按站立姿势出的图" width="360">
+<img src="docs/result-costume.jpg" alt="换装：同一姿势换成 SPR-0001 的春装" width="360">
+</p>
+
+选了「女孩坐・双手抱头后」，并换成 SPR-0045 之后，成图出现在右侧。
+
+![澜姿工作室：姿势和服装都已选中，右侧是成图](docs/studio-live.jpg)
 
 窄屏时模特收在顶上，分类用下拉，出图按钮留在底部。
 
@@ -80,7 +89,7 @@ npm run typecheck
 
 ## 许可
 
-澜姿自己的程序使用 [MIT License](./LICENSE)，版权所有 (c) 2026 [wzc520pyfm](https://github.com/wzc520pyfm)。数据来源和各自的版权写在 [`shared/license.mjs`](./shared/license.mjs)，并附在 [`LICENSE`](./LICENSE) 末尾。
+澜姿自己的程序使用 [MIT License](./LICENSE)。数据来源和各自的版权写在 [`shared/license.mjs`](./shared/license.mjs)，并附在 [`LICENSE`](./LICENSE) 末尾。
 
 这份 MIT 许可只覆盖程序。下面的作者和作品另外标注，图片按需读取、不放进仓库：
 
