@@ -1,4 +1,6 @@
-import { readFile } from "node:fs/promises"
+import { spawn } from "node:child_process"
+import { mkdtemp, readFile, rm, writeFile } from "node:fs/promises"
+import { tmpdir } from "node:os"
 import { dirname, join } from "node:path"
 import { fileURLToPath } from "node:url"
 import { characterFromUploads, DEFAULT_CHARACTER } from "./character.mjs"
@@ -35,6 +37,27 @@ export async function fetchPoseBytes(relativePath, fetchImpl = fetch) {
   if (poseCache.size > 80) poseCache.delete(poseCache.keys().next().value)
   poseCache.set(relativePath, value)
   return value
+}
+
+export async function modelImage(image) {
+  if (image.mediaType === "image/png" || image.mediaType === "image/jpeg") return image
+  if (image.mediaType !== "image/webp") throw new Error("参考图格式不支持")
+  const dir = await mkdtemp(join(tmpdir(), "pose-muse-"))
+  try {
+    const source = join(dir, "in.webp")
+    const dest = join(dir, "out.jpg")
+    await writeFile(source, image.buffer)
+    await new Promise((resolve, reject) => {
+      const child = spawn("ffmpeg", ["-hide_banner", "-loglevel", "error", "-y", "-i", source, "-q:v", "4", dest])
+      let message = ""
+      child.stderr?.on("data", (chunk) => { message += chunk })
+      child.on("error", reject)
+      child.on("exit", (code) => (code === 0 ? resolve() : reject(new Error(message.trim() || "服装图转成 JPEG 失败"))))
+    })
+    return { mediaType: "image/jpeg", buffer: await readFile(dest), role: image.role }
+  } finally {
+    await rm(dir, { recursive: true, force: true })
+  }
 }
 
 export async function loadDefaultCharacterImage() {
@@ -144,7 +167,7 @@ export async function runGeneration(input, deps = {}) {
   const generate = deps.generate ?? generateImage
   const characterImages = await resolveCharacterImages(plan)
   const fetchCostume = deps.fetchCostume ?? fetchCostumeBytes
-  const costumeImages = plan.costume ? [await fetchCostume(costumeFile(plan.costume, "preview"))] : []
+  const costumeImages = plan.costume ? [await modelImage(await fetchCostume(costumeFile(plan.costume, "preview")))] : []
   const signal = deps.signal
   if (plan.mode === "sheet") {
     const poseImages = []

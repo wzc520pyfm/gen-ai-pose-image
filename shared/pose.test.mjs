@@ -1,10 +1,14 @@
 import assert from "node:assert/strict"
+import { spawnSync } from "node:child_process"
+import { mkdtempSync, readFileSync, rmSync } from "node:fs"
+import { tmpdir } from "node:os"
+import { join } from "node:path"
 import { test } from "node:test"
 import { DEFAULT_CHARACTER } from "./character.mjs"
 import { getCatalog, resolveView, searchPoses } from "./catalog.mjs"
 import { getCostume, isSafeCostumePath, searchCostumes } from "./costumes.mjs"
 import { extractGeminiImage, extractOpenAIImage, openAISize, redact, seedreamSize } from "./generate.mjs"
-import { isSafePosePath, planRequest, promptCards } from "./jobs.mjs"
+import { isSafePosePath, modelImage, planRequest, promptCards } from "./jobs.mjs"
 import { composePrompt } from "./prompt.mjs"
 
 test("catalog keeps every translated pose and view", () => {
@@ -111,6 +115,24 @@ test("a chosen costume replaces the locked outfit", () => {
   const opened = searchCostumes({ category: "ランジェリー", includeAdult: true, limit: 3 })
   assert.equal(opened.length, 3)
   assert.ok(opened.every((item) => item.adult))
+})
+
+test("webp costume references become jpeg before they are sent", async () => {
+  const dir = mkdtempSync(join(tmpdir(), "pose-muse-test-"))
+  try {
+    const source = join(dir, "swatch.webp")
+    const made = spawnSync("ffmpeg", ["-hide_banner", "-loglevel", "error", "-y", "-f", "lavfi", "-i", "color=c=red:s=16x16", "-frames:v", "1", source])
+    assert.equal(made.status, 0)
+    const converted = await modelImage({ mediaType: "image/webp", buffer: readFileSync(source), role: "costume" })
+    assert.equal(converted.mediaType, "image/jpeg")
+    assert.equal(converted.buffer[0], 0xff)
+    assert.equal(converted.buffer[1], 0xd8)
+    const png = Buffer.from([0x89, 0x50, 0x4e, 0x47])
+    const kept = await modelImage({ mediaType: "image/png", buffer: png, role: "character" })
+    assert.equal(kept.buffer, png)
+  } finally {
+    rmSync(dir, { recursive: true, force: true })
+  }
 })
 
 test("image helpers stay inside the public gallery", () => {
