@@ -10,6 +10,7 @@ import { getCostume, isSafeCostumePath, searchCostumes } from "./costumes.mjs"
 import { extractGeminiImage, extractOpenAIImage, openAISize, redact, seedreamSize } from "./generate.mjs"
 import { isSafePosePath, modelImage, planRequest, promptCards } from "./jobs.mjs"
 import { composePrompt } from "./prompt.mjs"
+import { PROJECT_LICENSE, licenseNotices } from "./license.mjs"
 
 test("catalog keeps every translated pose and view", () => {
   const catalog = getCatalog()
@@ -133,6 +134,21 @@ test("webp costume references become jpeg before they are sent", async () => {
   } finally {
     rmSync(dir, { recursive: true, force: true })
   }
+})
+
+test("project license is MIT and names every outside source", () => {
+  const license = readFileSync(new URL("../LICENSE", import.meta.url), "utf8")
+  assert.equal(PROJECT_LICENSE.spdx, "MIT")
+  assert.match(license, /^MIT License/)
+  assert.match(license, new RegExp(PROJECT_LICENSE.copyright.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")))
+  assert.doesNotMatch(license, /Apache/)
+  assert.doesNotMatch(license, /shanliuling/)
+  const notices = licenseNotices()
+  assert.match(notices, /ギア/)
+  assert.match(notices, /Anhao/)
+  assert.match(notices, /TreapGoGo/)
+  assert.match(notices, /DeepSeek/)
+  assert.ok(license.endsWith(`${notices}\n`))
 })
 
 test("image helpers stay inside the public gallery", () => {

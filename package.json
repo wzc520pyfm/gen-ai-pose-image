@@ -1,6 +1,7 @@
 {
   "name": "dsh-pose-muse",
   "version": "0.1.0",
+  "license": "MIT",
   "private": true,
   "description": "DeepSeek Harness 姿势参考生图插件。从 ai-pose-gallery-zh 选择姿势，可从衣装集换装，默认模特是社区鲸鱼娘大飞鱼，也可以导入其他模特。",
   "type": "module",
