@@ -165,7 +165,13 @@ test("the browser module id matches the npm package name", () => {
   const client = readFileSync(new URL("../plugin/client.js", import.meta.url), "utf8")
   assert.match(client, new RegExp(`__ModuleLoader__\\.load\\(\\{ id: "${pkg.name}"`))
   assert.match(client, new RegExp(`exports\\.name = "${pkg.name}"`))
-  assert.ok(pkg.dsh.client.inject.every((name) => name.startsWith("@deepseek-ai/")))
+  assert.match(client, /sidebar\.panellist/)
+  assert.match(client, /key: "pose-muse"/)
+  assert.doesNotMatch(client, /conversation\.view/)
+  assert.deepEqual(pkg.dsh.client.inject, [
+    "@deepseek-ai/dsh-client-ui-layout",
+    "@deepseek-ai/dsh-client-ui-sidebar",
+  ])
 })
 
 test("tool output schemas declare whether extra fields are allowed", () => {

@@ -49,7 +49,7 @@ dsh plugin --profile web add gen-ai-pose-image
 
 重启对应 profile 后：
 
-- 对话视图里多一个「姿势」页，可多选标准全身姿势并生图。
+- 左侧栏多一项「姿势」，和「插件」「自动化任务」排在一起。点开后可多选标准全身姿势并生图。
 - Agent 可以使用 `search_poses`、`search_costumes` 和 `generate_pose_images`。换装时把服装编号传给 `costume_id`。
 - 给进程设置 `POSE_MUSE_API_KEY` 后，工具会直接出图并挂到会话里。没有密钥时，工具返回写好的提示词，方便交给 `dsh-image-gen` 的 `generate_image` / `edit_image`。
 
