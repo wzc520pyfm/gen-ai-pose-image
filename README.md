@@ -2,7 +2,7 @@
 
 DeepSeek Harness 插件，也是一个可以单独打开的姿势工作室。从 [ai-pose-gallery-zh](https://github.com/anhao/ai-pose-gallery-zh) 的 288 组、1439 张姿势线稿里选一个或多个姿势，生成同一位模特的图。
 
-默认模特是 **澜**：按 DeepSeek 蓝白配色原创绘制的成年女性，约二十五岁，墨蓝长发、青色挑染、鲸鱼发夹、白色短西装。可以导入最多三张别的模特照片，用来替换脸和衣服。姿势图只提供身体姿态，默认不会把线稿里的空白身体画进成图。
+默认模特是 **大飞鱼**：社区鲸鱼娘的成年形象，长波浪蓝发、鲸耳、蓝鲸尾，穿海军蓝与白色女仆装。参考图用的是 [deepseek-whale-girl](https://github.com/TreapGoGo/deepseek-whale-girl) 里的 `dafeiyu-mature-character-sheet.png`。可以导入最多三张别的模特照片，用来替换脸和衣服。姿势图只提供身体姿态，默认不会把线稿里的空白身体画进成图。
 
 姿势线稿不在这个仓库里。页面会按需读取公开图床 `https://ai-pose-gallery.anhao.app`。图片与原始数据的著作权归ギア所有，中文译名来自 Anhao 的图库。
 
@@ -18,7 +18,7 @@ npm run dev
 打开 [http://127.0.0.1:43123](http://127.0.0.1:43123)。
 
 1. 在中间点选姿势，可以多选。标准全身是默认页；性感系和双人姿势需要明确打开「成人向」。
-2. 左侧可以导入其他模特，或继续用澜。
+2. 左侧可以导入其他模特，或继续用大飞鱼。
 3. 右上角「生图设置」里填写 Gemini 或 OpenAI 兼容接口的密钥。密钥只留在这台浏览器里。
 4. 没有密钥时，右侧仍会写出每一张图的提示词，可以复制到已安装的 `dsh-image-gen` 里生图。
 
@@ -59,4 +59,4 @@ npm run typecheck
 
 ## 许可
 
-插件代码使用 Apache License 2.0。该许可不覆盖姿势线稿、译名数据和 DeepSeek 的商标。澜的参考图是为本项目原创绘制的。
+插件代码使用 Apache License 2.0。该许可不覆盖姿势线稿、译名数据、DeepSeek 的商标，也不覆盖大飞鱼设定图。设定图来自社区仓库 [TreapGoGo/deepseek-whale-girl](https://github.com/TreapGoGo/deepseek-whale-girl)，著作权归原作者。

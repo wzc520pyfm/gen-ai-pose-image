@@ -7,7 +7,7 @@ import { composePrompt } from "./prompt.mjs"
 import { assertBaseURL, defaultModel, generateImage } from "./generate.mjs"
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), "..")
-const DEFAULT_CHARACTER_FILE = join(ROOT, "public/muse/lan-full.jpg")
+const DEFAULT_CHARACTER_FILE = join(ROOT, "public/muse/dafeiyu-sheet.png")
 const ASPECTS = new Set(["1:1", "3:4", "4:3", "9:16", "16:9"])
 const poseCache = new Map()
 
@@ -38,7 +38,7 @@ export async function fetchPoseBytes(relativePath, fetchImpl = fetch) {
 
 export async function loadDefaultCharacterImage() {
   const buffer = await readFile(DEFAULT_CHARACTER_FILE)
-  return { mediaType: "image/jpeg", buffer, role: "character" }
+  return { mediaType: "image/png", buffer, role: "character" }
 }
 
 function mediaTypeOf(buffer, declared) {

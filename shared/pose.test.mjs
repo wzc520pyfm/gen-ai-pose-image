@@ -39,8 +39,8 @@ test("prompt locks the adult default character and the chosen pose", () => {
     keepOutfit: true,
     mode: "each",
   })
-  assert.match(text, /澜/)
-  assert.match(text, /二十五岁/)
+  assert.match(text, /大飞鱼/)
+  assert.match(text, /鲸尾/)
   assert.match(text, /禁止画成儿童/)
   assert.match(text, /后仰坐・单膝立起/)
   assert.match(text, /必须保留角色参考图中的服装/)
@@ -69,7 +69,7 @@ test("plan rejects unknown poses and builds one prompt per view", () => {
   assert.equal(plan.items.length, 2)
   assert.equal(plan.aspectRatio, "16:9")
   assert.equal(plan.model, "gpt-image-1")
-  assert.match(plan.items[0].prompt, /澜/)
+  assert.match(plan.items[0].prompt, /大飞鱼/)
   assert.equal(promptCards(plan).length, 2)
 })
 

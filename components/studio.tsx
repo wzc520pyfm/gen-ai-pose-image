@@ -249,7 +249,7 @@ export function Studio() {
         <WhaleMark />
         <div className="min-w-0 flex-1">
           <p className="font-display text-xl leading-none">澜姿</p>
-          <p className="mt-1 truncate text-xs text-muted-foreground">从姿势图库里挑一个或多个姿势，用澜或你自己的模特出图</p>
+          <p className="mt-1 truncate text-xs text-muted-foreground">从姿势图库里挑一个或多个姿势，用大飞鱼或你自己的模特出图</p>
         </div>
         <Button variant="outline" size="sm" onClick={() => setInstallOpen(true)}>装进 Harness</Button>
         <Button variant="outline" size="icon" aria-label="生图设置" onClick={() => setSettingsOpen(true)}>

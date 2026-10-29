@@ -23,8 +23,8 @@ export function CharacterDock({
   const [error, setError] = useState("")
   const [busy, setBusy] = useState(false)
   const custom = images.length > 0
-  const portrait = custom ? `data:${images[0].mediaType};base64,${images[0].dataBase64}` : "/muse/lan-portrait.jpg"
-  const full = custom ? portrait : "/muse/lan-full.jpg"
+  const portrait = custom ? `data:${images[0].mediaType};base64,${images[0].dataBase64}` : "/muse/dafeiyu-portrait.jpg"
+  const full = custom ? portrait : "/muse/dafeiyu-sheet.png"
 
   async function addFiles(list: FileList | null) {
     if (!list || list.length === 0) return
@@ -51,19 +51,19 @@ export function CharacterDock({
     <aside className="dock flex min-h-0 flex-col gap-4 px-4 py-5 text-[#e7eefc] lg:h-full lg:overflow-y-auto">
       <div>
         <p className="text-[11px] tracking-[0.22em] text-[#9fb4d8]">默认模特</p>
-        <h2 className="font-display mt-1 text-3xl text-white">{custom ? "导入的模特" : "澜"}</h2>
-        <p className="mt-1 text-sm text-[#b7c6e2]">{custom ? "生图时改用你导入的参考图。" : "按 DeepSeek 蓝白配色原创绘制的成年形象，不是官方吉祥物。"}</p>
+        <h2 className="font-display mt-1 text-3xl text-white">{custom ? "导入的模特" : "大飞鱼"}</h2>
+        <p className="mt-1 text-sm text-[#b7c6e2]">{custom ? "生图时改用你导入的参考图。" : "社区鲸鱼娘的成年形象，不是 DeepSeek 官方吉祥物。"}</p>
       </div>
       <div className="overflow-hidden rounded-3xl bg-white/10 ring-1 ring-white/15">
-        <img src={portrait} alt={custom ? "导入的模特头像" : "澜的肖像，墨蓝长发，鲸鱼发夹，白色外套"} className="aspect-square w-full object-cover object-top" />
+        <img src={portrait} alt={custom ? "导入的模特头像" : "大飞鱼的正面全身像，蓝发、鲸耳、蓝白女仆装"} className="aspect-square w-full object-cover object-top" />
       </div>
       <p className="text-sm leading-6 text-[#d5e0f5]">
         {custom
           ? "参考图会和姿势线稿一起交给模型。请使用成年人物的图片。"
-          : "墨蓝长发，一缕青色挑染，蓝色鲸鱼发夹。白色短西装、钴蓝高领、藏青色西裤。全身参考图会一起送去生图，用来锁住脸和衣服。"}
+          : "长波浪蓝发、鲸耳和蓝鲸尾，海军蓝与白色女仆装。三视图会一起送去生图，用来锁住脸、鲸尾和衣服。"}
       </p>
       {!custom ? (
-        <img src={full} alt="澜的全身参考：白色短西装、钴蓝高领、藏青色西裤" className="max-h-72 rounded-2xl bg-[#f4f1ea] object-contain" />
+        <img src={full} alt="大飞鱼的成年三视图：正面、侧面、背面，以及头饰和裙摆细节" className="max-h-72 rounded-2xl bg-[#f4f1ea] object-contain" />
       ) : (
         <div className="grid grid-cols-3 gap-2">
           {images.map((image) => (
@@ -100,7 +100,7 @@ export function CharacterDock({
       {custom ? (
         <Button variant="ghost" className="text-[#d5e0f5] hover:bg-white/10 hover:text-white" onClick={() => onChange([])}>
           <RotateCcw />
-          恢复默认模特澜
+          恢复默认模特大飞鱼
         </Button>
       ) : null}
       {error ? <p className="text-sm text-[#fecaca]">{error}</p> : null}

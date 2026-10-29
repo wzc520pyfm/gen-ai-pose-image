@@ -97,7 +97,7 @@ export function apply(ctx, config = {}) {
         order: 58,
         text: () => [
           "澜姿插件已安装。用户要按姿势参考出图时，先用 search_poses 查找姿势，再用 generate_pose_images，view_ids 传姿势 id 或具体视角 id。",
-          "默认可一次选择多个姿势。默认模特是成年女性「澜」（DeepSeek 娘化形象，约二十五岁）。不要把角色画成未成年人。",
+          "默认可一次选择多个姿势。默认模特是成年女性「大飞鱼」（社区 DeepSeek 鲸鱼娘的成年形象，蓝发、鲸耳、鲸尾、蓝白女仆装）。不要把角色画成未成年人或 Q 版。",
           "没有 POSE_MUSE_API_KEY 时，generate_pose_images 会返回提示词；若 dsh-image-gen 可用，把提示词原样交给 edit_image 或 generate_image，并附上角色参考与姿势线稿。",
         ].join("\n"),
       }), "dsh-pose-muse prompt")
@@ -145,11 +145,11 @@ export function apply(ctx, config = {}) {
 
   ctx.tools.register(defineTool({
     name: "generate_pose_images",
-    description: "Generate images of the default adult DeepSeek muse 澜, or describe a wardrobe change, using one or more pose references from search_poses. Pass view ids (or pose ids, which use the front view). Keeps the character's outfit unless keep_outfit is false. One image per pose unless mode is sheet.",
+    description: "Generate images of the default adult whale-girl 大飞鱼, or describe a wardrobe change, using one or more pose references from search_poses. Pass view ids (or pose ids, which use the front view). Keeps the character's maid outfit unless keep_outfit is false. One image per pose unless mode is sheet.",
     parameters: {
       view_ids: { type: "array", items: { type: "string" }, required: true, description: "Pose or view ids from search_poses. Up to 8 for each, 4 for sheet." },
       extra_prompt: { type: "string", description: "Optional scene, lighting, or wardrobe note." },
-      keep_outfit: { type: "boolean", description: "Keep 澜's white jacket and navy outfit. Default true." },
+      keep_outfit: { type: "boolean", description: "Keep 大飞鱼's blue-and-white maid outfit, whale ears and tail. Default true." },
       aspect_ratio: { type: "string", enum: ["1:1", "3:4", "4:3", "9:16", "16:9"], description: "Default 3:4." },
       mode: { type: "string", enum: ["each", "sheet"], description: "each makes one image per pose. sheet puts up to 4 poses in one image." },
       provider: { type: "string", enum: ["seedream", "gemini", "openai"], description: "Omit to use the plugin default. seedream calls Volcengine Ark." },
@@ -186,7 +186,7 @@ export function apply(ctx, config = {}) {
         const plan = planRequest(input)
         return {
           generated: false,
-          message: "没有 POSE_MUSE_API_KEY。提示词已经按澜的成年形象和所选姿势写好。若安装了 dsh-image-gen，请把每段提示词交给 edit_image 或 generate_image，并附上角色参考图与姿势线稿。不要把角色改成未成年人。",
+          message: "没有 POSE_MUSE_API_KEY。提示词已经按大飞鱼的成年形象和所选姿势写好。若安装了 dsh-image-gen，请把每段提示词交给 edit_image 或 generate_image，并附上角色参考图与姿势线稿。不要把角色改成未成年人或 Q 版。",
           prompts: promptCards(plan),
         }
       }

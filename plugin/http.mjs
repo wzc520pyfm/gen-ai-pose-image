@@ -55,10 +55,11 @@ export function createPoseHandler(getConfig) {
         res.end(image.buffer)
         return
       }
-      if (req.method === "GET" && (path === "/muse/lan-full.jpg" || path === "/muse/lan-portrait.jpg")) {
+      if (req.method === "GET" && (path === "/muse/dafeiyu-sheet.png" || path === "/muse/dafeiyu-portrait.jpg")) {
         const file = join(ROOT, "public", path.slice(1))
         const data = await readFile(file)
-        res.writeHead(200, { "content-type": "image/jpeg", "cache-control": "public, max-age=86400" })
+        const mediaType = path.endsWith(".png") ? "image/png" : "image/jpeg"
+        res.writeHead(200, { "content-type": mediaType, "cache-control": "public, max-age=86400" })
         res.end(data)
         return
       }

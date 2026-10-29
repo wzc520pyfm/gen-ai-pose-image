@@ -66,7 +66,7 @@ export function Composer({
 }) {
   const characterSrc = characters[0]
     ? `data:${characters[0].mediaType};base64,${characters[0].dataBase64}`
-    : "/muse/lan-full.jpg"
+    : "/muse/dafeiyu-sheet.png"
   const limit = mode === "sheet" ? 4 : 8
 
   return (
@@ -83,7 +83,7 @@ export function Composer({
 
       {selected.length === 0 ? (
         <p className="rounded-2xl bg-muted px-3 py-4 text-sm leading-6 text-muted-foreground">
-          从中间点选一个或多个姿势。每一张成图都会带上{characters.length ? "你导入的模特" : "澜"}，只把身体换成对应的线稿姿势。
+          从中间点选一个或多个姿势。每一张成图都会带上{characters.length ? "你导入的模特" : "大飞鱼"}，只把身体换成对应的线稿姿势。
         </p>
       ) : (
         <ul className="flex max-h-40 flex-col gap-2 overflow-auto">
@@ -104,7 +104,7 @@ export function Composer({
         <div className="rounded-2xl bg-card p-3 ring-1 ring-border">
           <p className="text-xs text-muted-foreground">参考对照 · {selected[0].title}</p>
           <div className="mt-2 grid grid-cols-[1fr_auto_1fr] items-center gap-2">
-            <img src={characterSrc} alt={characters.length ? "导入的模特" : "澜的全身参考"} className="aspect-[3/4] rounded-xl bg-[#f7f4ee] object-contain" />
+            <img src={characterSrc} alt={characters.length ? "导入的模特" : "大飞鱼的成年三视图"} className="aspect-[3/4] rounded-xl bg-[#f7f4ee] object-contain" />
             <span className="text-lg text-muted-foreground" aria-hidden="true">→</span>
             <img src={`/api/pose-image?id=${encodeURIComponent(selected[0].viewId)}&size=thumb`} alt={`${selected[0].title} 的姿势线稿`} className="aspect-[3/4] rounded-xl bg-white object-contain" />
           </div>
