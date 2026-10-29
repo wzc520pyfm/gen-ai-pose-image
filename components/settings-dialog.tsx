@@ -44,7 +44,7 @@ export function SettingsDialog({
           <DialogDescription>密钥存在这台浏览器的本地存储里，不会写进仓库，也不会出现在提示词里。</DialogDescription>
         </DialogHeader>
         <div className="grid gap-4">
-          <div className="grid grid-cols-3 gap-2">
+          <div className="flex flex-wrap gap-2">
             <Button variant={settings.provider === "seedream" ? "default" : "outline"} onClick={() => chooseProvider("seedream")}>Seedream</Button>
             <Button variant={settings.provider === "gemini" ? "default" : "outline"} onClick={() => chooseProvider("gemini")}>Gemini</Button>
             <Button variant={settings.provider === "openai" ? "default" : "outline"} onClick={() => chooseProvider("openai")}>OpenAI</Button>

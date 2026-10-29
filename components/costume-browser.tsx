@@ -87,7 +87,7 @@ export function CostumeBrowser({
     <section>
       <div className="sticky top-0 z-10 border-b bg-white/95 px-4 py-3 backdrop-blur md:px-6">
         <p className="mb-2 text-sm text-muted-foreground">这些图里没有人物。选一套之后，大肥鱼会换上这身衣服，脸、头发、鲸耳和鲸尾保持不变。</p>
-        <div className="flex gap-2 overflow-x-auto pb-2">
+        <div className="mb-2 flex flex-wrap gap-2">
           {catalog?.categories.map((item) => (
             <button
               key={item.id}
@@ -99,7 +99,7 @@ export function CostumeBrowser({
                 }
                 setCategory(item.id)
               }}
-              className={`shrink-0 rounded-full px-3 py-1.5 text-sm ${category === item.id ? "bg-primary text-primary-foreground" : "bg-white ring-1 ring-border"}`}
+              className={`inline-flex items-center whitespace-nowrap rounded-full px-3 py-1.5 text-sm ${category === item.id ? "bg-primary text-primary-foreground" : "bg-white ring-1 ring-border"}`}
             >
               {item.label}
               <span className={`ml-1.5 text-xs ${category === item.id ? "text-primary-foreground/80" : "text-muted-foreground"}`}>{item.count}</span>
@@ -112,7 +112,7 @@ export function CostumeBrowser({
           <Input
             value={query}
             onChange={(event) => setQuery(event.target.value)}
-            placeholder="搜索编号或英文关键词，例如 denim、SPR-0001"
+            placeholder="搜索编号或关键词"
             aria-label="搜索服装"
             className="h-10 bg-card pr-9 pl-8"
           />
@@ -147,7 +147,7 @@ export function CostumeBrowser({
                 aria-pressed={selected}
                 className={`overflow-hidden rounded-xl border bg-card text-left shadow-sm ${selected ? "border-primary ring-2 ring-primary/25" : "border-border hover:border-primary/40"}`}
               >
-                <div className="relative aspect-[2/3] bg-white">
+                <div className="relative aspect-[3/4] bg-white sm:aspect-[2/3]">
                   <img
                     src={`/api/costume-image?id=${encodeURIComponent(costume.id)}&size=thumb`}
                     alt={`${costume.id}，${costume.keywords}`}
@@ -158,7 +158,7 @@ export function CostumeBrowser({
                 </div>
                 <div className="space-y-1 px-3 py-2.5">
                   <p className="text-sm font-medium">{costume.id}</p>
-                  <p className="line-clamp-2 text-xs text-muted-foreground">{costume.label} · {costume.keywords}</p>
+                  <p className="line-clamp-1 text-xs text-muted-foreground sm:line-clamp-2">{costume.label} · {costume.keywords}</p>
                 </div>
               </button>
             )
