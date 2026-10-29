@@ -1,10 +1,4 @@
-import { readFileSync } from "node:fs"
-import { dirname, join } from "node:path"
-import { fileURLToPath } from "node:url"
-
-const catalog = JSON.parse(
-  readFileSync(join(dirname(fileURLToPath(import.meta.url)), "../data/catalog.json"), "utf8"),
-)
+import catalog from "../data/catalog.json" with { type: "json" }
 
 const byPose = new Map()
 const byView = new Map()

@@ -1,10 +1,4 @@
-import { readFileSync } from "node:fs"
-import { dirname, join } from "node:path"
-import { fileURLToPath } from "node:url"
-
-const catalog = JSON.parse(
-  readFileSync(join(dirname(fileURLToPath(import.meta.url)), "../data/costumes.json"), "utf8"),
-)
+import catalog from "../data/costumes.json" with { type: "json" }
 
 const byId = new Map(catalog.costumes.map((costume) => [costume.id, costume]))
 const cache = new Map()
