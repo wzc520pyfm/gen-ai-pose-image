@@ -41,7 +41,7 @@ export function syncLibrary(models, activeId, images, now = Date.now(), random =
   }
   const index = list.findIndex((model) => model.id === activeId)
   if (index >= 0) {
-    const entry = { ...list[index], images, updatedAt: now, lastUsedAt: now }
+    const entry = { ...list[index], images, updatedAt: now, lastUsedAt: list[index].lastUsedAt || now }
     const next = list.slice()
     next[index] = entry
     return { models: next, activeId, removedId: null, entry }
@@ -54,7 +54,7 @@ export function syncLibrary(models, activeId, images, now = Date.now(), random =
     lastUsedAt: now,
     images,
   }
-  return { models: [entry, ...list], activeId: entry.id, removedId: null, entry }
+  return { models: [...list, entry], activeId: entry.id, removedId: null, entry }
 }
 
 export function adoptCurrent(models, images, activeId, now = Date.now(), random = () => globalThis.crypto.randomUUID()) {
@@ -71,7 +71,7 @@ export function adoptCurrent(models, images, activeId, now = Date.now(), random 
     lastUsedAt: now,
     images,
   }
-  return { models: [entry, ...list], activeId: entry.id, adopted: true, entry }
+  return { models: [...list, entry], activeId: entry.id, adopted: true, entry }
 }
 
 export function activateModel(models, id) {
@@ -119,33 +119,32 @@ export function cycleModelId(entries, activeId, direction) {
   return list[(start + delta + list.length) % list.length].id
 }
 
-/** 1-based position in the current cycle. The list order must not change just because the selection did. */
+/** 1-based position in the fixed cycle. Order does not change when the selection changes. */
 export function modelIndicator(entries, activeId) {
   const list = Array.isArray(entries) ? entries : []
   const found = list.findIndex((item) => item.id === activeId)
   return { index: found < 0 ? 1 : found + 1, total: list.length }
 }
 
-export function switcherEntries({ models = [], builtinUsed = {} } = {}) {
+/** Built-ins in catalog order, then saved models by creation time. Later models stay at the end. */
+export function switcherEntries({ models = [] } = {}) {
   const builtins = BUILTIN_MODELS.map((model) => ({
     id: model.id,
     label: model.name,
     builtin: true,
-    lastUsedAt: Number(builtinUsed[model.id]) || 0,
     portrait: model.portrait,
     sheet: model.sheet,
   }))
-  const custom = (Array.isArray(models) ? models : []).map((model) => ({
+  const custom = [...(Array.isArray(models) ? models : [])].sort((a, b) => {
+    const created = (Number(a.createdAt) || 0) - (Number(b.createdAt) || 0)
+    if (created !== 0) return created
+    return String(a.id).localeCompare(String(b.id))
+  }).map((model) => ({
     id: model.id,
     label: model.label,
     builtin: false,
-    lastUsedAt: Number(model.lastUsedAt || model.updatedAt || model.createdAt) || 0,
     portrait: "",
     sheet: "",
   }))
-  return [...builtins, ...custom].sort((a, b) => {
-    if (b.lastUsedAt !== a.lastUsedAt) return b.lastUsedAt - a.lastUsedAt
-    if (a.builtin !== b.builtin) return a.builtin ? -1 : 1
-    return a.label.localeCompare(b.label, "zh")
-  })
+  return [...builtins, ...custom]
 }

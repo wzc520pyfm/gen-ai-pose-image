@@ -126,7 +126,7 @@ test("library save, switch, rename, and delete keep the selected model", () => {
   assert.equal(kept.models.length, 1)
 })
 
-test("the switcher always lists 大肥鱼 with customs, newest first, and builtins stay out of the library", () => {
+test("the switcher lists 大肥鱼 first, then saved models in creation order", () => {
   assert.equal(isBuiltinModelId("dafeiyu"), true)
   const empty = switcherEntries({ models: [] })
   assert.equal(empty.length, 1)
@@ -135,32 +135,27 @@ test("the switcher always lists 大肥鱼 with customs, newest first, and builti
   const created = syncLibrary([], "dafeiyu", [photo], 10, () => "new")
   assert.equal(created.activeId, "model-new")
   assert.equal(created.models.some((model) => model.id === "dafeiyu"), false)
-  const entries = switcherEntries({
-    models: created.models,
-    builtinUsed: { dafeiyu: 50 },
-  })
+  const entries = switcherEntries({ models: created.models })
   assert.deepEqual(entries.map((item) => item.id), ["dafeiyu", "model-new"])
-  const recentCustom = switcherEntries({
-    models: [{ ...created.models[0], lastUsedAt: 80 }],
-    builtinUsed: { dafeiyu: 50 },
+  const later = syncLibrary(created.models, null, [photoTwo], 30, () => "later")
+  assert.deepEqual(later.models.map((model) => model.id), ["model-new", "model-later"])
+  const stable = switcherEntries({
+    models: markModelUsed(later.models, "model-later", 999),
+    builtinUsed: { dafeiyu: 5000 },
   })
-  assert.deepEqual(recentCustom.map((item) => item.id), ["model-new", "dafeiyu"])
+  assert.deepEqual(stable.map((item) => item.id), ["dafeiyu", "model-new", "model-later"])
+  assert.deepEqual(modelIndicator(stable, "model-later"), { index: 3, total: 3 })
   assert.throws(() => renameModel([], "dafeiyu", "别的名字"), /不能改名/)
   assert.throws(() => deleteFromLibrary([], "dafeiyu", "dafeiyu"), /不能删除/)
-  const order = switcherEntries({
-    models: created.models,
-    builtinUsed: { dafeiyu: 50 },
-  })
+  const order = switcherEntries({ models: created.models })
   assert.equal(cycleModelId(order, "dafeiyu", "next"), "model-new")
   assert.equal(cycleModelId(order, "model-new", "next"), "dafeiyu")
   assert.equal(cycleModelId(order, "dafeiyu", "prev"), "model-new")
   assert.deepEqual(modelIndicator(order, "dafeiyu"), { index: 1, total: 2 })
   assert.deepEqual(modelIndicator(order, "model-new"), { index: 2, total: 2 })
-  const resorted = switcherEntries({
-    models: markModelUsed(created.models, "model-new", 90),
-    builtinUsed: { dafeiyu: 50 },
-  })
-  assert.deepEqual(modelIndicator(resorted, "model-new"), { index: 1, total: 2 })
+  const resorted = switcherEntries({ models: markModelUsed(created.models, "model-new", 90) })
+  assert.deepEqual(resorted.map((item) => item.id), ["dafeiyu", "model-new"])
+  assert.deepEqual(modelIndicator(resorted, "model-new"), { index: 2, total: 2 })
   const stayed = adoptCurrent([], [photo], "dafeiyu", 90)
   assert.equal(stayed.adopted, false)
   assert.equal(stayed.models.length, 0)

@@ -31,7 +31,7 @@ export async function listSavedModels() {
     await done
     return result
   })
-  return rows.sort((a, b) => b.updatedAt - a.updatedAt)
+  return rows.sort((a, b) => (a.createdAt || 0) - (b.createdAt || 0) || String(a.id).localeCompare(String(b.id)))
 }
 
 export async function putSavedModel(model: SavedModel) {

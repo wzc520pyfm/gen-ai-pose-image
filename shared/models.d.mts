@@ -45,12 +45,10 @@ export function cycleModelId(entries: Array<{ id: string }>, activeId: string, d
 export function modelIndicator(entries: Array<{ id: string }>, activeId: string): { index: number; total: number }
 export function switcherEntries(input?: {
   models?: SavedModel[]
-  builtinUsed?: Record<string, number>
 }): Array<{
   id: string
   label: string
   builtin: boolean
-  lastUsedAt: number
   portrait: string
   sheet: string
 }>

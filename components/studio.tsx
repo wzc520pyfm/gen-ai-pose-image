@@ -708,7 +708,7 @@ function StudioFrame({ embedded }: { embedded: boolean }) {
           keepOutfit={settings.keepOutfit}
           onKeepOutfit={(keepOutfit) => updateSettings({ ...settings, keepOutfit })}
           outfitLocked={Boolean(costume)}
-          switchItems={switcherEntries({ models, builtinUsed }).map((item) => {
+          switchItems={switcherEntries({ models }).map((item) => {
             const saved = models.find((model) => model.id === item.id)
             const thumb = saved?.images[0]
             return {

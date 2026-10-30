@@ -5547,7 +5547,7 @@ function syncLibrary(models, activeId, images, now = Date.now(), random = () => 
   }
   const index = list.findIndex((model) => model.id === activeId);
   if (index >= 0) {
-    const entry2 = { ...list[index], images, updatedAt: now, lastUsedAt: now };
+    const entry2 = { ...list[index], images, updatedAt: now, lastUsedAt: list[index].lastUsedAt || now };
     const next = list.slice();
     next[index] = entry2;
     return { models: next, activeId, removedId: null, entry: entry2 };
@@ -5560,7 +5560,7 @@ function syncLibrary(models, activeId, images, now = Date.now(), random = () => 
     lastUsedAt: now,
     images
   };
-  return { models: [entry, ...list], activeId: entry.id, removedId: null, entry };
+  return { models: [...list, entry], activeId: entry.id, removedId: null, entry };
 }
 function adoptCurrent(models, images, activeId, now = Date.now(), random = () => globalThis.crypto.randomUUID()) {
   const list = Array.isArray(models) ? models.slice() : [];
@@ -5576,7 +5576,7 @@ function adoptCurrent(models, images, activeId, now = Date.now(), random = () =>
     lastUsedAt: now,
     images
   };
-  return { models: [entry, ...list], activeId: entry.id, adopted: true, entry };
+  return { models: [...list, entry], activeId: entry.id, adopted: true, entry };
 }
 function activateModel(models, id) {
   const found = (Array.isArray(models) ? models : []).find((model) => model.id === id);
@@ -5615,28 +5615,26 @@ function modelIndicator(entries, activeId) {
   const found = list.findIndex((item) => item.id === activeId);
   return { index: found < 0 ? 1 : found + 1, total: list.length };
 }
-function switcherEntries({ models = [], builtinUsed = {} } = {}) {
+function switcherEntries({ models = [] } = {}) {
   const builtins = BUILTIN_MODELS.map((model) => ({
     id: model.id,
     label: model.name,
     builtin: true,
-    lastUsedAt: Number(builtinUsed[model.id]) || 0,
     portrait: model.portrait,
     sheet: model.sheet
   }));
-  const custom = (Array.isArray(models) ? models : []).map((model) => ({
+  const custom = [...Array.isArray(models) ? models : []].sort((a, b) => {
+    const created = (Number(a.createdAt) || 0) - (Number(b.createdAt) || 0);
+    if (created !== 0) return created;
+    return String(a.id).localeCompare(String(b.id));
+  }).map((model) => ({
     id: model.id,
     label: model.label,
     builtin: false,
-    lastUsedAt: Number(model.lastUsedAt || model.updatedAt || model.createdAt) || 0,
     portrait: "",
     sheet: ""
   }));
-  return [...builtins, ...custom].sort((a, b) => {
-    if (b.lastUsedAt !== a.lastUsedAt) return b.lastUsedAt - a.lastUsedAt;
-    if (a.builtin !== b.builtin) return a.builtin ? -1 : 1;
-    return a.label.localeCompare(b.label, "zh");
-  });
+  return [...builtins, ...custom];
 }
 
 // components/character-dock.tsx
@@ -11464,7 +11462,7 @@ async function listSavedModels() {
     await done;
     return result;
   });
-  return rows.sort((a, b) => b.updatedAt - a.updatedAt);
+  return rows.sort((a, b) => (a.createdAt || 0) - (b.createdAt || 0) || String(a.id).localeCompare(String(b.id)));
 }
 async function putSavedModel(model) {
   await withDb("models", "readwrite", async (store, done) => {
@@ -12119,7 +12117,7 @@ function StudioFrame({ embedded }) {
           keepOutfit: settings.keepOutfit,
           onKeepOutfit: (keepOutfit) => updateSettings({ ...settings, keepOutfit }),
           outfitLocked: Boolean(costume),
-          switchItems: switcherEntries({ models, builtinUsed }).map((item) => {
+          switchItems: switcherEntries({ models }).map((item) => {
             const saved = models.find((model) => model.id === item.id);
             const thumb = saved?.images[0];
             return {
