@@ -57,6 +57,26 @@ export async function readActiveModelId() {
   return typeof value === "string" && value ? value : null
 }
 
+const BUILTIN_USED_KEY = "lanpose-builtin-used-v1"
+
+export function readBuiltinUsed() {
+  if (typeof window === "undefined") return {} as Record<string, number>
+  try {
+    const parsed = JSON.parse(window.localStorage.getItem(BUILTIN_USED_KEY) || "{}") as Record<string, unknown>
+    const next: Record<string, number> = {}
+    for (const [key, value] of Object.entries(parsed)) {
+      if (typeof value === "number" && Number.isFinite(value)) next[key] = value
+    }
+    return next
+  } catch {
+    return {}
+  }
+}
+
+export function writeBuiltinUsed(value: Record<string, number>) {
+  window.localStorage.setItem(BUILTIN_USED_KEY, JSON.stringify(value))
+}
+
 export async function writeActiveModelId(id: string | null) {
   await withDb("characters", "readwrite", async (store, done) => {
     if (id) store.put(id, "activeModelId")

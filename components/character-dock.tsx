@@ -3,23 +3,28 @@
 /* eslint-disable @next/next/no-img-element -- model photos are data URLs or the bundled muse file */
 
 import { useRef, useState } from "react"
-import { ImagePlus, RotateCcw } from "lucide-react"
+import { ImagePlus } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Switch } from "@/components/ui/switch"
 import { fileToCharacter, type StoredCharacter } from "@/lib/characters"
-import type { SavedModel } from "@/lib/models"
-import { withUploadedSheet } from "@/shared/models.mjs"
 import { studioUrl, useStudioEnv } from "@/lib/studio-env"
+import { withUploadedSheet } from "@/shared/models.mjs"
+
+export type ModelSwitchItem = {
+  id: string
+  label: string
+  builtin: boolean
+  thumbSrc: string
+}
 
 export function CharacterDock({
   images,
   onChange,
-  onUseDefault,
   keepOutfit,
   onKeepOutfit,
   outfitLocked = false,
-  models,
+  switchItems,
   activeModelId,
   activeLabel,
   onSelectModel,
@@ -33,12 +38,11 @@ export function CharacterDock({
 }: {
   images: StoredCharacter[]
   onChange: (images: StoredCharacter[]) => void
-  onUseDefault: () => void
   keepOutfit: boolean
   onKeepOutfit: (value: boolean) => void
   outfitLocked?: boolean
-  models: SavedModel[]
-  activeModelId: string | null
+  switchItems: ModelSwitchItem[]
+  activeModelId: string
   activeLabel: string
   onSelectModel: (id: string) => void
   onRenameModel: (id: string, label: string) => void
@@ -119,54 +123,55 @@ export function CharacterDock({
           {busy ? "读图" : "导入"}
         </Button>
       </div>
-      {models.length > 0 ? (
-        <div className="grid max-h-36 gap-2 overflow-y-auto">
-          <p className="text-xs text-[#cbd5e1]">已存模特</p>
-          {models.map((model) => {
-            const thumb = model.images[0]
-            const selected = model.id === activeModelId
-            return (
-              <div key={model.id} className={`flex items-center gap-2 rounded-xl px-2 py-1.5 ${selected ? "bg-white/15 ring-1 ring-white/30" : "bg-white/5"}`}>
-                {thumb ? <img src={`data:${thumb.mediaType};base64,${thumb.dataBase64}`} alt="" className={`h-10 w-8 shrink-0 rounded-md ${thumb.role === "sheet" ? "bg-white object-contain" : "object-cover"}`} /> : null}
-                {editingId === model.id ? (
-                  <Input
-                    value={draftLabel}
-                    aria-label={`模特名称 ${model.label}`}
-                    className="h-8 border-white/20 bg-white/10 text-white"
-                    onChange={(event) => setDraftLabel(event.target.value)}
-                    onBlur={() => {
-                      onRenameModel(model.id, draftLabel)
-                      setEditingId(null)
-                    }}
-                    onKeyDown={(event) => {
-                      if (event.key === "Enter") (event.target as HTMLInputElement).blur()
-                    }}
-                  />
-                ) : (
-                  <button type="button" className="min-w-0 flex-1 truncate text-left text-sm text-white" aria-pressed={selected} onClick={() => onSelectModel(model.id)}>
-                    {model.label}
-                  </button>
-                )}
-                <button type="button" className="shrink-0 text-[11px] text-[#cbd5e1]" onClick={() => { setEditingId(model.id); setDraftLabel(model.label) }}>改名</button>
-                <button
-                  type="button"
-                  className="shrink-0 text-[11px] text-[#cbd5e1]"
-                  onClick={() => {
-                    if (pendingDelete === model.id) {
-                      setPendingDelete(null)
-                      onDeleteModel(model.id)
-                      return
-                    }
-                    setPendingDelete(model.id)
+      <div className="grid max-h-40 gap-2 overflow-y-auto" role="listbox" aria-label="模特">
+        <p className="text-xs text-[#cbd5e1]">模特</p>
+        {switchItems.map((model) => {
+          const selected = model.id === activeModelId
+          return (
+            <div key={model.id} className={`flex items-center gap-2 rounded-xl px-2 py-1.5 ${selected ? "bg-white/15 ring-1 ring-white/30" : "bg-white/5"}`}>
+              <img src={model.thumbSrc} alt="" className={`h-10 w-8 shrink-0 rounded-md bg-white ${model.builtin ? "object-cover object-top" : "object-contain"}`} />
+              {editingId === model.id ? (
+                <Input
+                  value={draftLabel}
+                  aria-label={`模特名称 ${model.label}`}
+                  className="h-8 border-white/20 bg-white/10 text-white"
+                  onChange={(event) => setDraftLabel(event.target.value)}
+                  onBlur={() => {
+                    onRenameModel(model.id, draftLabel)
+                    setEditingId(null)
                   }}
-                >
-                  {pendingDelete === model.id ? "确认" : "删除"}
+                  onKeyDown={(event) => {
+                    if (event.key === "Enter") (event.target as HTMLInputElement).blur()
+                  }}
+                />
+              ) : (
+                <button type="button" role="option" aria-selected={selected} className="min-w-0 flex-1 truncate text-left text-sm text-white" onClick={() => onSelectModel(model.id)}>
+                  {model.label}
                 </button>
-              </div>
-            )
-          })}
-        </div>
-      ) : null}
+              )}
+              {model.builtin ? <span className="shrink-0 text-[11px] text-[#cbd5e1]">内置</span> : (
+                <>
+                  <button type="button" className="shrink-0 text-[11px] text-[#cbd5e1]" onClick={() => { setEditingId(model.id); setDraftLabel(model.label) }}>改名</button>
+                  <button
+                    type="button"
+                    className="shrink-0 text-[11px] text-[#cbd5e1]"
+                    onClick={() => {
+                      if (pendingDelete === model.id) {
+                        setPendingDelete(null)
+                        onDeleteModel(model.id)
+                        return
+                      }
+                      setPendingDelete(model.id)
+                    }}
+                  >
+                    {pendingDelete === model.id ? "确认" : "删除"}
+                  </button>
+                </>
+              )}
+            </div>
+          )
+        })}
+      </div>
       <img src={portrait} alt={custom ? (images[0]?.role === "sheet" ? "多视角设定图" : "导入的模特头像") : "大肥鱼的正面全身像，蓝发、鲸耳、蓝白女仆装"} className={`hidden w-full rounded-xl @min-[1024px]/studio:block ${images[0]?.role === "sheet" ? "max-h-56 bg-white object-contain" : "aspect-[3/4] object-cover object-top"}`} />
       <p className="hidden text-sm leading-6 text-[#cbd5e1] @min-[1024px]/studio:block">
         {custom
@@ -241,12 +246,6 @@ export function CharacterDock({
           }}
         >
           {sheetBusy ? "正在生成" : "生成多视角 sheet"}
-        </Button>
-      ) : null}
-      {custom ? (
-        <Button variant="ghost" className="text-[#e2e8f0] hover:bg-white/10 hover:text-white" onClick={onUseDefault}>
-          <RotateCcw />
-          恢复默认模特大肥鱼
         </Button>
       ) : null}
       {sheetError ? <p className="text-sm text-[#fecaca]">{sheetError}</p> : null}

@@ -10,8 +10,11 @@ export type SavedModel = {
   label: string
   createdAt: number
   updatedAt: number
+  lastUsedAt?: number
   images: ModelImage[]
 }
+
+export const DEFAULT_MODEL_ID: string
 
 export function createModelId(random?: () => string): string
 export function photosOnly(images: ModelImage[]): ModelImage[]
@@ -37,3 +40,15 @@ export function deleteFromLibrary(models: SavedModel[], id: string, activeId: st
   activeId: string | null
   cleared: boolean
 }
+export function markModelUsed(models: SavedModel[], id: string, now?: number): SavedModel[]
+export function switcherEntries(input?: {
+  models?: SavedModel[]
+  builtinUsed?: Record<string, number>
+}): Array<{
+  id: string
+  label: string
+  builtin: boolean
+  lastUsedAt: number
+  portrait: string
+  sheet: string
+}>

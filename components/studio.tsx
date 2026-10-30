@@ -35,12 +35,13 @@ import {
   type CustomAsset,
   type HistoryEntry,
 } from "@/lib/library"
-import { deleteSavedModel, listSavedModels, putSavedModel, readActiveModelId, writeActiveModelId, type SavedModel } from "@/lib/models"
+import { deleteSavedModel, listSavedModels, putSavedModel, readActiveModelId, readBuiltinUsed, writeActiveModelId, writeBuiltinUsed, type SavedModel } from "@/lib/models"
 import { baseURLFor, DEFAULT_SETTINGS, loadSettings, modelFor, saveSettings, type StudioSettings } from "@/lib/settings"
 import { StudioEnvProvider, studioUrl, useStudioEnv, type StudioPortal } from "@/lib/studio-env"
 import { createCustomId, isCustomCostumeId, reuseFromHistory } from "@/shared/custom.mjs"
 import { messageForStatus } from "@/shared/http-status.mjs"
-import { activateModel, adoptCurrent, deleteFromLibrary, identityImage, renameModel, syncLibrary, withGeneratedSheet } from "@/shared/models.mjs"
+import { isBuiltinModelId } from "@/shared/builtin-models.mjs"
+import { DEFAULT_MODEL_ID, activateModel, adoptCurrent, deleteFromLibrary, identityImage, markModelUsed, renameModel, switcherEntries, syncLibrary, withGeneratedSheet } from "@/shared/models.mjs"
 import type { Catalog, Pose, PoseView, PromptCard } from "@/lib/types"
 
 type Selection = Record<string, string>
@@ -80,7 +81,8 @@ function StudioFrame({ embedded }: { embedded: boolean }) {
   const [adultAsk, setAdultAsk] = useState<string | null>(null)
   const [characters, setCharacters] = useState<StoredCharacter[]>([])
   const [models, setModels] = useState<SavedModel[]>([])
-  const [activeModelId, setActiveModelId] = useState<string | null>(null)
+  const [activeModelId, setActiveModelId] = useState(DEFAULT_MODEL_ID)
+  const [builtinUsed, setBuiltinUsed] = useState<Record<string, number>>({})
   const [sheetBusy, setSheetBusy] = useState(false)
   const [sheetError, setSheetError] = useState("")
   const [selected, setSelected] = useState<Selection>({})
@@ -160,13 +162,19 @@ function StudioFrame({ embedded }: { embedded: boolean }) {
     Promise.all([readStoredCharacters(), listSavedModels(), readActiveModelId()])
       .then(([images, saved, activeId]) => {
         if (modelLoadGen.current !== gen) return
-        const adopted = adoptCurrent(saved, images, activeId, Date.now())
-        setCharacters(images)
+        const adopted = adoptCurrent(saved, images, activeId || DEFAULT_MODEL_ID, Date.now())
+        const active = adopted.activeId || DEFAULT_MODEL_ID
+        const builtin = isBuiltinModelId(active)
         setModels(adopted.models)
-        setActiveModelId(adopted.activeId)
+        setActiveModelId(active)
+        setCharacters(builtin ? [] : (adopted.models.find((model) => model.id === active)?.images as StoredCharacter[] | undefined) ?? images)
+        setBuiltinUsed(readBuiltinUsed())
+        if (builtin && images.length) void writeStoredCharacters([])
         if (adopted.adopted && adopted.entry) {
           void putSavedModel(adopted.entry as SavedModel)
           void writeActiveModelId(adopted.activeId)
+        } else if (!activeId) {
+          void writeActiveModelId(DEFAULT_MODEL_ID)
         }
       })
       .catch(() => {})
@@ -209,9 +217,10 @@ function StudioFrame({ embedded }: { embedded: boolean }) {
     const synced = syncLibrary(baseModels, baseActive, nextImages, Date.now())
     setCharacters(nextImages)
     setModels(synced.models)
-    setActiveModelId(synced.activeId)
+    setActiveModelId(synced.activeId || DEFAULT_MODEL_ID)
+    if (synced.activeId && isBuiltinModelId(synced.activeId)) rememberBuiltin(synced.activeId)
     void writeStoredCharacters(nextImages)
-    void writeActiveModelId(synced.activeId)
+    void writeActiveModelId(synced.activeId || DEFAULT_MODEL_ID)
     if (synced.removedId) void deleteSavedModel(synced.removedId)
     else if (synced.entry) void putSavedModel(synced.entry as SavedModel)
   }
@@ -221,23 +230,33 @@ function StudioFrame({ embedded }: { embedded: boolean }) {
     commitLibrary(next, models, activeModelId)
   }
 
-  function useDefaultModel() {
-    modelLoadGen.current += 1
-    setCharacters([])
-    setActiveModelId(null)
-    setSheetError("")
-    void writeStoredCharacters([])
-    void writeActiveModelId(null)
+  function rememberBuiltin(id: string) {
+    const next = { ...builtinUsed, [id]: Date.now() }
+    setBuiltinUsed(next)
+    writeBuiltinUsed(next)
   }
 
   function selectSavedModel(id: string) {
+    modelLoadGen.current += 1
+    setSheetError("")
+    if (isBuiltinModelId(id)) {
+      setCharacters([])
+      setActiveModelId(id)
+      rememberBuiltin(id)
+      void writeStoredCharacters([])
+      void writeActiveModelId(id)
+      return
+    }
     try {
       const model = activateModel(models, id)
-      modelLoadGen.current += 1
-      setCharacters(model.images)
+      const now = Date.now()
+      const nextModels = markModelUsed(models, id, now)
+      setModels(nextModels)
+      setCharacters(model.images as StoredCharacter[])
       setActiveModelId(model.id)
-      setSheetError("")
-      void writeStoredCharacters(model.images)
+      const entry = nextModels.find((item) => item.id === id)
+      if (entry) void putSavedModel(entry)
+      void writeStoredCharacters(model.images as StoredCharacter[])
       void writeActiveModelId(model.id)
     } catch (error) {
       setSheetError(error instanceof Error ? error.message : "找不到这个模特")
@@ -262,9 +281,10 @@ function StudioFrame({ embedded }: { embedded: boolean }) {
     void deleteSavedModel(id)
     if (result.cleared) {
       setCharacters([])
-      setActiveModelId(null)
+      setActiveModelId(result.activeId || DEFAULT_MODEL_ID)
+      rememberBuiltin(result.activeId || DEFAULT_MODEL_ID)
       void writeStoredCharacters([])
-      void writeActiveModelId(null)
+      void writeActiveModelId(result.activeId || DEFAULT_MODEL_ID)
     }
   }
 
@@ -691,11 +711,21 @@ function StudioFrame({ embedded }: { embedded: boolean }) {
         <CharacterDock
           images={characters}
           onChange={updateCharacters}
-          onUseDefault={useDefaultModel}
           keepOutfit={settings.keepOutfit}
           onKeepOutfit={(keepOutfit) => updateSettings({ ...settings, keepOutfit })}
           outfitLocked={Boolean(costume)}
-          models={models}
+          switchItems={switcherEntries({ models, builtinUsed }).map((item) => {
+            const saved = models.find((model) => model.id === item.id)
+            const thumb = saved?.images[0]
+            return {
+              id: item.id,
+              label: item.label,
+              builtin: item.builtin,
+              thumbSrc: thumb
+                ? `data:${thumb.mediaType};base64,${thumb.dataBase64}`
+                : studioUrl(basePath, item.portrait || "/muse/dafeiyu-portrait.jpg"),
+            }
+          })}
           activeModelId={activeModelId}
           activeLabel={models.find((model) => model.id === activeModelId)?.label ?? ""}
           onSelectModel={selectSavedModel}

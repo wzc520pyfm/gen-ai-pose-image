@@ -8,9 +8,11 @@ import {
   identityImage,
   renameModel,
   syncLibrary,
+  switcherEntries,
   withGeneratedSheet,
   withUploadedSheet,
 } from "./models.mjs"
+import { isBuiltinModelId } from "./builtin-models.mjs"
 
 function pngBuffer() {
   const bytes = Buffer.alloc(64, 0)
@@ -108,7 +110,7 @@ test("library save, switch, rename, and delete keep the selected model", () => {
   assert.equal(renamed.find((model) => model.id === "model-aaa").label, "小蓝")
   const removed = deleteFromLibrary(renamed, "model-aaa", "model-aaa")
   assert.equal(removed.cleared, true)
-  assert.equal(removed.activeId, null)
+  assert.equal(removed.activeId, "dafeiyu")
   assert.equal(removed.models.length, 1)
   const wiped = syncLibrary(updated.models, updated.activeId, [], 40)
   assert.equal(wiped.models.length, 0)
@@ -119,4 +121,30 @@ test("library save, switch, rename, and delete keep the selected model", () => {
   const kept = adoptCurrent(adopted.models, [photo], adopted.activeId, 60)
   assert.equal(kept.adopted, false)
   assert.equal(kept.models.length, 1)
+})
+
+test("the switcher always lists 大肥鱼 with customs, newest first, and builtins stay out of the library", () => {
+  assert.equal(isBuiltinModelId("dafeiyu"), true)
+  const empty = switcherEntries({ models: [] })
+  assert.equal(empty.length, 1)
+  assert.equal(empty[0].id, "dafeiyu")
+  assert.equal(empty[0].builtin, true)
+  const created = syncLibrary([], "dafeiyu", [photo], 10, () => "new")
+  assert.equal(created.activeId, "model-new")
+  assert.equal(created.models.some((model) => model.id === "dafeiyu"), false)
+  const entries = switcherEntries({
+    models: created.models,
+    builtinUsed: { dafeiyu: 50 },
+  })
+  assert.deepEqual(entries.map((item) => item.id), ["dafeiyu", "model-new"])
+  const recentCustom = switcherEntries({
+    models: [{ ...created.models[0], lastUsedAt: 80 }],
+    builtinUsed: { dafeiyu: 50 },
+  })
+  assert.deepEqual(recentCustom.map((item) => item.id), ["model-new", "dafeiyu"])
+  assert.throws(() => renameModel([], "dafeiyu", "别的名字"), /不能改名/)
+  assert.throws(() => deleteFromLibrary([], "dafeiyu", "dafeiyu"), /不能删除/)
+  const stayed = adoptCurrent([], [photo], "dafeiyu", 90)
+  assert.equal(stayed.adopted, false)
+  assert.equal(stayed.models.length, 0)
 })

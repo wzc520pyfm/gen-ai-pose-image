@@ -455,20 +455,8 @@ var __iconData3 = {
 __iconData3.node;
 var LoaderCircle = createLucideIcon(__iconData3);
 
-// node_modules/lucide-react/dist/esm/icons/rotate-ccw.mjs
-var __iconData4 = {
-  name: "rotate-ccw",
-  size: 24,
-  node: [
-    ["path", { d: "M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8", key: "1357e3" }],
-    ["path", { d: "M3 3v5h5", key: "1xhq8a" }]
-  ]
-};
-__iconData4.node;
-var RotateCcw = createLucideIcon(__iconData4);
-
 // node_modules/lucide-react/dist/esm/icons/search.mjs
-var __iconData5 = {
+var __iconData4 = {
   name: "search",
   size: 24,
   node: [
@@ -476,11 +464,11 @@ var __iconData5 = {
     ["circle", { cx: "11", cy: "11", r: "8", key: "4ej97u" }]
   ]
 };
-__iconData5.node;
-var Search = createLucideIcon(__iconData5);
+__iconData4.node;
+var Search = createLucideIcon(__iconData4);
 
 // node_modules/lucide-react/dist/esm/icons/settings.mjs
-var __iconData6 = {
+var __iconData5 = {
   name: "settings",
   size: 24,
   node: [
@@ -494,11 +482,11 @@ var __iconData6 = {
     ["circle", { cx: "12", cy: "12", r: "3", key: "1v7zrd" }]
   ]
 };
-__iconData6.node;
-var Settings = createLucideIcon(__iconData6);
+__iconData5.node;
+var Settings = createLucideIcon(__iconData5);
 
 // node_modules/lucide-react/dist/esm/icons/sparkles.mjs
-var __iconData7 = {
+var __iconData6 = {
   name: "sparkles",
   size: 24,
   node: [
@@ -515,11 +503,11 @@ var __iconData7 = {
   ],
   aliases: ["stars"]
 };
-__iconData7.node;
-var Sparkles = createLucideIcon(__iconData7);
+__iconData6.node;
+var Sparkles = createLucideIcon(__iconData6);
 
 // node_modules/lucide-react/dist/esm/icons/x.mjs
-var __iconData8 = {
+var __iconData7 = {
   name: "x",
   size: 24,
   node: [
@@ -527,8 +515,8 @@ var __iconData8 = {
     ["path", { d: "m6 6 12 12", key: "d8bk6v" }]
   ]
 };
-__iconData8.node;
-var X = createLucideIcon(__iconData8);
+__iconData7.node;
+var X = createLucideIcon(__iconData7);
 
 // components/character-dock.tsx
 var import_react6 = require("react");
@@ -5471,88 +5459,6 @@ async function fileToCharacter(file) {
   };
 }
 
-// shared/models.mjs
-function createModelId(random = () => globalThis.crypto.randomUUID()) {
-  return `model-${random()}`;
-}
-function photosOnly(images) {
-  return (Array.isArray(images) ? images : []).filter((image) => image && image.dataBase64 && image.role !== "sheet");
-}
-function identityImage(images) {
-  return photosOnly(images)[0] || (Array.isArray(images) ? images.find((image) => image?.dataBase64) : null) || null;
-}
-function withGeneratedSheet(images, sheet) {
-  if (!sheet?.dataBase64) throw new Error("多视角 sheet 是空的");
-  const photos = photosOnly(images).map((image) => ({ ...image, role: "photo" }));
-  return [{ ...sheet, role: "sheet" }, ...photos];
-}
-function withUploadedSheet(images, sheet) {
-  return withGeneratedSheet(images, sheet);
-}
-function syncLibrary(models, activeId, images, now = Date.now(), random = () => globalThis.crypto.randomUUID()) {
-  const list = Array.isArray(models) ? models.slice() : [];
-  if (!images?.length) {
-    if (!activeId) return { models: list, activeId: null, removedId: null, entry: null };
-    return {
-      models: list.filter((model) => model.id !== activeId),
-      activeId: null,
-      removedId: activeId,
-      entry: null
-    };
-  }
-  const index = list.findIndex((model) => model.id === activeId);
-  if (index >= 0) {
-    const entry2 = { ...list[index], images, updatedAt: now };
-    const next = list.slice();
-    next[index] = entry2;
-    return { models: next, activeId, removedId: null, entry: entry2 };
-  }
-  const entry = {
-    id: createModelId(random),
-    label: `模特 ${list.length + 1}`,
-    createdAt: now,
-    updatedAt: now,
-    images
-  };
-  return { models: [entry, ...list], activeId: entry.id, removedId: null, entry };
-}
-function adoptCurrent(models, images, activeId, now = Date.now(), random = () => globalThis.crypto.randomUUID()) {
-  const list = Array.isArray(models) ? models.slice() : [];
-  const known = activeId && list.some((model) => model.id === activeId) ? activeId : null;
-  if (!images?.length) return { models: list, activeId: known, adopted: false, entry: null };
-  if (known) return { models: list, activeId: known, adopted: false, entry: null };
-  const entry = {
-    id: createModelId(random),
-    label: `模特 ${list.length + 1}`,
-    createdAt: now,
-    updatedAt: now,
-    images
-  };
-  return { models: [entry, ...list], activeId: entry.id, adopted: true, entry };
-}
-function activateModel(models, id) {
-  const found = (Array.isArray(models) ? models : []).find((model) => model.id === id);
-  if (!found) throw new Error("找不到这个模特");
-  return found;
-}
-function renameModel(models, id, label) {
-  const text = String(label || "").trim().slice(0, 40);
-  if (!text) throw new Error("模特名称不能为空");
-  const list = Array.isArray(models) ? models.slice() : [];
-  const index = list.findIndex((model) => model.id === id);
-  if (index < 0) throw new Error("找不到这个模特");
-  list[index] = { ...list[index], label: text };
-  return list;
-}
-function deleteFromLibrary(models, id, activeId) {
-  const list = (Array.isArray(models) ? models : []).filter((model) => model.id !== id);
-  return {
-    models: list,
-    activeId: activeId === id ? null : activeId,
-    cleared: activeId === id
-  };
-}
-
 // lib/studio-env.tsx
 var import_react5 = require("react");
 var import_jsx_runtime11 = require("react/jsx-runtime");
@@ -5576,16 +5482,149 @@ function studioUrl(basePath, path) {
   return `${base}${path}`;
 }
 
+// shared/builtin-models.mjs
+var BUILTIN_MODELS = Object.freeze([
+  Object.freeze({
+    id: "dafeiyu",
+    name: "大肥鱼",
+    portrait: "/muse/dafeiyu-portrait.jpg",
+    sheet: "/muse/dafeiyu-sheet.png"
+  })
+]);
+function isBuiltinModelId(id) {
+  return BUILTIN_MODELS.some((model) => model.id === id);
+}
+
+// shared/models.mjs
+var DEFAULT_MODEL_ID = "dafeiyu";
+function createModelId(random = () => globalThis.crypto.randomUUID()) {
+  return `model-${random()}`;
+}
+function photosOnly(images) {
+  return (Array.isArray(images) ? images : []).filter((image) => image && image.dataBase64 && image.role !== "sheet");
+}
+function identityImage(images) {
+  return photosOnly(images)[0] || (Array.isArray(images) ? images.find((image) => image?.dataBase64) : null) || null;
+}
+function withGeneratedSheet(images, sheet) {
+  if (!sheet?.dataBase64) throw new Error("多视角 sheet 是空的");
+  const photos = photosOnly(images).map((image) => ({ ...image, role: "photo" }));
+  return [{ ...sheet, role: "sheet" }, ...photos];
+}
+function withUploadedSheet(images, sheet) {
+  return withGeneratedSheet(images, sheet);
+}
+function syncLibrary(models, activeId, images, now = Date.now(), random = () => globalThis.crypto.randomUUID()) {
+  const list = Array.isArray(models) ? models.slice() : [];
+  if (!images?.length) {
+    if (!activeId || isBuiltinModelId(activeId)) {
+      return { models: list, activeId: isBuiltinModelId(activeId) ? activeId : DEFAULT_MODEL_ID, removedId: null, entry: null };
+    }
+    return {
+      models: list.filter((model) => model.id !== activeId),
+      activeId: DEFAULT_MODEL_ID,
+      removedId: activeId,
+      entry: null
+    };
+  }
+  const index = list.findIndex((model) => model.id === activeId);
+  if (index >= 0) {
+    const entry2 = { ...list[index], images, updatedAt: now, lastUsedAt: now };
+    const next = list.slice();
+    next[index] = entry2;
+    return { models: next, activeId, removedId: null, entry: entry2 };
+  }
+  const entry = {
+    id: createModelId(random),
+    label: `模特 ${list.length + 1}`,
+    createdAt: now,
+    updatedAt: now,
+    lastUsedAt: now,
+    images
+  };
+  return { models: [entry, ...list], activeId: entry.id, removedId: null, entry };
+}
+function adoptCurrent(models, images, activeId, now = Date.now(), random = () => globalThis.crypto.randomUUID()) {
+  const list = Array.isArray(models) ? models.slice() : [];
+  if (isBuiltinModelId(activeId)) return { models: list, activeId, adopted: false, entry: null };
+  const known = activeId && list.some((model) => model.id === activeId) ? activeId : null;
+  if (!images?.length) return { models: list, activeId: known || DEFAULT_MODEL_ID, adopted: false, entry: null };
+  if (known) return { models: list, activeId: known, adopted: false, entry: null };
+  const entry = {
+    id: createModelId(random),
+    label: `模特 ${list.length + 1}`,
+    createdAt: now,
+    updatedAt: now,
+    lastUsedAt: now,
+    images
+  };
+  return { models: [entry, ...list], activeId: entry.id, adopted: true, entry };
+}
+function activateModel(models, id) {
+  const found = (Array.isArray(models) ? models : []).find((model) => model.id === id);
+  if (!found) throw new Error("找不到这个模特");
+  return found;
+}
+function renameModel(models, id, label) {
+  if (isBuiltinModelId(id)) throw new Error("内置模特不能改名");
+  const text = String(label || "").trim().slice(0, 40);
+  if (!text) throw new Error("模特名称不能为空");
+  const list = Array.isArray(models) ? models.slice() : [];
+  const index = list.findIndex((model) => model.id === id);
+  if (index < 0) throw new Error("找不到这个模特");
+  list[index] = { ...list[index], label: text };
+  return list;
+}
+function deleteFromLibrary(models, id, activeId) {
+  if (isBuiltinModelId(id)) throw new Error("内置模特不能删除");
+  const list = (Array.isArray(models) ? models : []).filter((model) => model.id !== id);
+  return {
+    models: list,
+    activeId: activeId === id ? DEFAULT_MODEL_ID : activeId,
+    cleared: activeId === id
+  };
+}
+function markModelUsed(models, id, now = Date.now()) {
+  if (isBuiltinModelId(id)) return models;
+  const list = Array.isArray(models) ? models.slice() : [];
+  const index = list.findIndex((model) => model.id === id);
+  if (index < 0) throw new Error("找不到这个模特");
+  list[index] = { ...list[index], lastUsedAt: now };
+  return list;
+}
+function switcherEntries({ models = [], builtinUsed = {} } = {}) {
+  const builtins = BUILTIN_MODELS.map((model) => ({
+    id: model.id,
+    label: model.name,
+    builtin: true,
+    lastUsedAt: Number(builtinUsed[model.id]) || 0,
+    portrait: model.portrait,
+    sheet: model.sheet
+  }));
+  const custom = (Array.isArray(models) ? models : []).map((model) => ({
+    id: model.id,
+    label: model.label,
+    builtin: false,
+    lastUsedAt: Number(model.lastUsedAt || model.updatedAt || model.createdAt) || 0,
+    portrait: "",
+    sheet: ""
+  }));
+  return [...builtins, ...custom].sort((a, b) => {
+    if (b.lastUsedAt !== a.lastUsedAt) return b.lastUsedAt - a.lastUsedAt;
+    if (a.builtin !== b.builtin) return a.builtin ? -1 : 1;
+    return a.label.localeCompare(b.label, "zh");
+  });
+}
+
 // components/character-dock.tsx
 var import_jsx_runtime12 = require("react/jsx-runtime");
 function CharacterDock({
   images,
   onChange,
-  onUseDefault,
   keepOutfit,
   onKeepOutfit,
   outfitLocked = false,
-  models,
+  switchItems,
   activeModelId,
   activeLabel,
   onSelectModel,
@@ -5667,13 +5706,12 @@ function CharacterDock({
         }
       )
     ] }),
-    models.length > 0 ? /* @__PURE__ */ (0, import_jsx_runtime12.jsxs)("div", { className: "grid max-h-36 gap-2 overflow-y-auto", children: [
-      /* @__PURE__ */ (0, import_jsx_runtime12.jsx)("p", { className: "text-xs text-[#cbd5e1]", children: "已存模特" }),
-      models.map((model) => {
-        const thumb = model.images[0];
+    /* @__PURE__ */ (0, import_jsx_runtime12.jsxs)("div", { className: "grid max-h-40 gap-2 overflow-y-auto", role: "listbox", "aria-label": "模特", children: [
+      /* @__PURE__ */ (0, import_jsx_runtime12.jsx)("p", { className: "text-xs text-[#cbd5e1]", children: "模特" }),
+      switchItems.map((model) => {
         const selected = model.id === activeModelId;
         return /* @__PURE__ */ (0, import_jsx_runtime12.jsxs)("div", { className: `flex items-center gap-2 rounded-xl px-2 py-1.5 ${selected ? "bg-white/15 ring-1 ring-white/30" : "bg-white/5"}`, children: [
-          thumb ? /* @__PURE__ */ (0, import_jsx_runtime12.jsx)("img", { src: `data:${thumb.mediaType};base64,${thumb.dataBase64}`, alt: "", className: `h-10 w-8 shrink-0 rounded-md ${thumb.role === "sheet" ? "bg-white object-contain" : "object-cover"}` }) : null,
+          /* @__PURE__ */ (0, import_jsx_runtime12.jsx)("img", { src: model.thumbSrc, alt: "", className: `h-10 w-8 shrink-0 rounded-md bg-white ${model.builtin ? "object-cover object-top" : "object-contain"}` }),
           editingId === model.id ? /* @__PURE__ */ (0, import_jsx_runtime12.jsx)(
             Input3,
             {
@@ -5689,30 +5727,32 @@ function CharacterDock({
                 if (event.key === "Enter") event.target.blur();
               }
             }
-          ) : /* @__PURE__ */ (0, import_jsx_runtime12.jsx)("button", { type: "button", className: "min-w-0 flex-1 truncate text-left text-sm text-white", "aria-pressed": selected, onClick: () => onSelectModel(model.id), children: model.label }),
-          /* @__PURE__ */ (0, import_jsx_runtime12.jsx)("button", { type: "button", className: "shrink-0 text-[11px] text-[#cbd5e1]", onClick: () => {
-            setEditingId(model.id);
-            setDraftLabel(model.label);
-          }, children: "改名" }),
-          /* @__PURE__ */ (0, import_jsx_runtime12.jsx)(
-            "button",
-            {
-              type: "button",
-              className: "shrink-0 text-[11px] text-[#cbd5e1]",
-              onClick: () => {
-                if (pendingDelete === model.id) {
-                  setPendingDelete(null);
-                  onDeleteModel(model.id);
-                  return;
-                }
-                setPendingDelete(model.id);
-              },
-              children: pendingDelete === model.id ? "确认" : "删除"
-            }
-          )
+          ) : /* @__PURE__ */ (0, import_jsx_runtime12.jsx)("button", { type: "button", role: "option", "aria-selected": selected, className: "min-w-0 flex-1 truncate text-left text-sm text-white", onClick: () => onSelectModel(model.id), children: model.label }),
+          model.builtin ? /* @__PURE__ */ (0, import_jsx_runtime12.jsx)("span", { className: "shrink-0 text-[11px] text-[#cbd5e1]", children: "内置" }) : /* @__PURE__ */ (0, import_jsx_runtime12.jsxs)(import_jsx_runtime12.Fragment, { children: [
+            /* @__PURE__ */ (0, import_jsx_runtime12.jsx)("button", { type: "button", className: "shrink-0 text-[11px] text-[#cbd5e1]", onClick: () => {
+              setEditingId(model.id);
+              setDraftLabel(model.label);
+            }, children: "改名" }),
+            /* @__PURE__ */ (0, import_jsx_runtime12.jsx)(
+              "button",
+              {
+                type: "button",
+                className: "shrink-0 text-[11px] text-[#cbd5e1]",
+                onClick: () => {
+                  if (pendingDelete === model.id) {
+                    setPendingDelete(null);
+                    onDeleteModel(model.id);
+                    return;
+                  }
+                  setPendingDelete(model.id);
+                },
+                children: pendingDelete === model.id ? "确认" : "删除"
+              }
+            )
+          ] })
         ] }, model.id);
       })
-    ] }) : null,
+    ] }),
     /* @__PURE__ */ (0, import_jsx_runtime12.jsx)("img", { src: portrait, alt: custom ? images[0]?.role === "sheet" ? "多视角设定图" : "导入的模特头像" : "大肥鱼的正面全身像，蓝发、鲸耳、蓝白女仆装", className: `hidden w-full rounded-xl @min-[1024px]/studio:block ${images[0]?.role === "sheet" ? "max-h-56 bg-white object-contain" : "aspect-[3/4] object-cover object-top"}` }),
     /* @__PURE__ */ (0, import_jsx_runtime12.jsx)("p", { className: "hidden text-sm leading-6 text-[#cbd5e1] @min-[1024px]/studio:block", children: custom ? "参考图会和姿势线稿一起交给模型。请使用成年人物的图片。" : "长波浪蓝发、鲸耳和蓝鲸尾。三视图锁住脸和鲸尾，衣服可以换成衣装集里的一套。" }),
     !custom ? /* @__PURE__ */ (0, import_jsx_runtime12.jsx)("img", { src: full, alt: "大肥鱼的成年三视图：正面、侧面、背面，以及头饰和裙摆细节", className: "hidden max-h-56 rounded-xl bg-white object-contain @min-[1024px]/studio:block" }) : /* @__PURE__ */ (0, import_jsx_runtime12.jsx)("div", { className: "grid grid-cols-3 gap-2", children: images.map((image) => /* @__PURE__ */ (0, import_jsx_runtime12.jsxs)("div", { className: "relative", children: [
@@ -5791,10 +5831,6 @@ function CharacterDock({
         children: sheetBusy ? "正在生成" : "生成多视角 sheet"
       }
     ) : null,
-    custom ? /* @__PURE__ */ (0, import_jsx_runtime12.jsxs)(Button3, { variant: "ghost", className: "text-[#e2e8f0] hover:bg-white/10 hover:text-white", onClick: onUseDefault, children: [
-      /* @__PURE__ */ (0, import_jsx_runtime12.jsx)(RotateCcw, {}),
-      "恢复默认模特大肥鱼"
-    ] }) : null,
     sheetError ? /* @__PURE__ */ (0, import_jsx_runtime12.jsx)("p", { className: "text-sm text-[#fecaca]", children: sheetError }) : null,
     error ? /* @__PURE__ */ (0, import_jsx_runtime12.jsx)("p", { className: "text-sm text-[#fecaca]", children: error }) : null,
     /* @__PURE__ */ (0, import_jsx_runtime12.jsxs)("label", { className: "mt-auto flex items-center justify-between gap-3 rounded-xl bg-white/10 px-3 py-2.5 text-sm @min-[1024px]/studio:py-3", children: [
@@ -11398,6 +11434,23 @@ async function readActiveModelId() {
   });
   return typeof value === "string" && value ? value : null;
 }
+var BUILTIN_USED_KEY = "lanpose-builtin-used-v1";
+function readBuiltinUsed() {
+  if (typeof window === "undefined") return {};
+  try {
+    const parsed = JSON.parse(window.localStorage.getItem(BUILTIN_USED_KEY) || "{}");
+    const next = {};
+    for (const [key, value] of Object.entries(parsed)) {
+      if (typeof value === "number" && Number.isFinite(value)) next[key] = value;
+    }
+    return next;
+  } catch {
+    return {};
+  }
+}
+function writeBuiltinUsed(value) {
+  window.localStorage.setItem(BUILTIN_USED_KEY, JSON.stringify(value));
+}
 async function writeActiveModelId(id) {
   await withDb("characters", "readwrite", async (store, done) => {
     if (id) store.put(id, "activeModelId");
@@ -11431,7 +11484,8 @@ function StudioFrame({ embedded }) {
   const [adultAsk, setAdultAsk] = (0, import_react11.useState)(null);
   const [characters, setCharacters] = (0, import_react11.useState)([]);
   const [models, setModels] = (0, import_react11.useState)([]);
-  const [activeModelId, setActiveModelId] = (0, import_react11.useState)(null);
+  const [activeModelId, setActiveModelId] = (0, import_react11.useState)(DEFAULT_MODEL_ID);
+  const [builtinUsed, setBuiltinUsed] = (0, import_react11.useState)({});
   const [sheetBusy, setSheetBusy] = (0, import_react11.useState)(false);
   const [sheetError, setSheetError] = (0, import_react11.useState)("");
   const [selected, setSelected] = (0, import_react11.useState)({});
@@ -11502,13 +11556,19 @@ function StudioFrame({ embedded }) {
     const gen = ++modelLoadGen.current;
     Promise.all([readStoredCharacters(), listSavedModels(), readActiveModelId()]).then(([images, saved, activeId]) => {
       if (modelLoadGen.current !== gen) return;
-      const adopted = adoptCurrent(saved, images, activeId, Date.now());
-      setCharacters(images);
+      const adopted = adoptCurrent(saved, images, activeId || DEFAULT_MODEL_ID, Date.now());
+      const active = adopted.activeId || DEFAULT_MODEL_ID;
+      const builtin = isBuiltinModelId(active);
       setModels(adopted.models);
-      setActiveModelId(adopted.activeId);
+      setActiveModelId(active);
+      setCharacters(builtin ? [] : adopted.models.find((model) => model.id === active)?.images ?? images);
+      setBuiltinUsed(readBuiltinUsed());
+      if (builtin && images.length) void writeStoredCharacters([]);
       if (adopted.adopted && adopted.entry) {
         void putSavedModel(adopted.entry);
         void writeActiveModelId(adopted.activeId);
+      } else if (!activeId) {
+        void writeActiveModelId(DEFAULT_MODEL_ID);
       }
     }).catch(() => {
     });
@@ -11545,9 +11605,10 @@ function StudioFrame({ embedded }) {
     const synced = syncLibrary(baseModels, baseActive, nextImages, Date.now());
     setCharacters(nextImages);
     setModels(synced.models);
-    setActiveModelId(synced.activeId);
+    setActiveModelId(synced.activeId || DEFAULT_MODEL_ID);
+    if (synced.activeId && isBuiltinModelId(synced.activeId)) rememberBuiltin(synced.activeId);
     void writeStoredCharacters(nextImages);
-    void writeActiveModelId(synced.activeId);
+    void writeActiveModelId(synced.activeId || DEFAULT_MODEL_ID);
     if (synced.removedId) void deleteSavedModel(synced.removedId);
     else if (synced.entry) void putSavedModel(synced.entry);
   }
@@ -11555,21 +11616,31 @@ function StudioFrame({ embedded }) {
     setSheetError("");
     commitLibrary(next, models, activeModelId);
   }
-  function useDefaultModel() {
-    modelLoadGen.current += 1;
-    setCharacters([]);
-    setActiveModelId(null);
-    setSheetError("");
-    void writeStoredCharacters([]);
-    void writeActiveModelId(null);
+  function rememberBuiltin(id) {
+    const next = { ...builtinUsed, [id]: Date.now() };
+    setBuiltinUsed(next);
+    writeBuiltinUsed(next);
   }
   function selectSavedModel(id) {
+    modelLoadGen.current += 1;
+    setSheetError("");
+    if (isBuiltinModelId(id)) {
+      setCharacters([]);
+      setActiveModelId(id);
+      rememberBuiltin(id);
+      void writeStoredCharacters([]);
+      void writeActiveModelId(id);
+      return;
+    }
     try {
       const model = activateModel(models, id);
-      modelLoadGen.current += 1;
+      const now = Date.now();
+      const nextModels = markModelUsed(models, id, now);
+      setModels(nextModels);
       setCharacters(model.images);
       setActiveModelId(model.id);
-      setSheetError("");
+      const entry = nextModels.find((item) => item.id === id);
+      if (entry) void putSavedModel(entry);
       void writeStoredCharacters(model.images);
       void writeActiveModelId(model.id);
     } catch (error) {
@@ -11593,9 +11664,10 @@ function StudioFrame({ embedded }) {
     void deleteSavedModel(id);
     if (result.cleared) {
       setCharacters([]);
-      setActiveModelId(null);
+      setActiveModelId(result.activeId || DEFAULT_MODEL_ID);
+      rememberBuiltin(result.activeId || DEFAULT_MODEL_ID);
       void writeStoredCharacters([]);
-      void writeActiveModelId(null);
+      void writeActiveModelId(result.activeId || DEFAULT_MODEL_ID);
     }
   }
   async function generateModelSheet() {
@@ -11998,11 +12070,19 @@ function StudioFrame({ embedded }) {
         {
           images: characters,
           onChange: updateCharacters,
-          onUseDefault: useDefaultModel,
           keepOutfit: settings.keepOutfit,
           onKeepOutfit: (keepOutfit) => updateSettings({ ...settings, keepOutfit }),
           outfitLocked: Boolean(costume),
-          models,
+          switchItems: switcherEntries({ models, builtinUsed }).map((item) => {
+            const saved = models.find((model) => model.id === item.id);
+            const thumb = saved?.images[0];
+            return {
+              id: item.id,
+              label: item.label,
+              builtin: item.builtin,
+              thumbSrc: thumb ? `data:${thumb.mediaType};base64,${thumb.dataBase64}` : studioUrl(basePath, item.portrait || "/muse/dafeiyu-portrait.jpg")
+            };
+          }),
           activeModelId,
           activeLabel: models.find((model) => model.id === activeModelId)?.label ?? "",
           onSelectModel: selectSavedModel,
@@ -12641,9 +12721,6 @@ function PoseStudio() {
   }
   .h-full {
     height: 100%;
-  }
-  .max-h-36 {
-    max-height: calc(var(--spacing) * 36);
   }
   .max-h-40 {
     max-height: calc(var(--spacing) * 40);
@@ -13493,14 +13570,6 @@ function PoseStudio() {
     @supports (color: color-mix(in lab, red, red)) {
       .hover\\:bg-primary\\/80:hover {
         background-color: color-mix(in oklab, var(--primary) 80%, transparent);
-      }
-    }
-    .hover\\:bg-white\\/10:hover {
-      background-color: color-mix(in srgb, #fff 10%, transparent);
-    }
-    @supports (color: color-mix(in lab, red, red)) {
-      .hover\\:bg-white\\/10:hover {
-        background-color: color-mix(in oklab, var(--color-white) 10%, transparent);
       }
     }
     .hover\\:bg-white\\/15:hover {
