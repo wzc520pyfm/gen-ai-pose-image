@@ -4,7 +4,7 @@
 
 import { useRef, useState } from "react"
 import { useElapsedSeconds, withElapsed } from "@/lib/elapsed"
-import { ChevronLeft, ChevronRight, ImagePlus } from "lucide-react"
+import { ChevronLeft, ChevronRight, ImagePlus, Loader2 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Switch } from "@/components/ui/switch"
@@ -125,7 +125,14 @@ export function CharacterDock({
   return (
     <aside className="dock order-1 flex shrink-0 flex-col gap-3 px-3 py-3 text-[#e2e8f0] @min-[1024px]/studio:order-none @min-[1024px]/studio:h-full @min-[1024px]/studio:min-h-0 @min-[1024px]/studio:shrink @min-[1024px]/studio:gap-4 @min-[1024px]/studio:overflow-y-auto @min-[1024px]/studio:px-4 @min-[1024px]/studio:py-5">
       <div className="flex items-start gap-1">
-        <img src={portrait} alt="" className="mt-1 size-14 shrink-0 rounded-xl object-cover object-top @min-[1024px]/studio:hidden" />
+        <ModelFigure
+          src={portrait}
+          alt=""
+          label="正在加载立绘"
+          frameClassName="relative mt-1 size-14 shrink-0 overflow-hidden rounded-xl @min-[1024px]/studio:hidden"
+          className="size-full object-cover object-top"
+          fill
+        />
         <button
           type="button"
           className="mt-1 grid size-7 shrink-0 place-items-center rounded-full text-white hover:bg-white/10 disabled:opacity-30"
@@ -208,7 +215,15 @@ export function CharacterDock({
           {busy ? "读图" : "导入"}
         </Button>
       </div>
-      <img src={portrait} alt={custom ? (images[0]?.role === "sheet" ? "多视角设定图" : "导入的模特头像") : `${builtin?.name || "大肥鱼"}的正面全身像`} className={`hidden w-full rounded-xl @min-[1024px]/studio:block ${images[0]?.role === "sheet" ? "max-h-56 bg-white object-contain" : "aspect-[3/4] object-cover object-top"}`} />
+      <ModelFigure
+        src={portrait}
+        alt={custom ? (images[0]?.role === "sheet" ? "多视角设定图" : "导入的模特头像") : `${builtin?.name || "大肥鱼"}的正面全身像`}
+        label="正在加载立绘"
+        frameClassName={`relative hidden w-full overflow-hidden rounded-xl @min-[1024px]/studio:block ${images[0]?.role === "sheet" ? "max-h-56 bg-white" : "aspect-[3/4]"}`}
+        className={images[0]?.role === "sheet" ? "max-h-56 w-full bg-white object-contain" : "size-full object-cover object-top"}
+        fill={images[0]?.role !== "sheet"}
+        spinnerClassName={images[0]?.role === "sheet" ? "text-slate-500" : "text-white/80"}
+      />
       <p className="hidden text-sm leading-6 text-[#cbd5e1] @min-[1024px]/studio:block">
         {custom
           ? "参考图会和姿势线稿一起交给模型。请使用成年人物的图片。"
@@ -217,7 +232,14 @@ export function CharacterDock({
             : "三视图锁住脸和服装。衣服可以换成衣装集里的一套。"}
       </p>
       {!custom ? (
-        <img src={full} alt={`${builtin?.name || "大肥鱼"}的多视角设定图`} className="hidden max-h-56 rounded-xl bg-white object-contain @min-[1024px]/studio:block" />
+        <ModelFigure
+          src={full}
+          alt={`${builtin?.name || "大肥鱼"}的多视角设定图`}
+          label="正在加载设定图"
+          frameClassName="relative hidden w-full overflow-hidden rounded-xl bg-white @min-[1024px]/studio:block"
+          className="max-h-56 w-full object-contain"
+          spinnerClassName="text-slate-500"
+        />
       ) : (
         <div className="grid grid-cols-3 gap-2">
           {images.map((image) => (
@@ -303,5 +325,54 @@ export function CharacterDock({
         <Switch checked={outfitLocked ? false : keepOutfit} onCheckedChange={onKeepOutfit} disabled={outfitLocked} aria-label="保持服装" />
       </label>
     </aside>
+  )
+}
+
+function cachedImage(src: string) {
+  if (!src || src.startsWith("data:") || typeof Image === "undefined") return true
+  const probe = new Image()
+  probe.src = src
+  return probe.complete && probe.naturalWidth > 0
+}
+
+function ModelFigure({
+  src,
+  alt,
+  label,
+  frameClassName,
+  className,
+  fill = false,
+  spinnerClassName = "text-white/80",
+}: {
+  src: string
+  alt: string
+  label: string
+  frameClassName: string
+  className: string
+  fill?: boolean
+  spinnerClassName?: string
+}) {
+  const [current, setCurrent] = useState(src)
+  const [pending, setPending] = useState(() => !cachedImage(src))
+  if (current !== src) {
+    setCurrent(src)
+    setPending(!cachedImage(src))
+  }
+  return (
+    <div className={`${frameClassName}${pending && !fill ? " min-h-40" : ""}`}>
+      {pending ? (
+        <div className="absolute inset-0 z-10 grid place-items-center" role="status" aria-live="polite">
+          <Loader2 className={`size-6 animate-spin ${spinnerClassName}`} />
+          <span className="sr-only">{label}</span>
+        </div>
+      ) : null}
+      <img
+        src={src}
+        alt={pending ? "" : alt}
+        onLoad={() => setPending(false)}
+        onError={() => setPending(false)}
+        className={`${className} ${pending ? "invisible" : ""} ${fill ? "absolute inset-0 size-full" : ""}`}
+      />
+    </div>
   )
 }
