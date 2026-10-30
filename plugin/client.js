@@ -5518,6 +5518,10 @@ var DEFAULT_MODEL_ID = "dafeiyu";
 function createModelId(random = () => globalThis.crypto.randomUUID()) {
   return `model-${random()}`;
 }
+function defaultModelLabel(existingCustomCount = 0) {
+  const saved = Math.max(0, Number(existingCustomCount) || 0);
+  return `模特 ${BUILTIN_MODELS.length + saved + 1}`;
+}
 function photosOnly(images) {
   return (Array.isArray(images) ? images : []).filter((image) => image && image.dataBase64 && image.role !== "sheet");
 }
@@ -5554,7 +5558,7 @@ function syncLibrary(models, activeId, images, now = Date.now(), random = () => 
   }
   const entry = {
     id: createModelId(random),
-    label: `模特 ${list.length + 1}`,
+    label: defaultModelLabel(list.length),
     createdAt: now,
     updatedAt: now,
     lastUsedAt: now,
@@ -5570,7 +5574,7 @@ function adoptCurrent(models, images, activeId, now = Date.now(), random = () =>
   if (known) return { models: list, activeId: known, adopted: false, entry: null };
   const entry = {
     id: createModelId(random),
-    label: `模特 ${list.length + 1}`,
+    label: defaultModelLabel(list.length),
     createdAt: now,
     updatedAt: now,
     lastUsedAt: now,

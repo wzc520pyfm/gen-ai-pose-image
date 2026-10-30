@@ -17,6 +17,7 @@ export type SavedModel = {
 export const DEFAULT_MODEL_ID: string
 
 export function createModelId(random?: () => string): string
+export function defaultModelLabel(existingCustomCount?: number): string
 export function photosOnly(images: ModelImage[]): ModelImage[]
 export function identityImage(images: ModelImage[]): ModelImage | null
 export function withGeneratedSheet(images: ModelImage[], sheet: ModelImage): ModelImage[]
