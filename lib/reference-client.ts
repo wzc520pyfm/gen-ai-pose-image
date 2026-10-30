@@ -34,7 +34,7 @@ export async function requestBeautify(basePath: string, settings: StudioSettings
         provider: settings.provider,
         apiKey: settings.apiKey,
         baseURL: settings.baseURL,
-        model: settings.model,
+        textModel: settings.textModel,
         kind: input.kind,
         userPrompt: input.userPrompt,
         adult: input.adult,

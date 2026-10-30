@@ -19,7 +19,7 @@ export async function POST(request: Request) {
     provider,
     apiKey: typeof filled.apiKey === "string" ? filled.apiKey : "",
     baseURL: typeof filled.baseURL === "string" ? filled.baseURL : "",
-    model: typeof filled.model === "string" ? filled.model : "",
+    textModel: typeof body.textModel === "string" ? body.textModel : "",
     kind,
     userPrompt: typeof body.userPrompt === "string" ? body.userPrompt : "",
     adult: body.adult === true,

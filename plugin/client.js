@@ -10317,7 +10317,7 @@ async function requestBeautify(basePath, settings, input) {
         provider: settings.provider,
         apiKey: settings.apiKey,
         baseURL: settings.baseURL,
-        model: settings.model,
+        textModel: settings.textModel,
         kind: input.kind,
         userPrompt: input.userPrompt,
         adult: input.adult
@@ -11200,12 +11200,22 @@ function Label({ className, ...props }) {
   );
 }
 
+// shared/beautify.mjs
+function textModelFor(provider, textModel) {
+  const name2 = String(textModel ?? "").trim();
+  if (name2) return name2;
+  if (provider === "gemini") return "gemini-2.5-flash";
+  if (provider === "openai") return "gpt-4o-mini";
+  return "doubao-seed-2-1-pro-260628";
+}
+
 // lib/settings.ts
 var DEFAULT_SETTINGS = {
   provider: "gemini",
   apiKey: "",
   baseURL: "",
   model: "gemini-2.5-flash-image",
+  textModel: "",
   aspectRatio: "3:4",
   keepOutfit: true,
   mode: "each",
@@ -11226,6 +11236,7 @@ function loadSettings() {
       apiKey: typeof parsed.apiKey === "string" ? parsed.apiKey : "",
       baseURL: typeof parsed.baseURL === "string" ? parsed.baseURL : "",
       model: typeof parsed.model === "string" && parsed.model.trim() ? parsed.model : DEFAULT_SETTINGS.model,
+      textModel: typeof parsed.textModel === "string" ? parsed.textModel : "",
       aspectRatio,
       keepOutfit: parsed.keepOutfit !== false,
       mode: parsed.mode === "sheet" ? "sheet" : "each",
@@ -11281,7 +11292,7 @@ function SettingsDialog({
         /* @__PURE__ */ (0, import_jsx_runtime29.jsx)(Button3, { variant: settings.provider === "gemini" ? "default" : "outline", onClick: () => chooseProvider("gemini"), children: "Gemini" }),
         /* @__PURE__ */ (0, import_jsx_runtime29.jsx)(Button3, { variant: settings.provider === "openai" ? "default" : "outline", onClick: () => chooseProvider("openai"), children: "OpenAI" })
       ] }),
-      /* @__PURE__ */ (0, import_jsx_runtime29.jsx)("p", { className: "text-xs leading-5 text-muted-foreground", children: settings.provider === "seedream" ? "火山方舟 Seedream。会把模特图和姿势线稿一起提交，默认模型 doubao-seedream-5-0-flash-260915。" : settings.provider === "gemini" ? "默认模型 gemini-2.5-flash-image。官方地址留空即可；中转站把根地址填进下面。" : "会先把模特图和姿势线稿交给 images/edits。接口不支持编辑时，自动改走文生图，并在结果上标明。" }),
+      /* @__PURE__ */ (0, import_jsx_runtime29.jsx)("p", { className: "text-xs leading-5 text-muted-foreground", children: settings.provider === "seedream" ? "火山方舟 Seedream。会把模特图和姿势线稿一起提交，默认生图模型 doubao-seedream-5-0-flash-260915。" : settings.provider === "gemini" ? "默认生图模型 gemini-2.5-flash-image。官方地址留空即可；中转站把根地址填进下面。" : "会先把模特图和姿势线稿交给 images/edits。接口不支持编辑时，自动改走文生图，并在结果上标明。" }),
       /* @__PURE__ */ (0, import_jsx_runtime29.jsx)(Field, { label: "API Key", children: /* @__PURE__ */ (0, import_jsx_runtime29.jsx)(Input3, { type: "password", autoComplete: "off", value: settings.apiKey, onChange: (event) => patch({ apiKey: event.target.value }), placeholder: settings.provider === "seedream" ? "填入火山方舟 API Key" : "填入 API Key" }) }),
       /* @__PURE__ */ (0, import_jsx_runtime29.jsx)(Field, { label: "接口根地址", children: /* @__PURE__ */ (0, import_jsx_runtime29.jsx)(
         Input3,
@@ -11291,7 +11302,15 @@ function SettingsDialog({
           placeholder: settings.provider === "seedream" ? "https://ark.cn-beijing.volces.com/api/v3" : settings.provider === "gemini" ? "https://generativelanguage.googleapis.com/v1beta" : "https://api.openai.com/v1"
         }
       ) }),
-      /* @__PURE__ */ (0, import_jsx_runtime29.jsx)(Field, { label: "模型", children: /* @__PURE__ */ (0, import_jsx_runtime29.jsx)(Input3, { value: settings.model, onChange: (event) => patch({ model: event.target.value }) }) }),
+      /* @__PURE__ */ (0, import_jsx_runtime29.jsx)(Field, { label: "生图模型", children: /* @__PURE__ */ (0, import_jsx_runtime29.jsx)(Input3, { value: settings.model, onChange: (event) => patch({ model: event.target.value }), placeholder: modelFor(settings.provider) }) }),
+      /* @__PURE__ */ (0, import_jsx_runtime29.jsx)(Field, { label: "文本模型（可选）", hint: "只用于「扩写提示词」。留空则使用当前接口的默认文本模型。", children: /* @__PURE__ */ (0, import_jsx_runtime29.jsx)(
+        Input3,
+        {
+          value: settings.textModel,
+          onChange: (event) => patch({ textModel: event.target.value }),
+          placeholder: textModelFor(settings.provider, "")
+        }
+      ) }),
       /* @__PURE__ */ (0, import_jsx_runtime29.jsxs)("div", { className: "grid gap-2", children: [
         /* @__PURE__ */ (0, import_jsx_runtime29.jsx)(Label, { children: "比例" }),
         /* @__PURE__ */ (0, import_jsx_runtime29.jsx)("div", { className: "flex flex-wrap gap-1.5", children: ASPECT_RATIOS.map((ratio) => /* @__PURE__ */ (0, import_jsx_runtime29.jsx)(Button3, { size: "sm", variant: settings.aspectRatio === ratio ? "default" : "outline", onClick: () => patch({ aspectRatio: ratio }), children: ASPECT_LABEL[ratio] }, ratio)) })
@@ -11310,10 +11329,11 @@ function SettingsDialog({
     ] })
   ] }) });
 }
-function Field({ label, children }) {
+function Field({ label, hint, children }) {
   return /* @__PURE__ */ (0, import_jsx_runtime29.jsxs)("label", { className: "grid gap-1.5 text-sm", children: [
     /* @__PURE__ */ (0, import_jsx_runtime29.jsx)("span", { children: label }),
-    children
+    children,
+    hint ? /* @__PURE__ */ (0, import_jsx_runtime29.jsx)("span", { className: "text-xs leading-5 text-muted-foreground", children: hint }) : null
   ] });
 }
 

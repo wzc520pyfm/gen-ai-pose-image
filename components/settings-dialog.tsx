@@ -7,6 +7,7 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } f
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Switch } from "@/components/ui/switch"
+import { textModelFor } from "@/shared/beautify.mjs"
 import { baseURLFor, modelFor, type StudioSettings } from "@/lib/settings"
 import { ASPECT_LABEL, ASPECT_RATIOS, type AspectRatio, type ProviderId } from "@/lib/types"
 
@@ -51,9 +52,9 @@ export function SettingsDialog({
           </div>
           <p className="text-xs leading-5 text-muted-foreground">
             {settings.provider === "seedream"
-              ? "火山方舟 Seedream。会把模特图和姿势线稿一起提交，默认模型 doubao-seedream-5-0-flash-260915。"
+              ? "火山方舟 Seedream。会把模特图和姿势线稿一起提交，默认生图模型 doubao-seedream-5-0-flash-260915。"
               : settings.provider === "gemini"
-                ? "默认模型 gemini-2.5-flash-image。官方地址留空即可；中转站把根地址填进下面。"
+                ? "默认生图模型 gemini-2.5-flash-image。官方地址留空即可；中转站把根地址填进下面。"
                 : "会先把模特图和姿势线稿交给 images/edits。接口不支持编辑时，自动改走文生图，并在结果上标明。"}
           </p>
           <Field label="API Key">
@@ -66,8 +67,15 @@ export function SettingsDialog({
               placeholder={settings.provider === "seedream" ? "https://ark.cn-beijing.volces.com/api/v3" : settings.provider === "gemini" ? "https://generativelanguage.googleapis.com/v1beta" : "https://api.openai.com/v1"}
             />
           </Field>
-          <Field label="模型">
-            <Input value={settings.model} onChange={(event) => patch({ model: event.target.value })} />
+          <Field label="生图模型">
+            <Input value={settings.model} onChange={(event) => patch({ model: event.target.value })} placeholder={modelFor(settings.provider)} />
+          </Field>
+          <Field label="文本模型（可选）" hint="只用于「扩写提示词」。留空则使用当前接口的默认文本模型。">
+            <Input
+              value={settings.textModel}
+              onChange={(event) => patch({ textModel: event.target.value })}
+              placeholder={textModelFor(settings.provider, "")}
+            />
           </Field>
           <div className="grid gap-2">
             <Label>比例</Label>
@@ -96,11 +104,12 @@ export function SettingsDialog({
   )
 }
 
-function Field({ label, children }: { label: string; children: ReactNode }) {
+function Field({ label, hint, children }: { label: string; hint?: string; children: ReactNode }) {
   return (
     <label className="grid gap-1.5 text-sm">
       <span>{label}</span>
       {children}
+      {hint ? <span className="text-xs leading-5 text-muted-foreground">{hint}</span> : null}
     </label>
   )
 }

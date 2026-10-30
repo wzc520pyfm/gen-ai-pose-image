@@ -237,10 +237,12 @@ test("custom generation attaches stored blobs and does not fetch the catalog", a
 })
 
 test("beautify uses the provider text API and falls back to the local template", async () => {
-  assert.equal(textModelFor("gemini", "gemini-2.5-flash-image"), "gemini-2.5-flash")
-  assert.equal(textModelFor("openai", "gpt-image-1"), "gpt-4o-mini")
-  assert.equal(textModelFor("seedream", "doubao-seedream-5-0-flash-260915"), "doubao-seed-2-1-pro-260628")
+  assert.equal(textModelFor("gemini", ""), "gemini-2.5-flash")
+  assert.equal(textModelFor("gemini", "gemini-2.5-flash-image"), "gemini-2.5-flash-image")
+  assert.equal(textModelFor("openai", ""), "gpt-4o-mini")
+  assert.equal(textModelFor("openai", "gpt-image-1"), "gpt-image-1")
   assert.equal(textModelFor("seedream", ""), "doubao-seed-2-1-pro-260628")
+  assert.equal(textModelFor("seedream", "my-chat-endpoint"), "my-chat-endpoint")
   const offline = await beautifyPrompt({
     provider: "gemini",
     apiKey: "",
@@ -259,6 +261,7 @@ test("beautify uses the provider text API and falls back to the local template",
     provider: "gemini",
     apiKey: "test-key",
     model: "gemini-2.5-flash-image",
+    textModel: "",
     kind: "costume",
     userPrompt: "牛仔外套",
     adult: false,
@@ -276,7 +279,7 @@ test("beautify uses the provider text API and falls back to the local template",
   const failed = await beautifyPrompt({
     provider: "openai",
     apiKey: "test-key",
-    model: "gpt-image-1",
+    textModel: "",
     kind: "pose",
     userPrompt: "举手",
     adult: false,
@@ -297,13 +300,14 @@ test("beautify uses the provider text API and falls back to the local template",
     provider: "seedream",
     apiKey: secret,
     model: "doubao-seedream-5-0-flash-260915",
+    textModel: "my-chat-endpoint",
     kind: "pose",
     userPrompt: "举手",
     adult: false,
     fetchImpl: async (url, init) => {
       assert.match(String(url), /\/chat\/completions$/)
       const body = JSON.parse(init.body)
-      assert.equal(body.model, "doubao-seed-2-1-pro-260628")
+      assert.equal(body.model, "my-chat-endpoint")
       return new Response(JSON.stringify({
         error: {
           code: "InvalidEndpointOrModel.NotFound",

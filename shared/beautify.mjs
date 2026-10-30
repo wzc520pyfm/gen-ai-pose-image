@@ -1,18 +1,13 @@
 import { COSTUME_STYLE_LOCK, POSE_STYLE_LOCK, expandReferencePrompt } from "./custom.mjs"
 import { defaultBaseURL, redact } from "./generate.mjs"
 
-export function textModelFor(provider, model) {
-  const name = String(model ?? "").trim()
-  if (provider === "gemini") {
-    if (!name || /image|imagen/i.test(name)) return "gemini-2.5-flash"
-    return name
-  }
-  if (provider === "openai") {
-    if (!name || /image|dall-e|gpt-image/i.test(name)) return "gpt-4o-mini"
-    return name
-  }
-  if (!name || /seedream|image/i.test(name)) return "doubao-seed-2-1-pro-260628"
-  return name
+/** Empty uses the provider default. A filled id is sent as written, even if it looks like an image model. */
+export function textModelFor(provider, textModel) {
+  const name = String(textModel ?? "").trim()
+  if (name) return name
+  if (provider === "gemini") return "gemini-2.5-flash"
+  if (provider === "openai") return "gpt-4o-mini"
+  return "doubao-seed-2-1-pro-260628"
 }
 
 function describedError(payload, status, secret) {
@@ -129,7 +124,7 @@ export async function beautifyPrompt({
   provider,
   apiKey = "",
   baseURL = "",
-  model = "",
+  textModel = "",
   kind = "pose",
   userPrompt = "",
   adult = false,
@@ -149,7 +144,7 @@ export async function beautifyPrompt({
       ? await geminiText({
           apiKey: key,
           baseURL,
-          model: textModelFor(chosen, model),
+          model: textModelFor(chosen, textModel),
           instruction: beautifyInstruction(input),
           fetchImpl,
           signal,
@@ -158,7 +153,7 @@ export async function beautifyPrompt({
           provider: chosen,
           apiKey: key,
           baseURL,
-          model: textModelFor(chosen, model),
+          model: textModelFor(chosen, textModel),
           instruction: beautifyInstruction(input),
           fetchImpl,
           signal,

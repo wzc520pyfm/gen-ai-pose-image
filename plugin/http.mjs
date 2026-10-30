@@ -119,7 +119,7 @@ export function createPoseHandler(getConfig) {
             provider: body.provider,
             apiKey: body.apiKey,
             baseURL: body.baseURL,
-            model: body.model,
+            textModel: typeof body.textModel === "string" ? body.textModel : "",
             kind,
             userPrompt: typeof body.userPrompt === "string" ? body.userPrompt : "",
             adult: body.adult === true,

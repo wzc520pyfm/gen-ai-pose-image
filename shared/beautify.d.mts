@@ -1,9 +1,9 @@
-export function textModelFor(provider: string, model?: string): string
+export function textModelFor(provider: string, textModel?: string): string
 export function beautifyPrompt(input: {
   provider?: string
   apiKey?: string
   baseURL?: string
-  model?: string
+  textModel?: string
   kind?: "pose" | "costume"
   userPrompt?: string
   adult?: boolean
