@@ -3,8 +3,8 @@
 /* eslint-disable @next/next/no-img-element -- results are data URLs and pose thumbs are proxied */
 
 import { Download, Loader2, Sparkles } from "lucide-react"
-import { HistoryPanel, type HistoryView } from "@/components/history-panel"
 import { Button } from "@/components/ui/button"
+import { HistoryPanel, type HistoryView } from "@/components/history-panel"
 import { Textarea } from "@/components/ui/textarea"
 import type { StoredCharacter } from "@/lib/characters"
 import type { AspectRatio, GenerateMode, PromptCard } from "@/lib/types"
@@ -25,6 +25,7 @@ export function Composer({
   selected,
   onRemove,
   onClear,
+  onRandom,
   characters,
   extraPrompt,
   onExtraPrompt,
@@ -54,6 +55,7 @@ export function Composer({
   selected: Array<{ poseId: string; viewId: string; title: string; angle: string; thumbSrc?: string }>
   onRemove: (poseId: string) => void
   onClear: () => void
+  onRandom: () => void
   characters: StoredCharacter[]
   extraPrompt: string
   onExtraPrompt: (value: string) => void
@@ -90,9 +92,10 @@ export function Composer({
 
   return (
     <div className="flex flex-col gap-4">
-      <div className="flex items-end justify-between gap-3">
-        <div>
+      <div className="flex flex-wrap items-center justify-between gap-2">
+        <div className="flex min-w-0 flex-wrap items-center gap-2">
           <h2 className="text-lg font-semibold">已选 {selected.length} 个姿势</h2>
+          <Button type="button" size="sm" variant="outline" disabled={running} onClick={onRandom}>随机组合</Button>
         </div>
         {selected.length > 0 ? (
           <button type="button" className="text-xs text-muted-foreground underline-offset-2 hover:underline" onClick={onClear}>清空</button>

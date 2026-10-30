@@ -9888,6 +9888,7 @@ function Composer({
   selected,
   onRemove,
   onClear,
+  onRandom,
   characters,
   extraPrompt,
   onExtraPrompt,
@@ -9920,12 +9921,15 @@ function Composer({
   const poseThumb = (viewId, thumbSrc) => thumbSrc || studioUrl(basePath, `/api/pose-image?id=${encodeURIComponent(viewId)}&size=thumb`);
   const costumeThumb = costume?.thumbSrc || (costume ? studioUrl(basePath, `/api/costume-image?id=${encodeURIComponent(costume.id)}&size=thumb`) : "");
   return /* @__PURE__ */ (0, import_jsx_runtime24.jsxs)("div", { className: "flex flex-col gap-4", children: [
-    /* @__PURE__ */ (0, import_jsx_runtime24.jsxs)("div", { className: "flex items-end justify-between gap-3", children: [
-      /* @__PURE__ */ (0, import_jsx_runtime24.jsx)("div", { children: /* @__PURE__ */ (0, import_jsx_runtime24.jsxs)("h2", { className: "text-lg font-semibold", children: [
-        "已选 ",
-        selected.length,
-        " 个姿势"
-      ] }) }),
+    /* @__PURE__ */ (0, import_jsx_runtime24.jsxs)("div", { className: "flex flex-wrap items-center justify-between gap-2", children: [
+      /* @__PURE__ */ (0, import_jsx_runtime24.jsxs)("div", { className: "flex min-w-0 flex-wrap items-center gap-2", children: [
+        /* @__PURE__ */ (0, import_jsx_runtime24.jsxs)("h2", { className: "text-lg font-semibold", children: [
+          "已选 ",
+          selected.length,
+          " 个姿势"
+        ] }),
+        /* @__PURE__ */ (0, import_jsx_runtime24.jsx)(Button3, { type: "button", size: "sm", variant: "outline", disabled: running, onClick: onRandom, children: "随机组合" })
+      ] }),
       selected.length > 0 ? /* @__PURE__ */ (0, import_jsx_runtime24.jsx)("button", { type: "button", className: "text-xs text-muted-foreground underline-offset-2 hover:underline", onClick: onClear, children: "清空" }) : null
     ] }),
     costume ? /* @__PURE__ */ (0, import_jsx_runtime24.jsxs)("div", { className: "flex items-center gap-2 rounded-xl border border-primary/40 bg-card px-2 py-1.5", children: [
@@ -11547,6 +11551,28 @@ async function writeActiveModelId(id) {
   });
 }
 
+// shared/random-combo.mjs
+function usable(random) {
+  const value = Number(typeof random === "function" ? random() : Math.random());
+  if (!Number.isFinite(value)) return 0;
+  return Math.min(0.999999, Math.max(0, value));
+}
+function pickOne(list, random) {
+  return list[Math.floor(usable(random) * list.length)];
+}
+function visible(items, showAdult) {
+  return (Array.isArray(items) ? items : []).filter((item) => item && (showAdult || item.adult !== true));
+}
+function pickRandomCombo({ poses = [], costumes = [], showAdult = false, random = Math.random } = {}) {
+  const posePool = visible(poses, showAdult).filter((pose2) => Array.isArray(pose2.views) && pose2.views.length > 0);
+  const costumePool = visible(costumes, showAdult).filter((costume) => costume.id);
+  if (posePool.length === 0) return { ok: false, message: "没有可选的姿势。", pose: null, view: null, costume: null };
+  if (costumePool.length === 0) return { ok: false, message: "没有可选的服装。", pose: null, view: null, costume: null };
+  const pose = pickOne(posePool, random);
+  const view = pose.views.find((item) => item?.angle === "正面") || pose.views[0];
+  return { ok: true, message: "", pose, view, costume: pickOne(costumePool, random) };
+}
+
 // components/studio.tsx
 var import_jsx_runtime32 = require("react/jsx-runtime");
 var REPOSITORY_URL = "https://github.com/wzc520pyfm/gen-ai-pose-image";
@@ -11561,6 +11587,9 @@ function StudioFrame({ embedded }) {
   const { basePath } = useStudioEnv();
   const [catalog, setCatalog] = (0, import_react12.useState)(null);
   const [catalogError, setCatalogError] = (0, import_react12.useState)("");
+  const [costumeCatalog, setCostumeCatalog] = (0, import_react12.useState)([]);
+  const [costumeCatalogReady, setCostumeCatalogReady] = (0, import_react12.useState)(false);
+  const [costumeCatalogError, setCostumeCatalogError] = (0, import_react12.useState)("");
   const [loading, setLoading] = (0, import_react12.useState)(true);
   const [settings, setSettings] = (0, import_react12.useState)(DEFAULT_SETTINGS);
   const [library, setLibrary] = (0, import_react12.useState)("poses");
@@ -11610,6 +11639,22 @@ function StudioFrame({ embedded }) {
   (0, import_react12.useEffect)(() => {
     loadCatalog();
   }, [loadCatalog]);
+  (0, import_react12.useEffect)(() => {
+    const controller = new AbortController();
+    fetch(studioUrl(basePath, "/api/costumes"), { signal: controller.signal }).then(async (response) => {
+      if (!response.ok) throw new Error("服装目录没有加载出来");
+      return response.json();
+    }).then((payload) => {
+      setCostumeCatalog(Array.isArray(payload.costumes) ? payload.costumes : []);
+      setCostumeCatalogError("");
+      setCostumeCatalogReady(true);
+    }).catch((error) => {
+      if (error instanceof DOMException && error.name === "AbortError") return;
+      setCostumeCatalogError(error instanceof Error ? error.message : "服装目录没有加载出来");
+      setCostumeCatalogReady(true);
+    });
+    return () => controller.abort();
+  }, [basePath]);
   (0, import_react12.useEffect)(() => {
     const local = loadSettings();
     fetch(studioUrl(basePath, "/api/status")).then((response) => response.json()).then((payload) => {
@@ -11869,6 +11914,45 @@ function StudioFrame({ embedded }) {
     setLimitNote("");
     setSelected((current) => ({ ...current, [pose.id]: view.id }));
   }
+  function randomizeCombo() {
+    if (!catalog) {
+      setLimitNote(catalogError || "姿势目录还没加载出来。");
+      return;
+    }
+    if (!costumeCatalogReady) {
+      setLimitNote("服装目录还在加载。");
+      return;
+    }
+    if (costumeCatalogError && costumeCatalog.length === 0 && customCostumes.length === 0) {
+      setLimitNote(costumeCatalogError);
+      return;
+    }
+    const poses = [
+      ...catalog.poses,
+      ...customPoses.map((asset) => ({
+        id: asset.id,
+        adult: asset.adult,
+        views: [{ id: asset.id, angle: "自定义" }]
+      }))
+    ];
+    const costumes = [
+      ...costumeCatalog,
+      ...customCostumes.map((asset) => ({
+        id: asset.id,
+        label: asset.label,
+        keywords: asset.keywords,
+        adult: asset.adult
+      }))
+    ];
+    const pick = pickRandomCombo({ poses, costumes, showAdult: settings.showAdult });
+    if (!pick.ok || !pick.pose || !pick.view || !pick.costume) {
+      setLimitNote(pick.message);
+      return;
+    }
+    setLimitNote("");
+    setSelected({ [pick.pose.id]: pick.view.id });
+    setCostume({ id: pick.costume.id, label: pick.costume.label, keywords: pick.costume.keywords });
+  }
   async function generate() {
     if (!settings.apiKey.trim() && !serverKey) {
       setSettingsOpen(true);
@@ -12051,6 +12135,7 @@ function StudioFrame({ embedded }) {
         return next;
       }),
       onClear: () => setSelected({}),
+      onRandom: randomizeCombo,
       characters,
       extraPrompt,
       onExtraPrompt: setExtraPrompt,
@@ -12912,9 +12997,6 @@ function PoseStudio() {
   }
   .items-center {
     align-items: center;
-  }
-  .items-end {
-    align-items: flex-end;
   }
   .items-start {
     align-items: flex-start;
