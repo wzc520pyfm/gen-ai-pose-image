@@ -1,4 +1,5 @@
 import catalog from "../data/costumes.json" with { type: "json" }
+import { customCostumeRecord, isCustomCostumeId } from "./custom.mjs"
 
 const byId = new Map(catalog.costumes.map((costume) => [costume.id, costume]))
 const cache = new Map()
@@ -12,10 +13,25 @@ export function getCostume(id) {
   return byId.get(id)
 }
 
-export function searchCostumes({ query = "", category = "", includeAdult = false, limit = 60 } = {}) {
+export function searchCostumes({ query = "", category = "", includeAdult = false, limit = 60, custom = [] } = {}) {
   const parts = String(query).trim().toLowerCase().split(/\s+/).filter(Boolean)
   const cap = Math.max(1, Math.min(120, Number(limit) || 60))
   const matches = []
+  const wantCustom = !category || category === "自定义"
+  if (wantCustom) {
+    for (const asset of custom) {
+      if (!asset || !isCustomCostumeId(asset.id) || !asset.dataBase64) continue
+      if (!includeAdult && asset.adult === true) continue
+      const costume = customCostumeRecord(asset)
+      if (parts.length > 0) {
+        const hay = `${costume.id} ${costume.keywords} ${costume.label} ${asset.userPrompt ?? ""}`.toLowerCase()
+        if (!parts.every((part) => hay.includes(part))) continue
+      }
+      matches.push(costume)
+      if (matches.length >= cap) return matches
+    }
+  }
+  if (category === "自定义") return matches
   for (const costume of catalog.costumes) {
     if (!includeAdult && costume.adult) continue
     if (category && costume.category !== category) continue

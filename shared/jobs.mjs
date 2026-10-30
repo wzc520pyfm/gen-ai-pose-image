@@ -5,10 +5,12 @@ import { dirname, join } from "node:path"
 import { fileURLToPath } from "node:url"
 import { characterFromUploads, DEFAULT_CHARACTER } from "./character.mjs"
 import { resolveView } from "./catalog.mjs"
+import { isCustomCostumeId, isCustomPoseId, missingCustomCostumeMessage, missingCustomPoseMessage } from "./custom.mjs"
 import { costumeFile, fetchCostumeBytes, getCostume } from "./costumes.mjs"
 import { assertBaseURL, defaultModel, generateImage } from "./generate.mjs"
 import { fetchPoseBytes } from "./poses.mjs"
 import { composePrompt } from "./prompt.mjs"
+import { getCustomCostumeAsset, getCustomPoseAsset } from "./registry.mjs"
 
 export { fetchPoseBytes, isSafePosePath, poseFileFor } from "./poses.mjs"
 
@@ -65,17 +67,107 @@ function mediaTypeOf(buffer, declared) {
   if (buffer[0] === 0xff && buffer[1] === 0xd8) return "image/jpeg"
   if (buffer.toString("ascii", 0, 4) === "RIFF" && buffer.toString("ascii", 8, 12) === "WEBP") return "image/webp"
   if (declared === "image/png" || declared === "image/jpeg" || declared === "image/webp") return declared
-  throw new Error("模特图片只支持 PNG、JPEG、WebP")
+  throw new Error("图片只支持 PNG、JPEG、WebP")
 }
 
 export function decodeCharacterImage(input) {
+  return decodeImage(input, "character", "模特图片", 5_000_000)
+}
+
+export function decodeReferenceImage(input, role) {
+  return decodeImage(input, role, "参考图", 8_000_000)
+}
+
+function decodeImage(input, role, label, maxBytes) {
   const declared = typeof input?.mediaType === "string" ? input.mediaType : ""
   const data = typeof input?.dataBase64 === "string" ? input.dataBase64.replace(/\s/g, "") : ""
-  if (!data) throw new Error("模特图片是空的")
-  if (!/^[A-Za-z0-9+/]+={0,2}$/.test(data)) throw new Error("模特图片数据无效")
+  if (!data) throw new Error(`${label}是空的`)
+  if (!/^[A-Za-z0-9+/]+={0,2}$/.test(data)) throw new Error(`${label}数据无效`)
   const buffer = Buffer.from(data, "base64")
-  if (buffer.byteLength < 32 || buffer.byteLength > 5_000_000) throw new Error("单张模特图片需小于 5MB")
-  return { mediaType: mediaTypeOf(buffer, declared), buffer, role: "character" }
+  if (buffer.byteLength < 32 || buffer.byteLength > maxBytes) throw new Error(`${label}需小于 ${Math.round(maxBytes / 1_000_000)}MB`)
+  return { mediaType: mediaTypeOf(buffer, declared), buffer, role }
+}
+
+function listedReference(list, id) {
+  if (!Array.isArray(list)) return undefined
+  return list.find((item) => item && item.id === id)
+}
+
+function customPoseAsset(id, input) {
+  const inline = listedReference(input.customReferences?.poses, id)
+  if (inline?.dataBase64) return inline
+  const stored = getCustomPoseAsset(id)
+  if (stored?.dataBase64) return stored
+  return inline || stored
+}
+
+function customCostumeAsset(id, input) {
+  const inline = listedReference(input.customReferences?.costumes, id)
+  if (inline?.dataBase64) return inline
+  const stored = getCustomCostumeAsset(id)
+  if (stored?.dataBase64) return stored
+  return inline || stored
+}
+
+function planPose(id, input) {
+  const trimmed = id.trim()
+  if (isCustomPoseId(trimmed)) {
+    const asset = customPoseAsset(trimmed, input)
+    if (!asset?.dataBase64) throw new Error(missingCustomPoseMessage(trimmed))
+    const label = String(asset.label || asset.name || "自定义姿势").slice(0, 80)
+    return {
+      viewId: trimmed,
+      poseId: trimmed,
+      title: `${label} · 自定义`,
+      source: "custom",
+      poseImage: { mediaType: asset.mediaType || "image/png", dataBase64: asset.dataBase64 },
+      pose: { name: label, category: "自定义", system: "自定义", angle: "自定义", people: 1 },
+    }
+  }
+  const found = resolveView(trimmed)
+  if (!found) throw new Error(`找不到姿势 ${id}`)
+  return {
+    viewId: found.view.id,
+    poseId: found.pose.id,
+    title: `${found.pose.name} · ${found.view.angle}`,
+    source: "catalog",
+    posePath: found.view.full,
+    pose: {
+      name: found.pose.name,
+      category: found.pose.category,
+      system: found.pose.system,
+      angle: found.view.angle,
+      people: found.pose.people,
+    },
+  }
+}
+
+function planCostume(costumeId, input) {
+  if (!costumeId) return null
+  if (isCustomCostumeId(costumeId)) {
+    const asset = customCostumeAsset(costumeId, input)
+    if (!asset?.dataBase64) throw new Error(missingCustomCostumeMessage(costumeId))
+    return {
+      id: asset.id,
+      keywords: String(asset.keywords || asset.label || "自定义服装"),
+      source: "custom",
+      image: { mediaType: asset.mediaType || "image/png", dataBase64: asset.dataBase64 },
+    }
+  }
+  const costume = getCostume(costumeId)
+  if (!costume) throw new Error(`找不到服装 ${costumeId}`)
+  return costume
+}
+
+async function poseReference(item, fetchPose) {
+  if (item.source === "custom") return modelImage(decodeReferenceImage(item.poseImage, "pose"))
+  return fetchPose(item.posePath)
+}
+
+async function costumeReferences(plan, fetchCostume) {
+  if (!plan.costume) return []
+  if (plan.costume.source === "custom") return [await modelImage(decodeReferenceImage(plan.costume.image, "costume"))]
+  return [await modelImage(await fetchCostume(costumeFile(plan.costume, "preview")))]
 }
 
 export function planRequest(input = {}) {
@@ -87,31 +179,14 @@ export function planRequest(input = {}) {
   const max = mode === "sheet" ? 4 : 8
   if (viewIds.length === 0) throw new Error("先选择至少一个姿势")
   if (viewIds.length > max) throw new Error(mode === "sheet" ? "拼图一次最多 4 个姿势" : "一次最多 8 个姿势")
-  const items = viewIds.map((id) => {
-    const found = resolveView(id.trim())
-    if (!found) throw new Error(`找不到姿势 ${id}`)
-    return {
-      viewId: found.view.id,
-      poseId: found.pose.id,
-      title: `${found.pose.name} · ${found.view.angle}`,
-      posePath: found.view.full,
-      pose: {
-        name: found.pose.name,
-        category: found.pose.category,
-        system: found.pose.system,
-        angle: found.view.angle,
-        people: found.pose.people,
-      },
-    }
-  })
+  const items = viewIds.map((id) => planPose(id, input))
   const uploads = Array.isArray(input.characterImages) ? input.characterImages : []
   const declaredCount = Number(input.characterCount) || 0
   const characterCount = uploads.length || declaredCount
   if (characterCount > 3) throw new Error("模特参考图最多 3 张")
   const character = characterCount > 0 ? characterFromUploads(characterCount) : DEFAULT_CHARACTER
   const costumeId = typeof input.costumeId === "string" ? input.costumeId.trim() : ""
-  const costume = costumeId ? getCostume(costumeId) : null
-  if (costumeId && !costume) throw new Error(`找不到服装 ${costumeId}`)
+  const costume = planCostume(costumeId, input)
   const keepOutfit = costume ? false : input.keepOutfit !== false
   const extraPrompt = typeof input.extraPrompt === "string" ? input.extraPrompt.replace(/[^\S\n]+/g, " ").trim().slice(0, 2000) : ""
   const aspectRatio = ASPECTS.has(input.aspectRatio) ? input.aspectRatio : "3:4"
@@ -162,11 +237,11 @@ export async function runGeneration(input, deps = {}) {
   const generate = deps.generate ?? generateImage
   const characterImages = await resolveCharacterImages(plan)
   const fetchCostume = deps.fetchCostume ?? fetchCostumeBytes
-  const costumeImages = plan.costume ? [await modelImage(await fetchCostume(costumeFile(plan.costume, "preview")))] : []
+  const costumeImages = await costumeReferences(plan, fetchCostume)
   const signal = deps.signal
   if (plan.mode === "sheet") {
     const poseImages = []
-    for (const item of plan.items) poseImages.push(await fetchPose(item.posePath))
+    for (const item of plan.items) poseImages.push(await poseReference(item, fetchPose))
     const image = await generate({
       provider: plan.provider,
       apiKey: plan.apiKey,
@@ -194,7 +269,7 @@ export async function runGeneration(input, deps = {}) {
   for (const item of plan.items) {
     if (signal?.aborted) break
     try {
-      const poseImage = await fetchPose(item.posePath)
+      const poseImage = await poseReference(item, fetchPose)
       const image = await generate({
         provider: plan.provider,
         apiKey: plan.apiKey,

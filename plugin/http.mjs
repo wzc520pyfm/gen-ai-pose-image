@@ -1,13 +1,17 @@
 import { readFile } from "node:fs/promises"
 import { dirname, join } from "node:path"
 import { fileURLToPath } from "node:url"
+import { beautifyPrompt } from "../shared/beautify.mjs"
 import { getCatalog, resolveView } from "../shared/catalog.mjs"
 import { costumeFile, fetchCostumeBytes, getCostume, getCostumeCatalog } from "../shared/costumes.mjs"
+import { assertBaseURL, defaultModel, generateImage } from "../shared/generate.mjs"
 import { planRequest, promptCards, runGeneration } from "../shared/jobs.mjs"
 import { fetchPoseBytes, poseFileFor } from "../shared/poses.mjs"
+import { replaceCustomLibrary, upsertCustomCostume, upsertCustomPose } from "../shared/registry.mjs"
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), "..")
-const MAX_BODY = 12 * 1024 * 1024
+const MAX_BODY = 32 * 1024 * 1024
+const ASPECTS = new Set(["1:1", "3:4", "4:3", "9:16", "16:9"])
 
 function json(res, status, value) {
   const body = JSON.stringify(value)
@@ -84,7 +88,18 @@ export function createPoseHandler(getConfig) {
         res.end(data)
         return
       }
-      if (req.method === "POST" && (path === "/api/prompt" || path === "/api/generate")) {
+      if (req.method === "PUT" && path === "/api/custom-library") {
+        const body = await readBody(req)
+        replaceCustomLibrary({ poses: body.poses ?? [], costumes: body.costumes ?? [] })
+        return json(res, 200, { ok: true })
+      }
+      if (req.method === "POST" && path === "/api/custom-library") {
+        const body = await readBody(req)
+        if (body.kind === "costume") upsertCustomCostume(body.item)
+        else upsertCustomPose(body.item)
+        return json(res, 200, { ok: true })
+      }
+      if (req.method === "POST" && (path === "/api/prompt" || path === "/api/generate" || path === "/api/beautify" || path === "/api/reference")) {
         const body = await readBody(req)
         const config = getConfig()
         if (typeof body.apiKey !== "string" || body.apiKey.trim() === "") {
@@ -94,6 +109,39 @@ export function createPoseHandler(getConfig) {
         if (!body.model) body.model = config.model || ""
         if (!body.baseURL) body.baseURL = config.baseURL || ""
         if (path === "/api/prompt") return json(res, 200, { prompts: promptCards(planRequest(body)) })
+        if (path === "/api/beautify") {
+          const kind = body.kind === "costume" ? "costume" : body.kind === "pose" ? "pose" : ""
+          if (!kind) return json(res, 400, { error: "需要说明是姿势还是服装" })
+          const result = await beautifyPrompt({
+            provider: body.provider,
+            apiKey: body.apiKey,
+            baseURL: body.baseURL,
+            model: body.model,
+            kind,
+            userPrompt: typeof body.userPrompt === "string" ? body.userPrompt : "",
+            adult: body.adult === true,
+            signal: req.signal,
+          })
+          return json(res, 200, result)
+        }
+        if (path === "/api/reference") {
+          const prompt = typeof body.prompt === "string" ? body.prompt.trim() : ""
+          if (!prompt) return json(res, 400, { error: "先写好提示词" })
+          if (!String(body.apiKey || "").trim()) return json(res, 400, { error: "还没有填写 API Key" })
+          const provider = body.provider === "openai" || body.provider === "seedream" || body.provider === "gemini" ? body.provider : null
+          if (!provider) return json(res, 400, { error: "不支持的生图接口" })
+          const image = await generateImage({
+            provider,
+            apiKey: String(body.apiKey).trim(),
+            baseURL: assertBaseURL(body.baseURL),
+            model: String(body.model || "").trim() || defaultModel(provider),
+            prompt: prompt.slice(0, 4000),
+            images: [],
+            aspectRatio: ASPECTS.has(body.aspectRatio) ? body.aspectRatio : "3:4",
+            signal: req.signal,
+          })
+          return json(res, 200, { mediaType: image.mediaType, imageBase64: image.buffer.toString("base64") })
+        }
         const { results } = await runGeneration(body, { signal: req.signal })
         return json(res, 200, { results })
       }

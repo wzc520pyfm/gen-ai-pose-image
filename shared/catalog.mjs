@@ -1,4 +1,5 @@
 import catalog from "../data/catalog.json" with { type: "json" }
+import { customPoseRecord, isCustomPoseId } from "./custom.mjs"
 
 const byPose = new Map()
 const byView = new Map()
@@ -35,10 +36,27 @@ export function searchPoses({
   category = "",
   includeAdult = false,
   limit = 20,
+  custom = [],
 } = {}) {
   const parts = String(query).trim().toLowerCase().split(/\s+/).filter(Boolean)
   const cap = Math.max(1, Math.min(50, Number(limit) || 20))
   const matches = []
+  const wantCustom = !systemId || systemId === "custom"
+  if (wantCustom) {
+    for (const asset of custom) {
+      if (!asset || !isCustomPoseId(asset.id) || !asset.dataBase64) continue
+      if (!includeAdult && asset.adult === true) continue
+      if (category && category !== "自定义") continue
+      const pose = customPoseRecord(asset)
+      if (parts.length > 0) {
+        const hay = `${pose.name} ${pose.id} ${asset.label ?? ""} ${asset.userPrompt ?? ""}`.toLowerCase()
+        if (!parts.every((part) => hay.includes(part))) continue
+      }
+      matches.push(pose)
+      if (matches.length >= cap) return matches
+    }
+  }
+  if (systemId === "custom") return matches
   for (const pose of catalog.poses) {
     if (!includeAdult && pose.adult) continue
     if (systemId && pose.systemId !== systemId) continue

@@ -4,10 +4,12 @@
 
 import { useEffect, useMemo, useRef, useState, type ReactNode } from "react"
 import { Search, X } from "lucide-react"
+import { CustomReferencePanel, type CustomCard, type CustomDraft } from "@/components/custom-reference-panel"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { Input } from "@/components/ui/input"
+import type { StudioSettings } from "@/lib/settings"
 import type { Catalog, Pose, PoseView } from "@/lib/types"
 import { studioUrl, useStudioEnv } from "@/lib/studio-env"
 
@@ -57,6 +59,12 @@ export function PoseBrowser({
   onRequestAdult,
   selected,
   onToggle,
+  customPoses,
+  onSaveCustom,
+  onDeleteCustom,
+  settings,
+  hasKey,
+  syncWarning,
 }: {
   catalog: Catalog | null
   loading: boolean
@@ -68,8 +76,15 @@ export function PoseBrowser({
   onRequestAdult: (systemId: string) => void
   selected: Record<string, string>
   onToggle: (pose: Pose, view: PoseView) => void
+  customPoses: CustomCard[]
+  onSaveCustom: (draft: CustomDraft) => Promise<void>
+  onDeleteCustom: (id: string) => void
+  settings: StudioSettings
+  hasKey: boolean
+  syncWarning: string
 }) {
   const [systemId, setSystemId] = useState("full")
+  const customSection = systemId === "custom"
   const [category, setCategory] = useState("全部")
   const [angle, setAngle] = useState("")
   const [query, setQuery] = useState("")
@@ -89,7 +104,9 @@ export function PoseBrowser({
     return () => window.removeEventListener("keydown", onKey)
   }, [])
 
-  const system = catalog?.systems.find((item) => item.id === systemId) ?? catalog?.systems[0]
+  const system = customSection ? undefined : catalog?.systems.find((item) => item.id === systemId) ?? catalog?.systems[0]
+  const visibleCustom = customPoses.filter((item) => showAdult || !item.adult)
+  const hiddenCustomAdult = customPoses.length - visibleCustom.length
   const categories = useMemo(() => {
     if (!catalog || !system) return ["全部"]
     const names = new Set<string>()
@@ -107,6 +124,11 @@ export function PoseBrowser({
 
   useEffect(() => {
     if (!requestedSystem || !showAdult) return
+    if (requestedSystem === "custom") {
+      setSystemId("custom")
+      onRequestedSystemApplied()
+      return
+    }
     if (!catalog?.systems.some((item) => item.id === requestedSystem)) return
     setSystemId(requestedSystem)
     setCategory("全部")
@@ -136,7 +158,7 @@ export function PoseBrowser({
       <div className="sticky top-0 z-10 border-b bg-white/95 px-4 py-3 backdrop-blur @min-[768px]/studio:px-6">
         <div className="flex flex-wrap gap-2">
           {catalog?.systems.map((item) => {
-            const active = item.id === system?.id
+            const active = !customSection && item.id === system?.id
             return (
               <button
                 key={item.id}
@@ -158,58 +180,101 @@ export function PoseBrowser({
               </button>
             )
           })}
-        </div>
-        <div className="relative">
-          <Search className="pointer-events-none absolute top-1/2 left-2.5 size-4 -translate-y-1/2 text-muted-foreground" />
-          <Input
-            ref={searchRef}
-            value={query}
-            onChange={(event) => setQuery(event.target.value)}
-            placeholder="搜索姿势名、编号或分类"
-            aria-label="搜索姿势"
-            className="h-10 bg-card pr-9 pl-8"
-          />
-          {query ? (
-            <button type="button" className="absolute top-1/2 right-2 -translate-y-1/2 text-muted-foreground" onClick={() => setQuery("")} aria-label="清空搜索">
-              <X className="size-4" />
-            </button>
-          ) : null}
-        </div>
-        <div className="mt-2 flex flex-wrap gap-1.5">
-          <FilterChip active={angle === ""} onClick={() => setAngle("")}>全部视角</FilterChip>
-          {ANGLES.map((item) => (
-            <FilterChip key={item} active={angle === item} onClick={() => setAngle(item)}>{item}</FilterChip>
-          ))}
-        </div>
-        <label className="mt-2 block text-xs text-muted-foreground @min-[768px]/studio:hidden">
-          分类
-          <select
-            className="mt-1 h-10 w-full rounded-lg border bg-card px-2 text-sm text-foreground"
-            value={category}
-            aria-label="姿势分类"
-            onChange={(event) => setCategory(event.target.value)}
+          <button
+            type="button"
+            onClick={() => setSystemId("custom")}
+            className={`inline-flex items-center gap-1.5 whitespace-nowrap rounded-full px-3 py-1.5 text-sm leading-5 ${customSection ? "bg-primary text-primary-foreground" : "bg-white text-foreground ring-1 ring-border"}`}
           >
-            {categories.map((item) => (
-              <option key={item} value={item}>{item}</option>
-            ))}
-          </select>
-        </label>
-        <div className="mt-2 hidden flex-wrap gap-1.5 @min-[768px]/studio:flex">
-          {categories.map((item) => (
-            <FilterChip key={item} active={category === item} onClick={() => setCategory(item)}>{item}</FilterChip>
-          ))}
+            <span>自定义</span>
+            <span className={`text-xs ${customSection ? "text-primary-foreground/80" : "text-muted-foreground"}`}>{visibleCustom.length}</span>
+          </button>
         </div>
+        {customSection ? null : (
+          <>
+            <div className="relative">
+              <Search className="pointer-events-none absolute top-1/2 left-2.5 size-4 -translate-y-1/2 text-muted-foreground" />
+              <Input
+                ref={searchRef}
+                value={query}
+                onChange={(event) => setQuery(event.target.value)}
+                placeholder="搜索姿势名、编号或分类"
+                aria-label="搜索姿势"
+                className="h-10 bg-card pr-9 pl-8"
+              />
+              {query ? (
+                <button type="button" className="absolute top-1/2 right-2 -translate-y-1/2 text-muted-foreground" onClick={() => setQuery("")} aria-label="清空搜索">
+                  <X className="size-4" />
+                </button>
+              ) : null}
+            </div>
+            <div className="mt-2 flex flex-wrap gap-1.5">
+              <FilterChip active={angle === ""} onClick={() => setAngle("")}>全部视角</FilterChip>
+              {ANGLES.map((item) => (
+                <FilterChip key={item} active={angle === item} onClick={() => setAngle(item)}>{item}</FilterChip>
+              ))}
+            </div>
+            <label className="mt-2 block text-xs text-muted-foreground @min-[768px]/studio:hidden">
+              分类
+              <select
+                className="mt-1 h-10 w-full rounded-lg border bg-card px-2 text-sm text-foreground"
+                value={category}
+                aria-label="姿势分类"
+                onChange={(event) => setCategory(event.target.value)}
+              >
+                {categories.map((item) => (
+                  <option key={item} value={item}>{item}</option>
+                ))}
+              </select>
+            </label>
+            <div className="mt-2 hidden flex-wrap gap-1.5 @min-[768px]/studio:flex">
+              {categories.map((item) => (
+                <FilterChip key={item} active={category === item} onClick={() => setCategory(item)}>{item}</FilterChip>
+              ))}
+            </div>
+          </>
+        )}
       </div>
 
       <div className="px-4 py-4 @min-[768px]/studio:px-6">
-        {loading ? <PoseSkeleton /> : null}
-        {error ? (
+        {customSection ? (
+          <CustomReferencePanel
+            kind="pose"
+            items={visibleCustom}
+            hiddenAdult={hiddenCustomAdult}
+            isSelected={(id) => selected[id] === id}
+            onToggle={(id) => {
+              const item = customPoses.find((pose) => pose.id === id)
+              if (!item) return
+              const pose: Pose = {
+                id: item.id,
+                system: "自定义",
+                systemId: "custom",
+                code: "自定义",
+                category: "自定义",
+                name: item.label,
+                adult: item.adult,
+                people: 1,
+                views: [{ id: item.id, angle: "自定义", angleId: "custom", thumb: "", full: "" }],
+              }
+              onToggle(pose, pose.views[0])
+            }}
+            onDelete={onDeleteCustom}
+            onSave={onSaveCustom}
+            showAdult={showAdult}
+            onRequestAdult={() => onRequestAdult("custom")}
+            settings={settings}
+            hasKey={hasKey}
+            syncWarning={syncWarning}
+          />
+        ) : null}
+        {!customSection && loading ? <PoseSkeleton /> : null}
+        {!customSection && error ? (
           <div className="rounded-2xl border border-dashed border-border bg-card px-4 py-10 text-center">
             <p className="text-sm">{error}</p>
             <Button className="mt-3" variant="outline" onClick={onRetry}>重新加载</Button>
           </div>
         ) : null}
-        {!loading && !error && poses.length === 0 ? (
+        {!customSection && !loading && !error && poses.length === 0 ? (
           <div className="rounded-2xl border border-dashed border-border bg-card px-4 py-12 text-center">
             <p className="text-lg font-semibold">没有对上的姿势</p>
             <p className="mt-1 text-sm text-muted-foreground">
@@ -220,7 +285,7 @@ export function PoseBrowser({
             ) : null}
           </div>
         ) : null}
-        <div className="grid grid-cols-2 gap-3 @min-[640px]/studio:grid-cols-3 @min-[1280px]/studio:grid-cols-4 @min-[1536px]/studio:grid-cols-5">
+        {customSection ? null : <div className="grid grid-cols-2 gap-3 @min-[640px]/studio:grid-cols-3 @min-[1280px]/studio:grid-cols-4 @min-[1536px]/studio:grid-cols-5">
           {poses.map((pose) => {
             const view = displayView(pose, selected[pose.id], angle)
             if (!view) return null
@@ -248,8 +313,8 @@ export function PoseBrowser({
               </article>
             )
           })}
-        </div>
-        {catalog ? (
+        </div>}
+        {catalog && !customSection ? (
           <p className="mt-6 max-w-3xl text-xs leading-5 text-muted-foreground">
             {catalog.attribution} 图床：{catalog.origin}。索引来自 {catalog.source}。
           </p>
