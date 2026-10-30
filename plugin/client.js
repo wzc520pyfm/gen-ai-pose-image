@@ -2642,129 +2642,26 @@ function Button3({
   );
 }
 
-// node_modules/@base-ui/react/switch/index.parts.mjs
+// node_modules/@base-ui/react/input/Input.mjs
+var React34 = __toESM(require("react"), 1);
+
+// node_modules/@base-ui/react/field/index.parts.mjs
 var index_parts_exports = {};
 __export(index_parts_exports, {
-  Root: () => SwitchRoot,
-  Thumb: () => SwitchThumb
+  Control: () => FieldControl,
+  Description: () => FieldDescription,
+  Error: () => FieldError,
+  Item: () => FieldItem,
+  Label: () => FieldLabel,
+  Root: () => FieldRoot,
+  Validity: () => FieldValidity
 });
 
-// node_modules/@base-ui/react/switch/root/SwitchRoot.mjs
-var React21 = __toESM(require("react"), 1);
+// node_modules/@base-ui/react/field/root/FieldRoot.mjs
+var React23 = __toESM(require("react"), 1);
 
-// node_modules/@base-ui/utils/useControlled.mjs
+// node_modules/@base-ui/react/internals/field-root-context/FieldRootContext.mjs
 var React11 = __toESM(require("react"), 1);
-function useControlled({
-  controlled,
-  default: defaultProp,
-  name: name2,
-  state = "value"
-}) {
-  const {
-    current: isControlled
-  } = React11.useRef(controlled !== void 0);
-  const [valueState, setValue] = React11.useState(() => defaultProp);
-  const value = isControlled && controlled !== void 0 ? controlled : valueState;
-  if (false) {
-    React11.useEffect(() => {
-      if (isControlled !== (controlled !== void 0)) {
-        error([`A component is changing the ${isControlled ? "" : "un"}controlled ${state} state of ${name2} to be ${isControlled ? "un" : ""}controlled.`, "Elements should not switch from uncontrolled to controlled (or vice versa).", `Decide between using a controlled or uncontrolled ${name2} element for the lifetime of the component.`, "The nature of the state is determined during the first render. It's considered controlled if the value is not `undefined`.", "More info: https://fb.me/react-controlled-components"].join("\n"));
-      }
-    }, [state, name2, controlled]);
-    const {
-      current: defaultValue
-    } = React11.useRef(defaultProp);
-    React11.useEffect(() => {
-      if (!isControlled && serializeToDevModeString(defaultValue) !== serializeToDevModeString(defaultProp)) {
-        error([`A component is changing the default ${state} state of an uncontrolled ${name2} after being initialized. To suppress this warning opt to use a controlled ${name2}.`].join("\n"));
-      }
-    }, [defaultProp]);
-  }
-  const setValueIfUncontrolled = React11.useCallback((newValue) => {
-    if (!isControlled) {
-      setValue(newValue);
-    }
-  }, []);
-  return [value, setValueIfUncontrolled];
-}
-
-// node_modules/@base-ui/utils/visuallyHidden.mjs
-var visuallyHiddenBase = {
-  clipPath: "inset(50%)",
-  overflow: "hidden",
-  whiteSpace: "nowrap",
-  border: 0,
-  padding: 0,
-  width: 1,
-  height: 1,
-  margin: -1
-};
-var visuallyHidden = {
-  ...visuallyHiddenBase,
-  position: "fixed",
-  margin: 0,
-  top: 0,
-  left: 0
-};
-var visuallyHiddenInput = {
-  ...visuallyHiddenBase,
-  position: "absolute"
-};
-
-// node_modules/@base-ui/utils/useId.mjs
-var React13 = __toESM(require("react"), 1);
-
-// node_modules/@base-ui/utils/useForcedRerendering.mjs
-var React12 = __toESM(require("react"), 1);
-function useForcedRerendering() {
-  const [, setState] = React12.useState({});
-  return React12.useCallback(() => {
-    setState({});
-  }, []);
-}
-
-// node_modules/@base-ui/utils/useId.mjs
-var globalId = 0;
-function useGlobalId(idOverride, prefix = "mui") {
-  const defaultId = React13.useRef(void 0);
-  const forceRerender = useForcedRerendering();
-  const id = idOverride ?? defaultId.current;
-  React13.useEffect(() => {
-    if (defaultId.current == null) {
-      globalId += 1;
-      defaultId.current = `${prefix}-${globalId}`;
-      if (idOverride == null) {
-        forceRerender();
-      }
-    }
-  }, [idOverride, prefix, forceRerender]);
-  return id;
-}
-var maybeReactUseId = SafeReact.useId;
-function useId(idOverride, prefix) {
-  if (maybeReactUseId !== void 0) {
-    const reactId = maybeReactUseId();
-    return idOverride ?? (prefix ? `${prefix}-${reactId}` : reactId);
-  }
-  return useGlobalId(idOverride, prefix);
-}
-
-// node_modules/@base-ui/react/internals/useBaseUiId.mjs
-function useBaseUiId(idOverride) {
-  return useId(idOverride, "base-ui");
-}
-
-// node_modules/@base-ui/react/switch/root/SwitchRootContext.mjs
-var React14 = __toESM(require("react"), 1);
-var SwitchRootContext = /* @__PURE__ */ React14.createContext(void 0);
-if (false) SwitchRootContext.displayName = "SwitchRootContext";
-function useSwitchRootContext() {
-  const context = React14.useContext(SwitchRootContext);
-  if (context === void 0) {
-    throw new Error(false ? "Base UI: SwitchRootContext is missing. Switch parts must be placed within <Switch.Root>." : formatErrorMessage_default(63));
-  }
-  return context;
-}
 
 // node_modules/@base-ui/react/field/control/FieldControlDataAttributes.mjs
 var valid = "data-valid";
@@ -2811,27 +2708,7 @@ var fieldValidityMapping = {
   }
 };
 
-// node_modules/@base-ui/react/switch/root/SwitchRootDataAttributes.mjs
-var checked = "data-checked";
-var unchecked = "data-unchecked";
-
-// node_modules/@base-ui/react/switch/stateAttributesMapping.mjs
-var stateAttributesMapping = {
-  ...fieldValidityMapping,
-  checked(value) {
-    if (value) {
-      return {
-        [checked]: ""
-      };
-    }
-    return {
-      [unchecked]: ""
-    };
-  }
-};
-
 // node_modules/@base-ui/react/internals/field-root-context/FieldRootContext.mjs
-var React15 = __toESM(require("react"), 1);
 var DEFAULT_FIELD_ROOT_CONTEXT = {
   invalid: void 0,
   name: void 0,
@@ -2868,72 +2745,31 @@ var DEFAULT_FIELD_ROOT_CONTEXT = {
     change: NOOP
   }
 };
-var FieldRootContext = /* @__PURE__ */ React15.createContext(DEFAULT_FIELD_ROOT_CONTEXT);
+var FieldRootContext = /* @__PURE__ */ React11.createContext(DEFAULT_FIELD_ROOT_CONTEXT);
 if (false) FieldRootContext.displayName = "FieldRootContext";
 function useFieldRootContext(optional = true) {
-  const context = React15.useContext(FieldRootContext);
+  const context = React11.useContext(FieldRootContext);
   if (context.setValidityData === NOOP && !optional) {
     throw new Error(false ? "Base UI: FieldRootContext is missing. Field parts must be placed within <Field.Root>." : formatErrorMessage_default(28));
   }
   return context;
 }
 
-// node_modules/@base-ui/react/internals/field-root-context/useSetFieldFocused.mjs
-function useSetFieldFocused(disabled2, focusTargetRef, onFocusedChange) {
-  const {
-    setFocused,
-    focusOwnerRef
-  } = useFieldRootContext();
-  const setFieldFocused = useStableCallback((focused) => {
-    if (focused ? !disabled2 : focusOwnerRef.current === setFieldFocused) {
-      focusOwnerRef.current = focused && setFieldFocused;
-      onFocusedChange?.(focused);
-      setFocused(focused);
-    }
-  });
-  useIsoLayoutEffect(() => {
-    const el = focusTargetRef.current;
-    const root = el?.getRootNode();
-    if (root?.activeElement === el) {
-      setFieldFocused(true);
-    }
-    return () => setFieldFocused(false);
-  }, [disabled2, focusTargetRef, setFieldFocused]);
-  return setFieldFocused;
-}
-
-// node_modules/@base-ui/react/internals/field-register-control/useRegisterFieldControl.mjs
-function useRegisterFieldControl(controlRef, id, value, getFormValueOverride, enabled = true, name2) {
-  const {
-    registerFieldControl
-  } = useFieldRootContext();
-  const sourceRef = useRefWithInit(() => /* @__PURE__ */ Symbol());
-  useIsoLayoutEffect(() => {
-    const source = sourceRef.current;
-    if (!enabled) {
-      registerFieldControl(source, void 0);
-      return;
-    }
-    const registration = {
-      controlRef,
-      getValue: getFormValueOverride,
-      id,
-      name: name2,
-      value
-    };
-    registerFieldControl(source, registration);
-  }, [controlRef, enabled, getFormValueOverride, id, name2, registerFieldControl, sourceRef, value]);
-  useIsoLayoutEffect(() => {
-    const source = sourceRef.current;
-    return () => {
-      registerFieldControl(source, void 0);
-    };
-  }, [registerFieldControl, sourceRef]);
+// node_modules/@base-ui/react/fieldset/root/FieldsetRootContext.mjs
+var React12 = __toESM(require("react"), 1);
+var FieldsetRootContext = /* @__PURE__ */ React12.createContext(void 0);
+if (false) FieldsetRootContext.displayName = "FieldsetRootContext";
+function useFieldsetRootContext(optional = false) {
+  const context = React12.useContext(FieldsetRootContext);
+  if (!context && !optional) {
+    throw new Error(false ? "Base UI: FieldsetRootContext is missing. Fieldset parts must be placed within <Fieldset.Root>." : formatErrorMessage_default(86));
+  }
+  return context;
 }
 
 // node_modules/@base-ui/react/internals/form-context/FormContext.mjs
-var React16 = __toESM(require("react"), 1);
-var FormContext = /* @__PURE__ */ React16.createContext({
+var React13 = __toESM(require("react"), 1);
+var FormContext = /* @__PURE__ */ React13.createContext({
   elementRef: {
     current: null
   },
@@ -2951,12 +2787,58 @@ var FormContext = /* @__PURE__ */ React16.createContext({
 });
 if (false) FormContext.displayName = "FormContext";
 function useFormContext() {
-  return React16.useContext(FormContext);
+  return React13.useContext(FormContext);
+}
+
+// node_modules/@base-ui/react/internals/labelable-provider/LabelableProvider.mjs
+var React17 = __toESM(require("react"), 1);
+
+// node_modules/@base-ui/utils/useId.mjs
+var React15 = __toESM(require("react"), 1);
+
+// node_modules/@base-ui/utils/useForcedRerendering.mjs
+var React14 = __toESM(require("react"), 1);
+function useForcedRerendering() {
+  const [, setState] = React14.useState({});
+  return React14.useCallback(() => {
+    setState({});
+  }, []);
+}
+
+// node_modules/@base-ui/utils/useId.mjs
+var globalId = 0;
+function useGlobalId(idOverride, prefix = "mui") {
+  const defaultId = React15.useRef(void 0);
+  const forceRerender = useForcedRerendering();
+  const id = idOverride ?? defaultId.current;
+  React15.useEffect(() => {
+    if (defaultId.current == null) {
+      globalId += 1;
+      defaultId.current = `${prefix}-${globalId}`;
+      if (idOverride == null) {
+        forceRerender();
+      }
+    }
+  }, [idOverride, prefix, forceRerender]);
+  return id;
+}
+var maybeReactUseId = SafeReact.useId;
+function useId(idOverride, prefix) {
+  if (maybeReactUseId !== void 0) {
+    const reactId = maybeReactUseId();
+    return idOverride ?? (prefix ? `${prefix}-${reactId}` : reactId);
+  }
+  return useGlobalId(idOverride, prefix);
+}
+
+// node_modules/@base-ui/react/internals/useBaseUiId.mjs
+function useBaseUiId(idOverride) {
+  return useId(idOverride, "base-ui");
 }
 
 // node_modules/@base-ui/react/internals/labelable-provider/LabelableContext.mjs
-var React17 = __toESM(require("react"), 1);
-var LabelableContext = /* @__PURE__ */ React17.createContext({
+var React16 = __toESM(require("react"), 1);
+var LabelableContext = /* @__PURE__ */ React16.createContext({
   controlId: void 0,
   registerControlId: NOOP,
   resetControlId: NOOP,
@@ -2968,8 +2850,73 @@ var LabelableContext = /* @__PURE__ */ React17.createContext({
 });
 if (false) LabelableContext.displayName = "LabelableContext";
 function useLabelableContext() {
-  return React17.useContext(LabelableContext);
+  return React16.useContext(LabelableContext);
 }
+
+// node_modules/@base-ui/react/internals/labelable-provider/LabelableProvider.mjs
+var import_jsx_runtime2 = require("react/jsx-runtime");
+var LabelableProvider = function LabelableProvider2(props) {
+  const defaultId = useBaseUiId();
+  const [controlIdState, setControlIdState] = React17.useState(defaultId);
+  const [labelId, setLabelId] = React17.useState();
+  const [messageIds, setMessageIds] = React17.useState([]);
+  const controlId = controlIdState === void 0 ? defaultId : controlIdState;
+  const registrationsRef = useRefWithInit(() => /* @__PURE__ */ new Map());
+  const {
+    messageIds: parentMessageIds
+  } = useLabelableContext();
+  const registerControlId = useStableCallback((source, nextId) => {
+    const registrations = registrationsRef.current;
+    if (nextId === void 0) {
+      registrations.delete(source);
+    } else {
+      registrations.set(source, nextId);
+    }
+    setControlIdState((prev) => {
+      if (registrations.size === 0) {
+        return prev;
+      }
+      let nextControlId;
+      for (const id of registrations.values()) {
+        if (id === prev) {
+          return prev;
+        }
+        if (nextControlId === void 0) {
+          nextControlId = id;
+        }
+      }
+      return nextControlId;
+    });
+  });
+  const resetControlId = useStableCallback(() => {
+    if (registrationsRef.current.size === 0) {
+      setControlIdState(defaultId);
+    }
+  });
+  const getDescriptionProps = React17.useCallback((externalProps) => {
+    const ids = externalProps["aria-describedby"] ? externalProps["aria-describedby"].split(" ") : [];
+    ids.push(...parentMessageIds, ...messageIds);
+    return {
+      ...externalProps,
+      "aria-describedby": Array.from(new Set(ids)).join(" ") || void 0
+    };
+  }, [parentMessageIds, messageIds]);
+  const contextValue = React17.useMemo(() => ({
+    controlId,
+    registerControlId,
+    resetControlId,
+    labelId,
+    setLabelId,
+    messageIds,
+    setMessageIds,
+    getDescriptionProps
+  }), [controlId, registerControlId, resetControlId, labelId, setLabelId, messageIds, setMessageIds, getDescriptionProps]);
+  return /* @__PURE__ */ (0, import_jsx_runtime2.jsx)(LabelableContext.Provider, {
+    value: contextValue,
+    children: props.children
+  });
+};
+if (false) LabelableProvider.displayName = "LabelableProvider";
 
 // node_modules/@base-ui/react/internals/labelable-provider/useAriaLabelledBy.mjs
 var React18 = __toESM(require("react"), 1);
@@ -3066,825 +3013,6 @@ function useLabelableId(params = {}) {
     return unregisterControlId;
   }, [unregisterControlId]);
   return (enabled ? controlId : void 0) ?? id ?? defaultId;
-}
-
-// node_modules/@base-ui/react/internals/createBaseUIEventDetails.mjs
-function createChangeEventDetails(reason, event, trigger, customProperties) {
-  let canceled = false;
-  let allowPropagation = false;
-  const custom = customProperties ?? EMPTY_OBJECT;
-  const details = {
-    reason,
-    event: event ?? new Event("base-ui"),
-    cancel() {
-      canceled = true;
-    },
-    allowPropagation() {
-      allowPropagation = true;
-    },
-    get isCanceled() {
-      return canceled;
-    },
-    get isPropagationAllowed() {
-      return allowPropagation;
-    },
-    trigger,
-    ...custom
-  };
-  return details;
-}
-
-// node_modules/@base-ui/react/internals/reason-parts.mjs
-var reason_parts_exports = {};
-__export(reason_parts_exports, {
-  cancelOpen: () => cancelOpen,
-  chipRemovePress: () => chipRemovePress,
-  clearPress: () => clearPress,
-  closePress: () => closePress,
-  closeWatcher: () => closeWatcher,
-  decrementPress: () => decrementPress,
-  disabled: () => disabled,
-  drag: () => drag,
-  escapeKey: () => escapeKey,
-  focusOut: () => focusOut,
-  imperativeAction: () => imperativeAction,
-  incrementPress: () => incrementPress,
-  initial: () => initial,
-  inputBlur: () => inputBlur,
-  inputChange: () => inputChange,
-  inputClear: () => inputClear,
-  inputPaste: () => inputPaste,
-  inputPress: () => inputPress,
-  itemPress: () => itemPress,
-  keyboard: () => keyboard,
-  linkPress: () => linkPress,
-  listNavigation: () => listNavigation,
-  missing: () => missing,
-  none: () => none,
-  outsidePress: () => outsidePress,
-  pointer: () => pointer,
-  popupClose: () => popupClose,
-  scrub: () => scrub,
-  siblingOpen: () => siblingOpen,
-  swipe: () => swipe,
-  trackPress: () => trackPress,
-  triggerFocus: () => triggerFocus,
-  triggerHover: () => triggerHover,
-  triggerPress: () => triggerPress,
-  wheel: () => wheel,
-  windowResize: () => windowResize
-});
-var none = "none";
-var triggerPress = "trigger-press";
-var triggerHover = "trigger-hover";
-var triggerFocus = "trigger-focus";
-var outsidePress = "outside-press";
-var itemPress = "item-press";
-var closePress = "close-press";
-var linkPress = "link-press";
-var clearPress = "clear-press";
-var chipRemovePress = "chip-remove-press";
-var trackPress = "track-press";
-var incrementPress = "increment-press";
-var decrementPress = "decrement-press";
-var inputChange = "input-change";
-var inputClear = "input-clear";
-var inputBlur = "input-blur";
-var inputPaste = "input-paste";
-var inputPress = "input-press";
-var focusOut = "focus-out";
-var escapeKey = "escape-key";
-var closeWatcher = "close-watcher";
-var listNavigation = "list-navigation";
-var keyboard = "keyboard";
-var pointer = "pointer";
-var drag = "drag";
-var wheel = "wheel";
-var scrub = "scrub";
-var popupClose = "popup-close";
-var cancelOpen = "cancel-open";
-var siblingOpen = "sibling-open";
-var disabled = "disabled";
-var missing = "missing";
-var initial = "initial";
-var imperativeAction = "imperative-action";
-var swipe = "swipe";
-var windowResize = "window-resize";
-
-// node_modules/@base-ui/react/internals/useValueChanged.mjs
-var React20 = __toESM(require("react"), 1);
-function useValueChanged(value, onChange) {
-  const valueRef = React20.useRef(value);
-  const onChangeCallback = useStableCallback(onChange);
-  useIsoLayoutEffect(() => {
-    if (valueRef.current !== value) {
-      onChangeCallback(valueRef.current);
-    }
-    valueRef.current = value;
-  }, [value, onChangeCallback]);
-}
-
-// node_modules/@base-ui/react/switch/root/SwitchRoot.mjs
-var import_jsx_runtime2 = require("react/jsx-runtime");
-var SwitchRoot = /* @__PURE__ */ React21.forwardRef(function SwitchRoot2(componentProps, forwardedRef) {
-  const {
-    checked: checkedProp,
-    className,
-    defaultChecked,
-    "aria-labelledby": ariaLabelledByProp,
-    form,
-    id: idProp,
-    inputRef: externalInputRef,
-    name: nameProp,
-    nativeButton = false,
-    onCheckedChange,
-    readOnly = false,
-    required = false,
-    disabled: disabledProp = false,
-    render,
-    uncheckedValue,
-    value,
-    style,
-    ...elementProps
-  } = componentProps;
-  const {
-    clearErrors
-  } = useFormContext();
-  const {
-    state: fieldState,
-    setTouched,
-    setDirty,
-    validityData,
-    setFilled,
-    validationMode,
-    disabled: fieldDisabled,
-    name: fieldName,
-    validation
-  } = useFieldRootContext();
-  const {
-    labelId
-  } = useLabelableContext();
-  const disabled2 = fieldDisabled || disabledProp;
-  const name2 = fieldName ?? nameProp;
-  const inputRef = React21.useRef(null);
-  const handleInputRef = useMergedRefs(inputRef, externalInputRef, validation.inputRef);
-  const switchRef = React21.useRef(null);
-  const setFocused = useSetFieldFocused(disabled2, switchRef);
-  const id = useBaseUiId();
-  const controlId = useLabelableId({
-    id: idProp
-  });
-  const hiddenInputId = nativeButton ? void 0 : controlId;
-  const [checked2, setCheckedState] = useControlled({
-    controlled: checkedProp,
-    default: Boolean(defaultChecked),
-    name: "Switch",
-    state: "checked"
-  });
-  useRegisterFieldControl(switchRef, id, checked2, void 0, !disabled2, nameProp);
-  useIsoLayoutEffect(() => {
-    setFilled(checked2);
-  }, [checked2, setFilled]);
-  useValueChanged(checked2, () => {
-    clearErrors(name2);
-    setDirty(checked2 !== validityData.initialValue);
-    validation.change(checked2);
-  });
-  const {
-    getButtonProps,
-    buttonRef
-  } = useButton({
-    disabled: disabled2,
-    native: nativeButton
-  });
-  const ariaLabelledBy = useAriaLabelledBy(ariaLabelledByProp, labelId, inputRef, !nativeButton, hiddenInputId, elementProps["aria-label"]);
-  const rootProps = {
-    id: nativeButton ? controlId : id,
-    role: "switch",
-    "aria-checked": checked2,
-    "aria-readonly": readOnly || void 0,
-    "aria-required": required || void 0,
-    "aria-labelledby": ariaLabelledBy,
-    onFocus() {
-      setFocused(true);
-    },
-    onBlur() {
-      const element2 = inputRef.current;
-      if (!element2 || disabled2) {
-        return;
-      }
-      setTouched(true);
-      setFocused(false);
-      if (validationMode === "onBlur") {
-        validation.commit(element2.checked);
-      }
-    },
-    onClick(event) {
-      if (readOnly || disabled2) {
-        return;
-      }
-      event.preventDefault();
-      const input = inputRef.current;
-      if (!input) {
-        return;
-      }
-      dispatchClickWithModifiers(input, event);
-    }
-  };
-  const inputProps = {
-    ...validation.getValidationProps(disabled2),
-    checked: checked2,
-    disabled: disabled2,
-    form,
-    id: hiddenInputId,
-    name: name2,
-    required,
-    style: name2 ? visuallyHiddenInput : visuallyHidden,
-    tabIndex: -1,
-    type: "checkbox",
-    "aria-hidden": true,
-    ref: handleInputRef,
-    onChange(event) {
-      if (event.nativeEvent.defaultPrevented) {
-        return;
-      }
-      if (readOnly) {
-        event.preventDefault();
-        return;
-      }
-      const nextChecked = event.currentTarget.checked;
-      const eventDetails = createChangeEventDetails(reason_parts_exports.none, event.nativeEvent);
-      onCheckedChange?.(nextChecked, eventDetails);
-      if (eventDetails.isCanceled) {
-        return;
-      }
-      setCheckedState(nextChecked);
-    },
-    onClick(event) {
-      event.stopPropagation();
-    },
-    onFocus() {
-      switchRef.current?.focus();
-    },
-    // React <19 sets an empty value if `undefined` is passed explicitly
-    // To avoid this, we only set the value if it's defined
-    ...value !== void 0 ? {
-      value
-    } : EMPTY_OBJECT
-  };
-  const state = React21.useMemo(() => ({
-    ...fieldState,
-    checked: checked2,
-    disabled: disabled2,
-    readOnly,
-    required
-  }), [fieldState, checked2, disabled2, readOnly, required]);
-  const element = useRenderElement("span", componentProps, {
-    state,
-    ref: [forwardedRef, switchRef, buttonRef],
-    props: [rootProps, elementProps, getButtonProps, (props) => validation.getValidationProps(disabled2, props)],
-    stateAttributesMapping
-  });
-  return /* @__PURE__ */ (0, import_jsx_runtime2.jsxs)(SwitchRootContext.Provider, {
-    value: state,
-    children: [element, !checked2 && name2 && uncheckedValue !== void 0 && /* @__PURE__ */ (0, import_jsx_runtime2.jsx)("input", {
-      type: "hidden",
-      form,
-      name: name2,
-      value: uncheckedValue,
-      disabled: disabled2
-    }), /* @__PURE__ */ (0, import_jsx_runtime2.jsx)("input", {
-      ...inputProps,
-      suppressHydrationWarning: true
-    })]
-  });
-});
-if (false) SwitchRoot.displayName = "SwitchRoot";
-
-// node_modules/@base-ui/react/switch/thumb/SwitchThumb.mjs
-var React22 = __toESM(require("react"), 1);
-var SwitchThumb = /* @__PURE__ */ React22.forwardRef(function SwitchThumb2(componentProps, forwardedRef) {
-  const {
-    render,
-    className,
-    style,
-    ...elementProps
-  } = componentProps;
-  const state = useSwitchRootContext();
-  return useRenderElement("span", componentProps, {
-    state,
-    ref: forwardedRef,
-    stateAttributesMapping,
-    props: elementProps
-  });
-});
-if (false) SwitchThumb.displayName = "SwitchThumb";
-
-// components/ui/switch.tsx
-var import_jsx_runtime3 = require("react/jsx-runtime");
-function Switch({
-  className,
-  size = "default",
-  ...props
-}) {
-  return /* @__PURE__ */ (0, import_jsx_runtime3.jsx)(
-    index_parts_exports.Root,
-    {
-      "data-slot": "switch",
-      "data-size": size,
-      className: cn(
-        "peer group/switch relative inline-flex shrink-0 items-center rounded-full border border-transparent transition-all outline-none group-has-[:focus-visible]/field-label:border-transparent group-has-[:focus-visible]/field-label:ring-0 after:absolute after:-inset-x-3 after:-inset-y-2 focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 aria-invalid:border-destructive aria-invalid:ring-3 aria-invalid:ring-destructive/20 data-[size=default]:h-[18.4px] data-[size=default]:w-[32px] data-[size=sm]:h-[14px] data-[size=sm]:w-[24px] dark:aria-invalid:border-destructive/50 dark:aria-invalid:ring-destructive/40 data-checked:bg-primary data-unchecked:bg-input dark:data-unchecked:bg-input/80 data-disabled:cursor-not-allowed data-disabled:opacity-50",
-        className
-      ),
-      ...props,
-      children: /* @__PURE__ */ (0, import_jsx_runtime3.jsx)(
-        index_parts_exports.Thumb,
-        {
-          "data-slot": "switch-thumb",
-          className: "pointer-events-none block rounded-full bg-background ring-0 transition-transform group-data-[size=default]/switch:size-4 group-data-[size=sm]/switch:size-3 group-data-[size=default]/switch:data-checked:translate-x-[calc(100%-2px)] group-data-[size=sm]/switch:data-checked:translate-x-[calc(100%-2px)] dark:data-checked:bg-primary-foreground group-data-[size=default]/switch:data-unchecked:translate-x-0 group-data-[size=sm]/switch:data-unchecked:translate-x-0 dark:data-unchecked:bg-foreground"
-        }
-      )
-    }
-  );
-}
-
-// lib/idb.ts
-var DB_NAME = "lanpose";
-var DB_VERSION = 2;
-function openLanpose() {
-  return new Promise((resolve, reject) => {
-    const request = indexedDB.open(DB_NAME, DB_VERSION);
-    request.onupgradeneeded = () => {
-      const db = request.result;
-      if (!db.objectStoreNames.contains("characters")) db.createObjectStore("characters");
-      if (!db.objectStoreNames.contains("history")) db.createObjectStore("history", { keyPath: "id" });
-      if (!db.objectStoreNames.contains("customPoses")) db.createObjectStore("customPoses", { keyPath: "id" });
-      if (!db.objectStoreNames.contains("customCostumes")) db.createObjectStore("customCostumes", { keyPath: "id" });
-    };
-    request.onsuccess = () => resolve(request.result);
-    request.onerror = () => reject(request.error);
-  });
-}
-
-// lib/characters.ts
-var STORE = "characters";
-function openDb() {
-  return openLanpose();
-}
-async function readStoredCharacters() {
-  const db = await openDb();
-  try {
-    return await new Promise((resolve, reject) => {
-      const tx = db.transaction(STORE, "readonly");
-      const request = tx.objectStore(STORE).get("current");
-      request.onsuccess = () => {
-        const value = request.result;
-        resolve(Array.isArray(value) ? value : []);
-      };
-      request.onerror = () => reject(request.error);
-    });
-  } finally {
-    db.close();
-  }
-}
-async function writeStoredCharacters(images) {
-  const db = await openDb();
-  try {
-    await new Promise((resolve, reject) => {
-      const tx = db.transaction(STORE, "readwrite");
-      tx.objectStore(STORE).put(images, "current");
-      tx.oncomplete = () => resolve();
-      tx.onerror = () => reject(tx.error);
-    });
-  } finally {
-    db.close();
-  }
-}
-async function fileToCharacter(file) {
-  const bitmap = await createImageBitmap(file);
-  const maxEdge = 1280;
-  const scale = Math.min(1, maxEdge / Math.max(bitmap.width, bitmap.height));
-  const width = Math.max(1, Math.round(bitmap.width * scale));
-  const height = Math.max(1, Math.round(bitmap.height * scale));
-  const canvas = document.createElement("canvas");
-  canvas.width = width;
-  canvas.height = height;
-  const context = canvas.getContext("2d");
-  if (!context) throw new Error("无法读取这张图片");
-  context.drawImage(bitmap, 0, 0, width, height);
-  bitmap.close();
-  const blob = await new Promise((resolve) => canvas.toBlob(resolve, "image/jpeg", 0.86));
-  if (!blob) throw new Error("无法压缩这张图片");
-  const bytes = new Uint8Array(await blob.arrayBuffer());
-  let binary = "";
-  const chunk = 32768;
-  for (let index = 0; index < bytes.length; index += chunk) {
-    binary += String.fromCharCode(...bytes.subarray(index, index + chunk));
-  }
-  return {
-    id: crypto.randomUUID(),
-    mediaType: "image/jpeg",
-    dataBase64: btoa(binary)
-  };
-}
-
-// lib/studio-env.tsx
-var import_react5 = require("react");
-var import_jsx_runtime4 = require("react/jsx-runtime");
-var StudioEnvContext = (0, import_react5.createContext)({
-  basePath: "",
-  portalContainer: null
-});
-function StudioEnvProvider({
-  basePath,
-  portalContainer,
-  children
-}) {
-  return /* @__PURE__ */ (0, import_jsx_runtime4.jsx)(StudioEnvContext.Provider, { value: { basePath, portalContainer }, children });
-}
-function useStudioEnv() {
-  return (0, import_react5.useContext)(StudioEnvContext);
-}
-function studioUrl(basePath, path) {
-  if (!path.startsWith("/")) return path;
-  const base = basePath.endsWith("/") ? basePath.slice(0, -1) : basePath;
-  return `${base}${path}`;
-}
-
-// components/character-dock.tsx
-var import_jsx_runtime5 = require("react/jsx-runtime");
-function CharacterDock({
-  images,
-  onChange,
-  keepOutfit,
-  onKeepOutfit,
-  outfitLocked = false
-}) {
-  const inputRef = (0, import_react6.useRef)(null);
-  const { basePath } = useStudioEnv();
-  const [error, setError] = (0, import_react6.useState)("");
-  const [busy, setBusy] = (0, import_react6.useState)(false);
-  const custom = images.length > 0;
-  const portrait = custom ? `data:${images[0].mediaType};base64,${images[0].dataBase64}` : studioUrl(basePath, "/muse/dafeiyu-portrait.jpg");
-  const full = custom ? portrait : studioUrl(basePath, "/muse/dafeiyu-sheet.png");
-  async function addFiles(list) {
-    if (!list || list.length === 0) return;
-    setBusy(true);
-    setError("");
-    try {
-      const next = [...images];
-      for (const file of Array.from(list)) {
-        if (next.length >= 3) break;
-        if (!file.type.startsWith("image/")) continue;
-        next.push(await fileToCharacter(file));
-      }
-      if (next.length === images.length) setError("没有读到可用的图片");
-      else onChange(next.slice(0, 3));
-    } catch (cause) {
-      setError(cause instanceof Error ? cause.message : "图片导入失败");
-    } finally {
-      setBusy(false);
-      if (inputRef.current) inputRef.current.value = "";
-    }
-  }
-  return /* @__PURE__ */ (0, import_jsx_runtime5.jsxs)("aside", { className: "dock order-1 flex shrink-0 flex-col gap-3 px-3 py-3 text-[#e2e8f0] @min-[1024px]/studio:order-none @min-[1024px]/studio:h-full @min-[1024px]/studio:min-h-0 @min-[1024px]/studio:shrink @min-[1024px]/studio:gap-4 @min-[1024px]/studio:overflow-y-auto @min-[1024px]/studio:px-4 @min-[1024px]/studio:py-5", children: [
-    /* @__PURE__ */ (0, import_jsx_runtime5.jsxs)("div", { className: "flex items-center gap-3", children: [
-      /* @__PURE__ */ (0, import_jsx_runtime5.jsx)("img", { src: portrait, alt: "", className: "size-14 shrink-0 rounded-xl object-cover object-top @min-[1024px]/studio:hidden" }),
-      /* @__PURE__ */ (0, import_jsx_runtime5.jsxs)("div", { className: "min-w-0 flex-1", children: [
-        /* @__PURE__ */ (0, import_jsx_runtime5.jsx)("h2", { className: "text-lg font-semibold text-white @min-[1024px]/studio:text-2xl", children: custom ? "导入的模特" : "大肥鱼" }),
-        /* @__PURE__ */ (0, import_jsx_runtime5.jsx)("p", { className: "mt-0.5 line-clamp-2 text-xs leading-5 text-[#cbd5e1] @min-[1024px]/studio:mt-2 @min-[1024px]/studio:text-sm @min-[1024px]/studio:leading-6", children: custom ? "生图时改用你导入的参考图。" : "社区鲸鱼娘的成年形象，不是 DeepSeek 官方吉祥物。" })
-      ] }),
-      /* @__PURE__ */ (0, import_jsx_runtime5.jsxs)(
-        Button3,
-        {
-          variant: "outline",
-          size: "sm",
-          className: "shrink border-white/20 bg-white/10 text-white hover:bg-white/15 hover:text-white @min-[1024px]/studio:hidden",
-          disabled: busy || images.length >= 3,
-          onClick: () => inputRef.current?.click(),
-          children: [
-            /* @__PURE__ */ (0, import_jsx_runtime5.jsx)(ImagePlus, {}),
-            busy ? "读图" : "导入"
-          ]
-        }
-      )
-    ] }),
-    /* @__PURE__ */ (0, import_jsx_runtime5.jsx)("img", { src: portrait, alt: custom ? "导入的模特头像" : "大肥鱼的正面全身像，蓝发、鲸耳、蓝白女仆装", className: "hidden aspect-[3/4] w-full rounded-xl object-cover object-top @min-[1024px]/studio:block" }),
-    /* @__PURE__ */ (0, import_jsx_runtime5.jsx)("p", { className: "hidden text-sm leading-6 text-[#cbd5e1] @min-[1024px]/studio:block", children: custom ? "参考图会和姿势线稿一起交给模型。请使用成年人物的图片。" : "长波浪蓝发、鲸耳和蓝鲸尾。三视图锁住脸和鲸尾，衣服可以换成衣装集里的一套。" }),
-    !custom ? /* @__PURE__ */ (0, import_jsx_runtime5.jsx)("img", { src: full, alt: "大肥鱼的成年三视图：正面、侧面、背面，以及头饰和裙摆细节", className: "hidden max-h-56 rounded-xl bg-white object-contain @min-[1024px]/studio:block" }) : /* @__PURE__ */ (0, import_jsx_runtime5.jsx)("div", { className: "grid grid-cols-3 gap-2", children: images.map((image) => /* @__PURE__ */ (0, import_jsx_runtime5.jsxs)("div", { className: "relative", children: [
-      /* @__PURE__ */ (0, import_jsx_runtime5.jsx)("img", { src: `data:${image.mediaType};base64,${image.dataBase64}`, alt: "导入的模特参考", className: "aspect-[3/4] w-full rounded-lg object-cover" }),
-      /* @__PURE__ */ (0, import_jsx_runtime5.jsx)(
-        "button",
-        {
-          type: "button",
-          className: "absolute top-1 right-1 rounded-full bg-black/60 px-1.5 text-[10px] text-white",
-          onClick: () => onChange(images.filter((item) => item.id !== image.id)),
-          children: "移除"
-        }
-      )
-    ] }, image.id)) }),
-    /* @__PURE__ */ (0, import_jsx_runtime5.jsx)(
-      "input",
-      {
-        ref: inputRef,
-        type: "file",
-        accept: "image/png,image/jpeg,image/webp",
-        multiple: true,
-        className: "sr-only",
-        onChange: (event) => void addFiles(event.target.files)
-      }
-    ),
-    /* @__PURE__ */ (0, import_jsx_runtime5.jsxs)(
-      Button3,
-      {
-        variant: "outline",
-        className: "hidden border-white/20 bg-white/10 text-white hover:bg-white/15 hover:text-white @min-[1024px]/studio:inline-flex",
-        disabled: busy || images.length >= 3,
-        onClick: () => inputRef.current?.click(),
-        children: [
-          /* @__PURE__ */ (0, import_jsx_runtime5.jsx)(ImagePlus, {}),
-          busy ? "正在读图" : images.length ? "再加一张参考" : "导入其他模特"
-        ]
-      }
-    ),
-    custom ? /* @__PURE__ */ (0, import_jsx_runtime5.jsxs)(Button3, { variant: "ghost", className: "text-[#e2e8f0] hover:bg-white/10 hover:text-white", onClick: () => onChange([]), children: [
-      /* @__PURE__ */ (0, import_jsx_runtime5.jsx)(RotateCcw, {}),
-      "恢复默认模特大肥鱼"
-    ] }) : null,
-    error ? /* @__PURE__ */ (0, import_jsx_runtime5.jsx)("p", { className: "text-sm text-[#fecaca]", children: error }) : null,
-    /* @__PURE__ */ (0, import_jsx_runtime5.jsxs)("label", { className: "mt-auto flex items-center justify-between gap-3 rounded-xl bg-white/10 px-3 py-2.5 text-sm @min-[1024px]/studio:py-3", children: [
-      /* @__PURE__ */ (0, import_jsx_runtime5.jsxs)("span", { className: "min-w-0", children: [
-        /* @__PURE__ */ (0, import_jsx_runtime5.jsx)("span", { className: "block text-white", children: "保持服装" }),
-        /* @__PURE__ */ (0, import_jsx_runtime5.jsx)("span", { className: "mt-1 block text-xs leading-5 text-[#cbd5e1] @min-[640px]/studio:hidden", children: outfitLocked ? "已选服装优先，这个开关先让位。" : "只借姿势，不借线稿里的身体。" }),
-        /* @__PURE__ */ (0, import_jsx_runtime5.jsx)("span", { className: "mt-1 hidden text-xs leading-5 text-[#cbd5e1] @min-[640px]/studio:block", children: outfitLocked ? "已经选了一套衣服，生图会换成它。取消这套之后，这里的开关重新生效。" : "只借姿势，不借线稿里的身体。关掉后可在补充描述里换衣服。" })
-      ] }),
-      /* @__PURE__ */ (0, import_jsx_runtime5.jsx)(Switch, { checked: outfitLocked ? false : keepOutfit, onCheckedChange: onKeepOutfit, disabled: outfitLocked, "aria-label": "保持服装" })
-    ] })
-  ] });
-}
-
-// components/history-panel.tsx
-var import_react7 = require("react");
-
-// node_modules/@base-ui/react/dialog/index.parts.mjs
-var index_parts_exports2 = {};
-__export(index_parts_exports2, {
-  Backdrop: () => DialogBackdrop,
-  Close: () => DialogClose,
-  Description: () => DialogDescription,
-  Handle: () => DialogHandle,
-  Popup: () => DialogPopup,
-  Portal: () => DialogPortal,
-  Root: () => DialogRoot,
-  Title: () => DialogTitle,
-  Trigger: () => DialogTrigger,
-  Viewport: () => DialogViewport,
-  createHandle: () => createDialogHandle
-});
-
-// node_modules/@base-ui/react/dialog/backdrop/DialogBackdrop.mjs
-var React24 = __toESM(require("react"), 1);
-
-// node_modules/@base-ui/react/dialog/root/DialogRootContext.mjs
-var React23 = __toESM(require("react"), 1);
-var DialogRootContext = /* @__PURE__ */ React23.createContext(void 0);
-if (false) DialogRootContext.displayName = "DialogRootContext";
-function useDialogRootContext(optional) {
-  const store = React23.useContext(DialogRootContext);
-  if (!optional && store === void 0) {
-    throw new Error(false ? "Base UI: DialogRootContext is missing. Dialog parts must be placed within <Dialog.Root>." : formatErrorMessage_default(27));
-  }
-  return store;
-}
-
-// node_modules/@base-ui/react/internals/TransitionStatusDataAttributes.mjs
-var startingStyle = "data-starting-style";
-var endingStyle = "data-ending-style";
-
-// node_modules/@base-ui/react/internals/stateAttributesMapping.mjs
-var STARTING_HOOK = {
-  [startingStyle]: ""
-};
-var ENDING_HOOK = {
-  [endingStyle]: ""
-};
-var transitionStatusMapping = {
-  transitionStatus(value) {
-    if (value === "starting") {
-      return STARTING_HOOK;
-    }
-    if (value === "ending") {
-      return ENDING_HOOK;
-    }
-    return null;
-  }
-};
-
-// node_modules/@base-ui/react/utils/CommonPopupDataAttributes.mjs
-var CommonPopupDataAttributes_exports = {};
-__export(CommonPopupDataAttributes_exports, {
-  align: () => align,
-  anchorHidden: () => anchorHidden,
-  closed: () => closed,
-  endingStyle: () => endingStyle2,
-  open: () => open,
-  side: () => side,
-  startingStyle: () => startingStyle2
-});
-var open = "data-open";
-var closed = "data-closed";
-var startingStyle2 = startingStyle;
-var endingStyle2 = endingStyle;
-var anchorHidden = "data-anchor-hidden";
-var side = "data-side";
-var align = "data-align";
-
-// node_modules/@base-ui/react/utils/CommonTriggerDataAttributes.mjs
-var popupOpen = "data-popup-open";
-var pressed = "data-pressed";
-
-// node_modules/@base-ui/react/utils/popupStateMapping.mjs
-var TRIGGER_HOOK = {
-  [popupOpen]: ""
-};
-var PRESSABLE_TRIGGER_HOOK = {
-  [popupOpen]: "",
-  [pressed]: ""
-};
-var POPUP_OPEN_HOOK = {
-  [open]: ""
-};
-var POPUP_CLOSED_HOOK = {
-  [closed]: ""
-};
-var ANCHOR_HIDDEN_HOOK = {
-  [anchorHidden]: ""
-};
-var triggerOpenStateMapping = {
-  open(value) {
-    if (value) {
-      return TRIGGER_HOOK;
-    }
-    return null;
-  }
-};
-var popupStateMapping = {
-  open(value) {
-    if (value) {
-      return POPUP_OPEN_HOOK;
-    }
-    return POPUP_CLOSED_HOOK;
-  },
-  anchorHidden(value) {
-    if (value) {
-      return ANCHOR_HIDDEN_HOOK;
-    }
-    return null;
-  }
-};
-var popupTransitionStateMapping = {
-  ...popupStateMapping,
-  ...transitionStatusMapping
-};
-
-// node_modules/@base-ui/react/dialog/backdrop/DialogBackdrop.mjs
-var DialogBackdrop = /* @__PURE__ */ React24.forwardRef(function DialogBackdrop2(componentProps, forwardedRef) {
-  const {
-    render,
-    className,
-    style,
-    forceRender = false,
-    ...elementProps
-  } = componentProps;
-  const store = useDialogRootContext();
-  const open3 = store.useState("open");
-  const nested = store.useState("nested");
-  const mounted = store.useState("mounted");
-  const transitionStatus = store.useState("transitionStatus");
-  const state = {
-    open: open3,
-    transitionStatus
-  };
-  return useRenderElement("div", componentProps, {
-    state,
-    ref: [store.context.backdropRef, forwardedRef],
-    stateAttributesMapping: popupTransitionStateMapping,
-    props: [{
-      role: "presentation",
-      hidden: !mounted,
-      style: {
-        userSelect: "none",
-        WebkitUserSelect: "none"
-      }
-    }, elementProps],
-    enabled: forceRender || !nested
-  });
-});
-if (false) DialogBackdrop.displayName = "DialogBackdrop";
-
-// node_modules/@base-ui/react/dialog/close/DialogClose.mjs
-var React25 = __toESM(require("react"), 1);
-var DialogClose = /* @__PURE__ */ React25.forwardRef(function DialogClose2(componentProps, forwardedRef) {
-  const {
-    render,
-    className,
-    style,
-    disabled: disabled2 = false,
-    nativeButton = true,
-    ...elementProps
-  } = componentProps;
-  const store = useDialogRootContext();
-  const open3 = store.useState("open");
-  const {
-    getButtonProps,
-    buttonRef
-  } = useButton({
-    disabled: disabled2,
-    native: nativeButton
-  });
-  const state = {
-    disabled: disabled2
-  };
-  function handleClick(event) {
-    if (open3) {
-      store.setOpen(false, createChangeEventDetails(reason_parts_exports.closePress, event.nativeEvent));
-    }
-  }
-  return useRenderElement("button", componentProps, {
-    state,
-    ref: [forwardedRef, buttonRef],
-    props: [{
-      onClick: handleClick
-    }, elementProps, getButtonProps]
-  });
-});
-if (false) DialogClose.displayName = "DialogClose";
-
-// node_modules/@base-ui/react/dialog/description/DialogDescription.mjs
-var React26 = __toESM(require("react"), 1);
-var DialogDescription = /* @__PURE__ */ React26.forwardRef(function DialogDescription2(componentProps, forwardedRef) {
-  const {
-    render,
-    className,
-    style,
-    id: idProp,
-    ...elementProps
-  } = componentProps;
-  const store = useDialogRootContext();
-  const id = useBaseUiId(idProp);
-  store.useSyncedValueWithCleanup("descriptionElementId", id);
-  return useRenderElement("p", componentProps, {
-    ref: forwardedRef,
-    props: [{
-      id
-    }, elementProps]
-  });
-});
-if (false) DialogDescription.displayName = "DialogDescription";
-
-// node_modules/@base-ui/react/dialog/popup/DialogPopup.mjs
-var React43 = __toESM(require("react"), 1);
-
-// node_modules/@base-ui/utils/useOnMount.mjs
-var React27 = __toESM(require("react"), 1);
-function useOnMount(fn) {
-  React27.useEffect(fn, EMPTY_ARRAY);
-}
-
-// node_modules/@base-ui/utils/useTimeout.mjs
-var EMPTY = 0;
-var Timeout = class _Timeout {
-  static create() {
-    return new _Timeout();
-  }
-  currentId = EMPTY;
-  /**
-   * Executes `fn` after `delay`, clearing any previously scheduled call.
-   */
-  start(delay, fn) {
-    this.clear();
-    this.currentId = setTimeout(() => {
-      this.currentId = EMPTY;
-      fn();
-    }, delay);
-  }
-  isStarted() {
-    return this.currentId !== EMPTY;
-  }
-  clear = () => {
-    if (this.currentId !== EMPTY) {
-      clearTimeout(this.currentId);
-      this.currentId = EMPTY;
-    }
-  };
-  disposeEffect = () => {
-    return this.clear;
-  };
-};
-function useTimeout() {
-  const timeout = useRefWithInit(Timeout.create).current;
-  useOnMount(timeout.disposeEffect);
-  return timeout;
 }
 
 // node_modules/@base-ui/utils/platform/parts.mjs
@@ -3985,45 +3113,6 @@ __export(media_query_exports, {
 });
 var iOS = "@supports (-webkit-touch-callout: none)";
 
-// node_modules/@base-ui/react/floating-ui-react/utils/event.mjs
-function stopEvent(event) {
-  event.preventDefault();
-  event.stopPropagation();
-}
-function isReactEvent(event) {
-  return "nativeEvent" in event;
-}
-function isVirtualClick(event) {
-  if (event.pointerType === "" && event.isTrusted) {
-    return true;
-  }
-  if (parts_exports.os.android && event.pointerType) {
-    return event.type === "click" && event.buttons === 1;
-  }
-  return event.detail === 0 && !event.pointerType;
-}
-function isVirtualPointerEvent(event) {
-  if (parts_exports.env.jsdom) {
-    return false;
-  }
-  return !parts_exports.os.android && event.width === 0 && event.height === 0 || // Chrome synthesizes a screen reader press (TalkBack, VoiceOver, NVDA) as a 1x1 mouse
-  // `pointerdown` with no pressure. TalkBack can report a pressed button, while desktop
-  // mouse presses can report no pressure, so only require no pressed button off Android.
-  event.type === "pointerdown" && event.width === 1 && event.height === 1 && event.pressure === 0 && event.detail === 0 && event.pointerType === "mouse" && (parts_exports.os.android || event.buttons === 0) || // iOS VoiceOver returns 0.333• for width/height.
-  event.width < 1 && event.height < 1 && event.pressure === 0 && event.detail === 0 && event.pointerType === "touch";
-}
-function isMouseLikePointerType(pointerType, strict) {
-  const values = ["mouse", "pen"];
-  if (!strict) {
-    values.push("", void 0);
-  }
-  return values.includes(pointerType);
-}
-function isClickLikeEvent(event) {
-  const type = event.type;
-  return type === "click" || type === "mousedown" || type === "keydown" || type === "keyup";
-}
-
 // node_modules/@base-ui/utils/shadowDom.mjs
 function activeElement(doc) {
   let element = doc.activeElement;
@@ -4072,6 +3161,96 @@ function getTarget(event) {
 var FOCUSABLE_ATTRIBUTE = "data-base-ui-focusable";
 var TYPEABLE_SELECTOR = "input:not([type='hidden']):not([disabled]),[contenteditable]:not([contenteditable='false']),textarea:not([disabled])";
 
+// node_modules/@base-ui/react/internals/TransitionStatusDataAttributes.mjs
+var startingStyle = "data-starting-style";
+var endingStyle = "data-ending-style";
+
+// node_modules/@base-ui/react/internals/stateAttributesMapping.mjs
+var STARTING_HOOK = {
+  [startingStyle]: ""
+};
+var ENDING_HOOK = {
+  [endingStyle]: ""
+};
+var transitionStatusMapping = {
+  transitionStatus(value) {
+    if (value === "starting") {
+      return STARTING_HOOK;
+    }
+    if (value === "ending") {
+      return ENDING_HOOK;
+    }
+    return null;
+  }
+};
+
+// node_modules/@base-ui/react/utils/CommonPopupDataAttributes.mjs
+var CommonPopupDataAttributes_exports = {};
+__export(CommonPopupDataAttributes_exports, {
+  align: () => align,
+  anchorHidden: () => anchorHidden,
+  closed: () => closed,
+  endingStyle: () => endingStyle2,
+  open: () => open,
+  side: () => side,
+  startingStyle: () => startingStyle2
+});
+var open = "data-open";
+var closed = "data-closed";
+var startingStyle2 = startingStyle;
+var endingStyle2 = endingStyle;
+var anchorHidden = "data-anchor-hidden";
+var side = "data-side";
+var align = "data-align";
+
+// node_modules/@base-ui/react/utils/CommonTriggerDataAttributes.mjs
+var popupOpen = "data-popup-open";
+var pressed = "data-pressed";
+
+// node_modules/@base-ui/react/utils/popupStateMapping.mjs
+var TRIGGER_HOOK = {
+  [popupOpen]: ""
+};
+var PRESSABLE_TRIGGER_HOOK = {
+  [popupOpen]: "",
+  [pressed]: ""
+};
+var POPUP_OPEN_HOOK = {
+  [open]: ""
+};
+var POPUP_CLOSED_HOOK = {
+  [closed]: ""
+};
+var ANCHOR_HIDDEN_HOOK = {
+  [anchorHidden]: ""
+};
+var triggerOpenStateMapping = {
+  open(value) {
+    if (value) {
+      return TRIGGER_HOOK;
+    }
+    return null;
+  }
+};
+var popupStateMapping = {
+  open(value) {
+    if (value) {
+      return POPUP_OPEN_HOOK;
+    }
+    return POPUP_CLOSED_HOOK;
+  },
+  anchorHidden(value) {
+    if (value) {
+      return ANCHOR_HIDDEN_HOOK;
+    }
+    return null;
+  }
+};
+var popupTransitionStateMapping = {
+  ...popupStateMapping,
+  ...transitionStatusMapping
+};
+
 // node_modules/@base-ui/react/floating-ui-react/utils/element.mjs
 function isEventTargetWithin(event, node) {
   if (node == null) {
@@ -4102,163 +3281,62 @@ function getFloatingFocusElement(floatingElement) {
   return floatingElement.hasAttribute(FOCUSABLE_ATTRIBUTE) ? floatingElement : floatingElement.querySelector(`[${FOCUSABLE_ATTRIBUTE}]`) || floatingElement;
 }
 
-// node_modules/@base-ui/react/floating-ui-react/components/FloatingFocusManager.mjs
-var React31 = __toESM(require("react"), 1);
-
-// node_modules/@base-ui/utils/addEventListener.mjs
-function addEventListener(target, type, listener, options) {
-  target.addEventListener(type, listener, options);
-  return () => {
-    target.removeEventListener(type, listener, options);
-  };
+// node_modules/@base-ui/react/floating-ui-react/utils/nodes.mjs
+function getNodeChildren(nodes, id, onlyOpenChildren = true) {
+  const directChildren = nodes.filter((node) => node.parentId === id);
+  return directChildren.flatMap((child) => [...!onlyOpenChildren || child.context?.open ? [child] : [], ...getNodeChildren(nodes, child.id, onlyOpenChildren)]);
+}
+function getNodeAncestors(nodes, id) {
+  let allAncestors = [];
+  let currentParentId = nodes.find((node) => node.id === id)?.parentId;
+  while (currentParentId) {
+    const currentNode = nodes.find((node) => node.id === currentParentId);
+    currentParentId = currentNode?.parentId;
+    if (currentNode) {
+      allAncestors = allAncestors.concat(currentNode);
+    }
+  }
+  return allAncestors;
 }
 
-// node_modules/@base-ui/utils/mergeCleanups.mjs
-function mergeCleanups(...cleanups) {
-  return () => {
-    for (let i = 0; i < cleanups.length; i += 1) {
-      const cleanup = cleanups[i];
-      if (cleanup) {
-        cleanup();
-      }
-    }
-  };
+// node_modules/@base-ui/react/floating-ui-react/utils/event.mjs
+function stopEvent(event) {
+  event.preventDefault();
+  event.stopPropagation();
 }
-
-// node_modules/@base-ui/utils/useValueAsRef.mjs
-function useValueAsRef(value) {
-  const latest = useRefWithInit(createLatestRef, value).current;
-  latest.next = value;
-  useIsoLayoutEffect(latest.effect);
-  return latest;
+function isReactEvent(event) {
+  return "nativeEvent" in event;
 }
-function createLatestRef(value) {
-  const latest = {
-    current: value,
-    next: value,
-    effect: () => {
-      latest.current = latest.next;
-    }
-  };
-  return latest;
+function isVirtualClick(event) {
+  if (event.pointerType === "" && event.isTrusted) {
+    return true;
+  }
+  if (parts_exports.os.android && event.pointerType) {
+    return event.type === "click" && event.buttons === 1;
+  }
+  return event.detail === 0 && !event.pointerType;
 }
-
-// node_modules/@base-ui/utils/useAnimationFrame.mjs
-var EMPTY2 = null;
-var LAST_RAF = globalThis.requestAnimationFrame;
-var Scheduler = class {
-  /* This implementation uses an array as a backing data-structure for frame callbacks.
-   * It allows `O(1)` callback cancelling by inserting a `null` in the array, though it
-   * never calls the native `cancelAnimationFrame` if there are no frames left. This can
-   * be much more efficient if there is a call pattern that alterns as
-   * "request-cancel-request-cancel-…".
-   * But in the case of "request-request-…-cancel-cancel-…", it leaves the final animation
-   * frame to run anyway. We turn that frame into a `O(1)` no-op via `callbacksCount`. */
-  callbacks = [];
-  callbacksCount = 0;
-  nextId = 1;
-  startId = 1;
-  isScheduled = false;
-  tick = (timestamp) => {
-    this.isScheduled = false;
-    const currentCallbacks = this.callbacks;
-    const currentCallbacksCount = this.callbacksCount;
-    this.callbacks = [];
-    this.callbacksCount = 0;
-    this.startId = this.nextId;
-    if (currentCallbacksCount > 0) {
-      for (let i = 0; i < currentCallbacks.length; i += 1) {
-        currentCallbacks[i]?.(timestamp);
-      }
-    }
-  };
-  request(fn) {
-    const id = this.nextId;
-    this.nextId += 1;
-    this.callbacks.push(fn);
-    this.callbacksCount += 1;
-    const didRAFChange = false;
-    if (!this.isScheduled || didRAFChange) {
-      requestAnimationFrame(this.tick);
-      this.isScheduled = true;
-    }
-    return id;
+function isVirtualPointerEvent(event) {
+  if (parts_exports.env.jsdom) {
+    return false;
   }
-  cancel(id) {
-    const index = id - this.startId;
-    if (index < 0 || index >= this.callbacks.length) {
-      return;
-    }
-    if (this.callbacks[index] === null) {
-      return;
-    }
-    this.callbacks[index] = null;
-    this.callbacksCount -= 1;
-  }
-};
-var scheduler = new Scheduler();
-var AnimationFrame = class _AnimationFrame {
-  static create() {
-    return new _AnimationFrame();
-  }
-  static request(fn) {
-    return scheduler.request(fn);
-  }
-  static cancel(id) {
-    return scheduler.cancel(id);
-  }
-  currentId = EMPTY2;
-  /**
-   * Executes `fn` after `delay`, clearing any previously scheduled call.
-   */
-  request(fn) {
-    this.cancel();
-    this.currentId = scheduler.request(() => {
-      this.currentId = EMPTY2;
-      fn();
-    });
-  }
-  cancel = () => {
-    if (this.currentId !== EMPTY2) {
-      scheduler.cancel(this.currentId);
-      this.currentId = EMPTY2;
-    }
-  };
-  disposeEffect = () => {
-    return this.cancel;
-  };
-};
-function useAnimationFrame() {
-  const timeout = useRefWithInit(AnimationFrame.create).current;
-  useOnMount(timeout.disposeEffect);
-  return timeout;
+  return !parts_exports.os.android && event.width === 0 && event.height === 0 || // Chrome synthesizes a screen reader press (TalkBack, VoiceOver, NVDA) as a 1x1 mouse
+  // `pointerdown` with no pressure. TalkBack can report a pressed button, while desktop
+  // mouse presses can report no pressure, so only require no pressed button off Android.
+  event.type === "pointerdown" && event.width === 1 && event.height === 1 && event.pressure === 0 && event.detail === 0 && event.pointerType === "mouse" && (parts_exports.os.android || event.buttons === 0) || // iOS VoiceOver returns 0.333• for width/height.
+  event.width < 1 && event.height < 1 && event.pressure === 0 && event.detail === 0 && event.pointerType === "touch";
 }
-
-// node_modules/@base-ui/react/utils/FocusGuard.mjs
-var React28 = __toESM(require("react"), 1);
-var import_jsx_runtime6 = require("react/jsx-runtime");
-var FocusGuard = /* @__PURE__ */ React28.forwardRef(function FocusGuard2(props, ref) {
-  const [role, setRole] = React28.useState();
-  useIsoLayoutEffect(() => {
-    if (parts_exports.screenReader.voiceOver && parts_exports.engine.webkit) {
-      setRole("button");
-    }
-  }, []);
-  const restProps = {
-    tabIndex: 0,
-    // Role is only for VoiceOver
-    role
-  };
-  return /* @__PURE__ */ (0, import_jsx_runtime6.jsx)("span", {
-    ...props,
-    ref,
-    style: visuallyHidden,
-    "aria-hidden": role ? void 0 : true,
-    ...restProps,
-    "data-base-ui-focus-guard": ""
-  });
-});
-if (false) FocusGuard.displayName = "FocusGuard";
+function isMouseLikePointerType(pointerType, strict) {
+  const values = ["mouse", "pen"];
+  if (!strict) {
+    values.push("", void 0);
+  }
+  return values.includes(pointerType);
+}
+function isClickLikeEvent(event) {
+  const type = event.type;
+  return type === "click" || type === "mousedown" || type === "keydown" || type === "keyup";
+}
 
 // node_modules/@base-ui/react/floating-ui-react/utils/composite.mjs
 function isHiddenByStyles(styles) {
@@ -4445,23 +3523,2368 @@ function enableFocusInside(container) {
   });
 }
 
-// node_modules/@base-ui/react/floating-ui-react/utils/nodes.mjs
-function getNodeChildren(nodes, id, onlyOpenChildren = true) {
-  const directChildren = nodes.filter((node) => node.parentId === id);
-  return directChildren.flatMap((child) => [...!onlyOpenChildren || child.context?.open ? [child] : [], ...getNodeChildren(nodes, child.id, onlyOpenChildren)]);
+// node_modules/@base-ui/react/utils/useRegisteredLabelId.mjs
+function useRegisteredLabelId(idProp, setLabelId) {
+  const id = useBaseUiId(idProp);
+  useIsoLayoutEffect(() => {
+    setLabelId(id);
+    return () => {
+      setLabelId((currentId) => currentId === id ? void 0 : currentId);
+    };
+  }, [id, setLabelId]);
+  return id;
 }
-function getNodeAncestors(nodes, id) {
-  let allAncestors = [];
-  let currentParentId = nodes.find((node) => node.id === id)?.parentId;
-  while (currentParentId) {
-    const currentNode = nodes.find((node) => node.id === currentParentId);
-    currentParentId = currentNode?.parentId;
-    if (currentNode) {
-      allAncestors = allAncestors.concat(currentNode);
+
+// node_modules/@base-ui/react/internals/labelable-provider/useLabel.mjs
+function useLabel(params = {}) {
+  const {
+    id: idProp,
+    fallbackControlId,
+    native = false,
+    setLabelId: setLabelIdProp,
+    focusControl: focusControlProp
+  } = params;
+  const {
+    controlId: contextControlId,
+    setLabelId: setContextLabelId
+  } = useLabelableContext();
+  const syncLabelId = useStableCallback((nextLabelId) => {
+    setContextLabelId(nextLabelId);
+    setLabelIdProp?.(nextLabelId);
+  });
+  const id = useRegisteredLabelId(idProp, syncLabelId);
+  const resolvedControlId = contextControlId ?? fallbackControlId;
+  function focusControl(event) {
+    if (focusControlProp) {
+      focusControlProp(event, resolvedControlId);
+      return;
+    }
+    if (!resolvedControlId) {
+      return;
+    }
+    const controlElement = getControlById(event.currentTarget, resolvedControlId);
+    if (isHTMLElement(controlElement)) {
+      focusElementWithVisible(controlElement);
     }
   }
-  return allAncestors;
+  function handleInteraction(event) {
+    const target = getTarget(event.nativeEvent);
+    if (closest(target, "button,input,select,textarea")) {
+      return;
+    }
+    if (!event.defaultPrevented && event.detail > 1) {
+      event.preventDefault();
+    }
+    if (native) {
+      return;
+    }
+    focusControl(event);
+  }
+  return native ? {
+    id,
+    htmlFor: resolvedControlId,
+    onMouseDown: handleInteraction
+  } : {
+    id,
+    onClick: handleInteraction,
+    onPointerDown(event) {
+      event.preventDefault();
+    }
+  };
 }
+function getControlById(label, id) {
+  let root = label.getRootNode();
+  while (isShadowRoot(root)) {
+    const element = root.getElementById(id);
+    if (element) {
+      return element;
+    }
+    root = root.host.getRootNode();
+  }
+  return ownerDocument(label).getElementById(id);
+}
+function focusElementWithVisible(element) {
+  element.focus({
+    // Available from Chrome 144+ (January 2026).
+    // Safari and Firefox already support it.
+    focusVisible: true
+  });
+}
+
+// node_modules/@base-ui/react/field/root/useFieldValidation.mjs
+var React21 = __toESM(require("react"), 1);
+
+// node_modules/@base-ui/utils/useOnMount.mjs
+var React20 = __toESM(require("react"), 1);
+function useOnMount(fn) {
+  React20.useEffect(fn, EMPTY_ARRAY);
+}
+
+// node_modules/@base-ui/utils/useTimeout.mjs
+var EMPTY = 0;
+var Timeout = class _Timeout {
+  static create() {
+    return new _Timeout();
+  }
+  currentId = EMPTY;
+  /**
+   * Executes `fn` after `delay`, clearing any previously scheduled call.
+   */
+  start(delay, fn) {
+    this.clear();
+    this.currentId = setTimeout(() => {
+      this.currentId = EMPTY;
+      fn();
+    }, delay);
+  }
+  isStarted() {
+    return this.currentId !== EMPTY;
+  }
+  clear = () => {
+    if (this.currentId !== EMPTY) {
+      clearTimeout(this.currentId);
+      this.currentId = EMPTY;
+    }
+  };
+  disposeEffect = () => {
+    return this.clear;
+  };
+};
+function useTimeout() {
+  const timeout = useRefWithInit(Timeout.create).current;
+  useOnMount(timeout.disposeEffect);
+  return timeout;
+}
+
+// node_modules/@base-ui/react/field/utils/getCombinedFieldValidityData.mjs
+function getCombinedFieldValidityData(validityData, invalid2) {
+  return {
+    ...validityData,
+    state: {
+      ...validityData.state,
+      valid: !invalid2 && validityData.state.valid
+    }
+  };
+}
+
+// node_modules/@base-ui/react/field/root/useFieldValidation.mjs
+var validityKeys = Object.keys(DEFAULT_VALIDITY_STATE);
+function isEligibleInput(input, formElement) {
+  if (input.matches(":disabled")) {
+    return false;
+  }
+  if (!formElement || input.form === formElement) {
+    return true;
+  }
+  return input.form === null && !input.hasAttribute("form");
+}
+function findRepresentativeInput(inputs, formElement) {
+  let fallback2 = null;
+  for (const input of inputs.keys()) {
+    if (!isEligibleInput(input, formElement)) {
+      continue;
+    }
+    if (!input.validity.valid) {
+      return input;
+    }
+    fallback2 ??= input;
+  }
+  return fallback2;
+}
+function makeState(customError) {
+  return {
+    ...DEFAULT_VALIDITY_STATE,
+    valid: !customError,
+    customError
+  };
+}
+function getNativeErrors(element) {
+  return element && element.validationMessage ? [element.validationMessage] : [];
+}
+function useFieldValidation(params) {
+  const {
+    elementRef,
+    formRef
+  } = useFormContext();
+  const {
+    setValidityData,
+    validate,
+    validityData,
+    validationDebounceTime,
+    invalid: invalid2,
+    markedDirtyRef,
+    state,
+    shouldValidateOnChange,
+    validationMode,
+    registeredFieldIdRef
+  } = params;
+  const {
+    controlId,
+    getDescriptionProps
+  } = useLabelableContext();
+  const timeout = useTimeout();
+  const inputRef = React21.useRef(null);
+  const registeredInputs = useRefWithInit(() => /* @__PURE__ */ new Map()).current;
+  const validationCommitIdRef = React21.useRef(0);
+  const customValidityRef = React21.useRef(null);
+  const registerInput = React21.useCallback((element, registration) => {
+    registeredInputs.set(element, registration);
+    return () => {
+      registeredInputs.delete(element);
+    };
+  }, [registeredInputs]);
+  const getInputControl = useStableCallback(() => {
+    const element = findRepresentativeInput(registeredInputs, elementRef.current);
+    return element && registeredInputs.get(element)?.controlRef.current || null;
+  });
+  const commit = useStableCallback(async (value, revalidate = false) => {
+    validationCommitIdRef.current += 1;
+    const validationCommitId = validationCommitIdRef.current;
+    function updateRegisteredFieldValidity(nextValidityData, externalInvalid = invalid2) {
+      const fieldId = registeredFieldIdRef.current ?? controlId;
+      if (fieldId == null) {
+        return;
+      }
+      const currentFieldData = formRef.current.fields.get(fieldId);
+      if (!currentFieldData) {
+        return;
+      }
+      const validityDataWithFormErrors = getCombinedFieldValidityData(nextValidityData, externalInvalid);
+      formRef.current.fields.set(fieldId, {
+        ...currentFieldData,
+        validityData: validityDataWithFormErrors
+      });
+    }
+    function makeValidityData(validityState, errorMessages) {
+      const errors = validityState.valid === false ? errorMessages : [];
+      return {
+        value,
+        state: validityState,
+        error: errors[0] ?? "",
+        errors,
+        initialValue: validityData.initialValue
+      };
+    }
+    function setCustomValidity(element2, message) {
+      const displaced = element2.validity.customError ? element2.validationMessage : "";
+      const ownedMessage = message.replace(/\r\n?/g, "\n");
+      element2.setCustomValidity(ownedMessage);
+      customValidityRef.current = [element2, ownedMessage, displaced];
+    }
+    function clearCustomValidity() {
+      const record = customValidityRef.current;
+      customValidityRef.current = null;
+      if (record && (!record[0].willValidate || record[0].validationMessage === record[1])) {
+        record[0].setCustomValidity(record[2]);
+      }
+    }
+    function publish(validityState, errorMessages, externalInvalid) {
+      const nextValidityData = makeValidityData(validityState, errorMessages);
+      updateRegisteredFieldValidity(nextValidityData, externalInvalid);
+      setValidityData(nextValidityData);
+    }
+    function getState(el) {
+      const computedState = validityKeys.reduce((acc, key) => {
+        acc[key] = el.validity[key];
+        return acc;
+      }, {});
+      let hasOnlyValueMissingError = false;
+      for (const key of validityKeys) {
+        if (key === "valid") {
+          continue;
+        }
+        if (key === "valueMissing" && computedState[key]) {
+          hasOnlyValueMissingError = true;
+        } else if (computedState[key]) {
+          return computedState;
+        }
+      }
+      if (hasOnlyValueMissingError && !markedDirtyRef.current) {
+        computedState.valid = true;
+        computedState.valueMissing = false;
+      }
+      return computedState;
+    }
+    function resolveRepresentativeInput() {
+      return registeredInputs.size > 0 ? findRepresentativeInput(registeredInputs, elementRef.current) : inputRef.current;
+    }
+    let element = resolveRepresentativeInput();
+    function refreshState() {
+      element = resolveRepresentativeInput();
+      return element?.willValidate ? getState(element) : makeState(false);
+    }
+    if (revalidate) {
+      if (state.valid !== false || !element) {
+        return;
+      }
+      if (!element.validity.valueMissing) {
+        clearCustomValidity();
+        const currentElement = resolveRepresentativeInput();
+        const foreign = currentElement?.validity.customError ? getNativeErrors(currentElement) : [];
+        publish(makeState(foreign.length > 0), foreign, false);
+        return;
+      }
+      for (const key of validityKeys) {
+        if (key !== "valid" && key !== "valueMissing" && key !== "customError" && element.validity[key]) {
+          return;
+        }
+      }
+    }
+    timeout.clear();
+    clearCustomValidity();
+    let nextState = refreshState();
+    let validationErrors = getNativeErrors(element);
+    const isValidatingOnChange = shouldValidateOnChange();
+    if (validationErrors.length === 0 || isValidatingOnChange) {
+      const formValues = Array.from(formRef.current.fields.values()).reduce((acc, field) => {
+        if (field.name) {
+          acc[field.name] = field.getValue();
+        }
+        return acc;
+      }, {});
+      const resultOrPromise = validate(value, formValues);
+      let result;
+      if (typeof resultOrPromise === "object" && resultOrPromise !== null && "then" in resultOrPromise) {
+        if (nextState.valid === false) {
+          publish(nextState, validationErrors);
+        } else if (validationMode === "onSubmit" || !validityData.state.customError) {
+          nextState.valid = null;
+          publish(nextState, validationErrors);
+        }
+        result = await resultOrPromise;
+        if (validationCommitId !== validationCommitIdRef.current) {
+          return;
+        }
+        nextState = refreshState();
+      } else {
+        result = resultOrPromise;
+      }
+      validationErrors = result ? [].concat(result).filter(Boolean) : [];
+      if (validationErrors.length > 0) {
+        nextState.valid = false;
+        nextState.customError = true;
+        if (element?.willValidate) {
+          setCustomValidity(element, validationErrors.join("\n"));
+        }
+      } else {
+        validationErrors = getNativeErrors(element);
+      }
+    }
+    publish(nextState, validationErrors);
+  });
+  const change = useStableCallback((value, cancelPending = false) => {
+    timeout.clear();
+    validationCommitIdRef.current += 1;
+    if (cancelPending) {
+      return;
+    }
+    const validateOnChange = shouldValidateOnChange();
+    if (validateOnChange && value !== "" && validationDebounceTime) {
+      timeout.start(validationDebounceTime, () => {
+        commit(value);
+      });
+    } else {
+      commit(value, !validateOnChange);
+    }
+  });
+  const getValidationProps = React21.useCallback((disabled2, externalProps = {}) => mergeProps(getDescriptionProps(externalProps), state.valid === false && !state.disabled && !disabled2 ? {
+    "aria-invalid": true
+  } : EMPTY_OBJECT), [getDescriptionProps, state.disabled, state.valid]);
+  return React21.useMemo(() => ({
+    getValidationProps,
+    inputRef,
+    registeredInputs,
+    registerInput,
+    getInputControl,
+    commit,
+    change
+  }), [getValidationProps, registeredInputs, registerInput, getInputControl, commit, change]);
+}
+
+// node_modules/@base-ui/react/internals/field-register-control/useFieldControlRegistration.mjs
+var React22 = __toESM(require("react"), 1);
+function useFieldControlRegistration(params) {
+  const {
+    change,
+    commit,
+    invalid: invalid2,
+    markedDirtyRef,
+    name: name2,
+    setRegisteredFieldName,
+    registeredFieldIdRef,
+    setValidityData,
+    validityData
+  } = params;
+  const {
+    formRef
+  } = useFormContext();
+  const activeFieldControlSourceRef = React22.useRef(null);
+  const registrationRef = React22.useRef(null);
+  const initialValueCapturedRef = React22.useRef(false);
+  const getValueForForm = useStableCallback(() => {
+    const registration = registrationRef.current;
+    if (!registration) {
+      return void 0;
+    }
+    if (registration.getValue) {
+      return registration.getValue();
+    }
+    return registration.value;
+  });
+  function getRegistrationValue(registration) {
+    return registration.value === void 0 ? getValueForForm() : registration.value;
+  }
+  const validate = useStableCallback(() => {
+    const registration = registrationRef.current;
+    markedDirtyRef.current = true;
+    if (!registration) {
+      commit(validityData.value);
+      return;
+    }
+    commit(getRegistrationValue(registration));
+  });
+  function refreshRegistration() {
+    const registration = registrationRef.current;
+    if (!registration || !registration.id) {
+      return;
+    }
+    formRef.current.fields.set(registration.id, {
+      getValue: getValueForForm,
+      name: name2 ?? registration.name,
+      controlRef: registration.controlRef,
+      validityData: getCombinedFieldValidityData(validityData, invalid2),
+      validate
+    });
+  }
+  function deleteRegistration(id = registrationRef.current?.id) {
+    if (id) {
+      formRef.current.fields.delete(id);
+    }
+  }
+  function captureInitialValue(registration) {
+    if (initialValueCapturedRef.current) {
+      return;
+    }
+    initialValueCapturedRef.current = true;
+    const initialValue = getRegistrationValue(registration);
+    setValidityData((prev) => prev.initialValue === initialValue ? prev : {
+      ...prev,
+      initialValue
+    });
+  }
+  useIsoLayoutEffect(() => {
+    const registration = registrationRef.current;
+    if (!registration || !registration.id) {
+      return;
+    }
+    setRegisteredFieldName(name2 ? void 0 : registration.name);
+    formRef.current.fields.set(registration.id, {
+      getValue: getValueForForm,
+      name: name2 ?? registration.name,
+      controlRef: registration.controlRef,
+      validityData: getCombinedFieldValidityData(validityData, invalid2),
+      validate
+    });
+  }, [formRef, getValueForForm, invalid2, name2, setRegisteredFieldName, validate, validityData]);
+  useIsoLayoutEffect(() => {
+    const fields = formRef.current.fields;
+    return () => {
+      const id = registrationRef.current?.id;
+      if (id) {
+        fields.delete(id);
+      }
+    };
+  }, [formRef]);
+  const register2 = useStableCallback((source, registration) => {
+    if (!registration) {
+      if (activeFieldControlSourceRef.current === source) {
+        activeFieldControlSourceRef.current = null;
+        change(void 0, true);
+        deleteRegistration();
+        registrationRef.current = null;
+        setRegisteredFieldName(void 0);
+        registeredFieldIdRef.current = void 0;
+      }
+      return;
+    }
+    const previousId = registrationRef.current?.id;
+    const previousSource = activeFieldControlSourceRef.current;
+    if (previousSource && previousSource !== source) {
+      change(void 0, true);
+    }
+    activeFieldControlSourceRef.current = source;
+    registrationRef.current = registration;
+    if (!name2) {
+      setRegisteredFieldName(registration.name);
+    }
+    registeredFieldIdRef.current = registration.id;
+    if (previousId && previousId !== registration.id) {
+      deleteRegistration(previousId);
+    }
+    captureInitialValue(registration);
+    refreshRegistration();
+  });
+  return [validate, register2];
+}
+
+// node_modules/@base-ui/react/field/root/FieldRoot.mjs
+var import_jsx_runtime3 = require("react/jsx-runtime");
+var FieldRootInner = /* @__PURE__ */ React23.forwardRef(function FieldRootInner2(componentProps, forwardedRef) {
+  const {
+    errors,
+    validationMode: formValidationMode,
+    submitCountRef
+  } = useFormContext();
+  const {
+    render,
+    className,
+    validate: validateProp,
+    validationDebounceTime = 0,
+    validationMode = formValidationMode,
+    name: name2,
+    disabled: disabledProp = false,
+    invalid: invalidProp,
+    dirty: dirtyProp,
+    touched: touchedProp,
+    actionsRef,
+    style,
+    ...elementProps
+  } = componentProps;
+  const disabledFieldset = useFieldsetRootContext(true)?.disabled;
+  const validate = useStableCallback(validateProp || (() => null));
+  const disabled2 = disabledFieldset || disabledProp;
+  const [touchedState, setTouchedUnwrapped] = React23.useState(false);
+  const [dirtyState, setDirtyUnwrapped] = React23.useState(false);
+  const [filled, setFilled] = React23.useState(false);
+  const [focused, setFocused] = React23.useState(false);
+  const focusOwnerRef = React23.useRef(void 0);
+  const dirty = dirtyProp ?? dirtyState;
+  const touched = touchedProp ?? touchedState;
+  const markedDirtyRef = React23.useRef(dirty);
+  const registeredFieldIdRef = React23.useRef(void 0);
+  const [registeredFieldName, setRegisteredFieldName] = React23.useState();
+  const effectiveName = name2 ?? registeredFieldName;
+  useIsoLayoutEffect(() => {
+    if (dirtyProp !== void 0) {
+      markedDirtyRef.current = dirtyProp;
+    }
+  }, [dirtyProp]);
+  const setDirty = useStableCallback((value) => {
+    if (dirtyProp !== void 0) {
+      return;
+    }
+    if (value) {
+      markedDirtyRef.current = true;
+    }
+    setDirtyUnwrapped(value);
+  });
+  const setTouched = useStableCallback((value) => {
+    if (touchedProp !== void 0) {
+      return;
+    }
+    setTouchedUnwrapped(value);
+  });
+  const shouldValidateOnChange = useStableCallback(() => validationMode === "onChange" || validationMode === "onSubmit" && submitCountRef.current > 0);
+  const formError = effectiveName && Object.hasOwn(errors, effectiveName) ? errors[effectiveName] : null;
+  const hasFormError = !!(Array.isArray(formError) ? formError.length : formError);
+  const invalid2 = invalidProp === true || hasFormError;
+  const [validityData, setValidityData] = React23.useState({
+    state: DEFAULT_VALIDITY_STATE,
+    error: "",
+    errors: [],
+    value: null,
+    initialValue: null
+  });
+  const valid2 = !invalid2 && (disabled2 ? null : validityData.state.valid);
+  const state = React23.useMemo(() => ({
+    disabled: disabled2,
+    touched,
+    dirty,
+    valid: valid2,
+    filled,
+    focused
+  }), [disabled2, touched, dirty, valid2, filled, focused]);
+  const validation = useFieldValidation({
+    setValidityData,
+    validate,
+    validityData,
+    validationDebounceTime,
+    invalid: invalid2,
+    markedDirtyRef,
+    state,
+    shouldValidateOnChange,
+    validationMode,
+    registeredFieldIdRef
+  });
+  const [validateFieldControl, registerFieldControl] = useFieldControlRegistration({
+    change: validation.change,
+    commit: validation.commit,
+    invalid: invalid2,
+    markedDirtyRef,
+    name: name2,
+    setRegisteredFieldName,
+    registeredFieldIdRef,
+    setValidityData,
+    validityData
+  });
+  React23.useImperativeHandle(actionsRef, () => ({
+    validate: validateFieldControl
+  }), [validateFieldControl]);
+  const contextValue = React23.useMemo(() => ({
+    invalid: invalid2,
+    name: effectiveName,
+    validityData,
+    setValidityData,
+    disabled: disabled2,
+    setTouched,
+    setDirty,
+    setFilled,
+    setFocused,
+    focusOwnerRef,
+    validationMode,
+    shouldValidateOnChange,
+    state,
+    registerFieldControl,
+    validation
+  }), [invalid2, effectiveName, validityData, disabled2, setTouched, setDirty, setFilled, setFocused, validationMode, shouldValidateOnChange, state, registerFieldControl, validation]);
+  const element = useRenderElement("div", componentProps, {
+    ref: forwardedRef,
+    state,
+    props: elementProps,
+    stateAttributesMapping: fieldValidityMapping
+  });
+  return /* @__PURE__ */ (0, import_jsx_runtime3.jsx)(FieldRootContext.Provider, {
+    value: contextValue,
+    children: element
+  });
+});
+if (false) FieldRootInner.displayName = "FieldRootInner";
+var FieldRoot = /* @__PURE__ */ React23.forwardRef(function FieldRoot2(componentProps, forwardedRef) {
+  return /* @__PURE__ */ (0, import_jsx_runtime3.jsx)(LabelableProvider, {
+    children: /* @__PURE__ */ (0, import_jsx_runtime3.jsx)(FieldRootInner, {
+      ...componentProps,
+      ref: forwardedRef
+    })
+  });
+});
+if (false) FieldRoot.displayName = "FieldRoot";
+
+// node_modules/@base-ui/react/field/label/FieldLabel.mjs
+var React25 = __toESM(require("react"), 1);
+
+// node_modules/@base-ui/react/field/item/FieldItemContext.mjs
+var React24 = __toESM(require("react"), 1);
+var FieldItemContext = /* @__PURE__ */ React24.createContext({
+  disabled: false
+});
+if (false) FieldItemContext.displayName = "FieldItemContext";
+function useFieldItemContext() {
+  const context = React24.useContext(FieldItemContext);
+  return context;
+}
+
+// node_modules/@base-ui/react/field/label/FieldLabel.mjs
+var FieldLabel = /* @__PURE__ */ React25.forwardRef(function FieldLabel2(componentProps, forwardedRef) {
+  const {
+    render,
+    className,
+    style,
+    id: idProp,
+    nativeLabel = true,
+    ...elementProps
+  } = componentProps;
+  const fieldRootContext = useFieldRootContext(false);
+  const fieldItemContext = useFieldItemContext();
+  const {
+    labelId
+  } = useLabelableContext();
+  const state = {
+    ...fieldRootContext.state,
+    disabled: fieldRootContext.disabled || fieldItemContext.disabled
+  };
+  const labelRef = React25.useRef(null);
+  const labelProps = useLabel({
+    id: labelId ?? idProp,
+    native: nativeLabel
+  });
+  if (false) {
+    React25.useEffect(() => {
+      if (!labelRef.current) {
+        return;
+      }
+      const isLabelTag = labelRef.current.tagName === "LABEL";
+      if (nativeLabel) {
+        if (!isLabelTag) {
+          const ownerStackMessage = SafeReact.captureOwnerStack?.() || "";
+          const message = "<Field.Label> expected a <label> element because the `nativeLabel` prop is true. Rendering a non-<label> disables native label association, so `htmlFor` will not work. Use a real <label> in the `render` prop, or set `nativeLabel` to `false`.";
+          error(`${message}${ownerStackMessage}`);
+        }
+      } else if (isLabelTag) {
+        const ownerStackMessage = SafeReact.captureOwnerStack?.() || "";
+        const message = "<Field.Label> expected a non-<label> element because the `nativeLabel` prop is false. Rendering a <label> assumes native label behavior while Base UI treats it as non-native, which can cause unexpected pointer behavior. Use a non-<label> in the `render` prop, or set `nativeLabel` to `true`.";
+        error(`${message}${ownerStackMessage}`);
+      }
+    }, [nativeLabel]);
+  }
+  const element = useRenderElement("label", componentProps, {
+    ref: [forwardedRef, labelRef],
+    state,
+    props: [labelProps, elementProps],
+    stateAttributesMapping: fieldValidityMapping
+  });
+  return element;
+});
+if (false) FieldLabel.displayName = "FieldLabel";
+
+// node_modules/@base-ui/react/field/error/FieldError.mjs
+var React28 = __toESM(require("react"), 1);
+
+// node_modules/@base-ui/react/internals/useOpenChangeComplete.mjs
+var React26 = __toESM(require("react"), 1);
+
+// node_modules/@base-ui/react/internals/useAnimationsFinished.mjs
+var ReactDOM = __toESM(require("react-dom"), 1);
+
+// node_modules/@base-ui/utils/useAnimationFrame.mjs
+var EMPTY2 = null;
+var LAST_RAF = globalThis.requestAnimationFrame;
+var Scheduler = class {
+  /* This implementation uses an array as a backing data-structure for frame callbacks.
+   * It allows `O(1)` callback cancelling by inserting a `null` in the array, though it
+   * never calls the native `cancelAnimationFrame` if there are no frames left. This can
+   * be much more efficient if there is a call pattern that alterns as
+   * "request-cancel-request-cancel-…".
+   * But in the case of "request-request-…-cancel-cancel-…", it leaves the final animation
+   * frame to run anyway. We turn that frame into a `O(1)` no-op via `callbacksCount`. */
+  callbacks = [];
+  callbacksCount = 0;
+  nextId = 1;
+  startId = 1;
+  isScheduled = false;
+  tick = (timestamp) => {
+    this.isScheduled = false;
+    const currentCallbacks = this.callbacks;
+    const currentCallbacksCount = this.callbacksCount;
+    this.callbacks = [];
+    this.callbacksCount = 0;
+    this.startId = this.nextId;
+    if (currentCallbacksCount > 0) {
+      for (let i = 0; i < currentCallbacks.length; i += 1) {
+        currentCallbacks[i]?.(timestamp);
+      }
+    }
+  };
+  request(fn) {
+    const id = this.nextId;
+    this.nextId += 1;
+    this.callbacks.push(fn);
+    this.callbacksCount += 1;
+    const didRAFChange = false;
+    if (!this.isScheduled || didRAFChange) {
+      requestAnimationFrame(this.tick);
+      this.isScheduled = true;
+    }
+    return id;
+  }
+  cancel(id) {
+    const index = id - this.startId;
+    if (index < 0 || index >= this.callbacks.length) {
+      return;
+    }
+    if (this.callbacks[index] === null) {
+      return;
+    }
+    this.callbacks[index] = null;
+    this.callbacksCount -= 1;
+  }
+};
+var scheduler = new Scheduler();
+var AnimationFrame = class _AnimationFrame {
+  static create() {
+    return new _AnimationFrame();
+  }
+  static request(fn) {
+    return scheduler.request(fn);
+  }
+  static cancel(id) {
+    return scheduler.cancel(id);
+  }
+  currentId = EMPTY2;
+  /**
+   * Executes `fn` after `delay`, clearing any previously scheduled call.
+   */
+  request(fn) {
+    this.cancel();
+    this.currentId = scheduler.request(() => {
+      this.currentId = EMPTY2;
+      fn();
+    });
+  }
+  cancel = () => {
+    if (this.currentId !== EMPTY2) {
+      scheduler.cancel(this.currentId);
+      this.currentId = EMPTY2;
+    }
+  };
+  disposeEffect = () => {
+    return this.cancel;
+  };
+};
+function useAnimationFrame() {
+  const timeout = useRefWithInit(AnimationFrame.create).current;
+  useOnMount(timeout.disposeEffect);
+  return timeout;
+}
+
+// node_modules/@base-ui/react/utils/resolveRef.mjs
+function resolveRef(maybeRef) {
+  if (maybeRef == null) {
+    return maybeRef;
+  }
+  return "current" in maybeRef ? maybeRef.current : maybeRef;
+}
+
+// node_modules/@base-ui/react/utils/getFiniteAnimations.mjs
+function getFiniteAnimations(element, options) {
+  return element.getAnimations(options).filter((animation) => {
+    const timing = animation.effect?.getTiming();
+    return timing?.duration !== Infinity && timing?.iterations !== Infinity;
+  });
+}
+
+// node_modules/@base-ui/react/internals/useAnimationsFinished.mjs
+var pendingCallbacks = null;
+function flushBeforePaint(fn) {
+  if (!pendingCallbacks) {
+    const callbacks = [];
+    pendingCallbacks = callbacks;
+    queueMicrotask(() => {
+      pendingCallbacks = null;
+      ReactDOM.flushSync(() => {
+        for (const callback of callbacks) {
+          callback();
+        }
+      });
+    });
+  }
+  pendingCallbacks.push(fn);
+}
+function useAnimationsFinished(elementOrRef, waitForStartingStyleRemoved = false, batch = false) {
+  const frame = useAnimationFrame();
+  return useStableCallback((fnToExecute, signal = null) => {
+    frame.cancel();
+    const element = resolveRef(elementOrRef);
+    if (element == null) {
+      return;
+    }
+    const resolvedElement = element;
+    const done = () => {
+      if (!batch) {
+        ReactDOM.flushSync(fnToExecute);
+        return;
+      }
+      flushBeforePaint(() => {
+        if (!signal?.aborted) {
+          fnToExecute();
+        }
+      });
+    };
+    if (typeof resolvedElement.getAnimations !== "function" || globalThis.BASE_UI_ANIMATIONS_DISABLED) {
+      fnToExecute();
+      return;
+    }
+    function exec() {
+      Promise.all(getFiniteAnimations(resolvedElement).map((animation) => animation.finished.then(NOOP))).then(() => {
+        if (!signal?.aborted) {
+          done();
+        }
+      }, () => {
+        if (signal?.aborted) {
+          return;
+        }
+        const currentAnimations = getFiniteAnimations(resolvedElement);
+        if (currentAnimations.some((animation) => animation.pending || animation.playState !== "finished")) {
+          exec();
+          return;
+        }
+        done();
+      });
+    }
+    if (waitForStartingStyleRemoved) {
+      const startingStyleAttribute = startingStyle;
+      if (!resolvedElement.hasAttribute(startingStyleAttribute)) {
+        frame.request(exec);
+        return;
+      }
+      const attributeObserver = new MutationObserver(() => {
+        if (!resolvedElement.hasAttribute(startingStyleAttribute)) {
+          attributeObserver.disconnect();
+          exec();
+        }
+      });
+      attributeObserver.observe(resolvedElement, {
+        attributes: true,
+        attributeFilter: [startingStyleAttribute]
+      });
+      signal?.addEventListener("abort", () => attributeObserver.disconnect(), {
+        once: true
+      });
+      return;
+    }
+    frame.request(exec);
+  });
+}
+
+// node_modules/@base-ui/react/internals/useOpenChangeComplete.mjs
+function useOpenChangeComplete(parameters) {
+  const {
+    enabled = true,
+    open: open3,
+    ref,
+    batch = false,
+    onComplete: onCompleteParam
+  } = parameters;
+  const onComplete = useStableCallback(onCompleteParam);
+  const runOnceAnimationsFinish = useAnimationsFinished(ref, open3, batch);
+  React26.useEffect(() => {
+    if (!enabled) {
+      return void 0;
+    }
+    const abortController = new AbortController();
+    runOnceAnimationsFinish(onComplete, abortController.signal);
+    return () => {
+      abortController.abort();
+    };
+  }, [enabled, open3, onComplete, runOnceAnimationsFinish]);
+}
+
+// node_modules/@base-ui/react/internals/useTransitionStatus.mjs
+var React27 = __toESM(require("react"), 1);
+function useTransitionStatus(open3, enableIdleState = false, deferEndingState = false, animateInitialOpen = false) {
+  const [transitionStatus, setTransitionStatus] = React27.useState(open3 && enableIdleState ? "idle" : void 0);
+  const [mounted, setMounted] = React27.useState(open3 && !animateInitialOpen);
+  if (open3 && !mounted) {
+    setMounted(true);
+    setTransitionStatus("starting");
+  }
+  if (!open3 && mounted && transitionStatus !== "ending" && !deferEndingState) {
+    setTransitionStatus("ending");
+  }
+  if (!open3 && !mounted && transitionStatus === "ending") {
+    setTransitionStatus(void 0);
+  }
+  useIsoLayoutEffect(() => {
+    if (!open3 && mounted && transitionStatus !== "ending" && deferEndingState) {
+      const frame = AnimationFrame.request(() => {
+        setTransitionStatus("ending");
+      });
+      return () => {
+        AnimationFrame.cancel(frame);
+      };
+    }
+    return void 0;
+  }, [open3, mounted, transitionStatus, deferEndingState]);
+  useIsoLayoutEffect(() => {
+    if (!open3 || enableIdleState || transitionStatus === void 0) {
+      return void 0;
+    }
+    const frame = AnimationFrame.request(() => {
+      setTransitionStatus(void 0);
+    });
+    return () => {
+      AnimationFrame.cancel(frame);
+    };
+  }, [enableIdleState, open3, transitionStatus]);
+  useIsoLayoutEffect(() => {
+    if (!open3 || !enableIdleState) {
+      return void 0;
+    }
+    if (open3 && mounted && transitionStatus !== "idle") {
+      setTransitionStatus("starting");
+    }
+    const frame = AnimationFrame.request(() => {
+      setTransitionStatus("idle");
+    });
+    return () => {
+      AnimationFrame.cancel(frame);
+    };
+  }, [enableIdleState, open3, mounted, transitionStatus]);
+  return {
+    mounted,
+    setMounted,
+    transitionStatus
+  };
+}
+
+// node_modules/@base-ui/react/field/error/FieldError.mjs
+var import_jsx_runtime4 = require("react/jsx-runtime");
+var stateAttributesMapping = {
+  ...fieldValidityMapping,
+  ...transitionStatusMapping
+};
+var FieldError = /* @__PURE__ */ React28.forwardRef(function FieldError2(componentProps, forwardedRef) {
+  const {
+    render,
+    id: idProp,
+    className,
+    match,
+    style,
+    ...elementProps
+  } = componentProps;
+  const id = useBaseUiId(idProp);
+  const {
+    validityData,
+    state: fieldState,
+    name: name2
+  } = useFieldRootContext(false);
+  const {
+    setMessageIds
+  } = useLabelableContext();
+  const {
+    errors
+  } = useFormContext();
+  const formError = name2 && Object.hasOwn(errors, name2) ? errors[name2] : null;
+  const hasFormError = !!(Array.isArray(formError) ? formError.length : formError);
+  const hasSpecificMatch = typeof match === "string";
+  let rendered = false;
+  if (match === true) {
+    rendered = true;
+  } else if (fieldState.disabled) {
+    rendered = false;
+  } else if (hasSpecificMatch) {
+    rendered = Boolean(validityData.state[match]);
+  } else {
+    rendered = hasFormError || validityData.state.valid === false;
+  }
+  const {
+    mounted,
+    transitionStatus,
+    setMounted
+  } = useTransitionStatus(rendered);
+  useIsoLayoutEffect(() => {
+    if (!rendered || !id) {
+      return void 0;
+    }
+    setMessageIds((v) => v.concat(id));
+    return () => {
+      setMessageIds((v) => v.filter((item) => item !== id));
+    };
+  }, [rendered, id, setMessageIds]);
+  const errorRef = React28.useRef(null);
+  const [lastRenderedMessage, setLastRenderedMessage] = React28.useState(null);
+  const [lastRenderedMessageKey, setLastRenderedMessageKey] = React28.useState(null);
+  let error = validityData.error;
+  if (!hasSpecificMatch && hasFormError) {
+    error = formError;
+  } else if (validityData.errors.length > 1) {
+    error = validityData.errors;
+  }
+  let errorMessage = error;
+  if (Array.isArray(error)) {
+    errorMessage = error.length > 1 ? /* @__PURE__ */ (0, import_jsx_runtime4.jsx)("ul", {
+      children: error.map((message) => /* @__PURE__ */ (0, import_jsx_runtime4.jsx)("li", {
+        children: message
+      }, message))
+    }) : error[0];
+  }
+  const errorKey = Array.isArray(error) ? JSON.stringify(error) : error;
+  if (rendered && errorKey !== lastRenderedMessageKey) {
+    setLastRenderedMessageKey(errorKey);
+    setLastRenderedMessage(errorMessage);
+  }
+  useOpenChangeComplete({
+    open: rendered,
+    ref: errorRef,
+    onComplete() {
+      if (!rendered) {
+        setMounted(false);
+      }
+    }
+  });
+  const state = {
+    ...fieldState,
+    transitionStatus
+  };
+  const element = useRenderElement("div", componentProps, {
+    ref: [forwardedRef, errorRef],
+    state,
+    props: [{
+      id,
+      children: rendered ? errorMessage : lastRenderedMessage
+    }, elementProps],
+    stateAttributesMapping,
+    enabled: mounted
+  });
+  if (!mounted) {
+    return null;
+  }
+  return element;
+});
+if (false) FieldError.displayName = "FieldError";
+
+// node_modules/@base-ui/react/field/description/FieldDescription.mjs
+var React29 = __toESM(require("react"), 1);
+var FieldDescription = /* @__PURE__ */ React29.forwardRef(function FieldDescription2(componentProps, forwardedRef) {
+  const {
+    render,
+    id: idProp,
+    className,
+    style,
+    ...elementProps
+  } = componentProps;
+  const id = useBaseUiId(idProp);
+  const fieldRootContext = useFieldRootContext(false);
+  const fieldItemContext = useFieldItemContext();
+  const {
+    setMessageIds
+  } = useLabelableContext();
+  const state = {
+    ...fieldRootContext.state,
+    disabled: fieldRootContext.disabled || fieldItemContext.disabled
+  };
+  useIsoLayoutEffect(() => {
+    if (!id) {
+      return void 0;
+    }
+    setMessageIds((v) => v.concat(id));
+    return () => {
+      setMessageIds((v) => v.filter((item) => item !== id));
+    };
+  }, [id, setMessageIds]);
+  const element = useRenderElement("p", componentProps, {
+    ref: forwardedRef,
+    state,
+    props: [{
+      id
+    }, elementProps],
+    stateAttributesMapping: fieldValidityMapping
+  });
+  return element;
+});
+if (false) FieldDescription.displayName = "FieldDescription";
+
+// node_modules/@base-ui/react/field/control/FieldControl.mjs
+var React31 = __toESM(require("react"), 1);
+
+// node_modules/@base-ui/react/internals/field-root-context/useSetFieldFocused.mjs
+function useSetFieldFocused(disabled2, focusTargetRef, onFocusedChange) {
+  const {
+    setFocused,
+    focusOwnerRef
+  } = useFieldRootContext();
+  const setFieldFocused = useStableCallback((focused) => {
+    if (focused ? !disabled2 : focusOwnerRef.current === setFieldFocused) {
+      focusOwnerRef.current = focused && setFieldFocused;
+      onFocusedChange?.(focused);
+      setFocused(focused);
+    }
+  });
+  useIsoLayoutEffect(() => {
+    const el = focusTargetRef.current;
+    const root = el?.getRootNode();
+    if (root?.activeElement === el) {
+      setFieldFocused(true);
+    }
+    return () => setFieldFocused(false);
+  }, [disabled2, focusTargetRef, setFieldFocused]);
+  return setFieldFocused;
+}
+
+// node_modules/@base-ui/react/internals/field-register-control/useRegisterFieldControl.mjs
+function useRegisterFieldControl(controlRef, id, value, getFormValueOverride, enabled = true, name2) {
+  const {
+    registerFieldControl
+  } = useFieldRootContext();
+  const sourceRef = useRefWithInit(() => /* @__PURE__ */ Symbol());
+  useIsoLayoutEffect(() => {
+    const source = sourceRef.current;
+    if (!enabled) {
+      registerFieldControl(source, void 0);
+      return;
+    }
+    const registration = {
+      controlRef,
+      getValue: getFormValueOverride,
+      id,
+      name: name2,
+      value
+    };
+    registerFieldControl(source, registration);
+  }, [controlRef, enabled, getFormValueOverride, id, name2, registerFieldControl, sourceRef, value]);
+  useIsoLayoutEffect(() => {
+    const source = sourceRef.current;
+    return () => {
+      registerFieldControl(source, void 0);
+    };
+  }, [registerFieldControl, sourceRef]);
+}
+
+// node_modules/@base-ui/react/internals/useValueChanged.mjs
+var React30 = __toESM(require("react"), 1);
+function useValueChanged(value, onChange) {
+  const valueRef = React30.useRef(value);
+  const onChangeCallback = useStableCallback(onChange);
+  useIsoLayoutEffect(() => {
+    if (valueRef.current !== value) {
+      onChangeCallback(valueRef.current);
+    }
+    valueRef.current = value;
+  }, [value, onChangeCallback]);
+}
+
+// node_modules/@base-ui/react/internals/createBaseUIEventDetails.mjs
+function createChangeEventDetails(reason, event, trigger, customProperties) {
+  let canceled = false;
+  let allowPropagation = false;
+  const custom = customProperties ?? EMPTY_OBJECT;
+  const details = {
+    reason,
+    event: event ?? new Event("base-ui"),
+    cancel() {
+      canceled = true;
+    },
+    allowPropagation() {
+      allowPropagation = true;
+    },
+    get isCanceled() {
+      return canceled;
+    },
+    get isPropagationAllowed() {
+      return allowPropagation;
+    },
+    trigger,
+    ...custom
+  };
+  return details;
+}
+
+// node_modules/@base-ui/react/internals/reason-parts.mjs
+var reason_parts_exports = {};
+__export(reason_parts_exports, {
+  cancelOpen: () => cancelOpen,
+  chipRemovePress: () => chipRemovePress,
+  clearPress: () => clearPress,
+  closePress: () => closePress,
+  closeWatcher: () => closeWatcher,
+  decrementPress: () => decrementPress,
+  disabled: () => disabled,
+  drag: () => drag,
+  escapeKey: () => escapeKey,
+  focusOut: () => focusOut,
+  imperativeAction: () => imperativeAction,
+  incrementPress: () => incrementPress,
+  initial: () => initial,
+  inputBlur: () => inputBlur,
+  inputChange: () => inputChange,
+  inputClear: () => inputClear,
+  inputPaste: () => inputPaste,
+  inputPress: () => inputPress,
+  itemPress: () => itemPress,
+  keyboard: () => keyboard,
+  linkPress: () => linkPress,
+  listNavigation: () => listNavigation,
+  missing: () => missing,
+  none: () => none,
+  outsidePress: () => outsidePress,
+  pointer: () => pointer,
+  popupClose: () => popupClose,
+  scrub: () => scrub,
+  siblingOpen: () => siblingOpen,
+  swipe: () => swipe,
+  trackPress: () => trackPress,
+  triggerFocus: () => triggerFocus,
+  triggerHover: () => triggerHover,
+  triggerPress: () => triggerPress,
+  wheel: () => wheel,
+  windowResize: () => windowResize
+});
+var none = "none";
+var triggerPress = "trigger-press";
+var triggerHover = "trigger-hover";
+var triggerFocus = "trigger-focus";
+var outsidePress = "outside-press";
+var itemPress = "item-press";
+var closePress = "close-press";
+var linkPress = "link-press";
+var clearPress = "clear-press";
+var chipRemovePress = "chip-remove-press";
+var trackPress = "track-press";
+var incrementPress = "increment-press";
+var decrementPress = "decrement-press";
+var inputChange = "input-change";
+var inputClear = "input-clear";
+var inputBlur = "input-blur";
+var inputPaste = "input-paste";
+var inputPress = "input-press";
+var focusOut = "focus-out";
+var escapeKey = "escape-key";
+var closeWatcher = "close-watcher";
+var listNavigation = "list-navigation";
+var keyboard = "keyboard";
+var pointer = "pointer";
+var drag = "drag";
+var wheel = "wheel";
+var scrub = "scrub";
+var popupClose = "popup-close";
+var cancelOpen = "cancel-open";
+var siblingOpen = "sibling-open";
+var disabled = "disabled";
+var missing = "missing";
+var initial = "initial";
+var imperativeAction = "imperative-action";
+var swipe = "swipe";
+var windowResize = "window-resize";
+
+// node_modules/@base-ui/react/field/control/FieldControl.mjs
+var FieldControl = /* @__PURE__ */ React31.forwardRef(function FieldControl2(componentProps, forwardedRef) {
+  const {
+    render,
+    className,
+    id: idProp,
+    name: nameProp,
+    value,
+    disabled: disabledProp = false,
+    onValueChange,
+    defaultValue,
+    autoFocus = false,
+    style,
+    ...elementProps
+  } = componentProps;
+  const {
+    state: fieldState,
+    name: fieldName,
+    disabled: fieldDisabled,
+    setTouched,
+    setDirty,
+    validityData,
+    setFilled,
+    validationMode,
+    validation
+  } = useFieldRootContext();
+  const {
+    clearErrors,
+    elementRef: formElementRef,
+    submitCountRef
+  } = useFormContext();
+  const disabled2 = fieldDisabled || disabledProp;
+  const name2 = fieldName ?? nameProp;
+  const state = {
+    ...fieldState,
+    disabled: disabled2
+  };
+  const {
+    labelId
+  } = useLabelableContext();
+  const id = useLabelableId({
+    id: idProp
+  });
+  const isControlled = value !== void 0;
+  const serializedValue = value == null ? void 0 : String(value);
+  const getValueFromInput = useStableCallback(() => validation.inputRef.current?.value);
+  useRegisterFieldControl(validation.inputRef, id, serializedValue, getValueFromInput, !disabled2, nameProp);
+  useIsoLayoutEffect(() => {
+    const currentValue = serializedValue ?? validation.inputRef.current?.value;
+    if (currentValue !== void 0) {
+      setFilled(currentValue !== "");
+    }
+  }, [serializedValue, defaultValue, validation.inputRef, setFilled]);
+  useValueChanged(serializedValue, () => {
+    if (serializedValue === void 0) {
+      return;
+    }
+    clearErrors(name2);
+    setDirty(serializedValue !== (validityData.initialValue ?? ""));
+    validation.change(serializedValue);
+  });
+  const inputRef = React31.useRef(null);
+  const setFocused = useSetFieldFocused(disabled2, inputRef);
+  const enterValidationTimeout = useTimeout();
+  const element = useRenderElement("input", componentProps, {
+    ref: [forwardedRef, inputRef],
+    state,
+    props: [{
+      id,
+      disabled: disabled2,
+      name: name2,
+      ref: validation.inputRef,
+      "aria-labelledby": labelId,
+      autoFocus,
+      ...isControlled ? {
+        value
+      } : {
+        defaultValue
+      },
+      onChange(event) {
+        const inputValue = event.currentTarget.value;
+        const details = createChangeEventDetails(reason_parts_exports.none, event.nativeEvent);
+        onValueChange?.(inputValue, details);
+        if (isControlled) {
+          return;
+        }
+        setDirty(inputValue !== (validityData.initialValue ?? ""));
+        setFilled(inputValue !== "");
+        if (!event.nativeEvent.defaultPrevented && !details.isCanceled) {
+          clearErrors(name2);
+          validation.change(inputValue);
+        }
+      },
+      onFocus() {
+        setFocused(true);
+      },
+      onBlur(event) {
+        setTouched(true);
+        setFocused(false);
+        if (validationMode === "onBlur") {
+          const inputValue = event.currentTarget.value;
+          validation.commit(inputValue);
+          if (isControlled) {
+            queueMicrotask(() => {
+              const nextValue = validation.inputRef.current?.value;
+              if (nextValue !== void 0 && nextValue !== inputValue && nextValue !== (validityData.initialValue ?? "")) {
+                validation.commit(nextValue);
+              }
+            });
+          }
+        }
+      },
+      onKeyDown(event) {
+        if (event.currentTarget.tagName === "INPUT" && event.key === "Enter") {
+          setTouched(true);
+          const value2 = event.currentTarget.value;
+          const form = event.currentTarget.form;
+          if (form && form === formElementRef.current && !event.defaultPrevented) {
+            const input = event.currentTarget;
+            const submitCount = submitCountRef.current;
+            enterValidationTimeout.start(0, () => {
+              if (submitCountRef.current === submitCount) {
+                validation.commit(input.value);
+              }
+            });
+          } else {
+            validation.commit(value2);
+          }
+        }
+      }
+    }, elementProps, (props) => validation.getValidationProps(disabled2, props)],
+    stateAttributesMapping: fieldValidityMapping
+  });
+  return element;
+});
+if (false) FieldControl.displayName = "FieldControl";
+
+// node_modules/@base-ui/react/field/validity/FieldValidity.mjs
+var React32 = __toESM(require("react"), 1);
+var import_jsx_runtime5 = require("react/jsx-runtime");
+var FieldValidity = function FieldValidity2(props) {
+  const {
+    children
+  } = props;
+  const {
+    validityData,
+    invalid: invalid2
+  } = useFieldRootContext(false);
+  const combinedFieldValidityData = React32.useMemo(() => getCombinedFieldValidityData(validityData, invalid2), [validityData, invalid2]);
+  const isInvalid = combinedFieldValidityData.state.valid === false;
+  const {
+    transitionStatus
+  } = useTransitionStatus(isInvalid);
+  const fieldValidityState = React32.useMemo(() => {
+    return {
+      ...combinedFieldValidityData,
+      validity: combinedFieldValidityData.state,
+      transitionStatus
+    };
+  }, [combinedFieldValidityData, transitionStatus]);
+  return /* @__PURE__ */ (0, import_jsx_runtime5.jsx)(React32.Fragment, {
+    children: children(fieldValidityState)
+  });
+};
+if (false) FieldValidity.displayName = "FieldValidity";
+
+// node_modules/@base-ui/react/field/item/FieldItem.mjs
+var React33 = __toESM(require("react"), 1);
+var import_jsx_runtime6 = require("react/jsx-runtime");
+var FieldItem = /* @__PURE__ */ React33.forwardRef(function FieldItem2(componentProps, forwardedRef) {
+  const {
+    render,
+    className,
+    style,
+    disabled: disabledProp = false,
+    ...elementProps
+  } = componentProps;
+  const {
+    state: fieldState,
+    disabled: rootDisabled
+  } = useFieldRootContext(false);
+  const disabled2 = rootDisabled || disabledProp;
+  const state = {
+    ...fieldState,
+    disabled: disabled2
+  };
+  const fieldItemContext = React33.useMemo(() => ({
+    disabled: disabled2
+  }), [disabled2]);
+  const element = useRenderElement("div", componentProps, {
+    ref: forwardedRef,
+    state,
+    props: elementProps,
+    stateAttributesMapping: fieldValidityMapping
+  });
+  return /* @__PURE__ */ (0, import_jsx_runtime6.jsx)(LabelableProvider, {
+    children: /* @__PURE__ */ (0, import_jsx_runtime6.jsx)(FieldItemContext.Provider, {
+      value: fieldItemContext,
+      children: element
+    })
+  });
+});
+if (false) FieldItem.displayName = "FieldItem";
+
+// node_modules/@base-ui/react/input/Input.mjs
+var import_jsx_runtime7 = require("react/jsx-runtime");
+var Input = /* @__PURE__ */ React34.forwardRef(function Input2(props, forwardedRef) {
+  return /* @__PURE__ */ (0, import_jsx_runtime7.jsx)(index_parts_exports.Control, {
+    ref: forwardedRef,
+    ...props
+  });
+});
+if (false) Input.displayName = "Input";
+
+// components/ui/input.tsx
+var import_jsx_runtime8 = require("react/jsx-runtime");
+function Input3({ className, type, ...props }) {
+  return /* @__PURE__ */ (0, import_jsx_runtime8.jsx)(
+    Input,
+    {
+      type,
+      "data-slot": "input",
+      className: cn(
+        "h-8 w-full min-w-0 rounded-lg border border-input bg-transparent px-2.5 py-1 text-base transition-colors outline-none file:inline-flex file:h-6 file:border-0 file:bg-transparent file:text-sm file:font-medium file:text-foreground placeholder:text-muted-foreground focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 disabled:pointer-events-none disabled:cursor-not-allowed disabled:bg-input/50 disabled:opacity-50 aria-invalid:border-destructive aria-invalid:ring-3 aria-invalid:ring-destructive/20 md:text-sm dark:bg-input/30 dark:disabled:bg-input/80 dark:aria-invalid:border-destructive/50 dark:aria-invalid:ring-destructive/40",
+        className
+      ),
+      ...props
+    }
+  );
+}
+
+// node_modules/@base-ui/react/switch/index.parts.mjs
+var index_parts_exports2 = {};
+__export(index_parts_exports2, {
+  Root: () => SwitchRoot,
+  Thumb: () => SwitchThumb
+});
+
+// node_modules/@base-ui/react/switch/root/SwitchRoot.mjs
+var React37 = __toESM(require("react"), 1);
+
+// node_modules/@base-ui/utils/useControlled.mjs
+var React35 = __toESM(require("react"), 1);
+function useControlled({
+  controlled,
+  default: defaultProp,
+  name: name2,
+  state = "value"
+}) {
+  const {
+    current: isControlled
+  } = React35.useRef(controlled !== void 0);
+  const [valueState, setValue] = React35.useState(() => defaultProp);
+  const value = isControlled && controlled !== void 0 ? controlled : valueState;
+  if (false) {
+    React35.useEffect(() => {
+      if (isControlled !== (controlled !== void 0)) {
+        error([`A component is changing the ${isControlled ? "" : "un"}controlled ${state} state of ${name2} to be ${isControlled ? "un" : ""}controlled.`, "Elements should not switch from uncontrolled to controlled (or vice versa).", `Decide between using a controlled or uncontrolled ${name2} element for the lifetime of the component.`, "The nature of the state is determined during the first render. It's considered controlled if the value is not `undefined`.", "More info: https://fb.me/react-controlled-components"].join("\n"));
+      }
+    }, [state, name2, controlled]);
+    const {
+      current: defaultValue
+    } = React35.useRef(defaultProp);
+    React35.useEffect(() => {
+      if (!isControlled && serializeToDevModeString(defaultValue) !== serializeToDevModeString(defaultProp)) {
+        error([`A component is changing the default ${state} state of an uncontrolled ${name2} after being initialized. To suppress this warning opt to use a controlled ${name2}.`].join("\n"));
+      }
+    }, [defaultProp]);
+  }
+  const setValueIfUncontrolled = React35.useCallback((newValue) => {
+    if (!isControlled) {
+      setValue(newValue);
+    }
+  }, []);
+  return [value, setValueIfUncontrolled];
+}
+
+// node_modules/@base-ui/utils/visuallyHidden.mjs
+var visuallyHiddenBase = {
+  clipPath: "inset(50%)",
+  overflow: "hidden",
+  whiteSpace: "nowrap",
+  border: 0,
+  padding: 0,
+  width: 1,
+  height: 1,
+  margin: -1
+};
+var visuallyHidden = {
+  ...visuallyHiddenBase,
+  position: "fixed",
+  margin: 0,
+  top: 0,
+  left: 0
+};
+var visuallyHiddenInput = {
+  ...visuallyHiddenBase,
+  position: "absolute"
+};
+
+// node_modules/@base-ui/react/switch/root/SwitchRootContext.mjs
+var React36 = __toESM(require("react"), 1);
+var SwitchRootContext = /* @__PURE__ */ React36.createContext(void 0);
+if (false) SwitchRootContext.displayName = "SwitchRootContext";
+function useSwitchRootContext() {
+  const context = React36.useContext(SwitchRootContext);
+  if (context === void 0) {
+    throw new Error(false ? "Base UI: SwitchRootContext is missing. Switch parts must be placed within <Switch.Root>." : formatErrorMessage_default(63));
+  }
+  return context;
+}
+
+// node_modules/@base-ui/react/switch/root/SwitchRootDataAttributes.mjs
+var checked = "data-checked";
+var unchecked = "data-unchecked";
+
+// node_modules/@base-ui/react/switch/stateAttributesMapping.mjs
+var stateAttributesMapping2 = {
+  ...fieldValidityMapping,
+  checked(value) {
+    if (value) {
+      return {
+        [checked]: ""
+      };
+    }
+    return {
+      [unchecked]: ""
+    };
+  }
+};
+
+// node_modules/@base-ui/react/switch/root/SwitchRoot.mjs
+var import_jsx_runtime9 = require("react/jsx-runtime");
+var SwitchRoot = /* @__PURE__ */ React37.forwardRef(function SwitchRoot2(componentProps, forwardedRef) {
+  const {
+    checked: checkedProp,
+    className,
+    defaultChecked,
+    "aria-labelledby": ariaLabelledByProp,
+    form,
+    id: idProp,
+    inputRef: externalInputRef,
+    name: nameProp,
+    nativeButton = false,
+    onCheckedChange,
+    readOnly = false,
+    required = false,
+    disabled: disabledProp = false,
+    render,
+    uncheckedValue,
+    value,
+    style,
+    ...elementProps
+  } = componentProps;
+  const {
+    clearErrors
+  } = useFormContext();
+  const {
+    state: fieldState,
+    setTouched,
+    setDirty,
+    validityData,
+    setFilled,
+    validationMode,
+    disabled: fieldDisabled,
+    name: fieldName,
+    validation
+  } = useFieldRootContext();
+  const {
+    labelId
+  } = useLabelableContext();
+  const disabled2 = fieldDisabled || disabledProp;
+  const name2 = fieldName ?? nameProp;
+  const inputRef = React37.useRef(null);
+  const handleInputRef = useMergedRefs(inputRef, externalInputRef, validation.inputRef);
+  const switchRef = React37.useRef(null);
+  const setFocused = useSetFieldFocused(disabled2, switchRef);
+  const id = useBaseUiId();
+  const controlId = useLabelableId({
+    id: idProp
+  });
+  const hiddenInputId = nativeButton ? void 0 : controlId;
+  const [checked2, setCheckedState] = useControlled({
+    controlled: checkedProp,
+    default: Boolean(defaultChecked),
+    name: "Switch",
+    state: "checked"
+  });
+  useRegisterFieldControl(switchRef, id, checked2, void 0, !disabled2, nameProp);
+  useIsoLayoutEffect(() => {
+    setFilled(checked2);
+  }, [checked2, setFilled]);
+  useValueChanged(checked2, () => {
+    clearErrors(name2);
+    setDirty(checked2 !== validityData.initialValue);
+    validation.change(checked2);
+  });
+  const {
+    getButtonProps,
+    buttonRef
+  } = useButton({
+    disabled: disabled2,
+    native: nativeButton
+  });
+  const ariaLabelledBy = useAriaLabelledBy(ariaLabelledByProp, labelId, inputRef, !nativeButton, hiddenInputId, elementProps["aria-label"]);
+  const rootProps = {
+    id: nativeButton ? controlId : id,
+    role: "switch",
+    "aria-checked": checked2,
+    "aria-readonly": readOnly || void 0,
+    "aria-required": required || void 0,
+    "aria-labelledby": ariaLabelledBy,
+    onFocus() {
+      setFocused(true);
+    },
+    onBlur() {
+      const element2 = inputRef.current;
+      if (!element2 || disabled2) {
+        return;
+      }
+      setTouched(true);
+      setFocused(false);
+      if (validationMode === "onBlur") {
+        validation.commit(element2.checked);
+      }
+    },
+    onClick(event) {
+      if (readOnly || disabled2) {
+        return;
+      }
+      event.preventDefault();
+      const input = inputRef.current;
+      if (!input) {
+        return;
+      }
+      dispatchClickWithModifiers(input, event);
+    }
+  };
+  const inputProps = {
+    ...validation.getValidationProps(disabled2),
+    checked: checked2,
+    disabled: disabled2,
+    form,
+    id: hiddenInputId,
+    name: name2,
+    required,
+    style: name2 ? visuallyHiddenInput : visuallyHidden,
+    tabIndex: -1,
+    type: "checkbox",
+    "aria-hidden": true,
+    ref: handleInputRef,
+    onChange(event) {
+      if (event.nativeEvent.defaultPrevented) {
+        return;
+      }
+      if (readOnly) {
+        event.preventDefault();
+        return;
+      }
+      const nextChecked = event.currentTarget.checked;
+      const eventDetails = createChangeEventDetails(reason_parts_exports.none, event.nativeEvent);
+      onCheckedChange?.(nextChecked, eventDetails);
+      if (eventDetails.isCanceled) {
+        return;
+      }
+      setCheckedState(nextChecked);
+    },
+    onClick(event) {
+      event.stopPropagation();
+    },
+    onFocus() {
+      switchRef.current?.focus();
+    },
+    // React <19 sets an empty value if `undefined` is passed explicitly
+    // To avoid this, we only set the value if it's defined
+    ...value !== void 0 ? {
+      value
+    } : EMPTY_OBJECT
+  };
+  const state = React37.useMemo(() => ({
+    ...fieldState,
+    checked: checked2,
+    disabled: disabled2,
+    readOnly,
+    required
+  }), [fieldState, checked2, disabled2, readOnly, required]);
+  const element = useRenderElement("span", componentProps, {
+    state,
+    ref: [forwardedRef, switchRef, buttonRef],
+    props: [rootProps, elementProps, getButtonProps, (props) => validation.getValidationProps(disabled2, props)],
+    stateAttributesMapping: stateAttributesMapping2
+  });
+  return /* @__PURE__ */ (0, import_jsx_runtime9.jsxs)(SwitchRootContext.Provider, {
+    value: state,
+    children: [element, !checked2 && name2 && uncheckedValue !== void 0 && /* @__PURE__ */ (0, import_jsx_runtime9.jsx)("input", {
+      type: "hidden",
+      form,
+      name: name2,
+      value: uncheckedValue,
+      disabled: disabled2
+    }), /* @__PURE__ */ (0, import_jsx_runtime9.jsx)("input", {
+      ...inputProps,
+      suppressHydrationWarning: true
+    })]
+  });
+});
+if (false) SwitchRoot.displayName = "SwitchRoot";
+
+// node_modules/@base-ui/react/switch/thumb/SwitchThumb.mjs
+var React38 = __toESM(require("react"), 1);
+var SwitchThumb = /* @__PURE__ */ React38.forwardRef(function SwitchThumb2(componentProps, forwardedRef) {
+  const {
+    render,
+    className,
+    style,
+    ...elementProps
+  } = componentProps;
+  const state = useSwitchRootContext();
+  return useRenderElement("span", componentProps, {
+    state,
+    ref: forwardedRef,
+    stateAttributesMapping: stateAttributesMapping2,
+    props: elementProps
+  });
+});
+if (false) SwitchThumb.displayName = "SwitchThumb";
+
+// components/ui/switch.tsx
+var import_jsx_runtime10 = require("react/jsx-runtime");
+function Switch({
+  className,
+  size = "default",
+  ...props
+}) {
+  return /* @__PURE__ */ (0, import_jsx_runtime10.jsx)(
+    index_parts_exports2.Root,
+    {
+      "data-slot": "switch",
+      "data-size": size,
+      className: cn(
+        "peer group/switch relative inline-flex shrink-0 items-center rounded-full border border-transparent transition-all outline-none group-has-[:focus-visible]/field-label:border-transparent group-has-[:focus-visible]/field-label:ring-0 after:absolute after:-inset-x-3 after:-inset-y-2 focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 aria-invalid:border-destructive aria-invalid:ring-3 aria-invalid:ring-destructive/20 data-[size=default]:h-[18.4px] data-[size=default]:w-[32px] data-[size=sm]:h-[14px] data-[size=sm]:w-[24px] dark:aria-invalid:border-destructive/50 dark:aria-invalid:ring-destructive/40 data-checked:bg-primary data-unchecked:bg-input dark:data-unchecked:bg-input/80 data-disabled:cursor-not-allowed data-disabled:opacity-50",
+        className
+      ),
+      ...props,
+      children: /* @__PURE__ */ (0, import_jsx_runtime10.jsx)(
+        index_parts_exports2.Thumb,
+        {
+          "data-slot": "switch-thumb",
+          className: "pointer-events-none block rounded-full bg-background ring-0 transition-transform group-data-[size=default]/switch:size-4 group-data-[size=sm]/switch:size-3 group-data-[size=default]/switch:data-checked:translate-x-[calc(100%-2px)] group-data-[size=sm]/switch:data-checked:translate-x-[calc(100%-2px)] dark:data-checked:bg-primary-foreground group-data-[size=default]/switch:data-unchecked:translate-x-0 group-data-[size=sm]/switch:data-unchecked:translate-x-0 dark:data-unchecked:bg-foreground"
+        }
+      )
+    }
+  );
+}
+
+// lib/idb.ts
+var DB_NAME = "lanpose";
+var DB_VERSION = 3;
+function openLanpose() {
+  return new Promise((resolve, reject) => {
+    const request = indexedDB.open(DB_NAME, DB_VERSION);
+    request.onupgradeneeded = () => {
+      const db = request.result;
+      if (!db.objectStoreNames.contains("characters")) db.createObjectStore("characters");
+      if (!db.objectStoreNames.contains("history")) db.createObjectStore("history", { keyPath: "id" });
+      if (!db.objectStoreNames.contains("customPoses")) db.createObjectStore("customPoses", { keyPath: "id" });
+      if (!db.objectStoreNames.contains("customCostumes")) db.createObjectStore("customCostumes", { keyPath: "id" });
+      if (!db.objectStoreNames.contains("models")) db.createObjectStore("models", { keyPath: "id" });
+    };
+    request.onsuccess = () => resolve(request.result);
+    request.onerror = () => reject(request.error);
+  });
+}
+
+// lib/characters.ts
+var STORE = "characters";
+function openDb() {
+  return openLanpose();
+}
+async function readStoredCharacters() {
+  const db = await openDb();
+  try {
+    return await new Promise((resolve, reject) => {
+      const tx = db.transaction(STORE, "readonly");
+      const request = tx.objectStore(STORE).get("current");
+      request.onsuccess = () => {
+        const value = request.result;
+        resolve(Array.isArray(value) ? value : []);
+      };
+      request.onerror = () => reject(request.error);
+    });
+  } finally {
+    db.close();
+  }
+}
+async function writeStoredCharacters(images) {
+  const db = await openDb();
+  try {
+    await new Promise((resolve, reject) => {
+      const tx = db.transaction(STORE, "readwrite");
+      tx.objectStore(STORE).put(images, "current");
+      tx.oncomplete = () => resolve();
+      tx.onerror = () => reject(tx.error);
+    });
+  } finally {
+    db.close();
+  }
+}
+async function fileToCharacter(file) {
+  const bitmap = await createImageBitmap(file);
+  const maxEdge = 1280;
+  const scale = Math.min(1, maxEdge / Math.max(bitmap.width, bitmap.height));
+  const width = Math.max(1, Math.round(bitmap.width * scale));
+  const height = Math.max(1, Math.round(bitmap.height * scale));
+  const canvas = document.createElement("canvas");
+  canvas.width = width;
+  canvas.height = height;
+  const context = canvas.getContext("2d");
+  if (!context) throw new Error("无法读取这张图片");
+  context.drawImage(bitmap, 0, 0, width, height);
+  bitmap.close();
+  const blob = await new Promise((resolve) => canvas.toBlob(resolve, "image/jpeg", 0.86));
+  if (!blob) throw new Error("无法压缩这张图片");
+  const bytes = new Uint8Array(await blob.arrayBuffer());
+  let binary = "";
+  const chunk = 32768;
+  for (let index = 0; index < bytes.length; index += chunk) {
+    binary += String.fromCharCode(...bytes.subarray(index, index + chunk));
+  }
+  return {
+    id: crypto.randomUUID(),
+    mediaType: "image/jpeg",
+    dataBase64: btoa(binary)
+  };
+}
+
+// lib/studio-env.tsx
+var import_react5 = require("react");
+var import_jsx_runtime11 = require("react/jsx-runtime");
+var StudioEnvContext = (0, import_react5.createContext)({
+  basePath: "",
+  portalContainer: null
+});
+function StudioEnvProvider({
+  basePath,
+  portalContainer,
+  children
+}) {
+  return /* @__PURE__ */ (0, import_jsx_runtime11.jsx)(StudioEnvContext.Provider, { value: { basePath, portalContainer }, children });
+}
+function useStudioEnv() {
+  return (0, import_react5.useContext)(StudioEnvContext);
+}
+function studioUrl(basePath, path) {
+  if (!path.startsWith("/")) return path;
+  const base = basePath.endsWith("/") ? basePath.slice(0, -1) : basePath;
+  return `${base}${path}`;
+}
+
+// components/character-dock.tsx
+var import_jsx_runtime12 = require("react/jsx-runtime");
+function CharacterDock({
+  images,
+  onChange,
+  onUseDefault,
+  keepOutfit,
+  onKeepOutfit,
+  outfitLocked = false,
+  models,
+  activeModelId,
+  activeLabel,
+  onSelectModel,
+  onRenameModel,
+  onDeleteModel,
+  onGenerateSheet,
+  sheetBusy,
+  sheetError,
+  hasKey,
+  onOpenSettings
+}) {
+  const inputRef = (0, import_react6.useRef)(null);
+  const { basePath } = useStudioEnv();
+  const [error, setError] = (0, import_react6.useState)("");
+  const [busy, setBusy] = (0, import_react6.useState)(false);
+  const [editingId, setEditingId] = (0, import_react6.useState)(null);
+  const [draftLabel, setDraftLabel] = (0, import_react6.useState)("");
+  const [pendingDelete, setPendingDelete] = (0, import_react6.useState)(null);
+  const custom = images.length > 0;
+  const photoCount = images.filter((image) => image.role !== "sheet").length;
+  const portrait = custom ? `data:${images[0].mediaType};base64,${images[0].dataBase64}` : studioUrl(basePath, "/muse/dafeiyu-portrait.jpg");
+  const full = custom ? portrait : studioUrl(basePath, "/muse/dafeiyu-sheet.png");
+  async function addFiles(list) {
+    if (!list || list.length === 0) return;
+    setBusy(true);
+    setError("");
+    try {
+      const next = [...images];
+      for (const file of Array.from(list)) {
+        if (next.filter((image) => image.role !== "sheet").length >= 3) break;
+        if (!file.type.startsWith("image/")) continue;
+        next.push(await fileToCharacter(file));
+      }
+      if (next.length === images.length) setError("没有读到可用的图片");
+      else onChange(next.slice(0, 3));
+    } catch (cause) {
+      setError(cause instanceof Error ? cause.message : "图片导入失败");
+    } finally {
+      setBusy(false);
+      if (inputRef.current) inputRef.current.value = "";
+    }
+  }
+  return /* @__PURE__ */ (0, import_jsx_runtime12.jsxs)("aside", { className: "dock order-1 flex shrink-0 flex-col gap-3 px-3 py-3 text-[#e2e8f0] @min-[1024px]/studio:order-none @min-[1024px]/studio:h-full @min-[1024px]/studio:min-h-0 @min-[1024px]/studio:shrink @min-[1024px]/studio:gap-4 @min-[1024px]/studio:overflow-y-auto @min-[1024px]/studio:px-4 @min-[1024px]/studio:py-5", children: [
+    /* @__PURE__ */ (0, import_jsx_runtime12.jsxs)("div", { className: "flex items-center gap-3", children: [
+      /* @__PURE__ */ (0, import_jsx_runtime12.jsx)("img", { src: portrait, alt: "", className: "size-14 shrink-0 rounded-xl object-cover object-top @min-[1024px]/studio:hidden" }),
+      /* @__PURE__ */ (0, import_jsx_runtime12.jsxs)("div", { className: "min-w-0 flex-1", children: [
+        /* @__PURE__ */ (0, import_jsx_runtime12.jsx)("h2", { className: "text-lg font-semibold text-white @min-[1024px]/studio:text-2xl", children: custom ? activeLabel || "导入的模特" : "大肥鱼" }),
+        /* @__PURE__ */ (0, import_jsx_runtime12.jsx)("p", { className: "mt-0.5 line-clamp-2 text-xs leading-5 text-[#cbd5e1] @min-[1024px]/studio:mt-2 @min-[1024px]/studio:text-sm @min-[1024px]/studio:leading-6", children: custom ? "生图时改用你导入的参考图。" : "社区鲸鱼娘的成年形象，不是 DeepSeek 官方吉祥物。" })
+      ] }),
+      /* @__PURE__ */ (0, import_jsx_runtime12.jsxs)(
+        Button3,
+        {
+          variant: "outline",
+          size: "sm",
+          className: "shrink border-white/20 bg-white/10 text-white hover:bg-white/15 hover:text-white @min-[1024px]/studio:hidden",
+          disabled: busy || sheetBusy || photoCount >= 3,
+          onClick: () => inputRef.current?.click(),
+          children: [
+            /* @__PURE__ */ (0, import_jsx_runtime12.jsx)(ImagePlus, {}),
+            busy ? "读图" : "导入"
+          ]
+        }
+      )
+    ] }),
+    models.length > 0 ? /* @__PURE__ */ (0, import_jsx_runtime12.jsxs)("div", { className: "grid max-h-36 gap-2 overflow-y-auto", children: [
+      /* @__PURE__ */ (0, import_jsx_runtime12.jsx)("p", { className: "text-xs text-[#cbd5e1]", children: "已存模特" }),
+      models.map((model) => {
+        const thumb = model.images[0];
+        const selected = model.id === activeModelId;
+        return /* @__PURE__ */ (0, import_jsx_runtime12.jsxs)("div", { className: `flex items-center gap-2 rounded-xl px-2 py-1.5 ${selected ? "bg-white/15 ring-1 ring-white/30" : "bg-white/5"}`, children: [
+          thumb ? /* @__PURE__ */ (0, import_jsx_runtime12.jsx)("img", { src: `data:${thumb.mediaType};base64,${thumb.dataBase64}`, alt: "", className: `h-10 w-8 shrink-0 rounded-md ${thumb.role === "sheet" ? "bg-white object-contain" : "object-cover"}` }) : null,
+          editingId === model.id ? /* @__PURE__ */ (0, import_jsx_runtime12.jsx)(
+            Input3,
+            {
+              value: draftLabel,
+              "aria-label": `模特名称 ${model.label}`,
+              className: "h-8 border-white/20 bg-white/10 text-white",
+              onChange: (event) => setDraftLabel(event.target.value),
+              onBlur: () => {
+                onRenameModel(model.id, draftLabel);
+                setEditingId(null);
+              },
+              onKeyDown: (event) => {
+                if (event.key === "Enter") event.target.blur();
+              }
+            }
+          ) : /* @__PURE__ */ (0, import_jsx_runtime12.jsx)("button", { type: "button", className: "min-w-0 flex-1 truncate text-left text-sm text-white", "aria-pressed": selected, onClick: () => onSelectModel(model.id), children: model.label }),
+          /* @__PURE__ */ (0, import_jsx_runtime12.jsx)("button", { type: "button", className: "shrink-0 text-[11px] text-[#cbd5e1]", onClick: () => {
+            setEditingId(model.id);
+            setDraftLabel(model.label);
+          }, children: "改名" }),
+          /* @__PURE__ */ (0, import_jsx_runtime12.jsx)(
+            "button",
+            {
+              type: "button",
+              className: "shrink-0 text-[11px] text-[#cbd5e1]",
+              onClick: () => {
+                if (pendingDelete === model.id) {
+                  setPendingDelete(null);
+                  onDeleteModel(model.id);
+                  return;
+                }
+                setPendingDelete(model.id);
+              },
+              children: pendingDelete === model.id ? "确认" : "删除"
+            }
+          )
+        ] }, model.id);
+      })
+    ] }) : null,
+    /* @__PURE__ */ (0, import_jsx_runtime12.jsx)("img", { src: portrait, alt: custom ? images[0]?.role === "sheet" ? "多视角设定图" : "导入的模特头像" : "大肥鱼的正面全身像，蓝发、鲸耳、蓝白女仆装", className: `hidden w-full rounded-xl @min-[1024px]/studio:block ${images[0]?.role === "sheet" ? "max-h-56 bg-white object-contain" : "aspect-[3/4] object-cover object-top"}` }),
+    /* @__PURE__ */ (0, import_jsx_runtime12.jsx)("p", { className: "hidden text-sm leading-6 text-[#cbd5e1] @min-[1024px]/studio:block", children: custom ? "参考图会和姿势线稿一起交给模型。请使用成年人物的图片。" : "长波浪蓝发、鲸耳和蓝鲸尾。三视图锁住脸和鲸尾，衣服可以换成衣装集里的一套。" }),
+    !custom ? /* @__PURE__ */ (0, import_jsx_runtime12.jsx)("img", { src: full, alt: "大肥鱼的成年三视图：正面、侧面、背面，以及头饰和裙摆细节", className: "hidden max-h-56 rounded-xl bg-white object-contain @min-[1024px]/studio:block" }) : /* @__PURE__ */ (0, import_jsx_runtime12.jsx)("div", { className: "grid grid-cols-3 gap-2", children: images.map((image) => /* @__PURE__ */ (0, import_jsx_runtime12.jsxs)("div", { className: "relative", children: [
+      /* @__PURE__ */ (0, import_jsx_runtime12.jsx)("img", { src: `data:${image.mediaType};base64,${image.dataBase64}`, alt: image.role === "sheet" ? "多视角设定图" : "导入的模特参考", className: `aspect-[3/4] w-full rounded-lg ${image.role === "sheet" ? "bg-white object-contain" : "object-cover"}` }),
+      image.role === "sheet" ? /* @__PURE__ */ (0, import_jsx_runtime12.jsx)("span", { className: "absolute bottom-1 left-1 rounded-full bg-black/60 px-1.5 text-[10px] text-white", children: "设定图" }) : null,
+      /* @__PURE__ */ (0, import_jsx_runtime12.jsx)(
+        "button",
+        {
+          type: "button",
+          className: "absolute top-1 right-1 rounded-full bg-black/60 px-1.5 text-[10px] text-white",
+          onClick: () => onChange(images.filter((item) => item.id !== image.id)),
+          children: "移除"
+        }
+      )
+    ] }, image.id)) }),
+    /* @__PURE__ */ (0, import_jsx_runtime12.jsx)(
+      "input",
+      {
+        ref: inputRef,
+        type: "file",
+        accept: "image/png,image/jpeg,image/webp",
+        multiple: true,
+        "aria-label": "导入模特照片",
+        className: "sr-only",
+        onChange: (event) => void addFiles(event.target.files)
+      }
+    ),
+    /* @__PURE__ */ (0, import_jsx_runtime12.jsxs)(
+      Button3,
+      {
+        variant: "outline",
+        className: "hidden border-white/20 bg-white/10 text-white hover:bg-white/15 hover:text-white @min-[1024px]/studio:inline-flex",
+        disabled: busy || sheetBusy || photoCount >= 3,
+        onClick: () => inputRef.current?.click(),
+        children: [
+          /* @__PURE__ */ (0, import_jsx_runtime12.jsx)(ImagePlus, {}),
+          busy ? "正在读图" : images.length ? "再加一张参考" : "导入其他模特"
+        ]
+      }
+    ),
+    custom ? /* @__PURE__ */ (0, import_jsx_runtime12.jsx)(
+      Button3,
+      {
+        variant: "outline",
+        className: "border-white/20 bg-white/10 text-white hover:bg-white/15 hover:text-white",
+        disabled: sheetBusy,
+        onClick: () => {
+          if (!hasKey) {
+            onOpenSettings();
+            return;
+          }
+          onGenerateSheet();
+        },
+        children: sheetBusy ? "正在生成" : "生成多视角 sheet"
+      }
+    ) : null,
+    custom ? /* @__PURE__ */ (0, import_jsx_runtime12.jsxs)(Button3, { variant: "ghost", className: "text-[#e2e8f0] hover:bg-white/10 hover:text-white", onClick: onUseDefault, children: [
+      /* @__PURE__ */ (0, import_jsx_runtime12.jsx)(RotateCcw, {}),
+      "恢复默认模特大肥鱼"
+    ] }) : null,
+    sheetError ? /* @__PURE__ */ (0, import_jsx_runtime12.jsx)("p", { className: "text-sm text-[#fecaca]", children: sheetError }) : null,
+    error ? /* @__PURE__ */ (0, import_jsx_runtime12.jsx)("p", { className: "text-sm text-[#fecaca]", children: error }) : null,
+    /* @__PURE__ */ (0, import_jsx_runtime12.jsxs)("label", { className: "mt-auto flex items-center justify-between gap-3 rounded-xl bg-white/10 px-3 py-2.5 text-sm @min-[1024px]/studio:py-3", children: [
+      /* @__PURE__ */ (0, import_jsx_runtime12.jsxs)("span", { className: "min-w-0", children: [
+        /* @__PURE__ */ (0, import_jsx_runtime12.jsx)("span", { className: "block text-white", children: "保持服装" }),
+        /* @__PURE__ */ (0, import_jsx_runtime12.jsx)("span", { className: "mt-1 block text-xs leading-5 text-[#cbd5e1] @min-[640px]/studio:hidden", children: outfitLocked ? "已选服装优先，这个开关先让位。" : "只借姿势，不借线稿里的身体。" }),
+        /* @__PURE__ */ (0, import_jsx_runtime12.jsx)("span", { className: "mt-1 hidden text-xs leading-5 text-[#cbd5e1] @min-[640px]/studio:block", children: outfitLocked ? "已经选了一套衣服，生图会换成它。取消这套之后，这里的开关重新生效。" : "只借姿势，不借线稿里的身体。关掉后可在补充描述里换衣服。" })
+      ] }),
+      /* @__PURE__ */ (0, import_jsx_runtime12.jsx)(Switch, { checked: outfitLocked ? false : keepOutfit, onCheckedChange: onKeepOutfit, disabled: outfitLocked, "aria-label": "保持服装" })
+    ] })
+  ] });
+}
+
+// components/history-panel.tsx
+var import_react7 = require("react");
+
+// node_modules/@base-ui/react/dialog/index.parts.mjs
+var index_parts_exports3 = {};
+__export(index_parts_exports3, {
+  Backdrop: () => DialogBackdrop,
+  Close: () => DialogClose,
+  Description: () => DialogDescription,
+  Handle: () => DialogHandle,
+  Popup: () => DialogPopup,
+  Portal: () => DialogPortal,
+  Root: () => DialogRoot,
+  Title: () => DialogTitle,
+  Trigger: () => DialogTrigger,
+  Viewport: () => DialogViewport,
+  createHandle: () => createDialogHandle
+});
+
+// node_modules/@base-ui/react/dialog/backdrop/DialogBackdrop.mjs
+var React40 = __toESM(require("react"), 1);
+
+// node_modules/@base-ui/react/dialog/root/DialogRootContext.mjs
+var React39 = __toESM(require("react"), 1);
+var DialogRootContext = /* @__PURE__ */ React39.createContext(void 0);
+if (false) DialogRootContext.displayName = "DialogRootContext";
+function useDialogRootContext(optional) {
+  const store = React39.useContext(DialogRootContext);
+  if (!optional && store === void 0) {
+    throw new Error(false ? "Base UI: DialogRootContext is missing. Dialog parts must be placed within <Dialog.Root>." : formatErrorMessage_default(27));
+  }
+  return store;
+}
+
+// node_modules/@base-ui/react/dialog/backdrop/DialogBackdrop.mjs
+var DialogBackdrop = /* @__PURE__ */ React40.forwardRef(function DialogBackdrop2(componentProps, forwardedRef) {
+  const {
+    render,
+    className,
+    style,
+    forceRender = false,
+    ...elementProps
+  } = componentProps;
+  const store = useDialogRootContext();
+  const open3 = store.useState("open");
+  const nested = store.useState("nested");
+  const mounted = store.useState("mounted");
+  const transitionStatus = store.useState("transitionStatus");
+  const state = {
+    open: open3,
+    transitionStatus
+  };
+  return useRenderElement("div", componentProps, {
+    state,
+    ref: [store.context.backdropRef, forwardedRef],
+    stateAttributesMapping: popupTransitionStateMapping,
+    props: [{
+      role: "presentation",
+      hidden: !mounted,
+      style: {
+        userSelect: "none",
+        WebkitUserSelect: "none"
+      }
+    }, elementProps],
+    enabled: forceRender || !nested
+  });
+});
+if (false) DialogBackdrop.displayName = "DialogBackdrop";
+
+// node_modules/@base-ui/react/dialog/close/DialogClose.mjs
+var React41 = __toESM(require("react"), 1);
+var DialogClose = /* @__PURE__ */ React41.forwardRef(function DialogClose2(componentProps, forwardedRef) {
+  const {
+    render,
+    className,
+    style,
+    disabled: disabled2 = false,
+    nativeButton = true,
+    ...elementProps
+  } = componentProps;
+  const store = useDialogRootContext();
+  const open3 = store.useState("open");
+  const {
+    getButtonProps,
+    buttonRef
+  } = useButton({
+    disabled: disabled2,
+    native: nativeButton
+  });
+  const state = {
+    disabled: disabled2
+  };
+  function handleClick(event) {
+    if (open3) {
+      store.setOpen(false, createChangeEventDetails(reason_parts_exports.closePress, event.nativeEvent));
+    }
+  }
+  return useRenderElement("button", componentProps, {
+    state,
+    ref: [forwardedRef, buttonRef],
+    props: [{
+      onClick: handleClick
+    }, elementProps, getButtonProps]
+  });
+});
+if (false) DialogClose.displayName = "DialogClose";
+
+// node_modules/@base-ui/react/dialog/description/DialogDescription.mjs
+var React42 = __toESM(require("react"), 1);
+var DialogDescription = /* @__PURE__ */ React42.forwardRef(function DialogDescription2(componentProps, forwardedRef) {
+  const {
+    render,
+    className,
+    style,
+    id: idProp,
+    ...elementProps
+  } = componentProps;
+  const store = useDialogRootContext();
+  const id = useBaseUiId(idProp);
+  store.useSyncedValueWithCleanup("descriptionElementId", id);
+  return useRenderElement("p", componentProps, {
+    ref: forwardedRef,
+    props: [{
+      id
+    }, elementProps]
+  });
+});
+if (false) DialogDescription.displayName = "DialogDescription";
+
+// node_modules/@base-ui/react/dialog/popup/DialogPopup.mjs
+var React56 = __toESM(require("react"), 1);
+
+// node_modules/@base-ui/react/floating-ui-react/components/FloatingFocusManager.mjs
+var React46 = __toESM(require("react"), 1);
+
+// node_modules/@base-ui/utils/addEventListener.mjs
+function addEventListener(target, type, listener, options) {
+  target.addEventListener(type, listener, options);
+  return () => {
+    target.removeEventListener(type, listener, options);
+  };
+}
+
+// node_modules/@base-ui/utils/mergeCleanups.mjs
+function mergeCleanups(...cleanups) {
+  return () => {
+    for (let i = 0; i < cleanups.length; i += 1) {
+      const cleanup = cleanups[i];
+      if (cleanup) {
+        cleanup();
+      }
+    }
+  };
+}
+
+// node_modules/@base-ui/utils/useValueAsRef.mjs
+function useValueAsRef(value) {
+  const latest = useRefWithInit(createLatestRef, value).current;
+  latest.next = value;
+  useIsoLayoutEffect(latest.effect);
+  return latest;
+}
+function createLatestRef(value) {
+  const latest = {
+    current: value,
+    next: value,
+    effect: () => {
+      latest.current = latest.next;
+    }
+  };
+  return latest;
+}
+
+// node_modules/@base-ui/react/utils/FocusGuard.mjs
+var React43 = __toESM(require("react"), 1);
+var import_jsx_runtime13 = require("react/jsx-runtime");
+var FocusGuard = /* @__PURE__ */ React43.forwardRef(function FocusGuard2(props, ref) {
+  const [role, setRole] = React43.useState();
+  useIsoLayoutEffect(() => {
+    if (parts_exports.screenReader.voiceOver && parts_exports.engine.webkit) {
+      setRole("button");
+    }
+  }, []);
+  const restProps = {
+    tabIndex: 0,
+    // Role is only for VoiceOver
+    role
+  };
+  return /* @__PURE__ */ (0, import_jsx_runtime13.jsx)("span", {
+    ...props,
+    ref,
+    style: visuallyHidden,
+    "aria-hidden": role ? void 0 : true,
+    ...restProps,
+    "data-base-ui-focus-guard": ""
+  });
+});
+if (false) FocusGuard.displayName = "FocusGuard";
 
 // node_modules/@base-ui/react/floating-ui-react/utils/createAttribute.mjs
 function createAttribute(name2) {
@@ -4628,8 +6051,8 @@ function markOthers(avoidElements, options = {}) {
 }
 
 // node_modules/@base-ui/react/floating-ui-react/components/FloatingPortal.mjs
-var React29 = __toESM(require("react"), 1);
-var ReactDOM = __toESM(require("react-dom"), 1);
+var React44 = __toESM(require("react"), 1);
+var ReactDOM2 = __toESM(require("react-dom"), 1);
 
 // node_modules/@base-ui/react/internals/constants.mjs
 var CLICK_TRIGGER_IDENTIFIER = "data-base-ui-click-trigger";
@@ -4645,10 +6068,10 @@ var ownerVisuallyHidden = {
 };
 
 // node_modules/@base-ui/react/floating-ui-react/components/FloatingPortal.mjs
-var import_jsx_runtime7 = require("react/jsx-runtime");
-var PortalContext = /* @__PURE__ */ React29.createContext(null);
+var import_jsx_runtime14 = require("react/jsx-runtime");
+var PortalContext = /* @__PURE__ */ React44.createContext(null);
 if (false) PortalContext.displayName = "PortalContext";
-var usePortalContext = () => React29.useContext(PortalContext);
+var usePortalContext = () => React44.useContext(PortalContext);
 var attr = createAttribute("portal");
 function useFloatingPortalNode(props = {}) {
   const {
@@ -4660,14 +6083,14 @@ function useFloatingPortalNode(props = {}) {
   const uniqueId = useId();
   const portalContext = usePortalContext();
   const parentPortalNode = portalContext?.portalNode;
-  const [containerElement, setContainerElement] = React29.useState(null);
-  const [portalNode, setPortalNode] = React29.useState(null);
+  const [containerElement, setContainerElement] = React44.useState(null);
+  const [portalNode, setPortalNode] = React44.useState(null);
   const setPortalNodeRef = useStableCallback((node) => {
     if (node !== null) {
       setPortalNode(node);
     }
   });
-  const containerRef = React29.useRef(null);
+  const containerRef = React44.useRef(null);
   useIsoLayoutEffect(() => {
     if (containerProp === null) {
       if (containerRef.current) {
@@ -4699,16 +6122,16 @@ function useFloatingPortalNode(props = {}) {
       [attr]: ""
     }, elementProps]
   });
-  const portalSubtree = containerElement && portalElement ? /* @__PURE__ */ ReactDOM.createPortal(portalElement, containerElement) : null;
+  const portalSubtree = containerElement && portalElement ? /* @__PURE__ */ ReactDOM2.createPortal(portalElement, containerElement) : null;
   return {
     node: portalNode,
     // `id` and `render` props can override or remove the generated ID. Use the exact
     // rendered value so `aria-owns` never points at an ID absent from the DOM.
-    nodeId: /* @__PURE__ */ React29.isValidElement(portalElement) ? portalElement.props.id : void 0,
+    nodeId: /* @__PURE__ */ React44.isValidElement(portalElement) ? portalElement.props.id : void 0,
     subtree: portalSubtree
   };
 }
-var FloatingPortal = /* @__PURE__ */ React29.forwardRef(function FloatingPortal2(componentProps, forwardedRef) {
+var FloatingPortal = /* @__PURE__ */ React44.forwardRef(function FloatingPortal2(componentProps, forwardedRef) {
   const {
     render,
     className,
@@ -4728,16 +6151,16 @@ var FloatingPortal = /* @__PURE__ */ React29.forwardRef(function FloatingPortal2
     componentProps,
     elementProps
   });
-  const beforeOutsideRef = React29.useRef(null);
-  const afterOutsideRef = React29.useRef(null);
-  const beforeInsideRef = React29.useRef(null);
-  const afterInsideRef = React29.useRef(null);
-  const [focusManagerState, setFocusManagerState] = React29.useState(null);
-  const focusInsideDisabledRef = React29.useRef(false);
+  const beforeOutsideRef = React44.useRef(null);
+  const afterOutsideRef = React44.useRef(null);
+  const beforeInsideRef = React44.useRef(null);
+  const afterInsideRef = React44.useRef(null);
+  const [focusManagerState, setFocusManagerState] = React44.useState(null);
+  const focusInsideDisabledRef = React44.useRef(false);
   const modal = focusManagerState?.modal;
   const open3 = focusManagerState?.open;
   const shouldRenderGuards = !!focusManagerState && !focusManagerState.modal && focusManagerState.open && !!portalNode;
-  React29.useEffect(() => {
+  React44.useEffect(() => {
     if (!portalNode || modal) {
       return void 0;
     }
@@ -4763,7 +6186,7 @@ var FloatingPortal = /* @__PURE__ */ React29.forwardRef(function FloatingPortal2
     enableFocusInside(portalNode);
     focusInsideDisabledRef.current = false;
   }, [open3, portalNode]);
-  const portalContextValue = React29.useMemo(() => ({
+  const portalContextValue = React44.useMemo(() => ({
     beforeOutsideRef,
     afterOutsideRef,
     beforeInsideRef,
@@ -4771,10 +6194,10 @@ var FloatingPortal = /* @__PURE__ */ React29.forwardRef(function FloatingPortal2
     portalNode,
     setFocusManagerState
   }), [portalNode]);
-  return /* @__PURE__ */ (0, import_jsx_runtime7.jsxs)(React29.Fragment, {
-    children: [portalSubtree, /* @__PURE__ */ (0, import_jsx_runtime7.jsxs)(PortalContext.Provider, {
+  return /* @__PURE__ */ (0, import_jsx_runtime14.jsxs)(React44.Fragment, {
+    children: [portalSubtree, /* @__PURE__ */ (0, import_jsx_runtime14.jsxs)(PortalContext.Provider, {
       value: portalContextValue,
-      children: [shouldRenderGuards && portalNode && /* @__PURE__ */ (0, import_jsx_runtime7.jsx)(FocusGuard, {
+      children: [shouldRenderGuards && portalNode && /* @__PURE__ */ (0, import_jsx_runtime14.jsx)(FocusGuard, {
         "data-type": "outside",
         ref: beforeOutsideRef,
         onFocus: (event) => {
@@ -4786,11 +6209,11 @@ var FloatingPortal = /* @__PURE__ */ React29.forwardRef(function FloatingPortal2
             prevTabbable?.focus();
           }
         }
-      }), shouldRenderGuards && portalNode && /* @__PURE__ */ (0, import_jsx_runtime7.jsx)("span", {
+      }), shouldRenderGuards && portalNode && /* @__PURE__ */ (0, import_jsx_runtime14.jsx)("span", {
         role: portalOwnerRole,
         "aria-owns": portalNodeId,
         style: ownerVisuallyHidden
-      }), portalNode && /* @__PURE__ */ ReactDOM.createPortal(children, portalNode), shouldRenderGuards && portalNode && /* @__PURE__ */ (0, import_jsx_runtime7.jsx)(FocusGuard, {
+      }), portalNode && /* @__PURE__ */ ReactDOM2.createPortal(children, portalNode), shouldRenderGuards && portalNode && /* @__PURE__ */ (0, import_jsx_runtime14.jsx)(FocusGuard, {
         "data-type": "outside",
         ref: afterOutsideRef,
         onFocus: (event) => {
@@ -4812,7 +6235,7 @@ var FloatingPortal = /* @__PURE__ */ React29.forwardRef(function FloatingPortal2
 if (false) FloatingPortal.displayName = "FloatingPortal";
 
 // node_modules/@base-ui/react/floating-ui-react/components/FloatingTree.mjs
-var React30 = __toESM(require("react"), 1);
+var React45 = __toESM(require("react"), 1);
 
 // node_modules/@base-ui/react/floating-ui-react/utils/createEventEmitter.mjs
 function createEventEmitter() {
@@ -4834,27 +6257,19 @@ function createEventEmitter() {
 }
 
 // node_modules/@base-ui/react/floating-ui-react/components/FloatingTree.mjs
-var import_jsx_runtime8 = require("react/jsx-runtime");
-var FloatingNodeContext = /* @__PURE__ */ React30.createContext(null);
+var import_jsx_runtime15 = require("react/jsx-runtime");
+var FloatingNodeContext = /* @__PURE__ */ React45.createContext(null);
 if (false) FloatingNodeContext.displayName = "FloatingNodeContext";
-var FloatingTreeContext = /* @__PURE__ */ React30.createContext(null);
+var FloatingTreeContext = /* @__PURE__ */ React45.createContext(null);
 if (false) FloatingTreeContext.displayName = "FloatingTreeContext";
-var useFloatingParentNodeId = () => React30.useContext(FloatingNodeContext)?.id || null;
+var useFloatingParentNodeId = () => React45.useContext(FloatingNodeContext)?.id || null;
 var useFloatingTree = (externalTree) => {
-  const contextTree = React30.useContext(FloatingTreeContext);
+  const contextTree = React45.useContext(FloatingTreeContext);
   return externalTree ?? contextTree;
 };
 
-// node_modules/@base-ui/react/utils/resolveRef.mjs
-function resolveRef(maybeRef) {
-  if (maybeRef == null) {
-    return maybeRef;
-  }
-  return "current" in maybeRef ? maybeRef.current : maybeRef;
-}
-
 // node_modules/@base-ui/react/floating-ui-react/components/FloatingFocusManager.mjs
-var import_jsx_runtime9 = require("react/jsx-runtime");
+var import_jsx_runtime16 = require("react/jsx-runtime");
 function getEventType(event, lastInteractionType) {
   const win = getWindow(getTarget(event));
   if (event instanceof win.KeyboardEvent) {
@@ -4961,14 +6376,14 @@ function FloatingFocusManager(props) {
   const openRef = useValueAsRef(open3);
   const tree = useFloatingTree(externalTree);
   const portalContext = usePortalContext();
-  const preventReturnFocusRef = React31.useRef(false);
-  const isPointerDownRef = React31.useRef(false);
-  const pointerDownOutsideRef = React31.useRef(false);
-  const lastFocusedTabbableRef = React31.useRef(null);
-  const closeTypeRef = React31.useRef("");
-  const lastInteractionTypeRef = React31.useRef("");
-  const beforeGuardRef = React31.useRef(null);
-  const afterGuardRef = React31.useRef(null);
+  const preventReturnFocusRef = React46.useRef(false);
+  const isPointerDownRef = React46.useRef(false);
+  const pointerDownOutsideRef = React46.useRef(false);
+  const lastFocusedTabbableRef = React46.useRef(null);
+  const closeTypeRef = React46.useRef("");
+  const lastInteractionTypeRef = React46.useRef("");
+  const beforeGuardRef = React46.useRef(null);
+  const afterGuardRef = React46.useRef(null);
   const mergedBeforeGuardRef = useMergedRefs(beforeGuardRef, beforeContentFocusGuardRef, portalContext?.beforeInsideRef);
   const mergedAfterGuardRef = useMergedRefs(afterGuardRef, portalContext?.afterInsideRef);
   const blurTimeout = useTimeout();
@@ -4980,7 +6395,7 @@ function FloatingFocusManager(props) {
     return container ? tabbable(container) : [];
   });
   const getResolvedInsideElements = useStableCallback(() => getInsideElements?.().filter((element) => element != null) ?? []);
-  React31.useEffect(() => {
+  React46.useEffect(() => {
     if (disabled2 || !modal) {
       return void 0;
     }
@@ -4994,7 +6409,7 @@ function FloatingFocusManager(props) {
     const doc = ownerDocument(floatingFocusElement);
     return addEventListener(doc, "keydown", onKeyDown);
   }, [disabled2, floatingFocusElement, modal, isUntrappedTypeableCombobox, getTabbableContent]);
-  React31.useEffect(() => {
+  React46.useEffect(() => {
     if (disabled2 || !open3) {
       return void 0;
     }
@@ -5028,7 +6443,7 @@ function FloatingFocusManager(props) {
       clearPointerDownOutside
     );
   }, [disabled2, floating, domReference, floatingFocusElement, open3, portalContext, pointerDownTimeout, getResolvedInsideElements]);
-  React31.useEffect(() => {
+  React46.useEffect(() => {
     if (disabled2 || !closeOnFocusOut) {
       return void 0;
     }
@@ -5110,7 +6525,7 @@ function FloatingFocusManager(props) {
     }
     return mergeCleanups(domReferenceElement && addEventListener(domReferenceElement, "focusout", handleFocusOutside), domReferenceElement && addEventListener(domReferenceElement, "pointerdown", handlePointerDown), floating && addEventListener(floating, "focusin", handleFocusIn), floating && addEventListener(floating, "focusout", handleFocusOutside), floating && portalContext && addEventListener(floating, "focusout", markInsideReactTree, true));
   }, [disabled2, domReference, floating, floatingFocusElement, modal, tree, portalContext, store, closeOnFocusOut, restoreFocus, getTabbableContent, isUntrappedTypeableCombobox, getNodeId, dataRef, blurTimeout, pointerDownTimeout, restoreFocusFrame, nextFocusableElement, previousFocusableElement, getResolvedInsideElements]);
-  React31.useEffect(() => {
+  React46.useEffect(() => {
     if (disabled2 || !floating || !open3) {
       return void 0;
     }
@@ -5182,7 +6597,7 @@ function FloatingFocusManager(props) {
       });
     });
   }, [disabled2, open3, floatingFocusElement, getTabbableContent, initialFocusRef, openInteractionTypeRef, openRef, dataRef]);
-  const pendingReturnFocusRef = React31.useRef(null);
+  const pendingReturnFocusRef = React46.useRef(null);
   useIsoLayoutEffect(() => {
     if (disabled2 || !floatingFocusElement) {
       pendingReturnFocusRef.current = null;
@@ -5320,8 +6735,8 @@ function FloatingFocusManager(props) {
     };
   }, [disabled2, floatingFocusElement]);
   const shouldRenderGuards = !disabled2 && (modal ? !isUntrappedTypeableCombobox : true) && (isInsidePortal || modal);
-  return /* @__PURE__ */ (0, import_jsx_runtime9.jsxs)(React31.Fragment, {
-    children: [shouldRenderGuards && /* @__PURE__ */ (0, import_jsx_runtime9.jsx)(FocusGuard, {
+  return /* @__PURE__ */ (0, import_jsx_runtime16.jsxs)(React46.Fragment, {
+    children: [shouldRenderGuards && /* @__PURE__ */ (0, import_jsx_runtime16.jsx)(FocusGuard, {
       "data-type": "inside",
       ref: mergedBeforeGuardRef,
       onFocus: (event) => {
@@ -5338,7 +6753,7 @@ function FloatingFocusManager(props) {
           }
         }
       }
-    }), children, shouldRenderGuards && /* @__PURE__ */ (0, import_jsx_runtime9.jsx)(FocusGuard, {
+    }), children, shouldRenderGuards && /* @__PURE__ */ (0, import_jsx_runtime16.jsx)(FocusGuard, {
       "data-type": "inside",
       ref: mergedAfterGuardRef,
       onFocus: (event) => {
@@ -5361,7 +6776,7 @@ function FloatingFocusManager(props) {
 }
 
 // node_modules/@base-ui/react/floating-ui-react/hooks/useClick.mjs
-var React32 = __toESM(require("react"), 1);
+var React47 = __toESM(require("react"), 1);
 function useClick(store, props = {}) {
   const {
     enabled = true,
@@ -5373,10 +6788,10 @@ function useClick(store, props = {}) {
     reason = reason_parts_exports.triggerPress
   } = props;
   const dataRef = store.context.dataRef;
-  const pointerTypeRef = React32.useRef(void 0);
+  const pointerTypeRef = React47.useRef(void 0);
   const frame = useAnimationFrame();
   const touchOpenTimeout = useTimeout();
-  const reference = React32.useMemo(() => {
+  const reference = React47.useMemo(() => {
     function setOpenWithTouchDelay(nextOpen, nativeEvent, target, pointerType) {
       const details = createChangeEventDetails(reason, nativeEvent, target);
       if (nextOpen && pointerType === "touch" && touchOpenDelay > 0) {
@@ -5448,13 +6863,13 @@ function useClick(store, props = {}) {
       }
     };
   }, [dataRef, eventOption, ignoreMouse, reason, store, stickIfOpen, toggle, frame, touchOpenTimeout, touchOpenDelay]);
-  return React32.useMemo(() => enabled ? {
+  return React47.useMemo(() => enabled ? {
     reference
   } : EMPTY_OBJECT, [enabled, reference]);
 }
 
 // node_modules/@base-ui/react/floating-ui-react/hooks/useDismiss.mjs
-var React33 = __toESM(require("react"), 1);
+var React48 = __toESM(require("react"), 1);
 function alwaysFalse() {
   return false;
 }
@@ -5489,13 +6904,13 @@ function useDismiss(store, props = {}) {
     escapeKey: escapeKeyBubbles,
     outsidePress: outsidePressBubbles
   } = normalizeProp(bubbles);
-  const pressStartedInsideRef = React33.useRef(false);
-  const pressStartPreventedRef = React33.useRef(false);
-  const suppressNextOutsideClickRef = React33.useRef(false);
-  const sawPressWhileOpenRef = React33.useRef(false);
-  const isComposingRef = React33.useRef(false);
-  const currentPointerTypeRef = React33.useRef("");
-  const touchStateRef = React33.useRef(null);
+  const pressStartedInsideRef = React48.useRef(false);
+  const pressStartPreventedRef = React48.useRef(false);
+  const suppressNextOutsideClickRef = React48.useRef(false);
+  const sawPressWhileOpenRef = React48.useRef(false);
+  const isComposingRef = React48.useRef(false);
+  const currentPointerTypeRef = React48.useRef("");
+  const touchStateRef = React48.useRef(null);
   const cancelDismissOnEndTimeout = useTimeout();
   const clearInsideReactTreeTimeout = useTimeout();
   const compositionTimeout = useTimeout();
@@ -5565,7 +6980,7 @@ function useDismiss(store, props = {}) {
       pressStartPreventedRef.current = true;
     }
   });
-  React33.useEffect(() => {
+  React48.useEffect(() => {
     function handleOpenChange(details) {
       if (!details.open) {
         sawPressWhileOpenRef.current = false;
@@ -5576,8 +6991,8 @@ function useDismiss(store, props = {}) {
       events.off("openchange", handleOpenChange);
     };
   }, [events]);
-  React33.useEffect(() => clearInsideReactTree, [clearInsideReactTree]);
-  React33.useEffect(() => {
+  React48.useEffect(() => clearInsideReactTree, [clearInsideReactTree]);
+  React48.useEffect(() => {
     if (!open3 || !enabled) {
       if (!open3) {
         sawPressWhileOpenRef.current = false;
@@ -5852,12 +7267,12 @@ function useDismiss(store, props = {}) {
       suppressNextOutsideClickRef.current = false;
     };
   }, [dataRef, floatingElement, escapeKey2, outsidePressEnabled, outsidePress2, open3, enabled, escapeKeyBubbles, outsidePressBubbles, closeOnEscapeKeyDown, clearInsideReactTree, getOutsidePressEventProp, hasBlockingChild, isEventWithinOwnElements, tree, store, cancelDismissOnEndTimeout, compositionTimeout]);
-  const reference = React33.useMemo(() => ({
+  const reference = React48.useMemo(() => ({
     onKeyDown: closeOnEscapeKeyDown,
     onPointerDown: closeOnReferencePress,
     onClick: closeOnReferencePress
   }), [closeOnEscapeKeyDown, closeOnReferencePress]);
-  const floating = React33.useMemo(() => ({
+  const floating = React48.useMemo(() => ({
     onKeyDown: closeOnEscapeKeyDown,
     // `onMouseDown` may be blocked if `event.preventDefault()` is called in
     // `onPointerDown`, such as with <NumberField.ScrubArea>.
@@ -5877,7 +7292,7 @@ function useDismiss(store, props = {}) {
     onTouchEndCapture: markInsideReactTree,
     onTouchMoveCapture: markInsideReactTree
   }), [closeOnEscapeKeyDown, markInsideReactTree, markPressStartedInsideReactTree, markInsidePressStartPrevented]);
-  return React33.useMemo(() => enabled ? {
+  return React48.useMemo(() => enabled ? {
     reference,
     floating,
     trigger: reference
@@ -6046,7 +7461,7 @@ var BasePopupHandle = class {
 };
 
 // node_modules/@base-ui/react/utils/popups/popupStoreUtils.mjs
-var React37 = __toESM(require("react"), 1);
+var React50 = __toESM(require("react"), 1);
 var ReactDOM3 = __toESM(require("react-dom"), 1);
 
 // node_modules/@base-ui/react/floating-ui-react/hooks/useSyncedFloatingRootContext.mjs
@@ -6085,187 +7500,7 @@ function useSyncedFloatingRootContext(options) {
 }
 
 // node_modules/@base-ui/react/internals/useUnmountAfterClose.mjs
-var React36 = __toESM(require("react"), 1);
-
-// node_modules/@base-ui/react/internals/useTransitionStatus.mjs
-var React34 = __toESM(require("react"), 1);
-function useTransitionStatus(open3, enableIdleState = false, deferEndingState = false, animateInitialOpen = false) {
-  const [transitionStatus, setTransitionStatus] = React34.useState(open3 && enableIdleState ? "idle" : void 0);
-  const [mounted, setMounted] = React34.useState(open3 && !animateInitialOpen);
-  if (open3 && !mounted) {
-    setMounted(true);
-    setTransitionStatus("starting");
-  }
-  if (!open3 && mounted && transitionStatus !== "ending" && !deferEndingState) {
-    setTransitionStatus("ending");
-  }
-  if (!open3 && !mounted && transitionStatus === "ending") {
-    setTransitionStatus(void 0);
-  }
-  useIsoLayoutEffect(() => {
-    if (!open3 && mounted && transitionStatus !== "ending" && deferEndingState) {
-      const frame = AnimationFrame.request(() => {
-        setTransitionStatus("ending");
-      });
-      return () => {
-        AnimationFrame.cancel(frame);
-      };
-    }
-    return void 0;
-  }, [open3, mounted, transitionStatus, deferEndingState]);
-  useIsoLayoutEffect(() => {
-    if (!open3 || enableIdleState || transitionStatus === void 0) {
-      return void 0;
-    }
-    const frame = AnimationFrame.request(() => {
-      setTransitionStatus(void 0);
-    });
-    return () => {
-      AnimationFrame.cancel(frame);
-    };
-  }, [enableIdleState, open3, transitionStatus]);
-  useIsoLayoutEffect(() => {
-    if (!open3 || !enableIdleState) {
-      return void 0;
-    }
-    if (open3 && mounted && transitionStatus !== "idle") {
-      setTransitionStatus("starting");
-    }
-    const frame = AnimationFrame.request(() => {
-      setTransitionStatus("idle");
-    });
-    return () => {
-      AnimationFrame.cancel(frame);
-    };
-  }, [enableIdleState, open3, mounted, transitionStatus]);
-  return {
-    mounted,
-    setMounted,
-    transitionStatus
-  };
-}
-
-// node_modules/@base-ui/react/internals/useOpenChangeComplete.mjs
-var React35 = __toESM(require("react"), 1);
-
-// node_modules/@base-ui/react/internals/useAnimationsFinished.mjs
-var ReactDOM2 = __toESM(require("react-dom"), 1);
-
-// node_modules/@base-ui/react/utils/getFiniteAnimations.mjs
-function getFiniteAnimations(element, options) {
-  return element.getAnimations(options).filter((animation) => {
-    const timing = animation.effect?.getTiming();
-    return timing?.duration !== Infinity && timing?.iterations !== Infinity;
-  });
-}
-
-// node_modules/@base-ui/react/internals/useAnimationsFinished.mjs
-var pendingCallbacks = null;
-function flushBeforePaint(fn) {
-  if (!pendingCallbacks) {
-    const callbacks = [];
-    pendingCallbacks = callbacks;
-    queueMicrotask(() => {
-      pendingCallbacks = null;
-      ReactDOM2.flushSync(() => {
-        for (const callback of callbacks) {
-          callback();
-        }
-      });
-    });
-  }
-  pendingCallbacks.push(fn);
-}
-function useAnimationsFinished(elementOrRef, waitForStartingStyleRemoved = false, batch = false) {
-  const frame = useAnimationFrame();
-  return useStableCallback((fnToExecute, signal = null) => {
-    frame.cancel();
-    const element = resolveRef(elementOrRef);
-    if (element == null) {
-      return;
-    }
-    const resolvedElement = element;
-    const done = () => {
-      if (!batch) {
-        ReactDOM2.flushSync(fnToExecute);
-        return;
-      }
-      flushBeforePaint(() => {
-        if (!signal?.aborted) {
-          fnToExecute();
-        }
-      });
-    };
-    if (typeof resolvedElement.getAnimations !== "function" || globalThis.BASE_UI_ANIMATIONS_DISABLED) {
-      fnToExecute();
-      return;
-    }
-    function exec() {
-      Promise.all(getFiniteAnimations(resolvedElement).map((animation) => animation.finished.then(NOOP))).then(() => {
-        if (!signal?.aborted) {
-          done();
-        }
-      }, () => {
-        if (signal?.aborted) {
-          return;
-        }
-        const currentAnimations = getFiniteAnimations(resolvedElement);
-        if (currentAnimations.some((animation) => animation.pending || animation.playState !== "finished")) {
-          exec();
-          return;
-        }
-        done();
-      });
-    }
-    if (waitForStartingStyleRemoved) {
-      const startingStyleAttribute = startingStyle;
-      if (!resolvedElement.hasAttribute(startingStyleAttribute)) {
-        frame.request(exec);
-        return;
-      }
-      const attributeObserver = new MutationObserver(() => {
-        if (!resolvedElement.hasAttribute(startingStyleAttribute)) {
-          attributeObserver.disconnect();
-          exec();
-        }
-      });
-      attributeObserver.observe(resolvedElement, {
-        attributes: true,
-        attributeFilter: [startingStyleAttribute]
-      });
-      signal?.addEventListener("abort", () => attributeObserver.disconnect(), {
-        once: true
-      });
-      return;
-    }
-    frame.request(exec);
-  });
-}
-
-// node_modules/@base-ui/react/internals/useOpenChangeComplete.mjs
-function useOpenChangeComplete(parameters) {
-  const {
-    enabled = true,
-    open: open3,
-    ref,
-    batch = false,
-    onComplete: onCompleteParam
-  } = parameters;
-  const onComplete = useStableCallback(onCompleteParam);
-  const runOnceAnimationsFinish = useAnimationsFinished(ref, open3, batch);
-  React35.useEffect(() => {
-    if (!enabled) {
-      return void 0;
-    }
-    const abortController = new AbortController();
-    runOnceAnimationsFinish(onComplete, abortController.signal);
-    return () => {
-      abortController.abort();
-    };
-  }, [enabled, open3, onComplete, runOnceAnimationsFinish]);
-}
-
-// node_modules/@base-ui/react/internals/useUnmountAfterClose.mjs
+var React49 = __toESM(require("react"), 1);
 function useUnmountAfterClose(parameters) {
   const {
     open: open3,
@@ -6287,8 +7522,8 @@ function useUnmountAfterClose(parameters) {
       setPreventUnmountOnClose(false);
     }
   }, [open3, setPreventUnmountOnClose]);
-  const mountedRef = React36.useRef(mounted);
-  const pendingUnmountRef = React36.useRef(false);
+  const mountedRef = React49.useRef(mounted);
+  const pendingUnmountRef = React49.useRef(false);
   const rerender = useForcedRerendering();
   const unmount = () => {
     mountedRef.current = false;
@@ -6371,7 +7606,7 @@ function syncTriggerCount(store) {
   }
 }
 function useTriggerRegistration(id, store) {
-  const registrationRef = React37.useRef(null);
+  const registrationRef = React50.useRef(null);
   return useStableCallback((element) => {
     const registration = registrationRef.current;
     if (registration !== null) {
@@ -6474,7 +7709,7 @@ function useImplicitActiveTrigger(store, options = {}) {
   const {
     closeOnActiveTriggerUnmount = false
   } = options;
-  const resolvedActiveTriggerIdRef = React37.useRef(null);
+  const resolvedActiveTriggerIdRef = React50.useRef(null);
   const open3 = store.useState("open");
   const reactiveTriggerCount = store.useState("triggerCount");
   const activeTriggerId = store.useState("activeTriggerId");
@@ -6696,12 +7931,12 @@ var PopupTriggerMap = class {
 };
 
 // node_modules/@base-ui/utils/store/useStore.mjs
-var React39 = __toESM(require("react"), 1);
+var React52 = __toESM(require("react"), 1);
 var import_shim = __toESM(require_shim(), 1);
 var import_with_selector = __toESM(require_with_selector(), 1);
 
 // node_modules/@base-ui/utils/fastHooks.mjs
-var React38 = __toESM(require("react"), 1);
+var React51 = __toESM(require("react"), 1);
 var hooks = [];
 var currentInstance = void 0;
 function getInstance() {
@@ -6733,7 +7968,7 @@ function fastComponent(fn) {
   return FastComponent;
 }
 function fastComponentRef(fn) {
-  return /* @__PURE__ */ React38.forwardRef(fastComponent(fn));
+  return /* @__PURE__ */ React51.forwardRef(fastComponent(fn));
 }
 function createInstance() {
   return {
@@ -6748,7 +7983,7 @@ function useStore(store, selector, a1, a2, a3) {
   return useStoreImplementation(store, selector, a1, a2, a3);
 }
 function useStoreR19(store, selector, a1, a2, a3) {
-  const getSelection = React39.useCallback(() => selector(store.getSnapshot(), a1, a2, a3), [store, selector, a1, a2, a3]);
+  const getSelection = React52.useCallback(() => selector(store.getSnapshot(), a1, a2, a3), [store, selector, a1, a2, a3]);
   return (0, import_shim.useSyncExternalStore)(store.subscribe, getSelection, getSelection);
 }
 register({
@@ -6945,7 +8180,7 @@ var Store = class {
 };
 
 // node_modules/@base-ui/utils/store/ReactStore.mjs
-var React40 = __toESM(require("react"), 1);
+var React53 = __toESM(require("react"), 1);
 var ReactStore = class extends Store {
   /**
    * Creates a new ReactStore instance.
@@ -6969,7 +8204,7 @@ var ReactStore = class extends Store {
    * by `useState` is updated before the next render (similarly to React's `useState`).
    */
   useSyncedValue(key, value) {
-    React40.useDebugValue(key);
+    React53.useDebugValue(key);
     const store = this;
     useIsoLayoutEffect(() => {
       if (store.state[key] !== value) {
@@ -7008,8 +8243,8 @@ var ReactStore = class extends Store {
   useSyncedValues(statePart) {
     const store = this;
     if (false) {
-      React40.useDebugValue(statePart, (p) => Object.keys(p));
-      const keys = React40.useRef(Object.keys(statePart)).current;
+      React53.useDebugValue(statePart, (p) => Object.keys(p));
+      const keys = React53.useRef(Object.keys(statePart)).current;
       const nextKeys = Object.keys(statePart);
       if (keys.length !== nextKeys.length || keys.some((key, index) => key !== nextKeys[index])) {
         console.error("ReactStore.useSyncedValues expects the same prop keys on every render. Keys should be stable.");
@@ -7025,7 +8260,7 @@ var ReactStore = class extends Store {
    * is non-undefined, the store's state at `key` is updated to match `controlled`.
    */
   useControlledProp(key, controlled) {
-    React40.useDebugValue(key);
+    React53.useDebugValue(key);
     const store = this;
     const isControlled = controlled !== void 0;
     useIsoLayoutEffect(() => {
@@ -7063,7 +8298,7 @@ var ReactStore = class extends Store {
    * @param key Key of the selector to use.
    */
   useState(key, a1, a2, a3) {
-    React40.useDebugValue(key);
+    React53.useDebugValue(key);
     return useStore(this, this.selectors[key], a1, a2, a3);
   }
   /**
@@ -7074,7 +8309,7 @@ var ReactStore = class extends Store {
    * @param fn Function to assign.
    */
   useContextCallback(key, fn) {
-    React40.useDebugValue(key);
+    React53.useDebugValue(key);
     const stableFunction = useStableCallback(fn ?? NOOP);
     this.context[key] = stableFunction;
   }
@@ -7085,7 +8320,7 @@ var ReactStore = class extends Store {
    * @param key Key of the state to set.
    */
   useStateSetter(key) {
-    const ref = React40.useRef(void 0);
+    const ref = React53.useRef(void 0);
     if (ref.current === void 0) {
       ref.current = (value) => {
         this.set(key, value);
@@ -7276,27 +8511,27 @@ var popupStoreSelectors = {
 };
 
 // node_modules/@base-ui/react/utils/popups/usePopupHandleStore.mjs
-var React41 = __toESM(require("react"), 1);
+var React54 = __toESM(require("react"), 1);
 var import_shim2 = __toESM(require_shim(), 1);
 function usePopupHandleStore(handle) {
-  const subscribe = React41.useCallback((listener) => {
+  const subscribe = React54.useCallback((listener) => {
     if (handle === void 0) {
       return NOOP;
     }
     return handle.subscribeStore(listener);
   }, [handle]);
-  const getSnapshot = React41.useCallback(() => {
+  const getSnapshot = React54.useCallback(() => {
     return handle === void 0 ? void 0 : handle.store;
   }, [handle]);
   return (0, import_shim2.useSyncExternalStore)(subscribe, getSnapshot, () => handle?.serverStore);
 }
 
 // node_modules/@base-ui/react/dialog/portal/DialogPortalContext.mjs
-var React42 = __toESM(require("react"), 1);
-var DialogPortalContext = /* @__PURE__ */ React42.createContext(void 0);
+var React55 = __toESM(require("react"), 1);
+var DialogPortalContext = /* @__PURE__ */ React55.createContext(void 0);
 if (false) DialogPortalContext.displayName = "DialogPortalContext";
 function useDialogPortalContext() {
-  const value = React42.useContext(DialogPortalContext);
+  const value = React55.useContext(DialogPortalContext);
   if (value === void 0) {
     throw new Error(false ? "Base UI: <Dialog.Portal> is missing." : formatErrorMessage_default(26));
   }
@@ -7334,8 +8569,8 @@ var dialogStateAttributesMapping = {
 };
 
 // node_modules/@base-ui/react/dialog/popup/DialogPopup.mjs
-var import_jsx_runtime10 = require("react/jsx-runtime");
-var DialogPopup = /* @__PURE__ */ React43.forwardRef(function DialogPopup2(componentProps, forwardedRef) {
+var import_jsx_runtime17 = require("react/jsx-runtime");
+var DialogPopup = /* @__PURE__ */ React56.forwardRef(function DialogPopup2(componentProps, forwardedRef) {
   const {
     render,
     className,
@@ -7399,7 +8634,7 @@ var DialogPopup = /* @__PURE__ */ React43.forwardRef(function DialogPopup2(compo
     ref: [forwardedRef, store.context.popupRef, setPopupElement],
     stateAttributesMapping: dialogStateAttributesMapping
   });
-  return /* @__PURE__ */ (0, import_jsx_runtime10.jsx)(FloatingFocusManager, {
+  return /* @__PURE__ */ (0, import_jsx_runtime17.jsx)(FloatingFocusManager, {
     context: floatingRootContext,
     openInteractionType: openMethod,
     disabled: !mounted,
@@ -7414,7 +8649,7 @@ var DialogPopup = /* @__PURE__ */ React43.forwardRef(function DialogPopup2(compo
 if (false) DialogPopup.displayName = "DialogPopup";
 
 // node_modules/@base-ui/react/dialog/portal/DialogPortal.mjs
-var React45 = __toESM(require("react"), 1);
+var React58 = __toESM(require("react"), 1);
 
 // node_modules/@base-ui/utils/inertValue.mjs
 function inertValue(value) {
@@ -7425,9 +8660,9 @@ function inertValue(value) {
 }
 
 // node_modules/@base-ui/react/utils/InternalBackdrop.mjs
-var React44 = __toESM(require("react"), 1);
-var import_jsx_runtime11 = require("react/jsx-runtime");
-var InternalBackdrop = /* @__PURE__ */ React44.forwardRef(function InternalBackdrop2(props, ref) {
+var React57 = __toESM(require("react"), 1);
+var import_jsx_runtime18 = require("react/jsx-runtime");
+var InternalBackdrop = /* @__PURE__ */ React57.forwardRef(function InternalBackdrop2(props, ref) {
   const {
     cutout,
     ...otherProps
@@ -7437,7 +8672,7 @@ var InternalBackdrop = /* @__PURE__ */ React44.forwardRef(function InternalBackd
     const rect = cutout.getBoundingClientRect();
     clipPath = `polygon(0% 0%,100% 0%,100% 100%,0% 100%,0% 0%,${rect.left}px ${rect.top}px,${rect.left}px ${rect.bottom}px,${rect.right}px ${rect.bottom}px,${rect.right}px ${rect.top}px,${rect.left}px ${rect.top}px)`;
   }
-  return /* @__PURE__ */ (0, import_jsx_runtime11.jsx)("div", {
+  return /* @__PURE__ */ (0, import_jsx_runtime18.jsx)("div", {
     ref,
     role: "presentation",
     "data-base-ui-inert": "",
@@ -7454,8 +8689,8 @@ var InternalBackdrop = /* @__PURE__ */ React44.forwardRef(function InternalBackd
 if (false) InternalBackdrop.displayName = "InternalBackdrop";
 
 // node_modules/@base-ui/react/dialog/portal/DialogPortal.mjs
-var import_jsx_runtime12 = require("react/jsx-runtime");
-var DialogPortal = /* @__PURE__ */ React45.forwardRef(function DialogPortal2(props, forwardedRef) {
+var import_jsx_runtime19 = require("react/jsx-runtime");
+var DialogPortal = /* @__PURE__ */ React58.forwardRef(function DialogPortal2(props, forwardedRef) {
   const {
     keepMounted = false,
     ...portalProps
@@ -7468,12 +8703,12 @@ var DialogPortal = /* @__PURE__ */ React45.forwardRef(function DialogPortal2(pro
   if (!shouldRender) {
     return null;
   }
-  return /* @__PURE__ */ (0, import_jsx_runtime12.jsx)(DialogPortalContext.Provider, {
+  return /* @__PURE__ */ (0, import_jsx_runtime19.jsx)(DialogPortalContext.Provider, {
     value: keepMounted,
-    children: /* @__PURE__ */ (0, import_jsx_runtime12.jsxs)(FloatingPortal, {
+    children: /* @__PURE__ */ (0, import_jsx_runtime19.jsxs)(FloatingPortal, {
       ref: forwardedRef,
       ...portalProps,
-      children: [mounted && modal === true && /* @__PURE__ */ (0, import_jsx_runtime12.jsx)(InternalBackdrop, {
+      children: [mounted && modal === true && /* @__PURE__ */ (0, import_jsx_runtime19.jsx)(InternalBackdrop, {
         ref: store.context.internalBackdropRef,
         inert: inertValue(!open3)
       }), props.children]
@@ -7483,10 +8718,10 @@ var DialogPortal = /* @__PURE__ */ React45.forwardRef(function DialogPortal2(pro
 if (false) DialogPortal.displayName = "DialogPortal";
 
 // node_modules/@base-ui/react/dialog/root/useRenderDialogRoot.mjs
-var React48 = __toESM(require("react"), 1);
+var React61 = __toESM(require("react"), 1);
 
 // node_modules/@base-ui/react/dialog/root/useDialogRoot.mjs
-var React46 = __toESM(require("react"), 1);
+var React59 = __toESM(require("react"), 1);
 
 // node_modules/@base-ui/utils/useScrollLock.mjs
 var originalHtmlStyles = {};
@@ -7720,8 +8955,8 @@ function DialogInteractions({
   const modal = store.useState("modal");
   const popupElement = store.useState("popupElement");
   const floatingRootContext = store.useState("floatingRootContext");
-  const [ownNestedOpenDialogs, setOwnNestedOpenDialogs] = React46.useState(0);
-  const [ownNestedOpenDrawers, setOwnNestedOpenDrawers] = React46.useState(0);
+  const [ownNestedOpenDialogs, setOwnNestedOpenDialogs] = React59.useState(0);
+  const [ownNestedOpenDrawers, setOwnNestedOpenDrawers] = React59.useState(0);
   const isTopmost = ownNestedOpenDialogs === 0;
   const dismiss = useDismiss(floatingRootContext, {
     outsidePressEvent() {
@@ -7803,7 +9038,7 @@ function DialogInteractions({
 }
 
 // node_modules/@base-ui/react/dialog/store/DialogStore.mjs
-var React47 = __toESM(require("react"), 1);
+var React60 = __toESM(require("react"), 1);
 
 // node_modules/@base-ui/react/utils/NullStore.mjs
 var NullStore = class extends ReactStore {
@@ -7878,9 +9113,9 @@ function createInitialState(initialState, triggerElements, floatingId, nested = 
 }
 function createInitialContext(triggerElements) {
   return {
-    popupRef: /* @__PURE__ */ React47.createRef(),
-    backdropRef: /* @__PURE__ */ React47.createRef(),
-    internalBackdropRef: /* @__PURE__ */ React47.createRef(),
+    popupRef: /* @__PURE__ */ React60.createRef(),
+    backdropRef: /* @__PURE__ */ React60.createRef(),
+    internalBackdropRef: /* @__PURE__ */ React60.createRef(),
     outsidePressEnabledRef: {
       current: true
     },
@@ -7891,7 +9126,7 @@ function createInitialContext(triggerElements) {
 }
 
 // node_modules/@base-ui/react/dialog/root/useRenderDialogRoot.mjs
-var import_jsx_runtime13 = require("react/jsx-runtime");
+var import_jsx_runtime20 = require("react/jsx-runtime");
 function useRenderDialogRoot(mode, props) {
   const {
     children,
@@ -7939,17 +9174,17 @@ function useRenderDialogRoot(mode, props) {
   const {
     forceUnmount
   } = useOpenStateTransitions(open3, store);
-  React48.useImperativeHandle(actionsRef, () => ({
+  React61.useImperativeHandle(actionsRef, () => ({
     unmount: forceUnmount,
     close: () => store.setOpen(false, createChangeEventDetails(reason_parts_exports.imperativeAction))
   }), [forceUnmount, store]);
   const shouldRenderInteractions = open3 || mounted || handle != null;
-  return /* @__PURE__ */ (0, import_jsx_runtime13.jsxs)(DialogRootContext.Provider, {
+  return /* @__PURE__ */ (0, import_jsx_runtime20.jsxs)(DialogRootContext.Provider, {
     value: store,
-    children: [handle && /* @__PURE__ */ (0, import_jsx_runtime13.jsx)(PopupHandleAttachment, {
+    children: [handle && /* @__PURE__ */ (0, import_jsx_runtime20.jsx)(PopupHandleAttachment, {
       handle,
       store
-    }), shouldRenderInteractions && /* @__PURE__ */ (0, import_jsx_runtime13.jsx)(DialogInteractions, {
+    }), shouldRenderInteractions && /* @__PURE__ */ (0, import_jsx_runtime20.jsx)(DialogInteractions, {
       store,
       parentContext: parentStore?.context,
       isDrawer
@@ -7966,8 +9201,8 @@ var DialogRoot = fastComponent(function DialogRoot2(props) {
 if (false) DialogRoot.displayName = "DialogRoot";
 
 // node_modules/@base-ui/react/dialog/viewport/DialogViewport.mjs
-var React49 = __toESM(require("react"), 1);
-var DialogViewport = /* @__PURE__ */ React49.forwardRef(function DialogViewport2(componentProps, forwardedRef) {
+var React62 = __toESM(require("react"), 1);
+var DialogViewport = /* @__PURE__ */ React62.forwardRef(function DialogViewport2(componentProps, forwardedRef) {
   const {
     render,
     className,
@@ -8009,8 +9244,8 @@ var DialogViewport = /* @__PURE__ */ React49.forwardRef(function DialogViewport2
 if (false) DialogViewport.displayName = "DialogViewport";
 
 // node_modules/@base-ui/react/dialog/title/DialogTitle.mjs
-var React50 = __toESM(require("react"), 1);
-var DialogTitle = /* @__PURE__ */ React50.forwardRef(function DialogTitle2(componentProps, forwardedRef) {
+var React63 = __toESM(require("react"), 1);
+var DialogTitle = /* @__PURE__ */ React63.forwardRef(function DialogTitle2(componentProps, forwardedRef) {
   const {
     render,
     className,
@@ -8031,23 +9266,23 @@ var DialogTitle = /* @__PURE__ */ React50.forwardRef(function DialogTitle2(compo
 if (false) DialogTitle.displayName = "DialogTitle";
 
 // node_modules/@base-ui/react/dialog/trigger/DialogTrigger.mjs
-var React53 = __toESM(require("react"), 1);
+var React66 = __toESM(require("react"), 1);
 
 // node_modules/@base-ui/react/utils/useOpenInteractionType.mjs
-var React52 = __toESM(require("react"), 1);
+var React65 = __toESM(require("react"), 1);
 
 // node_modules/@base-ui/utils/useEnhancedClickHandler.mjs
-var React51 = __toESM(require("react"), 1);
+var React64 = __toESM(require("react"), 1);
 function useEnhancedClickHandler(handler) {
-  const lastClickInteractionTypeRef = React51.useRef("");
-  const handlePointerDown = React51.useCallback((event) => {
+  const lastClickInteractionTypeRef = React64.useRef("");
+  const handlePointerDown = React64.useCallback((event) => {
     if (event.defaultPrevented) {
       return;
     }
     lastClickInteractionTypeRef.current = event.pointerType;
     handler(event, event.pointerType);
   }, [handler]);
-  const handleClick = React51.useCallback((event) => {
+  const handleClick = React64.useCallback((event) => {
     if (event.detail === 0) {
       handler(event, "keyboard");
       return;
@@ -8080,7 +9315,7 @@ function useOpenMethodTriggerProps(open3, setOpenMethod) {
     onClick,
     onPointerDown
   } = useEnhancedClickHandler(handleTriggerClick);
-  return React52.useMemo(() => ({
+  return React65.useMemo(() => ({
     onClick,
     onPointerDown
   }), [onClick, onPointerDown]);
@@ -8109,7 +9344,7 @@ var DialogTrigger = fastComponentRef(function DialogTrigger2(componentProps, for
   const floatingContext = store.useState("floatingRootContext");
   const isOpenedByThisTrigger = store.useState("isOpenedByTrigger", thisTriggerId);
   const popupId = store.useState("triggerPopupId", thisTriggerId);
-  const triggerElementRef = React53.useRef(null);
+  const triggerElementRef = React66.useRef(null);
   const {
     registerTrigger,
     isMountedByThisTrigger
@@ -8201,21 +9436,21 @@ function createDialogHandle() {
 }
 
 // components/ui/dialog.tsx
-var import_jsx_runtime14 = require("react/jsx-runtime");
+var import_jsx_runtime21 = require("react/jsx-runtime");
 function Dialog({ ...props }) {
-  return /* @__PURE__ */ (0, import_jsx_runtime14.jsx)(index_parts_exports2.Root, { "data-slot": "dialog", ...props });
+  return /* @__PURE__ */ (0, import_jsx_runtime21.jsx)(index_parts_exports3.Root, { "data-slot": "dialog", ...props });
 }
 function DialogPortal3({ container, ...props }) {
   const { portalContainer } = useStudioEnv();
   const resolved = container !== void 0 ? container : portalContainer ?? void 0;
-  return /* @__PURE__ */ (0, import_jsx_runtime14.jsx)(index_parts_exports2.Portal, { "data-slot": "dialog-portal", container: resolved, ...props });
+  return /* @__PURE__ */ (0, import_jsx_runtime21.jsx)(index_parts_exports3.Portal, { "data-slot": "dialog-portal", container: resolved, ...props });
 }
 function DialogOverlay({
   className,
   ...props
 }) {
-  return /* @__PURE__ */ (0, import_jsx_runtime14.jsx)(
-    index_parts_exports2.Backdrop,
+  return /* @__PURE__ */ (0, import_jsx_runtime21.jsx)(
+    index_parts_exports3.Backdrop,
     {
       "data-slot": "dialog-overlay",
       className: cn(
@@ -8232,10 +9467,10 @@ function DialogContent({
   showCloseButton = true,
   ...props
 }) {
-  return /* @__PURE__ */ (0, import_jsx_runtime14.jsxs)(DialogPortal3, { children: [
-    /* @__PURE__ */ (0, import_jsx_runtime14.jsx)(DialogOverlay, {}),
-    /* @__PURE__ */ (0, import_jsx_runtime14.jsxs)(
-      index_parts_exports2.Popup,
+  return /* @__PURE__ */ (0, import_jsx_runtime21.jsxs)(DialogPortal3, { children: [
+    /* @__PURE__ */ (0, import_jsx_runtime21.jsx)(DialogOverlay, {}),
+    /* @__PURE__ */ (0, import_jsx_runtime21.jsxs)(
+      index_parts_exports3.Popup,
       {
         "data-slot": "dialog-content",
         className: cn(
@@ -8245,11 +9480,11 @@ function DialogContent({
         ...props,
         children: [
           children,
-          showCloseButton && /* @__PURE__ */ (0, import_jsx_runtime14.jsxs)(
-            index_parts_exports2.Close,
+          showCloseButton && /* @__PURE__ */ (0, import_jsx_runtime21.jsxs)(
+            index_parts_exports3.Close,
             {
               "data-slot": "dialog-close",
-              render: /* @__PURE__ */ (0, import_jsx_runtime14.jsx)(
+              render: /* @__PURE__ */ (0, import_jsx_runtime21.jsx)(
                 Button3,
                 {
                   variant: "ghost",
@@ -8258,11 +9493,11 @@ function DialogContent({
                 }
               ),
               children: [
-                /* @__PURE__ */ (0, import_jsx_runtime14.jsx)(
+                /* @__PURE__ */ (0, import_jsx_runtime21.jsx)(
                   X,
                   {}
                 ),
-                /* @__PURE__ */ (0, import_jsx_runtime14.jsx)("span", { className: "sr-only", children: "Close" })
+                /* @__PURE__ */ (0, import_jsx_runtime21.jsx)("span", { className: "sr-only", children: "Close" })
               ]
             }
           )
@@ -8272,7 +9507,7 @@ function DialogContent({
   ] });
 }
 function DialogHeader({ className, ...props }) {
-  return /* @__PURE__ */ (0, import_jsx_runtime14.jsx)(
+  return /* @__PURE__ */ (0, import_jsx_runtime21.jsx)(
     "div",
     {
       "data-slot": "dialog-header",
@@ -8282,8 +9517,8 @@ function DialogHeader({ className, ...props }) {
   );
 }
 function DialogTitle3({ className, ...props }) {
-  return /* @__PURE__ */ (0, import_jsx_runtime14.jsx)(
-    index_parts_exports2.Title,
+  return /* @__PURE__ */ (0, import_jsx_runtime21.jsx)(
+    index_parts_exports3.Title,
     {
       "data-slot": "dialog-title",
       className: cn(
@@ -8298,8 +9533,8 @@ function DialogDescription3({
   className,
   ...props
 }) {
-  return /* @__PURE__ */ (0, import_jsx_runtime14.jsx)(
-    index_parts_exports2.Description,
+  return /* @__PURE__ */ (0, import_jsx_runtime21.jsx)(
+    index_parts_exports3.Description,
     {
       "data-slot": "dialog-description",
       className: cn(
@@ -8312,7 +9547,7 @@ function DialogDescription3({
 }
 
 // components/history-panel.tsx
-var import_jsx_runtime15 = require("react/jsx-runtime");
+var import_jsx_runtime22 = require("react/jsx-runtime");
 function HistoryPanel({
   entries,
   onReuse,
@@ -8322,24 +9557,24 @@ function HistoryPanel({
   const [openId, setOpenId] = (0, import_react7.useState)(null);
   const [confirmClear, setConfirmClear] = (0, import_react7.useState)(false);
   const current = entries.find((entry) => entry.id === openId) ?? null;
-  return /* @__PURE__ */ (0, import_jsx_runtime15.jsxs)("div", { className: "grid gap-3", children: [
-    /* @__PURE__ */ (0, import_jsx_runtime15.jsxs)("div", { className: "flex items-center justify-between gap-3", children: [
-      /* @__PURE__ */ (0, import_jsx_runtime15.jsx)("h3", { className: "text-sm font-medium", children: "历史" }),
-      entries.length > 0 ? /* @__PURE__ */ (0, import_jsx_runtime15.jsx)("button", { type: "button", className: "text-xs text-muted-foreground underline-offset-2 hover:underline", onClick: () => setConfirmClear(true), children: "清空" }) : null
+  return /* @__PURE__ */ (0, import_jsx_runtime22.jsxs)("div", { className: "grid gap-3", children: [
+    /* @__PURE__ */ (0, import_jsx_runtime22.jsxs)("div", { className: "flex items-center justify-between gap-3", children: [
+      /* @__PURE__ */ (0, import_jsx_runtime22.jsx)("h3", { className: "text-sm font-medium", children: "历史" }),
+      entries.length > 0 ? /* @__PURE__ */ (0, import_jsx_runtime22.jsx)("button", { type: "button", className: "text-xs text-muted-foreground underline-offset-2 hover:underline", onClick: () => setConfirmClear(true), children: "清空" }) : null
     ] }),
-    entries.length === 0 ? /* @__PURE__ */ (0, import_jsx_runtime15.jsx)("p", { className: "text-xs leading-5 text-muted-foreground", children: "还没有历史。成功出图后会留在这里，刷新也不会丢。" }) : /* @__PURE__ */ (0, import_jsx_runtime15.jsx)("div", { className: "grid grid-cols-3 gap-2", children: entries.map((entry) => /* @__PURE__ */ (0, import_jsx_runtime15.jsxs)("button", { type: "button", className: "overflow-hidden rounded-lg border bg-card text-left", onClick: () => setOpenId(entry.id), children: [
-      /* @__PURE__ */ (0, import_jsx_runtime15.jsx)("img", { src: entry.thumbUrl, alt: entry.title, className: "aspect-[3/4] w-full bg-[#f7f4ee] object-contain" }),
-      /* @__PURE__ */ (0, import_jsx_runtime15.jsx)("span", { className: "line-clamp-2 px-1.5 py-1 text-[11px] leading-4", children: entry.title })
+    entries.length === 0 ? /* @__PURE__ */ (0, import_jsx_runtime22.jsx)("p", { className: "text-xs leading-5 text-muted-foreground", children: "还没有历史。成功出图后会留在这里，刷新也不会丢。" }) : /* @__PURE__ */ (0, import_jsx_runtime22.jsx)("div", { className: "grid grid-cols-3 gap-2", children: entries.map((entry) => /* @__PURE__ */ (0, import_jsx_runtime22.jsxs)("button", { type: "button", className: "overflow-hidden rounded-lg border bg-card text-left", onClick: () => setOpenId(entry.id), children: [
+      /* @__PURE__ */ (0, import_jsx_runtime22.jsx)("img", { src: entry.thumbUrl, alt: entry.title, className: "aspect-[3/4] w-full bg-[#f7f4ee] object-contain" }),
+      /* @__PURE__ */ (0, import_jsx_runtime22.jsx)("span", { className: "line-clamp-2 px-1.5 py-1 text-[11px] leading-4", children: entry.title })
     ] }, entry.id)) }),
-    /* @__PURE__ */ (0, import_jsx_runtime15.jsx)(Dialog, { open: current !== null, onOpenChange: (open3) => {
+    /* @__PURE__ */ (0, import_jsx_runtime22.jsx)(Dialog, { open: current !== null, onOpenChange: (open3) => {
       if (!open3) setOpenId(null);
-    }, children: /* @__PURE__ */ (0, import_jsx_runtime15.jsx)(DialogContent, { className: "max-h-[min(85dvh,85%)] max-w-[min(32rem,calc(100%-2rem))] overflow-y-auto", children: current ? /* @__PURE__ */ (0, import_jsx_runtime15.jsxs)(import_jsx_runtime15.Fragment, { children: [
-      /* @__PURE__ */ (0, import_jsx_runtime15.jsxs)(DialogHeader, { children: [
-        /* @__PURE__ */ (0, import_jsx_runtime15.jsx)(DialogTitle3, { children: current.title }),
-        /* @__PURE__ */ (0, import_jsx_runtime15.jsx)(DialogDescription3, { children: new Date(current.createdAt).toLocaleString("zh-CN", { hour12: false }) })
+    }, children: /* @__PURE__ */ (0, import_jsx_runtime22.jsx)(DialogContent, { className: "max-h-[min(85dvh,85%)] max-w-[min(32rem,calc(100%-2rem))] overflow-y-auto", children: current ? /* @__PURE__ */ (0, import_jsx_runtime22.jsxs)(import_jsx_runtime22.Fragment, { children: [
+      /* @__PURE__ */ (0, import_jsx_runtime22.jsxs)(DialogHeader, { children: [
+        /* @__PURE__ */ (0, import_jsx_runtime22.jsx)(DialogTitle3, { children: current.title }),
+        /* @__PURE__ */ (0, import_jsx_runtime22.jsx)(DialogDescription3, { children: new Date(current.createdAt).toLocaleString("zh-CN", { hour12: false }) })
       ] }),
-      /* @__PURE__ */ (0, import_jsx_runtime15.jsx)("img", { src: current.thumbUrl, alt: current.title, className: "w-full rounded-xl bg-[#f7f4ee] object-contain" }),
-      /* @__PURE__ */ (0, import_jsx_runtime15.jsxs)("p", { className: "text-xs leading-5 text-muted-foreground", children: [
+      /* @__PURE__ */ (0, import_jsx_runtime22.jsx)("img", { src: current.thumbUrl, alt: current.title, className: "w-full rounded-xl bg-[#f7f4ee] object-contain" }),
+      /* @__PURE__ */ (0, import_jsx_runtime22.jsxs)("p", { className: "text-xs leading-5 text-muted-foreground", children: [
         current.provider,
         " · ",
         current.aspectRatio,
@@ -8349,35 +9584,35 @@ function HistoryPanel({
         current.costume ? `换成 ${current.costume.id}` : current.keepOutfit ? "保持服装" : "允许换衣服",
         current.model ? ` · ${current.model}` : ""
       ] }),
-      current.selection.length > 0 ? /* @__PURE__ */ (0, import_jsx_runtime15.jsx)("ul", { className: "text-sm leading-6", children: current.selection.map((item) => /* @__PURE__ */ (0, import_jsx_runtime15.jsxs)("li", { children: [
+      current.selection.length > 0 ? /* @__PURE__ */ (0, import_jsx_runtime22.jsx)("ul", { className: "text-sm leading-6", children: current.selection.map((item) => /* @__PURE__ */ (0, import_jsx_runtime22.jsxs)("li", { children: [
         item.title,
         " · ",
         item.angle
       ] }, `${item.poseId}-${item.viewId}`)) }) : null,
-      current.extraPrompt ? /* @__PURE__ */ (0, import_jsx_runtime15.jsxs)("p", { className: "text-sm leading-6", children: [
+      current.extraPrompt ? /* @__PURE__ */ (0, import_jsx_runtime22.jsxs)("p", { className: "text-sm leading-6", children: [
         "补充描述：",
         current.extraPrompt
       ] }) : null,
-      /* @__PURE__ */ (0, import_jsx_runtime15.jsx)("pre", { className: "max-h-40 overflow-auto rounded-xl bg-muted px-3 py-2 text-xs leading-5 whitespace-pre-wrap", children: current.prompt }),
-      /* @__PURE__ */ (0, import_jsx_runtime15.jsxs)("div", { className: "flex gap-2", children: [
-        /* @__PURE__ */ (0, import_jsx_runtime15.jsx)(Button3, { type: "button", onClick: () => {
+      /* @__PURE__ */ (0, import_jsx_runtime22.jsx)("pre", { className: "max-h-40 overflow-auto rounded-xl bg-muted px-3 py-2 text-xs leading-5 whitespace-pre-wrap", children: current.prompt }),
+      /* @__PURE__ */ (0, import_jsx_runtime22.jsxs)("div", { className: "flex gap-2", children: [
+        /* @__PURE__ */ (0, import_jsx_runtime22.jsx)(Button3, { type: "button", onClick: () => {
           onReuse(current);
           setOpenId(null);
         }, children: "再用" }),
-        /* @__PURE__ */ (0, import_jsx_runtime15.jsx)(Button3, { type: "button", variant: "outline", onClick: () => {
+        /* @__PURE__ */ (0, import_jsx_runtime22.jsx)(Button3, { type: "button", variant: "outline", onClick: () => {
           onDelete(current.id);
           setOpenId(null);
         }, children: "删除" })
       ] })
     ] }) : null }) }),
-    /* @__PURE__ */ (0, import_jsx_runtime15.jsx)(Dialog, { open: confirmClear, onOpenChange: setConfirmClear, children: /* @__PURE__ */ (0, import_jsx_runtime15.jsxs)(DialogContent, { className: "max-w-[min(28rem,calc(100%-2rem))]", children: [
-      /* @__PURE__ */ (0, import_jsx_runtime15.jsxs)(DialogHeader, { children: [
-        /* @__PURE__ */ (0, import_jsx_runtime15.jsx)(DialogTitle3, { children: "清空全部历史" }),
-        /* @__PURE__ */ (0, import_jsx_runtime15.jsx)(DialogDescription3, { children: "这些成图会从这台浏览器删除，不能恢复。" })
+    /* @__PURE__ */ (0, import_jsx_runtime22.jsx)(Dialog, { open: confirmClear, onOpenChange: setConfirmClear, children: /* @__PURE__ */ (0, import_jsx_runtime22.jsxs)(DialogContent, { className: "max-w-[min(28rem,calc(100%-2rem))]", children: [
+      /* @__PURE__ */ (0, import_jsx_runtime22.jsxs)(DialogHeader, { children: [
+        /* @__PURE__ */ (0, import_jsx_runtime22.jsx)(DialogTitle3, { children: "清空全部历史" }),
+        /* @__PURE__ */ (0, import_jsx_runtime22.jsx)(DialogDescription3, { children: "这些成图会从这台浏览器删除，不能恢复。" })
       ] }),
-      /* @__PURE__ */ (0, import_jsx_runtime15.jsxs)("div", { className: "flex justify-end gap-2", children: [
-        /* @__PURE__ */ (0, import_jsx_runtime15.jsx)(Button3, { type: "button", variant: "outline", onClick: () => setConfirmClear(false), children: "先留着" }),
-        /* @__PURE__ */ (0, import_jsx_runtime15.jsx)(Button3, { type: "button", onClick: () => {
+      /* @__PURE__ */ (0, import_jsx_runtime22.jsxs)("div", { className: "flex justify-end gap-2", children: [
+        /* @__PURE__ */ (0, import_jsx_runtime22.jsx)(Button3, { type: "button", variant: "outline", onClick: () => setConfirmClear(false), children: "先留着" }),
+        /* @__PURE__ */ (0, import_jsx_runtime22.jsx)(Button3, { type: "button", onClick: () => {
           setConfirmClear(false);
           onClear();
         }, children: "清空" })
@@ -8387,9 +9622,9 @@ function HistoryPanel({
 }
 
 // components/ui/textarea.tsx
-var import_jsx_runtime16 = require("react/jsx-runtime");
+var import_jsx_runtime23 = require("react/jsx-runtime");
 function Textarea({ className, ...props }) {
-  return /* @__PURE__ */ (0, import_jsx_runtime16.jsx)(
+  return /* @__PURE__ */ (0, import_jsx_runtime23.jsx)(
     "textarea",
     {
       "data-slot": "textarea",
@@ -8413,7 +9648,7 @@ var ASPECT_LABEL = {
 };
 
 // components/composer.tsx
-var import_jsx_runtime17 = require("react/jsx-runtime");
+var import_jsx_runtime24 = require("react/jsx-runtime");
 function Composer({
   selected,
   onRemove,
@@ -8449,65 +9684,65 @@ function Composer({
   const limit = mode === "sheet" ? 4 : 8;
   const poseThumb = (viewId, thumbSrc) => thumbSrc || studioUrl(basePath, `/api/pose-image?id=${encodeURIComponent(viewId)}&size=thumb`);
   const costumeThumb = costume?.thumbSrc || (costume ? studioUrl(basePath, `/api/costume-image?id=${encodeURIComponent(costume.id)}&size=thumb`) : "");
-  return /* @__PURE__ */ (0, import_jsx_runtime17.jsxs)("div", { className: "flex flex-col gap-4", children: [
-    /* @__PURE__ */ (0, import_jsx_runtime17.jsxs)("div", { className: "flex items-end justify-between gap-3", children: [
-      /* @__PURE__ */ (0, import_jsx_runtime17.jsx)("div", { children: /* @__PURE__ */ (0, import_jsx_runtime17.jsxs)("h2", { className: "text-lg font-semibold", children: [
+  return /* @__PURE__ */ (0, import_jsx_runtime24.jsxs)("div", { className: "flex flex-col gap-4", children: [
+    /* @__PURE__ */ (0, import_jsx_runtime24.jsxs)("div", { className: "flex items-end justify-between gap-3", children: [
+      /* @__PURE__ */ (0, import_jsx_runtime24.jsx)("div", { children: /* @__PURE__ */ (0, import_jsx_runtime24.jsxs)("h2", { className: "text-lg font-semibold", children: [
         "已选 ",
         selected.length,
         " 个姿势"
       ] }) }),
-      selected.length > 0 ? /* @__PURE__ */ (0, import_jsx_runtime17.jsx)("button", { type: "button", className: "text-xs text-muted-foreground underline-offset-2 hover:underline", onClick: onClear, children: "清空" }) : null
+      selected.length > 0 ? /* @__PURE__ */ (0, import_jsx_runtime24.jsx)("button", { type: "button", className: "text-xs text-muted-foreground underline-offset-2 hover:underline", onClick: onClear, children: "清空" }) : null
     ] }),
-    costume ? /* @__PURE__ */ (0, import_jsx_runtime17.jsxs)("div", { className: "flex items-center gap-2 rounded-xl border border-primary/40 bg-card px-2 py-1.5", children: [
-      /* @__PURE__ */ (0, import_jsx_runtime17.jsx)("img", { src: costumeThumb, alt: "", className: "h-14 w-10 rounded-md bg-white object-contain" }),
-      /* @__PURE__ */ (0, import_jsx_runtime17.jsxs)("span", { className: "min-w-0 flex-1", children: [
-        /* @__PURE__ */ (0, import_jsx_runtime17.jsxs)("span", { className: "block truncate text-sm", children: [
+    costume ? /* @__PURE__ */ (0, import_jsx_runtime24.jsxs)("div", { className: "flex items-center gap-2 rounded-xl border border-primary/40 bg-card px-2 py-1.5", children: [
+      /* @__PURE__ */ (0, import_jsx_runtime24.jsx)("img", { src: costumeThumb, alt: "", className: "h-14 w-10 rounded-md bg-white object-contain" }),
+      /* @__PURE__ */ (0, import_jsx_runtime24.jsxs)("span", { className: "min-w-0 flex-1", children: [
+        /* @__PURE__ */ (0, import_jsx_runtime24.jsxs)("span", { className: "block truncate text-sm", children: [
           "换成 ",
           costume.id
         ] }),
-        /* @__PURE__ */ (0, import_jsx_runtime17.jsxs)("span", { className: "line-clamp-2 text-xs text-muted-foreground", children: [
+        /* @__PURE__ */ (0, import_jsx_runtime24.jsxs)("span", { className: "line-clamp-2 text-xs text-muted-foreground", children: [
           costume.label,
           " · ",
           costume.keywords
         ] })
       ] }),
-      /* @__PURE__ */ (0, import_jsx_runtime17.jsx)("button", { type: "button", className: "px-1 text-xs text-muted-foreground", onClick: onClearCostume, "aria-label": `取消服装 ${costume.id}`, children: "取消" })
+      /* @__PURE__ */ (0, import_jsx_runtime24.jsx)("button", { type: "button", className: "px-1 text-xs text-muted-foreground", onClick: onClearCostume, "aria-label": `取消服装 ${costume.id}`, children: "取消" })
     ] }) : null,
-    selected.length === 0 ? /* @__PURE__ */ (0, import_jsx_runtime17.jsxs)("p", { className: "rounded-xl bg-muted px-3 py-4 text-sm leading-6 text-muted-foreground", children: [
+    selected.length === 0 ? /* @__PURE__ */ (0, import_jsx_runtime24.jsxs)("p", { className: "rounded-xl bg-muted px-3 py-4 text-sm leading-6 text-muted-foreground", children: [
       "从中间点选一个或多个姿势。每一张成图都会带上",
       characters.length ? "你导入的模特" : "大肥鱼",
       "，只把身体换成对应的线稿姿势。要换衣服，先到「服装」里点一套。"
-    ] }) : /* @__PURE__ */ (0, import_jsx_runtime17.jsx)("ul", { className: "flex max-h-40 flex-col gap-2 overflow-auto", children: selected.map((item) => /* @__PURE__ */ (0, import_jsx_runtime17.jsxs)("li", { className: "flex items-center gap-2 rounded-xl border bg-card px-2 py-1.5", children: [
-      /* @__PURE__ */ (0, import_jsx_runtime17.jsx)("img", { src: poseThumb(item.viewId, item.thumbSrc), alt: "", className: "h-12 w-9 rounded-md bg-white object-contain" }),
-      /* @__PURE__ */ (0, import_jsx_runtime17.jsxs)("span", { className: "min-w-0 flex-1", children: [
-        /* @__PURE__ */ (0, import_jsx_runtime17.jsx)("span", { className: "block truncate text-sm", children: item.title }),
-        /* @__PURE__ */ (0, import_jsx_runtime17.jsx)("span", { className: "text-xs text-muted-foreground", children: item.angle })
+    ] }) : /* @__PURE__ */ (0, import_jsx_runtime24.jsx)("ul", { className: "flex max-h-40 flex-col gap-2 overflow-auto", children: selected.map((item) => /* @__PURE__ */ (0, import_jsx_runtime24.jsxs)("li", { className: "flex items-center gap-2 rounded-xl border bg-card px-2 py-1.5", children: [
+      /* @__PURE__ */ (0, import_jsx_runtime24.jsx)("img", { src: poseThumb(item.viewId, item.thumbSrc), alt: "", className: "h-12 w-9 rounded-md bg-white object-contain" }),
+      /* @__PURE__ */ (0, import_jsx_runtime24.jsxs)("span", { className: "min-w-0 flex-1", children: [
+        /* @__PURE__ */ (0, import_jsx_runtime24.jsx)("span", { className: "block truncate text-sm", children: item.title }),
+        /* @__PURE__ */ (0, import_jsx_runtime24.jsx)("span", { className: "text-xs text-muted-foreground", children: item.angle })
       ] }),
-      /* @__PURE__ */ (0, import_jsx_runtime17.jsx)("button", { type: "button", className: "px-1 text-xs text-muted-foreground", onClick: () => onRemove(item.poseId), "aria-label": `去掉 ${item.title}`, children: "去掉" })
+      /* @__PURE__ */ (0, import_jsx_runtime24.jsx)("button", { type: "button", className: "px-1 text-xs text-muted-foreground", onClick: () => onRemove(item.poseId), "aria-label": `去掉 ${item.title}`, children: "去掉" })
     ] }, item.poseId)) }),
-    selected[0] ? /* @__PURE__ */ (0, import_jsx_runtime17.jsxs)("div", { className: "rounded-xl border bg-card p-3", children: [
-      /* @__PURE__ */ (0, import_jsx_runtime17.jsxs)("p", { className: "text-xs text-muted-foreground", children: [
+    selected[0] ? /* @__PURE__ */ (0, import_jsx_runtime24.jsxs)("div", { className: "rounded-xl border bg-card p-3", children: [
+      /* @__PURE__ */ (0, import_jsx_runtime24.jsxs)("p", { className: "text-xs text-muted-foreground", children: [
         "参考对照 · ",
         selected[0].title
       ] }),
-      /* @__PURE__ */ (0, import_jsx_runtime17.jsxs)("div", { className: `mt-2 grid items-center gap-2 ${costume ? "grid-cols-3" : "grid-cols-[1fr_auto_1fr]"}`, children: [
-        /* @__PURE__ */ (0, import_jsx_runtime17.jsx)("img", { src: characterSrc, alt: characters.length ? "导入的模特" : "大肥鱼的成年三视图", className: "aspect-[3/4] rounded-lg bg-[#f8fafc] object-contain" }),
-        costume ? /* @__PURE__ */ (0, import_jsx_runtime17.jsx)("img", { src: costumeThumb, alt: `${costume.id} 的服装参考，图中没有人物`, className: "aspect-[3/4] rounded-lg bg-white object-contain" }) : /* @__PURE__ */ (0, import_jsx_runtime17.jsx)("span", { className: "text-lg text-muted-foreground", "aria-hidden": "true", children: "→" }),
-        /* @__PURE__ */ (0, import_jsx_runtime17.jsx)("img", { src: poseThumb(selected[0].viewId, selected[0].thumbSrc), alt: `${selected[0].title} 的姿势线稿`, className: "aspect-[3/4] rounded-lg bg-white object-contain" })
+      /* @__PURE__ */ (0, import_jsx_runtime24.jsxs)("div", { className: `mt-2 grid items-center gap-2 ${costume ? "grid-cols-3" : "grid-cols-[1fr_auto_1fr]"}`, children: [
+        /* @__PURE__ */ (0, import_jsx_runtime24.jsx)("img", { src: characterSrc, alt: characters.length ? "导入的模特" : "大肥鱼的成年三视图", className: "aspect-[3/4] rounded-lg bg-[#f8fafc] object-contain" }),
+        costume ? /* @__PURE__ */ (0, import_jsx_runtime24.jsx)("img", { src: costumeThumb, alt: `${costume.id} 的服装参考，图中没有人物`, className: "aspect-[3/4] rounded-lg bg-white object-contain" }) : /* @__PURE__ */ (0, import_jsx_runtime24.jsx)("span", { className: "text-lg text-muted-foreground", "aria-hidden": "true", children: "→" }),
+        /* @__PURE__ */ (0, import_jsx_runtime24.jsx)("img", { src: poseThumb(selected[0].viewId, selected[0].thumbSrc), alt: `${selected[0].title} 的姿势线稿`, className: "aspect-[3/4] rounded-lg bg-white object-contain" })
       ] }),
-      /* @__PURE__ */ (0, import_jsx_runtime17.jsx)("p", { className: "mt-2 text-xs leading-5 text-muted-foreground", children: costume ? "左边锁脸和鲸尾，中间是没有人物的衣服，右边只提供姿势。这还不是成图。" : "左边锁脸和衣服，右边只提供姿势。这还不是成图。" })
-    ] }) : costume ? /* @__PURE__ */ (0, import_jsx_runtime17.jsxs)("div", { className: "rounded-xl border bg-card p-3", children: [
-      /* @__PURE__ */ (0, import_jsx_runtime17.jsxs)("p", { className: "text-xs text-muted-foreground", children: [
+      /* @__PURE__ */ (0, import_jsx_runtime24.jsx)("p", { className: "mt-2 text-xs leading-5 text-muted-foreground", children: costume ? "左边锁脸和鲸尾，中间是没有人物的衣服，右边只提供姿势。这还不是成图。" : "左边锁脸和衣服，右边只提供姿势。这还不是成图。" })
+    ] }) : costume ? /* @__PURE__ */ (0, import_jsx_runtime24.jsxs)("div", { className: "rounded-xl border bg-card p-3", children: [
+      /* @__PURE__ */ (0, import_jsx_runtime24.jsxs)("p", { className: "text-xs text-muted-foreground", children: [
         "已选服装 · ",
         costume.id
       ] }),
-      /* @__PURE__ */ (0, import_jsx_runtime17.jsx)("img", { src: costumeThumb, alt: `${costume.id}，${costume.keywords}`, className: "mt-2 aspect-[2/3] max-h-48 rounded-lg bg-white object-contain" }),
-      /* @__PURE__ */ (0, import_jsx_runtime17.jsx)("p", { className: "mt-2 text-xs leading-5 text-muted-foreground", children: "还没选姿势。选好姿势后，角色会穿上这套衣服出图。" })
+      /* @__PURE__ */ (0, import_jsx_runtime24.jsx)("img", { src: costumeThumb, alt: `${costume.id}，${costume.keywords}`, className: "mt-2 aspect-[2/3] max-h-48 rounded-lg bg-white object-contain" }),
+      /* @__PURE__ */ (0, import_jsx_runtime24.jsx)("p", { className: "mt-2 text-xs leading-5 text-muted-foreground", children: "还没选姿势。选好姿势后，角色会穿上这套衣服出图。" })
     ] }) : null,
-    prompts.length > 0 ? /* @__PURE__ */ (0, import_jsx_runtime17.jsxs)("div", { className: "grid gap-2", children: [
-      /* @__PURE__ */ (0, import_jsx_runtime17.jsxs)("div", { className: "flex items-center justify-between", children: [
-        /* @__PURE__ */ (0, import_jsx_runtime17.jsx)("h3", { className: "text-sm font-medium", children: "提示词预览" }),
-        /* @__PURE__ */ (0, import_jsx_runtime17.jsx)(
+    prompts.length > 0 ? /* @__PURE__ */ (0, import_jsx_runtime24.jsxs)("div", { className: "grid gap-2", children: [
+      /* @__PURE__ */ (0, import_jsx_runtime24.jsxs)("div", { className: "flex items-center justify-between", children: [
+        /* @__PURE__ */ (0, import_jsx_runtime24.jsx)("h3", { className: "text-sm font-medium", children: "提示词预览" }),
+        /* @__PURE__ */ (0, import_jsx_runtime24.jsx)(
           "button",
           {
             type: "button",
@@ -8518,15 +9753,15 @@ ${item.prompt}`).join("\n\n")),
           }
         )
       ] }),
-      prompts.map((item) => /* @__PURE__ */ (0, import_jsx_runtime17.jsxs)("details", { className: "rounded-xl bg-muted/70 px-3 py-2", children: [
-        /* @__PURE__ */ (0, import_jsx_runtime17.jsx)("summary", { className: "cursor-pointer text-sm", children: item.title }),
-        /* @__PURE__ */ (0, import_jsx_runtime17.jsx)("pre", { className: "mt-2 max-h-48 overflow-auto text-xs leading-5 whitespace-pre-wrap", children: item.prompt })
+      prompts.map((item) => /* @__PURE__ */ (0, import_jsx_runtime24.jsxs)("details", { className: "rounded-xl bg-muted/70 px-3 py-2", children: [
+        /* @__PURE__ */ (0, import_jsx_runtime24.jsx)("summary", { className: "cursor-pointer text-sm", children: item.title }),
+        /* @__PURE__ */ (0, import_jsx_runtime24.jsx)("pre", { className: "mt-2 max-h-48 overflow-auto text-xs leading-5 whitespace-pre-wrap", children: item.prompt })
       ] }, item.viewId))
     ] }) : null,
-    promptError ? /* @__PURE__ */ (0, import_jsx_runtime17.jsx)("p", { className: "text-xs text-destructive", children: promptError }) : null,
-    /* @__PURE__ */ (0, import_jsx_runtime17.jsxs)("label", { className: "grid gap-1.5 text-sm", children: [
+    promptError ? /* @__PURE__ */ (0, import_jsx_runtime24.jsx)("p", { className: "text-xs text-destructive", children: promptError }) : null,
+    /* @__PURE__ */ (0, import_jsx_runtime24.jsxs)("label", { className: "grid gap-1.5 text-sm", children: [
       "补充描述",
-      /* @__PURE__ */ (0, import_jsx_runtime17.jsx)(
+      /* @__PURE__ */ (0, import_jsx_runtime24.jsx)(
         Textarea,
         {
           value: extraPrompt,
@@ -8537,7 +9772,7 @@ ${item.prompt}`).join("\n\n")),
         }
       )
     ] }),
-    /* @__PURE__ */ (0, import_jsx_runtime17.jsxs)("p", { className: "text-xs leading-5 text-muted-foreground", children: [
+    /* @__PURE__ */ (0, import_jsx_runtime24.jsxs)("p", { className: "text-xs leading-5 text-muted-foreground", children: [
       providerLabel,
       " · ",
       ASPECT_LABEL[aspectRatio],
@@ -8546,40 +9781,40 @@ ${item.prompt}`).join("\n\n")),
       " · ",
       costume ? `换成 ${costume.id}` : keepOutfit ? "保持服装" : "允许换衣服",
       " · ",
-      /* @__PURE__ */ (0, import_jsx_runtime17.jsx)("button", { type: "button", className: "text-primary underline-offset-2 hover:underline", onClick: onOpenSettings, children: "改设置" })
+      /* @__PURE__ */ (0, import_jsx_runtime24.jsx)("button", { type: "button", className: "text-primary underline-offset-2 hover:underline", onClick: onOpenSettings, children: "改设置" })
     ] }),
-    limitNote ? /* @__PURE__ */ (0, import_jsx_runtime17.jsx)("p", { className: "text-sm text-amber-800", children: limitNote }) : null,
-    selected.length > limit ? /* @__PURE__ */ (0, import_jsx_runtime17.jsxs)("p", { className: "text-sm text-amber-800", children: [
+    limitNote ? /* @__PURE__ */ (0, import_jsx_runtime24.jsx)("p", { className: "text-sm text-amber-800", children: limitNote }) : null,
+    selected.length > limit ? /* @__PURE__ */ (0, import_jsx_runtime24.jsxs)("p", { className: "text-sm text-amber-800", children: [
       "当前方式一次最多 ",
       limit,
       " 个姿势。"
     ] }) : null,
-    /* @__PURE__ */ (0, import_jsx_runtime17.jsxs)("div", { className: "flex gap-2", children: [
-      /* @__PURE__ */ (0, import_jsx_runtime17.jsxs)(Button3, { className: "h-11 flex-1", disabled: running || selected.length === 0 || selected.length > limit, onClick: onGenerate, children: [
-        running ? /* @__PURE__ */ (0, import_jsx_runtime17.jsx)(LoaderCircle, { className: "animate-spin" }) : /* @__PURE__ */ (0, import_jsx_runtime17.jsx)(Sparkles, {}),
+    /* @__PURE__ */ (0, import_jsx_runtime24.jsxs)("div", { className: "flex gap-2", children: [
+      /* @__PURE__ */ (0, import_jsx_runtime24.jsxs)(Button3, { className: "h-11 flex-1", disabled: running || selected.length === 0 || selected.length > limit, onClick: onGenerate, children: [
+        running ? /* @__PURE__ */ (0, import_jsx_runtime24.jsx)(LoaderCircle, { className: "animate-spin" }) : /* @__PURE__ */ (0, import_jsx_runtime24.jsx)(Sparkles, {}),
         running ? progress || "正在生图" : hasKey ? "按所选姿势生图" : "填写密钥后生图"
       ] }),
-      running ? /* @__PURE__ */ (0, import_jsx_runtime17.jsx)(Button3, { variant: "outline", className: "h-11", onClick: onStop, children: "停止" }) : null
+      running ? /* @__PURE__ */ (0, import_jsx_runtime24.jsx)(Button3, { variant: "outline", className: "h-11", onClick: onStop, children: "停止" }) : null
     ] }),
-    !hasKey ? /* @__PURE__ */ (0, import_jsx_runtime17.jsx)("p", { className: "text-xs leading-5 text-muted-foreground", children: "密钥只留在这台浏览器里。没有密钥时，下面的提示词仍然可以复制到 dsh-image-gen 里用。" }) : null,
-    reuseNote ? /* @__PURE__ */ (0, import_jsx_runtime17.jsx)("p", { className: "text-sm text-primary", children: reuseNote }) : null,
-    runError ? /* @__PURE__ */ (0, import_jsx_runtime17.jsx)("p", { className: "text-sm text-destructive", children: runError }) : null,
-    results.length > 0 ? /* @__PURE__ */ (0, import_jsx_runtime17.jsxs)("div", { className: "grid gap-3", children: [
-      /* @__PURE__ */ (0, import_jsx_runtime17.jsx)("h3", { className: "text-sm font-medium", children: "成图" }),
-      results.map((item) => /* @__PURE__ */ (0, import_jsx_runtime17.jsxs)("article", { className: "overflow-hidden rounded-xl border bg-card", children: [
-        item.ok && item.src ? /* @__PURE__ */ (0, import_jsx_runtime17.jsx)("img", { src: item.src, alt: item.title, className: "w-full bg-[#f7f4ee] object-contain" }) : null,
-        /* @__PURE__ */ (0, import_jsx_runtime17.jsxs)("div", { className: "space-y-2 px-3 py-3", children: [
-          /* @__PURE__ */ (0, import_jsx_runtime17.jsx)("p", { className: "text-sm font-medium", children: item.title }),
-          item.error ? /* @__PURE__ */ (0, import_jsx_runtime17.jsx)("p", { className: "text-sm text-destructive", children: item.error }) : null,
-          item.warning ? /* @__PURE__ */ (0, import_jsx_runtime17.jsx)("p", { className: "text-xs leading-5 text-amber-800", children: item.warning }) : null,
-          item.src ? /* @__PURE__ */ (0, import_jsx_runtime17.jsxs)("a", { className: "inline-flex items-center gap-1 text-sm text-primary", href: item.src, download: `${item.title}.png`, children: [
-            /* @__PURE__ */ (0, import_jsx_runtime17.jsx)(Download, { className: "size-4" }),
+    !hasKey ? /* @__PURE__ */ (0, import_jsx_runtime24.jsx)("p", { className: "text-xs leading-5 text-muted-foreground", children: "密钥只留在这台浏览器里。没有密钥时，下面的提示词仍然可以复制到 dsh-image-gen 里用。" }) : null,
+    reuseNote ? /* @__PURE__ */ (0, import_jsx_runtime24.jsx)("p", { className: "text-sm text-primary", children: reuseNote }) : null,
+    runError ? /* @__PURE__ */ (0, import_jsx_runtime24.jsx)("p", { className: "text-sm text-destructive", children: runError }) : null,
+    results.length > 0 ? /* @__PURE__ */ (0, import_jsx_runtime24.jsxs)("div", { className: "grid gap-3", children: [
+      /* @__PURE__ */ (0, import_jsx_runtime24.jsx)("h3", { className: "text-sm font-medium", children: "成图" }),
+      results.map((item) => /* @__PURE__ */ (0, import_jsx_runtime24.jsxs)("article", { className: "overflow-hidden rounded-xl border bg-card", children: [
+        item.ok && item.src ? /* @__PURE__ */ (0, import_jsx_runtime24.jsx)("img", { src: item.src, alt: item.title, className: "w-full bg-[#f7f4ee] object-contain" }) : null,
+        /* @__PURE__ */ (0, import_jsx_runtime24.jsxs)("div", { className: "space-y-2 px-3 py-3", children: [
+          /* @__PURE__ */ (0, import_jsx_runtime24.jsx)("p", { className: "text-sm font-medium", children: item.title }),
+          item.error ? /* @__PURE__ */ (0, import_jsx_runtime24.jsx)("p", { className: "text-sm text-destructive", children: item.error }) : null,
+          item.warning ? /* @__PURE__ */ (0, import_jsx_runtime24.jsx)("p", { className: "text-xs leading-5 text-amber-800", children: item.warning }) : null,
+          item.src ? /* @__PURE__ */ (0, import_jsx_runtime24.jsxs)("a", { className: "inline-flex items-center gap-1 text-sm text-primary", href: item.src, download: `${item.title}.png`, children: [
+            /* @__PURE__ */ (0, import_jsx_runtime24.jsx)(Download, { className: "size-4" }),
             "下载"
           ] }) : null
         ] })
       ] }, item.key))
     ] }) : null,
-    /* @__PURE__ */ (0, import_jsx_runtime17.jsx)(HistoryPanel, { entries: history, onReuse: onReuseHistory, onDelete: onDeleteHistory, onClear: onClearHistory })
+    /* @__PURE__ */ (0, import_jsx_runtime24.jsx)(HistoryPanel, { entries: history, onReuse: onReuseHistory, onDelete: onDeleteHistory, onClear: onClearHistory })
   ] });
 }
 
@@ -8867,1153 +10102,6 @@ async function requestReferenceImage(basePath, settings, prompt, kind) {
   const payload = await response.json();
   if (!response.ok || !payload.imageBase64) throw new Error(payload.error || "参考图没有生成");
   return { mediaType: payload.mediaType || "image/png", imageBase64: payload.imageBase64 };
-}
-
-// node_modules/@base-ui/react/input/Input.mjs
-var React66 = __toESM(require("react"), 1);
-
-// node_modules/@base-ui/react/field/index.parts.mjs
-var index_parts_exports3 = {};
-__export(index_parts_exports3, {
-  Control: () => FieldControl,
-  Description: () => FieldDescription,
-  Error: () => FieldError,
-  Item: () => FieldItem,
-  Label: () => FieldLabel,
-  Root: () => FieldRoot,
-  Validity: () => FieldValidity
-});
-
-// node_modules/@base-ui/react/field/root/FieldRoot.mjs
-var React58 = __toESM(require("react"), 1);
-
-// node_modules/@base-ui/react/fieldset/root/FieldsetRootContext.mjs
-var React54 = __toESM(require("react"), 1);
-var FieldsetRootContext = /* @__PURE__ */ React54.createContext(void 0);
-if (false) FieldsetRootContext.displayName = "FieldsetRootContext";
-function useFieldsetRootContext(optional = false) {
-  const context = React54.useContext(FieldsetRootContext);
-  if (!context && !optional) {
-    throw new Error(false ? "Base UI: FieldsetRootContext is missing. Fieldset parts must be placed within <Fieldset.Root>." : formatErrorMessage_default(86));
-  }
-  return context;
-}
-
-// node_modules/@base-ui/react/internals/labelable-provider/LabelableProvider.mjs
-var React55 = __toESM(require("react"), 1);
-var import_jsx_runtime18 = require("react/jsx-runtime");
-var LabelableProvider = function LabelableProvider2(props) {
-  const defaultId = useBaseUiId();
-  const [controlIdState, setControlIdState] = React55.useState(defaultId);
-  const [labelId, setLabelId] = React55.useState();
-  const [messageIds, setMessageIds] = React55.useState([]);
-  const controlId = controlIdState === void 0 ? defaultId : controlIdState;
-  const registrationsRef = useRefWithInit(() => /* @__PURE__ */ new Map());
-  const {
-    messageIds: parentMessageIds
-  } = useLabelableContext();
-  const registerControlId = useStableCallback((source, nextId) => {
-    const registrations = registrationsRef.current;
-    if (nextId === void 0) {
-      registrations.delete(source);
-    } else {
-      registrations.set(source, nextId);
-    }
-    setControlIdState((prev) => {
-      if (registrations.size === 0) {
-        return prev;
-      }
-      let nextControlId;
-      for (const id of registrations.values()) {
-        if (id === prev) {
-          return prev;
-        }
-        if (nextControlId === void 0) {
-          nextControlId = id;
-        }
-      }
-      return nextControlId;
-    });
-  });
-  const resetControlId = useStableCallback(() => {
-    if (registrationsRef.current.size === 0) {
-      setControlIdState(defaultId);
-    }
-  });
-  const getDescriptionProps = React55.useCallback((externalProps) => {
-    const ids = externalProps["aria-describedby"] ? externalProps["aria-describedby"].split(" ") : [];
-    ids.push(...parentMessageIds, ...messageIds);
-    return {
-      ...externalProps,
-      "aria-describedby": Array.from(new Set(ids)).join(" ") || void 0
-    };
-  }, [parentMessageIds, messageIds]);
-  const contextValue = React55.useMemo(() => ({
-    controlId,
-    registerControlId,
-    resetControlId,
-    labelId,
-    setLabelId,
-    messageIds,
-    setMessageIds,
-    getDescriptionProps
-  }), [controlId, registerControlId, resetControlId, labelId, setLabelId, messageIds, setMessageIds, getDescriptionProps]);
-  return /* @__PURE__ */ (0, import_jsx_runtime18.jsx)(LabelableContext.Provider, {
-    value: contextValue,
-    children: props.children
-  });
-};
-if (false) LabelableProvider.displayName = "LabelableProvider";
-
-// node_modules/@base-ui/react/utils/useRegisteredLabelId.mjs
-function useRegisteredLabelId(idProp, setLabelId) {
-  const id = useBaseUiId(idProp);
-  useIsoLayoutEffect(() => {
-    setLabelId(id);
-    return () => {
-      setLabelId((currentId) => currentId === id ? void 0 : currentId);
-    };
-  }, [id, setLabelId]);
-  return id;
-}
-
-// node_modules/@base-ui/react/internals/labelable-provider/useLabel.mjs
-function useLabel(params = {}) {
-  const {
-    id: idProp,
-    fallbackControlId,
-    native = false,
-    setLabelId: setLabelIdProp,
-    focusControl: focusControlProp
-  } = params;
-  const {
-    controlId: contextControlId,
-    setLabelId: setContextLabelId
-  } = useLabelableContext();
-  const syncLabelId = useStableCallback((nextLabelId) => {
-    setContextLabelId(nextLabelId);
-    setLabelIdProp?.(nextLabelId);
-  });
-  const id = useRegisteredLabelId(idProp, syncLabelId);
-  const resolvedControlId = contextControlId ?? fallbackControlId;
-  function focusControl(event) {
-    if (focusControlProp) {
-      focusControlProp(event, resolvedControlId);
-      return;
-    }
-    if (!resolvedControlId) {
-      return;
-    }
-    const controlElement = getControlById(event.currentTarget, resolvedControlId);
-    if (isHTMLElement(controlElement)) {
-      focusElementWithVisible(controlElement);
-    }
-  }
-  function handleInteraction(event) {
-    const target = getTarget(event.nativeEvent);
-    if (closest(target, "button,input,select,textarea")) {
-      return;
-    }
-    if (!event.defaultPrevented && event.detail > 1) {
-      event.preventDefault();
-    }
-    if (native) {
-      return;
-    }
-    focusControl(event);
-  }
-  return native ? {
-    id,
-    htmlFor: resolvedControlId,
-    onMouseDown: handleInteraction
-  } : {
-    id,
-    onClick: handleInteraction,
-    onPointerDown(event) {
-      event.preventDefault();
-    }
-  };
-}
-function getControlById(label, id) {
-  let root = label.getRootNode();
-  while (isShadowRoot(root)) {
-    const element = root.getElementById(id);
-    if (element) {
-      return element;
-    }
-    root = root.host.getRootNode();
-  }
-  return ownerDocument(label).getElementById(id);
-}
-function focusElementWithVisible(element) {
-  element.focus({
-    // Available from Chrome 144+ (January 2026).
-    // Safari and Firefox already support it.
-    focusVisible: true
-  });
-}
-
-// node_modules/@base-ui/react/field/root/useFieldValidation.mjs
-var React56 = __toESM(require("react"), 1);
-
-// node_modules/@base-ui/react/field/utils/getCombinedFieldValidityData.mjs
-function getCombinedFieldValidityData(validityData, invalid2) {
-  return {
-    ...validityData,
-    state: {
-      ...validityData.state,
-      valid: !invalid2 && validityData.state.valid
-    }
-  };
-}
-
-// node_modules/@base-ui/react/field/root/useFieldValidation.mjs
-var validityKeys = Object.keys(DEFAULT_VALIDITY_STATE);
-function isEligibleInput(input, formElement) {
-  if (input.matches(":disabled")) {
-    return false;
-  }
-  if (!formElement || input.form === formElement) {
-    return true;
-  }
-  return input.form === null && !input.hasAttribute("form");
-}
-function findRepresentativeInput(inputs, formElement) {
-  let fallback2 = null;
-  for (const input of inputs.keys()) {
-    if (!isEligibleInput(input, formElement)) {
-      continue;
-    }
-    if (!input.validity.valid) {
-      return input;
-    }
-    fallback2 ??= input;
-  }
-  return fallback2;
-}
-function makeState(customError) {
-  return {
-    ...DEFAULT_VALIDITY_STATE,
-    valid: !customError,
-    customError
-  };
-}
-function getNativeErrors(element) {
-  return element && element.validationMessage ? [element.validationMessage] : [];
-}
-function useFieldValidation(params) {
-  const {
-    elementRef,
-    formRef
-  } = useFormContext();
-  const {
-    setValidityData,
-    validate,
-    validityData,
-    validationDebounceTime,
-    invalid: invalid2,
-    markedDirtyRef,
-    state,
-    shouldValidateOnChange,
-    validationMode,
-    registeredFieldIdRef
-  } = params;
-  const {
-    controlId,
-    getDescriptionProps
-  } = useLabelableContext();
-  const timeout = useTimeout();
-  const inputRef = React56.useRef(null);
-  const registeredInputs = useRefWithInit(() => /* @__PURE__ */ new Map()).current;
-  const validationCommitIdRef = React56.useRef(0);
-  const customValidityRef = React56.useRef(null);
-  const registerInput = React56.useCallback((element, registration) => {
-    registeredInputs.set(element, registration);
-    return () => {
-      registeredInputs.delete(element);
-    };
-  }, [registeredInputs]);
-  const getInputControl = useStableCallback(() => {
-    const element = findRepresentativeInput(registeredInputs, elementRef.current);
-    return element && registeredInputs.get(element)?.controlRef.current || null;
-  });
-  const commit = useStableCallback(async (value, revalidate = false) => {
-    validationCommitIdRef.current += 1;
-    const validationCommitId = validationCommitIdRef.current;
-    function updateRegisteredFieldValidity(nextValidityData, externalInvalid = invalid2) {
-      const fieldId = registeredFieldIdRef.current ?? controlId;
-      if (fieldId == null) {
-        return;
-      }
-      const currentFieldData = formRef.current.fields.get(fieldId);
-      if (!currentFieldData) {
-        return;
-      }
-      const validityDataWithFormErrors = getCombinedFieldValidityData(nextValidityData, externalInvalid);
-      formRef.current.fields.set(fieldId, {
-        ...currentFieldData,
-        validityData: validityDataWithFormErrors
-      });
-    }
-    function makeValidityData(validityState, errorMessages) {
-      const errors = validityState.valid === false ? errorMessages : [];
-      return {
-        value,
-        state: validityState,
-        error: errors[0] ?? "",
-        errors,
-        initialValue: validityData.initialValue
-      };
-    }
-    function setCustomValidity(element2, message) {
-      const displaced = element2.validity.customError ? element2.validationMessage : "";
-      const ownedMessage = message.replace(/\r\n?/g, "\n");
-      element2.setCustomValidity(ownedMessage);
-      customValidityRef.current = [element2, ownedMessage, displaced];
-    }
-    function clearCustomValidity() {
-      const record = customValidityRef.current;
-      customValidityRef.current = null;
-      if (record && (!record[0].willValidate || record[0].validationMessage === record[1])) {
-        record[0].setCustomValidity(record[2]);
-      }
-    }
-    function publish(validityState, errorMessages, externalInvalid) {
-      const nextValidityData = makeValidityData(validityState, errorMessages);
-      updateRegisteredFieldValidity(nextValidityData, externalInvalid);
-      setValidityData(nextValidityData);
-    }
-    function getState(el) {
-      const computedState = validityKeys.reduce((acc, key) => {
-        acc[key] = el.validity[key];
-        return acc;
-      }, {});
-      let hasOnlyValueMissingError = false;
-      for (const key of validityKeys) {
-        if (key === "valid") {
-          continue;
-        }
-        if (key === "valueMissing" && computedState[key]) {
-          hasOnlyValueMissingError = true;
-        } else if (computedState[key]) {
-          return computedState;
-        }
-      }
-      if (hasOnlyValueMissingError && !markedDirtyRef.current) {
-        computedState.valid = true;
-        computedState.valueMissing = false;
-      }
-      return computedState;
-    }
-    function resolveRepresentativeInput() {
-      return registeredInputs.size > 0 ? findRepresentativeInput(registeredInputs, elementRef.current) : inputRef.current;
-    }
-    let element = resolveRepresentativeInput();
-    function refreshState() {
-      element = resolveRepresentativeInput();
-      return element?.willValidate ? getState(element) : makeState(false);
-    }
-    if (revalidate) {
-      if (state.valid !== false || !element) {
-        return;
-      }
-      if (!element.validity.valueMissing) {
-        clearCustomValidity();
-        const currentElement = resolveRepresentativeInput();
-        const foreign = currentElement?.validity.customError ? getNativeErrors(currentElement) : [];
-        publish(makeState(foreign.length > 0), foreign, false);
-        return;
-      }
-      for (const key of validityKeys) {
-        if (key !== "valid" && key !== "valueMissing" && key !== "customError" && element.validity[key]) {
-          return;
-        }
-      }
-    }
-    timeout.clear();
-    clearCustomValidity();
-    let nextState = refreshState();
-    let validationErrors = getNativeErrors(element);
-    const isValidatingOnChange = shouldValidateOnChange();
-    if (validationErrors.length === 0 || isValidatingOnChange) {
-      const formValues = Array.from(formRef.current.fields.values()).reduce((acc, field) => {
-        if (field.name) {
-          acc[field.name] = field.getValue();
-        }
-        return acc;
-      }, {});
-      const resultOrPromise = validate(value, formValues);
-      let result;
-      if (typeof resultOrPromise === "object" && resultOrPromise !== null && "then" in resultOrPromise) {
-        if (nextState.valid === false) {
-          publish(nextState, validationErrors);
-        } else if (validationMode === "onSubmit" || !validityData.state.customError) {
-          nextState.valid = null;
-          publish(nextState, validationErrors);
-        }
-        result = await resultOrPromise;
-        if (validationCommitId !== validationCommitIdRef.current) {
-          return;
-        }
-        nextState = refreshState();
-      } else {
-        result = resultOrPromise;
-      }
-      validationErrors = result ? [].concat(result).filter(Boolean) : [];
-      if (validationErrors.length > 0) {
-        nextState.valid = false;
-        nextState.customError = true;
-        if (element?.willValidate) {
-          setCustomValidity(element, validationErrors.join("\n"));
-        }
-      } else {
-        validationErrors = getNativeErrors(element);
-      }
-    }
-    publish(nextState, validationErrors);
-  });
-  const change = useStableCallback((value, cancelPending = false) => {
-    timeout.clear();
-    validationCommitIdRef.current += 1;
-    if (cancelPending) {
-      return;
-    }
-    const validateOnChange = shouldValidateOnChange();
-    if (validateOnChange && value !== "" && validationDebounceTime) {
-      timeout.start(validationDebounceTime, () => {
-        commit(value);
-      });
-    } else {
-      commit(value, !validateOnChange);
-    }
-  });
-  const getValidationProps = React56.useCallback((disabled2, externalProps = {}) => mergeProps(getDescriptionProps(externalProps), state.valid === false && !state.disabled && !disabled2 ? {
-    "aria-invalid": true
-  } : EMPTY_OBJECT), [getDescriptionProps, state.disabled, state.valid]);
-  return React56.useMemo(() => ({
-    getValidationProps,
-    inputRef,
-    registeredInputs,
-    registerInput,
-    getInputControl,
-    commit,
-    change
-  }), [getValidationProps, registeredInputs, registerInput, getInputControl, commit, change]);
-}
-
-// node_modules/@base-ui/react/internals/field-register-control/useFieldControlRegistration.mjs
-var React57 = __toESM(require("react"), 1);
-function useFieldControlRegistration(params) {
-  const {
-    change,
-    commit,
-    invalid: invalid2,
-    markedDirtyRef,
-    name: name2,
-    setRegisteredFieldName,
-    registeredFieldIdRef,
-    setValidityData,
-    validityData
-  } = params;
-  const {
-    formRef
-  } = useFormContext();
-  const activeFieldControlSourceRef = React57.useRef(null);
-  const registrationRef = React57.useRef(null);
-  const initialValueCapturedRef = React57.useRef(false);
-  const getValueForForm = useStableCallback(() => {
-    const registration = registrationRef.current;
-    if (!registration) {
-      return void 0;
-    }
-    if (registration.getValue) {
-      return registration.getValue();
-    }
-    return registration.value;
-  });
-  function getRegistrationValue(registration) {
-    return registration.value === void 0 ? getValueForForm() : registration.value;
-  }
-  const validate = useStableCallback(() => {
-    const registration = registrationRef.current;
-    markedDirtyRef.current = true;
-    if (!registration) {
-      commit(validityData.value);
-      return;
-    }
-    commit(getRegistrationValue(registration));
-  });
-  function refreshRegistration() {
-    const registration = registrationRef.current;
-    if (!registration || !registration.id) {
-      return;
-    }
-    formRef.current.fields.set(registration.id, {
-      getValue: getValueForForm,
-      name: name2 ?? registration.name,
-      controlRef: registration.controlRef,
-      validityData: getCombinedFieldValidityData(validityData, invalid2),
-      validate
-    });
-  }
-  function deleteRegistration(id = registrationRef.current?.id) {
-    if (id) {
-      formRef.current.fields.delete(id);
-    }
-  }
-  function captureInitialValue(registration) {
-    if (initialValueCapturedRef.current) {
-      return;
-    }
-    initialValueCapturedRef.current = true;
-    const initialValue = getRegistrationValue(registration);
-    setValidityData((prev) => prev.initialValue === initialValue ? prev : {
-      ...prev,
-      initialValue
-    });
-  }
-  useIsoLayoutEffect(() => {
-    const registration = registrationRef.current;
-    if (!registration || !registration.id) {
-      return;
-    }
-    setRegisteredFieldName(name2 ? void 0 : registration.name);
-    formRef.current.fields.set(registration.id, {
-      getValue: getValueForForm,
-      name: name2 ?? registration.name,
-      controlRef: registration.controlRef,
-      validityData: getCombinedFieldValidityData(validityData, invalid2),
-      validate
-    });
-  }, [formRef, getValueForForm, invalid2, name2, setRegisteredFieldName, validate, validityData]);
-  useIsoLayoutEffect(() => {
-    const fields = formRef.current.fields;
-    return () => {
-      const id = registrationRef.current?.id;
-      if (id) {
-        fields.delete(id);
-      }
-    };
-  }, [formRef]);
-  const register2 = useStableCallback((source, registration) => {
-    if (!registration) {
-      if (activeFieldControlSourceRef.current === source) {
-        activeFieldControlSourceRef.current = null;
-        change(void 0, true);
-        deleteRegistration();
-        registrationRef.current = null;
-        setRegisteredFieldName(void 0);
-        registeredFieldIdRef.current = void 0;
-      }
-      return;
-    }
-    const previousId = registrationRef.current?.id;
-    const previousSource = activeFieldControlSourceRef.current;
-    if (previousSource && previousSource !== source) {
-      change(void 0, true);
-    }
-    activeFieldControlSourceRef.current = source;
-    registrationRef.current = registration;
-    if (!name2) {
-      setRegisteredFieldName(registration.name);
-    }
-    registeredFieldIdRef.current = registration.id;
-    if (previousId && previousId !== registration.id) {
-      deleteRegistration(previousId);
-    }
-    captureInitialValue(registration);
-    refreshRegistration();
-  });
-  return [validate, register2];
-}
-
-// node_modules/@base-ui/react/field/root/FieldRoot.mjs
-var import_jsx_runtime19 = require("react/jsx-runtime");
-var FieldRootInner = /* @__PURE__ */ React58.forwardRef(function FieldRootInner2(componentProps, forwardedRef) {
-  const {
-    errors,
-    validationMode: formValidationMode,
-    submitCountRef
-  } = useFormContext();
-  const {
-    render,
-    className,
-    validate: validateProp,
-    validationDebounceTime = 0,
-    validationMode = formValidationMode,
-    name: name2,
-    disabled: disabledProp = false,
-    invalid: invalidProp,
-    dirty: dirtyProp,
-    touched: touchedProp,
-    actionsRef,
-    style,
-    ...elementProps
-  } = componentProps;
-  const disabledFieldset = useFieldsetRootContext(true)?.disabled;
-  const validate = useStableCallback(validateProp || (() => null));
-  const disabled2 = disabledFieldset || disabledProp;
-  const [touchedState, setTouchedUnwrapped] = React58.useState(false);
-  const [dirtyState, setDirtyUnwrapped] = React58.useState(false);
-  const [filled, setFilled] = React58.useState(false);
-  const [focused, setFocused] = React58.useState(false);
-  const focusOwnerRef = React58.useRef(void 0);
-  const dirty = dirtyProp ?? dirtyState;
-  const touched = touchedProp ?? touchedState;
-  const markedDirtyRef = React58.useRef(dirty);
-  const registeredFieldIdRef = React58.useRef(void 0);
-  const [registeredFieldName, setRegisteredFieldName] = React58.useState();
-  const effectiveName = name2 ?? registeredFieldName;
-  useIsoLayoutEffect(() => {
-    if (dirtyProp !== void 0) {
-      markedDirtyRef.current = dirtyProp;
-    }
-  }, [dirtyProp]);
-  const setDirty = useStableCallback((value) => {
-    if (dirtyProp !== void 0) {
-      return;
-    }
-    if (value) {
-      markedDirtyRef.current = true;
-    }
-    setDirtyUnwrapped(value);
-  });
-  const setTouched = useStableCallback((value) => {
-    if (touchedProp !== void 0) {
-      return;
-    }
-    setTouchedUnwrapped(value);
-  });
-  const shouldValidateOnChange = useStableCallback(() => validationMode === "onChange" || validationMode === "onSubmit" && submitCountRef.current > 0);
-  const formError = effectiveName && Object.hasOwn(errors, effectiveName) ? errors[effectiveName] : null;
-  const hasFormError = !!(Array.isArray(formError) ? formError.length : formError);
-  const invalid2 = invalidProp === true || hasFormError;
-  const [validityData, setValidityData] = React58.useState({
-    state: DEFAULT_VALIDITY_STATE,
-    error: "",
-    errors: [],
-    value: null,
-    initialValue: null
-  });
-  const valid2 = !invalid2 && (disabled2 ? null : validityData.state.valid);
-  const state = React58.useMemo(() => ({
-    disabled: disabled2,
-    touched,
-    dirty,
-    valid: valid2,
-    filled,
-    focused
-  }), [disabled2, touched, dirty, valid2, filled, focused]);
-  const validation = useFieldValidation({
-    setValidityData,
-    validate,
-    validityData,
-    validationDebounceTime,
-    invalid: invalid2,
-    markedDirtyRef,
-    state,
-    shouldValidateOnChange,
-    validationMode,
-    registeredFieldIdRef
-  });
-  const [validateFieldControl, registerFieldControl] = useFieldControlRegistration({
-    change: validation.change,
-    commit: validation.commit,
-    invalid: invalid2,
-    markedDirtyRef,
-    name: name2,
-    setRegisteredFieldName,
-    registeredFieldIdRef,
-    setValidityData,
-    validityData
-  });
-  React58.useImperativeHandle(actionsRef, () => ({
-    validate: validateFieldControl
-  }), [validateFieldControl]);
-  const contextValue = React58.useMemo(() => ({
-    invalid: invalid2,
-    name: effectiveName,
-    validityData,
-    setValidityData,
-    disabled: disabled2,
-    setTouched,
-    setDirty,
-    setFilled,
-    setFocused,
-    focusOwnerRef,
-    validationMode,
-    shouldValidateOnChange,
-    state,
-    registerFieldControl,
-    validation
-  }), [invalid2, effectiveName, validityData, disabled2, setTouched, setDirty, setFilled, setFocused, validationMode, shouldValidateOnChange, state, registerFieldControl, validation]);
-  const element = useRenderElement("div", componentProps, {
-    ref: forwardedRef,
-    state,
-    props: elementProps,
-    stateAttributesMapping: fieldValidityMapping
-  });
-  return /* @__PURE__ */ (0, import_jsx_runtime19.jsx)(FieldRootContext.Provider, {
-    value: contextValue,
-    children: element
-  });
-});
-if (false) FieldRootInner.displayName = "FieldRootInner";
-var FieldRoot = /* @__PURE__ */ React58.forwardRef(function FieldRoot2(componentProps, forwardedRef) {
-  return /* @__PURE__ */ (0, import_jsx_runtime19.jsx)(LabelableProvider, {
-    children: /* @__PURE__ */ (0, import_jsx_runtime19.jsx)(FieldRootInner, {
-      ...componentProps,
-      ref: forwardedRef
-    })
-  });
-});
-if (false) FieldRoot.displayName = "FieldRoot";
-
-// node_modules/@base-ui/react/field/label/FieldLabel.mjs
-var React60 = __toESM(require("react"), 1);
-
-// node_modules/@base-ui/react/field/item/FieldItemContext.mjs
-var React59 = __toESM(require("react"), 1);
-var FieldItemContext = /* @__PURE__ */ React59.createContext({
-  disabled: false
-});
-if (false) FieldItemContext.displayName = "FieldItemContext";
-function useFieldItemContext() {
-  const context = React59.useContext(FieldItemContext);
-  return context;
-}
-
-// node_modules/@base-ui/react/field/label/FieldLabel.mjs
-var FieldLabel = /* @__PURE__ */ React60.forwardRef(function FieldLabel2(componentProps, forwardedRef) {
-  const {
-    render,
-    className,
-    style,
-    id: idProp,
-    nativeLabel = true,
-    ...elementProps
-  } = componentProps;
-  const fieldRootContext = useFieldRootContext(false);
-  const fieldItemContext = useFieldItemContext();
-  const {
-    labelId
-  } = useLabelableContext();
-  const state = {
-    ...fieldRootContext.state,
-    disabled: fieldRootContext.disabled || fieldItemContext.disabled
-  };
-  const labelRef = React60.useRef(null);
-  const labelProps = useLabel({
-    id: labelId ?? idProp,
-    native: nativeLabel
-  });
-  if (false) {
-    React60.useEffect(() => {
-      if (!labelRef.current) {
-        return;
-      }
-      const isLabelTag = labelRef.current.tagName === "LABEL";
-      if (nativeLabel) {
-        if (!isLabelTag) {
-          const ownerStackMessage = SafeReact.captureOwnerStack?.() || "";
-          const message = "<Field.Label> expected a <label> element because the `nativeLabel` prop is true. Rendering a non-<label> disables native label association, so `htmlFor` will not work. Use a real <label> in the `render` prop, or set `nativeLabel` to `false`.";
-          error(`${message}${ownerStackMessage}`);
-        }
-      } else if (isLabelTag) {
-        const ownerStackMessage = SafeReact.captureOwnerStack?.() || "";
-        const message = "<Field.Label> expected a non-<label> element because the `nativeLabel` prop is false. Rendering a <label> assumes native label behavior while Base UI treats it as non-native, which can cause unexpected pointer behavior. Use a non-<label> in the `render` prop, or set `nativeLabel` to `true`.";
-        error(`${message}${ownerStackMessage}`);
-      }
-    }, [nativeLabel]);
-  }
-  const element = useRenderElement("label", componentProps, {
-    ref: [forwardedRef, labelRef],
-    state,
-    props: [labelProps, elementProps],
-    stateAttributesMapping: fieldValidityMapping
-  });
-  return element;
-});
-if (false) FieldLabel.displayName = "FieldLabel";
-
-// node_modules/@base-ui/react/field/error/FieldError.mjs
-var React61 = __toESM(require("react"), 1);
-var import_jsx_runtime20 = require("react/jsx-runtime");
-var stateAttributesMapping2 = {
-  ...fieldValidityMapping,
-  ...transitionStatusMapping
-};
-var FieldError = /* @__PURE__ */ React61.forwardRef(function FieldError2(componentProps, forwardedRef) {
-  const {
-    render,
-    id: idProp,
-    className,
-    match,
-    style,
-    ...elementProps
-  } = componentProps;
-  const id = useBaseUiId(idProp);
-  const {
-    validityData,
-    state: fieldState,
-    name: name2
-  } = useFieldRootContext(false);
-  const {
-    setMessageIds
-  } = useLabelableContext();
-  const {
-    errors
-  } = useFormContext();
-  const formError = name2 && Object.hasOwn(errors, name2) ? errors[name2] : null;
-  const hasFormError = !!(Array.isArray(formError) ? formError.length : formError);
-  const hasSpecificMatch = typeof match === "string";
-  let rendered = false;
-  if (match === true) {
-    rendered = true;
-  } else if (fieldState.disabled) {
-    rendered = false;
-  } else if (hasSpecificMatch) {
-    rendered = Boolean(validityData.state[match]);
-  } else {
-    rendered = hasFormError || validityData.state.valid === false;
-  }
-  const {
-    mounted,
-    transitionStatus,
-    setMounted
-  } = useTransitionStatus(rendered);
-  useIsoLayoutEffect(() => {
-    if (!rendered || !id) {
-      return void 0;
-    }
-    setMessageIds((v) => v.concat(id));
-    return () => {
-      setMessageIds((v) => v.filter((item) => item !== id));
-    };
-  }, [rendered, id, setMessageIds]);
-  const errorRef = React61.useRef(null);
-  const [lastRenderedMessage, setLastRenderedMessage] = React61.useState(null);
-  const [lastRenderedMessageKey, setLastRenderedMessageKey] = React61.useState(null);
-  let error = validityData.error;
-  if (!hasSpecificMatch && hasFormError) {
-    error = formError;
-  } else if (validityData.errors.length > 1) {
-    error = validityData.errors;
-  }
-  let errorMessage = error;
-  if (Array.isArray(error)) {
-    errorMessage = error.length > 1 ? /* @__PURE__ */ (0, import_jsx_runtime20.jsx)("ul", {
-      children: error.map((message) => /* @__PURE__ */ (0, import_jsx_runtime20.jsx)("li", {
-        children: message
-      }, message))
-    }) : error[0];
-  }
-  const errorKey = Array.isArray(error) ? JSON.stringify(error) : error;
-  if (rendered && errorKey !== lastRenderedMessageKey) {
-    setLastRenderedMessageKey(errorKey);
-    setLastRenderedMessage(errorMessage);
-  }
-  useOpenChangeComplete({
-    open: rendered,
-    ref: errorRef,
-    onComplete() {
-      if (!rendered) {
-        setMounted(false);
-      }
-    }
-  });
-  const state = {
-    ...fieldState,
-    transitionStatus
-  };
-  const element = useRenderElement("div", componentProps, {
-    ref: [forwardedRef, errorRef],
-    state,
-    props: [{
-      id,
-      children: rendered ? errorMessage : lastRenderedMessage
-    }, elementProps],
-    stateAttributesMapping: stateAttributesMapping2,
-    enabled: mounted
-  });
-  if (!mounted) {
-    return null;
-  }
-  return element;
-});
-if (false) FieldError.displayName = "FieldError";
-
-// node_modules/@base-ui/react/field/description/FieldDescription.mjs
-var React62 = __toESM(require("react"), 1);
-var FieldDescription = /* @__PURE__ */ React62.forwardRef(function FieldDescription2(componentProps, forwardedRef) {
-  const {
-    render,
-    id: idProp,
-    className,
-    style,
-    ...elementProps
-  } = componentProps;
-  const id = useBaseUiId(idProp);
-  const fieldRootContext = useFieldRootContext(false);
-  const fieldItemContext = useFieldItemContext();
-  const {
-    setMessageIds
-  } = useLabelableContext();
-  const state = {
-    ...fieldRootContext.state,
-    disabled: fieldRootContext.disabled || fieldItemContext.disabled
-  };
-  useIsoLayoutEffect(() => {
-    if (!id) {
-      return void 0;
-    }
-    setMessageIds((v) => v.concat(id));
-    return () => {
-      setMessageIds((v) => v.filter((item) => item !== id));
-    };
-  }, [id, setMessageIds]);
-  const element = useRenderElement("p", componentProps, {
-    ref: forwardedRef,
-    state,
-    props: [{
-      id
-    }, elementProps],
-    stateAttributesMapping: fieldValidityMapping
-  });
-  return element;
-});
-if (false) FieldDescription.displayName = "FieldDescription";
-
-// node_modules/@base-ui/react/field/control/FieldControl.mjs
-var React63 = __toESM(require("react"), 1);
-var FieldControl = /* @__PURE__ */ React63.forwardRef(function FieldControl2(componentProps, forwardedRef) {
-  const {
-    render,
-    className,
-    id: idProp,
-    name: nameProp,
-    value,
-    disabled: disabledProp = false,
-    onValueChange,
-    defaultValue,
-    autoFocus = false,
-    style,
-    ...elementProps
-  } = componentProps;
-  const {
-    state: fieldState,
-    name: fieldName,
-    disabled: fieldDisabled,
-    setTouched,
-    setDirty,
-    validityData,
-    setFilled,
-    validationMode,
-    validation
-  } = useFieldRootContext();
-  const {
-    clearErrors,
-    elementRef: formElementRef,
-    submitCountRef
-  } = useFormContext();
-  const disabled2 = fieldDisabled || disabledProp;
-  const name2 = fieldName ?? nameProp;
-  const state = {
-    ...fieldState,
-    disabled: disabled2
-  };
-  const {
-    labelId
-  } = useLabelableContext();
-  const id = useLabelableId({
-    id: idProp
-  });
-  const isControlled = value !== void 0;
-  const serializedValue = value == null ? void 0 : String(value);
-  const getValueFromInput = useStableCallback(() => validation.inputRef.current?.value);
-  useRegisterFieldControl(validation.inputRef, id, serializedValue, getValueFromInput, !disabled2, nameProp);
-  useIsoLayoutEffect(() => {
-    const currentValue = serializedValue ?? validation.inputRef.current?.value;
-    if (currentValue !== void 0) {
-      setFilled(currentValue !== "");
-    }
-  }, [serializedValue, defaultValue, validation.inputRef, setFilled]);
-  useValueChanged(serializedValue, () => {
-    if (serializedValue === void 0) {
-      return;
-    }
-    clearErrors(name2);
-    setDirty(serializedValue !== (validityData.initialValue ?? ""));
-    validation.change(serializedValue);
-  });
-  const inputRef = React63.useRef(null);
-  const setFocused = useSetFieldFocused(disabled2, inputRef);
-  const enterValidationTimeout = useTimeout();
-  const element = useRenderElement("input", componentProps, {
-    ref: [forwardedRef, inputRef],
-    state,
-    props: [{
-      id,
-      disabled: disabled2,
-      name: name2,
-      ref: validation.inputRef,
-      "aria-labelledby": labelId,
-      autoFocus,
-      ...isControlled ? {
-        value
-      } : {
-        defaultValue
-      },
-      onChange(event) {
-        const inputValue = event.currentTarget.value;
-        const details = createChangeEventDetails(reason_parts_exports.none, event.nativeEvent);
-        onValueChange?.(inputValue, details);
-        if (isControlled) {
-          return;
-        }
-        setDirty(inputValue !== (validityData.initialValue ?? ""));
-        setFilled(inputValue !== "");
-        if (!event.nativeEvent.defaultPrevented && !details.isCanceled) {
-          clearErrors(name2);
-          validation.change(inputValue);
-        }
-      },
-      onFocus() {
-        setFocused(true);
-      },
-      onBlur(event) {
-        setTouched(true);
-        setFocused(false);
-        if (validationMode === "onBlur") {
-          const inputValue = event.currentTarget.value;
-          validation.commit(inputValue);
-          if (isControlled) {
-            queueMicrotask(() => {
-              const nextValue = validation.inputRef.current?.value;
-              if (nextValue !== void 0 && nextValue !== inputValue && nextValue !== (validityData.initialValue ?? "")) {
-                validation.commit(nextValue);
-              }
-            });
-          }
-        }
-      },
-      onKeyDown(event) {
-        if (event.currentTarget.tagName === "INPUT" && event.key === "Enter") {
-          setTouched(true);
-          const value2 = event.currentTarget.value;
-          const form = event.currentTarget.form;
-          if (form && form === formElementRef.current && !event.defaultPrevented) {
-            const input = event.currentTarget;
-            const submitCount = submitCountRef.current;
-            enterValidationTimeout.start(0, () => {
-              if (submitCountRef.current === submitCount) {
-                validation.commit(input.value);
-              }
-            });
-          } else {
-            validation.commit(value2);
-          }
-        }
-      }
-    }, elementProps, (props) => validation.getValidationProps(disabled2, props)],
-    stateAttributesMapping: fieldValidityMapping
-  });
-  return element;
-});
-if (false) FieldControl.displayName = "FieldControl";
-
-// node_modules/@base-ui/react/field/validity/FieldValidity.mjs
-var React64 = __toESM(require("react"), 1);
-var import_jsx_runtime21 = require("react/jsx-runtime");
-var FieldValidity = function FieldValidity2(props) {
-  const {
-    children
-  } = props;
-  const {
-    validityData,
-    invalid: invalid2
-  } = useFieldRootContext(false);
-  const combinedFieldValidityData = React64.useMemo(() => getCombinedFieldValidityData(validityData, invalid2), [validityData, invalid2]);
-  const isInvalid = combinedFieldValidityData.state.valid === false;
-  const {
-    transitionStatus
-  } = useTransitionStatus(isInvalid);
-  const fieldValidityState = React64.useMemo(() => {
-    return {
-      ...combinedFieldValidityData,
-      validity: combinedFieldValidityData.state,
-      transitionStatus
-    };
-  }, [combinedFieldValidityData, transitionStatus]);
-  return /* @__PURE__ */ (0, import_jsx_runtime21.jsx)(React64.Fragment, {
-    children: children(fieldValidityState)
-  });
-};
-if (false) FieldValidity.displayName = "FieldValidity";
-
-// node_modules/@base-ui/react/field/item/FieldItem.mjs
-var React65 = __toESM(require("react"), 1);
-var import_jsx_runtime22 = require("react/jsx-runtime");
-var FieldItem = /* @__PURE__ */ React65.forwardRef(function FieldItem2(componentProps, forwardedRef) {
-  const {
-    render,
-    className,
-    style,
-    disabled: disabledProp = false,
-    ...elementProps
-  } = componentProps;
-  const {
-    state: fieldState,
-    disabled: rootDisabled
-  } = useFieldRootContext(false);
-  const disabled2 = rootDisabled || disabledProp;
-  const state = {
-    ...fieldState,
-    disabled: disabled2
-  };
-  const fieldItemContext = React65.useMemo(() => ({
-    disabled: disabled2
-  }), [disabled2]);
-  const element = useRenderElement("div", componentProps, {
-    ref: forwardedRef,
-    state,
-    props: elementProps,
-    stateAttributesMapping: fieldValidityMapping
-  });
-  return /* @__PURE__ */ (0, import_jsx_runtime22.jsx)(LabelableProvider, {
-    children: /* @__PURE__ */ (0, import_jsx_runtime22.jsx)(FieldItemContext.Provider, {
-      value: fieldItemContext,
-      children: element
-    })
-  });
-});
-if (false) FieldItem.displayName = "FieldItem";
-
-// node_modules/@base-ui/react/input/Input.mjs
-var import_jsx_runtime23 = require("react/jsx-runtime");
-var Input = /* @__PURE__ */ React66.forwardRef(function Input2(props, forwardedRef) {
-  return /* @__PURE__ */ (0, import_jsx_runtime23.jsx)(index_parts_exports3.Control, {
-    ref: forwardedRef,
-    ...props
-  });
-});
-if (false) Input.displayName = "Input";
-
-// components/ui/input.tsx
-var import_jsx_runtime24 = require("react/jsx-runtime");
-function Input3({ className, type, ...props }) {
-  return /* @__PURE__ */ (0, import_jsx_runtime24.jsx)(
-    Input,
-    {
-      type,
-      "data-slot": "input",
-      className: cn(
-        "h-8 w-full min-w-0 rounded-lg border border-input bg-transparent px-2.5 py-1 text-base transition-colors outline-none file:inline-flex file:h-6 file:border-0 file:bg-transparent file:text-sm file:font-medium file:text-foreground placeholder:text-muted-foreground focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 disabled:pointer-events-none disabled:cursor-not-allowed disabled:bg-input/50 disabled:opacity-50 aria-invalid:border-destructive aria-invalid:ring-3 aria-invalid:ring-destructive/20 md:text-sm dark:bg-input/30 dark:disabled:bg-input/80 dark:aria-invalid:border-destructive/50 dark:aria-invalid:ring-destructive/40",
-        className
-      ),
-      ...props
-    }
-  );
 }
 
 // components/custom-reference-panel.tsx
@@ -10972,16 +11060,16 @@ function Field({ label, children }) {
 // components/ui/sheet.tsx
 var import_jsx_runtime30 = require("react/jsx-runtime");
 function Sheet({ ...props }) {
-  return /* @__PURE__ */ (0, import_jsx_runtime30.jsx)(index_parts_exports2.Root, { "data-slot": "sheet", ...props });
+  return /* @__PURE__ */ (0, import_jsx_runtime30.jsx)(index_parts_exports3.Root, { "data-slot": "sheet", ...props });
 }
 function SheetPortal({ container, ...props }) {
   const { portalContainer } = useStudioEnv();
   const resolved = container !== void 0 ? container : portalContainer ?? void 0;
-  return /* @__PURE__ */ (0, import_jsx_runtime30.jsx)(index_parts_exports2.Portal, { "data-slot": "sheet-portal", container: resolved, ...props });
+  return /* @__PURE__ */ (0, import_jsx_runtime30.jsx)(index_parts_exports3.Portal, { "data-slot": "sheet-portal", container: resolved, ...props });
 }
 function SheetOverlay({ className, ...props }) {
   return /* @__PURE__ */ (0, import_jsx_runtime30.jsx)(
-    index_parts_exports2.Backdrop,
+    index_parts_exports3.Backdrop,
     {
       "data-slot": "sheet-overlay",
       className: cn(
@@ -11002,7 +11090,7 @@ function SheetContent({
   return /* @__PURE__ */ (0, import_jsx_runtime30.jsxs)(SheetPortal, { children: [
     /* @__PURE__ */ (0, import_jsx_runtime30.jsx)(SheetOverlay, {}),
     /* @__PURE__ */ (0, import_jsx_runtime30.jsxs)(
-      index_parts_exports2.Popup,
+      index_parts_exports3.Popup,
       {
         "data-slot": "sheet-content",
         "data-side": side2,
@@ -11014,7 +11102,7 @@ function SheetContent({
         children: [
           children,
           showCloseButton && /* @__PURE__ */ (0, import_jsx_runtime30.jsxs)(
-            index_parts_exports2.Close,
+            index_parts_exports3.Close,
             {
               "data-slot": "sheet-close",
               render: /* @__PURE__ */ (0, import_jsx_runtime30.jsx)(
@@ -11051,7 +11139,7 @@ function SheetHeader({ className, ...props }) {
 }
 function SheetTitle({ className, ...props }) {
   return /* @__PURE__ */ (0, import_jsx_runtime30.jsx)(
-    index_parts_exports2.Title,
+    index_parts_exports3.Title,
     {
       "data-slot": "sheet-title",
       className: cn(
@@ -11080,6 +11168,160 @@ function WhaleMark({ className = "size-8" }) {
   ] });
 }
 
+// lib/character-client.ts
+async function requestCharacterSheet(basePath, settings, image) {
+  const response = await fetch(studioUrl(basePath, "/api/character-sheet"), {
+    method: "POST",
+    headers: { "content-type": "application/json" },
+    body: JSON.stringify({
+      provider: settings.provider,
+      apiKey: settings.apiKey,
+      baseURL: settings.baseURL,
+      model: settings.model,
+      image: { mediaType: image.mediaType, dataBase64: image.dataBase64 }
+    })
+  });
+  const payload = await response.json();
+  if (!response.ok || !payload.imageBase64) throw new Error(payload.error || "多视角 sheet 没有生成");
+  return { mediaType: payload.mediaType || "image/png", imageBase64: payload.imageBase64 };
+}
+
+// lib/models.ts
+function requestToPromise2(request) {
+  return new Promise((resolve, reject) => {
+    request.onsuccess = () => resolve(request.result);
+    request.onerror = () => reject(request.error);
+  });
+}
+async function withDb(store, mode, run) {
+  const db = await openLanpose();
+  try {
+    const tx = db.transaction(store, mode);
+    const done = new Promise((resolve, reject) => {
+      tx.oncomplete = () => resolve();
+      tx.onerror = () => reject(tx.error);
+      tx.onabort = () => reject(tx.error);
+    });
+    return await run(tx.objectStore(store), done);
+  } finally {
+    db.close();
+  }
+}
+async function listSavedModels() {
+  const rows = await withDb("models", "readonly", async (store, done) => {
+    const result = await requestToPromise2(store.getAll());
+    await done;
+    return result;
+  });
+  return rows.sort((a, b) => b.updatedAt - a.updatedAt);
+}
+async function putSavedModel(model) {
+  await withDb("models", "readwrite", async (store, done) => {
+    store.put(model);
+    await done;
+  });
+}
+async function deleteSavedModel(id) {
+  await withDb("models", "readwrite", async (store, done) => {
+    store.delete(id);
+    await done;
+  });
+}
+async function readActiveModelId() {
+  const value = await withDb("characters", "readonly", async (store, done) => {
+    const result = await requestToPromise2(store.get("activeModelId"));
+    await done;
+    return result;
+  });
+  return typeof value === "string" && value ? value : null;
+}
+async function writeActiveModelId(id) {
+  await withDb("characters", "readwrite", async (store, done) => {
+    if (id) store.put(id, "activeModelId");
+    else store.delete("activeModelId");
+    await done;
+  });
+}
+
+// shared/models.mjs
+function createModelId(random = () => globalThis.crypto.randomUUID()) {
+  return `model-${random()}`;
+}
+function photosOnly(images) {
+  return (Array.isArray(images) ? images : []).filter((image) => image && image.dataBase64 && image.role !== "sheet");
+}
+function identityImage(images) {
+  return photosOnly(images)[0] || (Array.isArray(images) ? images.find((image) => image?.dataBase64) : null) || null;
+}
+function withGeneratedSheet(images, sheet) {
+  if (!sheet?.dataBase64) throw new Error("多视角 sheet 是空的");
+  const photos = photosOnly(images).map((image) => ({ ...image, role: "photo" }));
+  return [{ ...sheet, role: "sheet" }, ...photos];
+}
+function syncLibrary(models, activeId, images, now = Date.now(), random = () => globalThis.crypto.randomUUID()) {
+  const list = Array.isArray(models) ? models.slice() : [];
+  if (!images?.length) {
+    if (!activeId) return { models: list, activeId: null, removedId: null, entry: null };
+    return {
+      models: list.filter((model) => model.id !== activeId),
+      activeId: null,
+      removedId: activeId,
+      entry: null
+    };
+  }
+  const index = list.findIndex((model) => model.id === activeId);
+  if (index >= 0) {
+    const entry2 = { ...list[index], images, updatedAt: now };
+    const next = list.slice();
+    next[index] = entry2;
+    return { models: next, activeId, removedId: null, entry: entry2 };
+  }
+  const entry = {
+    id: createModelId(random),
+    label: `模特 ${list.length + 1}`,
+    createdAt: now,
+    updatedAt: now,
+    images
+  };
+  return { models: [entry, ...list], activeId: entry.id, removedId: null, entry };
+}
+function adoptCurrent(models, images, activeId, now = Date.now(), random = () => globalThis.crypto.randomUUID()) {
+  const list = Array.isArray(models) ? models.slice() : [];
+  const known = activeId && list.some((model) => model.id === activeId) ? activeId : null;
+  if (!images?.length) return { models: list, activeId: known, adopted: false, entry: null };
+  if (known) return { models: list, activeId: known, adopted: false, entry: null };
+  const entry = {
+    id: createModelId(random),
+    label: `模特 ${list.length + 1}`,
+    createdAt: now,
+    updatedAt: now,
+    images
+  };
+  return { models: [entry, ...list], activeId: entry.id, adopted: true, entry };
+}
+function activateModel(models, id) {
+  const found = (Array.isArray(models) ? models : []).find((model) => model.id === id);
+  if (!found) throw new Error("找不到这个模特");
+  return found;
+}
+function renameModel(models, id, label) {
+  const text = String(label || "").trim().slice(0, 40);
+  if (!text) throw new Error("模特名称不能为空");
+  const list = Array.isArray(models) ? models.slice() : [];
+  const index = list.findIndex((model) => model.id === id);
+  if (index < 0) throw new Error("找不到这个模特");
+  list[index] = { ...list[index], label: text };
+  return list;
+}
+function deleteFromLibrary(models, id, activeId) {
+  const list = (Array.isArray(models) ? models : []).filter((model) => model.id !== id);
+  return {
+    models: list,
+    activeId: activeId === id ? null : activeId,
+    cleared: activeId === id
+  };
+}
+
 // components/studio.tsx
 var import_jsx_runtime32 = require("react/jsx-runtime");
 var REPOSITORY_URL = "https://github.com/wzc520pyfm/gen-ai-pose-image";
@@ -11104,6 +11346,10 @@ function StudioFrame({ embedded }) {
   const [installOpen, setInstallOpen] = (0, import_react11.useState)(false);
   const [adultAsk, setAdultAsk] = (0, import_react11.useState)(null);
   const [characters, setCharacters] = (0, import_react11.useState)([]);
+  const [models, setModels] = (0, import_react11.useState)([]);
+  const [activeModelId, setActiveModelId] = (0, import_react11.useState)(null);
+  const [sheetBusy, setSheetBusy] = (0, import_react11.useState)(false);
+  const [sheetError, setSheetError] = (0, import_react11.useState)("");
   const [selected, setSelected] = (0, import_react11.useState)({});
   const [extraPrompt, setExtraPrompt] = (0, import_react11.useState)("");
   const [prompts, setPrompts] = (0, import_react11.useState)([]);
@@ -11122,6 +11368,7 @@ function StudioFrame({ embedded }) {
   const [syncWarning, setSyncWarning] = (0, import_react11.useState)("");
   const [reuseNote, setReuseNote] = (0, import_react11.useState)("");
   const libraryReady = (0, import_react11.useRef)(false);
+  const modelLoadGen = (0, import_react11.useRef)(0);
   const clearRequestedSystem = (0, import_react11.useCallback)(() => setRequestedSystem(null), []);
   const clearCostumeFocus = (0, import_react11.useCallback)(() => setCostumeFocus(null), []);
   const abortRef = (0, import_react11.useRef)(null);
@@ -11156,7 +11403,18 @@ function StudioFrame({ embedded }) {
     }).catch(() => setSettings(local));
   }, [basePath]);
   (0, import_react11.useEffect)(() => {
-    readStoredCharacters().then(setCharacters).catch(() => {
+    const gen = ++modelLoadGen.current;
+    Promise.all([readStoredCharacters(), listSavedModels(), readActiveModelId()]).then(([images, saved, activeId]) => {
+      if (modelLoadGen.current !== gen) return;
+      const adopted = adoptCurrent(saved, images, activeId, Date.now());
+      setCharacters(images);
+      setModels(adopted.models);
+      setActiveModelId(adopted.activeId);
+      if (adopted.adopted && adopted.entry) {
+        void putSavedModel(adopted.entry);
+        void writeActiveModelId(adopted.activeId);
+      }
+    }).catch(() => {
     });
   }, []);
   (0, import_react11.useEffect)(() => {
@@ -11186,10 +11444,101 @@ function StudioFrame({ embedded }) {
     setSettings(next);
     saveSettings(next);
   }
+  function commitLibrary(nextImages, baseModels, baseActive) {
+    modelLoadGen.current += 1;
+    const synced = syncLibrary(baseModels, baseActive, nextImages, Date.now());
+    setCharacters(nextImages);
+    setModels(synced.models);
+    setActiveModelId(synced.activeId);
+    void writeStoredCharacters(nextImages);
+    void writeActiveModelId(synced.activeId);
+    if (synced.removedId) void deleteSavedModel(synced.removedId);
+    else if (synced.entry) void putSavedModel(synced.entry);
+  }
   function updateCharacters(next) {
-    setCharacters(next);
-    writeStoredCharacters(next).catch(() => {
-    });
+    setSheetError("");
+    commitLibrary(next, models, activeModelId);
+  }
+  function useDefaultModel() {
+    modelLoadGen.current += 1;
+    setCharacters([]);
+    setActiveModelId(null);
+    setSheetError("");
+    void writeStoredCharacters([]);
+    void writeActiveModelId(null);
+  }
+  function selectSavedModel(id) {
+    try {
+      const model = activateModel(models, id);
+      modelLoadGen.current += 1;
+      setCharacters(model.images);
+      setActiveModelId(model.id);
+      setSheetError("");
+      void writeStoredCharacters(model.images);
+      void writeActiveModelId(model.id);
+    } catch (error) {
+      setSheetError(error instanceof Error ? error.message : "找不到这个模特");
+    }
+  }
+  function renameSavedModel(id, label) {
+    try {
+      const next = renameModel(models, id, label);
+      setModels(next);
+      const entry = next.find((model) => model.id === id);
+      if (entry) void putSavedModel(entry);
+    } catch (error) {
+      setSheetError(error instanceof Error ? error.message : "没有改名");
+    }
+  }
+  function removeSavedModel(id) {
+    const result = deleteFromLibrary(models, id, activeModelId);
+    modelLoadGen.current += 1;
+    setModels(result.models);
+    void deleteSavedModel(id);
+    if (result.cleared) {
+      setCharacters([]);
+      setActiveModelId(null);
+      void writeStoredCharacters([]);
+      void writeActiveModelId(null);
+    }
+  }
+  async function generateModelSheet() {
+    if (!settings.apiKey.trim() && !serverKey) {
+      setSettingsOpen(true);
+      setSheetError("先在设置里填写 API Key。");
+      return;
+    }
+    const identity = identityImage(characters);
+    if (!identity?.dataBase64) {
+      setSheetError("先导入一张模特照片。");
+      return;
+    }
+    const startedModels = models;
+    const startedId = activeModelId;
+    const snapshot = characters;
+    setSheetBusy(true);
+    setSheetError("");
+    try {
+      const image = await requestCharacterSheet(basePath, settings, {
+        id: identity.id,
+        mediaType: "image/jpeg",
+        dataBase64: identity.dataBase64,
+        role: identity.role === "sheet" ? "sheet" : "photo"
+      });
+      const blob = await fileToJpegBlob(base64ToBlob(image.imageBase64, image.mediaType));
+      const dataBase64 = await blobToBase64(blob);
+      const next = withGeneratedSheet(snapshot, {
+        id: `sheet-${crypto.randomUUID()}`,
+        mediaType: "image/jpeg",
+        dataBase64,
+        role: "sheet"
+      });
+      commitLibrary(next, startedModels, startedId);
+    } catch (error) {
+      setSheetError(error instanceof Error ? error.message : "多视角 sheet 没有生成");
+    } finally {
+      setSheetBusy(false);
+    }
   }
   const poseUrls = useBlobUrls(customPoses);
   const costumeUrls = useBlobUrls(customCostumes);
@@ -11553,9 +11902,24 @@ function StudioFrame({ embedded }) {
         {
           images: characters,
           onChange: updateCharacters,
+          onUseDefault: useDefaultModel,
           keepOutfit: settings.keepOutfit,
           onKeepOutfit: (keepOutfit) => updateSettings({ ...settings, keepOutfit }),
-          outfitLocked: Boolean(costume)
+          outfitLocked: Boolean(costume),
+          models,
+          activeModelId,
+          activeLabel: models.find((model) => model.id === activeModelId)?.label ?? "",
+          onSelectModel: selectSavedModel,
+          onRenameModel: renameSavedModel,
+          onDeleteModel: removeSavedModel,
+          onGenerateSheet: () => void generateModelSheet(),
+          sheetBusy,
+          sheetError,
+          hasKey: Boolean(settings.apiKey.trim()) || serverKey,
+          onOpenSettings: () => {
+            setSheetError("先在设置里填写 API Key。");
+            setSettingsOpen(true);
+          }
         }
       ),
       /* @__PURE__ */ (0, import_jsx_runtime32.jsx)("main", { className: "order-2 min-h-0 min-w-0 flex-1 overflow-y-auto @min-[1024px]/studio:order-none @min-[1024px]/studio:pb-8", children: library === "poses" ? /* @__PURE__ */ (0, import_jsx_runtime32.jsx)(
@@ -11968,8 +12332,14 @@ function PoseStudio() {
   .right-3 {
     right: calc(var(--spacing) * 3);
   }
+  .bottom-1 {
+    bottom: var(--spacing);
+  }
   .bottom-2 {
     bottom: calc(var(--spacing) * 2);
+  }
+  .left-1 {
+    left: var(--spacing);
   }
   .left-1\\/2 {
     left: calc(1 / 2 * 100%);
@@ -12170,6 +12540,9 @@ function PoseStudio() {
   .h-full {
     height: 100%;
   }
+  .max-h-36 {
+    max-height: calc(var(--spacing) * 36);
+  }
   .max-h-40 {
     max-height: calc(var(--spacing) * 40);
   }
@@ -12199,6 +12572,9 @@ function PoseStudio() {
   }
   .min-h-28 {
     min-height: calc(var(--spacing) * 28);
+  }
+  .w-8 {
+    width: calc(var(--spacing) * 8);
   }
   .w-9 {
     width: calc(var(--spacing) * 9);
@@ -12497,10 +12873,22 @@ function PoseStudio() {
   .bg-white {
     background-color: var(--color-white);
   }
+  .bg-white\\/5 {
+    background-color: color-mix(in srgb, #fff 5%, transparent);
+    @supports (color: color-mix(in lab, red, red)) {
+      background-color: color-mix(in oklab, var(--color-white) 5%, transparent);
+    }
+  }
   .bg-white\\/10 {
     background-color: color-mix(in srgb, #fff 10%, transparent);
     @supports (color: color-mix(in lab, red, red)) {
       background-color: color-mix(in oklab, var(--color-white) 10%, transparent);
+    }
+  }
+  .bg-white\\/15 {
+    background-color: color-mix(in srgb, #fff 15%, transparent);
+    @supports (color: color-mix(in lab, red, red)) {
+      background-color: color-mix(in oklab, var(--color-white) 15%, transparent);
     }
   }
   .bg-white\\/95 {
@@ -12770,6 +13158,12 @@ function PoseStudio() {
     --tw-ring-color: var(--primary);
     @supports (color: color-mix(in lab, red, red)) {
       --tw-ring-color: color-mix(in oklab, var(--primary) 25%, transparent);
+    }
+  }
+  .ring-white\\/30 {
+    --tw-ring-color: color-mix(in srgb, #fff 30%, transparent);
+    @supports (color: color-mix(in lab, red, red)) {
+      --tw-ring-color: color-mix(in oklab, var(--color-white) 30%, transparent);
     }
   }
   .outline {

@@ -4,6 +4,7 @@ export type StoredCharacter = {
   id: string
   mediaType: "image/jpeg"
   dataBase64: string
+  role?: "photo" | "sheet"
 }
 
 const STORE = "characters"

@@ -13,9 +13,12 @@ import { Button, buttonVariants } from "@/components/ui/button"
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet"
 import { WhaleMark } from "@/components/whale-mark"
+import { requestCharacterSheet } from "@/lib/character-client"
 import { readStoredCharacters, writeStoredCharacters, type StoredCharacter } from "@/lib/characters"
 import {
   assetToWire,
+  base64ToBlob,
+  blobToBase64,
   clearHistory,
   deleteCustomCostume,
   deleteCustomPose,
@@ -32,9 +35,11 @@ import {
   type CustomAsset,
   type HistoryEntry,
 } from "@/lib/library"
+import { deleteSavedModel, listSavedModels, putSavedModel, readActiveModelId, writeActiveModelId, type SavedModel } from "@/lib/models"
 import { baseURLFor, DEFAULT_SETTINGS, loadSettings, modelFor, saveSettings, type StudioSettings } from "@/lib/settings"
 import { StudioEnvProvider, studioUrl, useStudioEnv, type StudioPortal } from "@/lib/studio-env"
 import { createCustomId, isCustomCostumeId, reuseFromHistory } from "@/shared/custom.mjs"
+import { activateModel, adoptCurrent, deleteFromLibrary, identityImage, renameModel, syncLibrary, withGeneratedSheet } from "@/shared/models.mjs"
 import type { Catalog, Pose, PoseView, PromptCard } from "@/lib/types"
 
 type Selection = Record<string, string>
@@ -73,6 +78,10 @@ function StudioFrame({ embedded }: { embedded: boolean }) {
   const [installOpen, setInstallOpen] = useState(false)
   const [adultAsk, setAdultAsk] = useState<string | null>(null)
   const [characters, setCharacters] = useState<StoredCharacter[]>([])
+  const [models, setModels] = useState<SavedModel[]>([])
+  const [activeModelId, setActiveModelId] = useState<string | null>(null)
+  const [sheetBusy, setSheetBusy] = useState(false)
+  const [sheetError, setSheetError] = useState("")
   const [selected, setSelected] = useState<Selection>({})
   const [extraPrompt, setExtraPrompt] = useState("")
   const [prompts, setPrompts] = useState<PromptCard[]>([])
@@ -91,6 +100,7 @@ function StudioFrame({ embedded }: { embedded: boolean }) {
   const [syncWarning, setSyncWarning] = useState("")
   const [reuseNote, setReuseNote] = useState("")
   const libraryReady = useRef(false)
+  const modelLoadGen = useRef(0)
   const clearRequestedSystem = useCallback(() => setRequestedSystem(null), [])
   const clearCostumeFocus = useCallback(() => setCostumeFocus(null), [])
   const abortRef = useRef<AbortController | null>(null)
@@ -132,7 +142,20 @@ function StudioFrame({ embedded }: { embedded: boolean }) {
       .catch(() => setSettings(local))
   }, [basePath])
   useEffect(() => {
-    readStoredCharacters().then(setCharacters).catch(() => {})
+    const gen = ++modelLoadGen.current
+    Promise.all([readStoredCharacters(), listSavedModels(), readActiveModelId()])
+      .then(([images, saved, activeId]) => {
+        if (modelLoadGen.current !== gen) return
+        const adopted = adoptCurrent(saved, images, activeId, Date.now())
+        setCharacters(images)
+        setModels(adopted.models)
+        setActiveModelId(adopted.activeId)
+        if (adopted.adopted && adopted.entry) {
+          void putSavedModel(adopted.entry as SavedModel)
+          void writeActiveModelId(adopted.activeId)
+        }
+      })
+      .catch(() => {})
   }, [])
   useEffect(() => {
     let cancelled = false
@@ -167,9 +190,107 @@ function StudioFrame({ embedded }: { embedded: boolean }) {
     saveSettings(next)
   }
 
+  function commitLibrary(nextImages: StoredCharacter[], baseModels: SavedModel[], baseActive: string | null) {
+    modelLoadGen.current += 1
+    const synced = syncLibrary(baseModels, baseActive, nextImages, Date.now())
+    setCharacters(nextImages)
+    setModels(synced.models)
+    setActiveModelId(synced.activeId)
+    void writeStoredCharacters(nextImages)
+    void writeActiveModelId(synced.activeId)
+    if (synced.removedId) void deleteSavedModel(synced.removedId)
+    else if (synced.entry) void putSavedModel(synced.entry as SavedModel)
+  }
+
   function updateCharacters(next: StoredCharacter[]) {
-    setCharacters(next)
-    writeStoredCharacters(next).catch(() => {})
+    setSheetError("")
+    commitLibrary(next, models, activeModelId)
+  }
+
+  function useDefaultModel() {
+    modelLoadGen.current += 1
+    setCharacters([])
+    setActiveModelId(null)
+    setSheetError("")
+    void writeStoredCharacters([])
+    void writeActiveModelId(null)
+  }
+
+  function selectSavedModel(id: string) {
+    try {
+      const model = activateModel(models, id)
+      modelLoadGen.current += 1
+      setCharacters(model.images)
+      setActiveModelId(model.id)
+      setSheetError("")
+      void writeStoredCharacters(model.images)
+      void writeActiveModelId(model.id)
+    } catch (error) {
+      setSheetError(error instanceof Error ? error.message : "找不到这个模特")
+    }
+  }
+
+  function renameSavedModel(id: string, label: string) {
+    try {
+      const next = renameModel(models, id, label)
+      setModels(next)
+      const entry = next.find((model) => model.id === id)
+      if (entry) void putSavedModel(entry)
+    } catch (error) {
+      setSheetError(error instanceof Error ? error.message : "没有改名")
+    }
+  }
+
+  function removeSavedModel(id: string) {
+    const result = deleteFromLibrary(models, id, activeModelId)
+    modelLoadGen.current += 1
+    setModels(result.models)
+    void deleteSavedModel(id)
+    if (result.cleared) {
+      setCharacters([])
+      setActiveModelId(null)
+      void writeStoredCharacters([])
+      void writeActiveModelId(null)
+    }
+  }
+
+  async function generateModelSheet() {
+    if (!settings.apiKey.trim() && !serverKey) {
+      setSettingsOpen(true)
+      setSheetError("先在设置里填写 API Key。")
+      return
+    }
+    const identity = identityImage(characters)
+    if (!identity?.dataBase64) {
+      setSheetError("先导入一张模特照片。")
+      return
+    }
+    const startedModels = models
+    const startedId = activeModelId
+    const snapshot = characters
+    setSheetBusy(true)
+    setSheetError("")
+    try {
+      const image = await requestCharacterSheet(basePath, settings, {
+        id: identity.id,
+        mediaType: "image/jpeg",
+        dataBase64: identity.dataBase64,
+        role: identity.role === "sheet" ? "sheet" : "photo",
+      })
+      const blob = await fileToJpegBlob(base64ToBlob(image.imageBase64, image.mediaType))
+      const dataBase64 = await blobToBase64(blob)
+      const next = withGeneratedSheet(snapshot, {
+        id: `sheet-${crypto.randomUUID()}`,
+        mediaType: "image/jpeg",
+        dataBase64,
+        role: "sheet",
+      }) as StoredCharacter[]
+      commitLibrary(next, startedModels, startedId)
+    } catch (error) {
+      setSheetError(error instanceof Error ? error.message : "多视角 sheet 没有生成")
+    } finally {
+      setSheetBusy(false)
+    }
   }
 
   const poseUrls = useBlobUrls(customPoses)
@@ -556,9 +677,24 @@ function StudioFrame({ embedded }: { embedded: boolean }) {
         <CharacterDock
           images={characters}
           onChange={updateCharacters}
+          onUseDefault={useDefaultModel}
           keepOutfit={settings.keepOutfit}
           onKeepOutfit={(keepOutfit) => updateSettings({ ...settings, keepOutfit })}
           outfitLocked={Boolean(costume)}
+          models={models}
+          activeModelId={activeModelId}
+          activeLabel={models.find((model) => model.id === activeModelId)?.label ?? ""}
+          onSelectModel={selectSavedModel}
+          onRenameModel={renameSavedModel}
+          onDeleteModel={removeSavedModel}
+          onGenerateSheet={() => void generateModelSheet()}
+          sheetBusy={sheetBusy}
+          sheetError={sheetError}
+          hasKey={Boolean(settings.apiKey.trim()) || serverKey}
+          onOpenSettings={() => {
+            setSheetError("先在设置里填写 API Key。")
+            setSettingsOpen(true)
+          }}
         />
         <main className="order-2 min-h-0 min-w-0 flex-1 overflow-y-auto @min-[1024px]/studio:order-none @min-[1024px]/studio:pb-8">
           {library === "poses" ? (

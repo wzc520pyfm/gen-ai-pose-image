@@ -5,6 +5,7 @@ import { beautifyPrompt } from "../shared/beautify.mjs"
 import { getCatalog, resolveView } from "../shared/catalog.mjs"
 import { costumeFile, fetchCostumeBytes, getCostume, getCostumeCatalog } from "../shared/costumes.mjs"
 import { assertBaseURL, defaultModel } from "../shared/generate.mjs"
+import { generateCharacterSheet } from "../shared/character-sheet.mjs"
 import { generateStyledReference } from "../shared/style-refs.mjs"
 import { planRequest, promptCards, runGeneration } from "../shared/jobs.mjs"
 import { fetchPoseBytes, poseFileFor } from "../shared/poses.mjs"
@@ -100,7 +101,7 @@ export function createPoseHandler(getConfig) {
         else upsertCustomPose(body.item)
         return json(res, 200, { ok: true })
       }
-      if (req.method === "POST" && (path === "/api/prompt" || path === "/api/generate" || path === "/api/beautify" || path === "/api/reference")) {
+      if (req.method === "POST" && (path === "/api/prompt" || path === "/api/generate" || path === "/api/beautify" || path === "/api/reference" || path === "/api/character-sheet")) {
         const body = await readBody(req)
         const config = getConfig()
         if (typeof body.apiKey !== "string" || body.apiKey.trim() === "") {
@@ -144,6 +145,27 @@ export function createPoseHandler(getConfig) {
             signal: req.signal,
           })
           return json(res, 200, { mediaType: image.mediaType, imageBase64: image.buffer.toString("base64") })
+        }
+        if (path === "/api/character-sheet") {
+          const source = body.image
+          if (!source || typeof source !== "object" || typeof source.dataBase64 !== "string" || source.dataBase64.trim() === "") {
+            return json(res, 400, { error: "先导入一张模特照片" })
+          }
+          if (!String(body.apiKey || "").trim()) return json(res, 400, { error: "还没有填写 API Key" })
+          const provider = body.provider === "openai" || body.provider === "seedream" || body.provider === "gemini" ? body.provider : null
+          if (!provider) return json(res, 400, { error: "不支持的生图接口" })
+          const sheet = await generateCharacterSheet({
+            provider,
+            apiKey: String(body.apiKey).trim(),
+            baseURL: assertBaseURL(body.baseURL),
+            model: String(body.model || "").trim() || defaultModel(provider),
+            image: {
+              mediaType: typeof source.mediaType === "string" ? source.mediaType : "image/jpeg",
+              dataBase64: source.dataBase64,
+            },
+            signal: req.signal,
+          })
+          return json(res, 200, { mediaType: sheet.mediaType, imageBase64: sheet.buffer.toString("base64") })
         }
         const { results } = await runGeneration(body, { signal: req.signal })
         return json(res, 200, { results })

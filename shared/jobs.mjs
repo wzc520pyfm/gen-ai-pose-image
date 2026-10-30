@@ -183,7 +183,7 @@ export function planRequest(input = {}) {
   const uploads = Array.isArray(input.characterImages) ? input.characterImages : []
   const declaredCount = Number(input.characterCount) || 0
   const characterCount = uploads.length || declaredCount
-  if (characterCount > 3) throw new Error("模特参考图最多 3 张")
+  if (characterCount > 4) throw new Error("模特参考图最多 4 张")
   const character = characterCount > 0 ? characterFromUploads(characterCount) : DEFAULT_CHARACTER
   const costumeId = typeof input.costumeId === "string" ? input.costumeId.trim() : ""
   const costume = planCostume(costumeId, input)

@@ -5,28 +5,58 @@
 import { useRef, useState } from "react"
 import { ImagePlus, RotateCcw } from "lucide-react"
 import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
 import { Switch } from "@/components/ui/switch"
 import { fileToCharacter, type StoredCharacter } from "@/lib/characters"
+import type { SavedModel } from "@/lib/models"
 import { studioUrl, useStudioEnv } from "@/lib/studio-env"
 
 export function CharacterDock({
   images,
   onChange,
+  onUseDefault,
   keepOutfit,
   onKeepOutfit,
   outfitLocked = false,
+  models,
+  activeModelId,
+  activeLabel,
+  onSelectModel,
+  onRenameModel,
+  onDeleteModel,
+  onGenerateSheet,
+  sheetBusy,
+  sheetError,
+  hasKey,
+  onOpenSettings,
 }: {
   images: StoredCharacter[]
   onChange: (images: StoredCharacter[]) => void
+  onUseDefault: () => void
   keepOutfit: boolean
   onKeepOutfit: (value: boolean) => void
   outfitLocked?: boolean
+  models: SavedModel[]
+  activeModelId: string | null
+  activeLabel: string
+  onSelectModel: (id: string) => void
+  onRenameModel: (id: string, label: string) => void
+  onDeleteModel: (id: string) => void
+  onGenerateSheet: () => void
+  sheetBusy: boolean
+  sheetError: string
+  hasKey: boolean
+  onOpenSettings: () => void
 }) {
   const inputRef = useRef<HTMLInputElement>(null)
   const { basePath } = useStudioEnv()
   const [error, setError] = useState("")
   const [busy, setBusy] = useState(false)
+  const [editingId, setEditingId] = useState<string | null>(null)
+  const [draftLabel, setDraftLabel] = useState("")
+  const [pendingDelete, setPendingDelete] = useState<string | null>(null)
   const custom = images.length > 0
+  const photoCount = images.filter((image) => image.role !== "sheet").length
   const portrait = custom ? `data:${images[0].mediaType};base64,${images[0].dataBase64}` : studioUrl(basePath, "/muse/dafeiyu-portrait.jpg")
   const full = custom ? portrait : studioUrl(basePath, "/muse/dafeiyu-sheet.png")
 
@@ -37,7 +67,7 @@ export function CharacterDock({
     try {
       const next = [...images]
       for (const file of Array.from(list)) {
-        if (next.length >= 3) break
+        if (next.filter((image) => image.role !== "sheet").length >= 3) break
         if (!file.type.startsWith("image/")) continue
         next.push(await fileToCharacter(file))
       }
@@ -56,21 +86,69 @@ export function CharacterDock({
       <div className="flex items-center gap-3">
         <img src={portrait} alt="" className="size-14 shrink-0 rounded-xl object-cover object-top @min-[1024px]/studio:hidden" />
         <div className="min-w-0 flex-1">
-          <h2 className="text-lg font-semibold text-white @min-[1024px]/studio:text-2xl">{custom ? "导入的模特" : "大肥鱼"}</h2>
+          <h2 className="text-lg font-semibold text-white @min-[1024px]/studio:text-2xl">{custom ? (activeLabel || "导入的模特") : "大肥鱼"}</h2>
           <p className="mt-0.5 line-clamp-2 text-xs leading-5 text-[#cbd5e1] @min-[1024px]/studio:mt-2 @min-[1024px]/studio:text-sm @min-[1024px]/studio:leading-6">{custom ? "生图时改用你导入的参考图。" : "社区鲸鱼娘的成年形象，不是 DeepSeek 官方吉祥物。"}</p>
         </div>
         <Button
           variant="outline"
           size="sm"
           className="shrink border-white/20 bg-white/10 text-white hover:bg-white/15 hover:text-white @min-[1024px]/studio:hidden"
-          disabled={busy || images.length >= 3}
+          disabled={busy || sheetBusy || photoCount >= 3}
           onClick={() => inputRef.current?.click()}
         >
           <ImagePlus />
           {busy ? "读图" : "导入"}
         </Button>
       </div>
-      <img src={portrait} alt={custom ? "导入的模特头像" : "大肥鱼的正面全身像，蓝发、鲸耳、蓝白女仆装"} className="hidden aspect-[3/4] w-full rounded-xl object-cover object-top @min-[1024px]/studio:block" />
+      {models.length > 0 ? (
+        <div className="grid max-h-36 gap-2 overflow-y-auto">
+          <p className="text-xs text-[#cbd5e1]">已存模特</p>
+          {models.map((model) => {
+            const thumb = model.images[0]
+            const selected = model.id === activeModelId
+            return (
+              <div key={model.id} className={`flex items-center gap-2 rounded-xl px-2 py-1.5 ${selected ? "bg-white/15 ring-1 ring-white/30" : "bg-white/5"}`}>
+                {thumb ? <img src={`data:${thumb.mediaType};base64,${thumb.dataBase64}`} alt="" className={`h-10 w-8 shrink-0 rounded-md ${thumb.role === "sheet" ? "bg-white object-contain" : "object-cover"}`} /> : null}
+                {editingId === model.id ? (
+                  <Input
+                    value={draftLabel}
+                    aria-label={`模特名称 ${model.label}`}
+                    className="h-8 border-white/20 bg-white/10 text-white"
+                    onChange={(event) => setDraftLabel(event.target.value)}
+                    onBlur={() => {
+                      onRenameModel(model.id, draftLabel)
+                      setEditingId(null)
+                    }}
+                    onKeyDown={(event) => {
+                      if (event.key === "Enter") (event.target as HTMLInputElement).blur()
+                    }}
+                  />
+                ) : (
+                  <button type="button" className="min-w-0 flex-1 truncate text-left text-sm text-white" aria-pressed={selected} onClick={() => onSelectModel(model.id)}>
+                    {model.label}
+                  </button>
+                )}
+                <button type="button" className="shrink-0 text-[11px] text-[#cbd5e1]" onClick={() => { setEditingId(model.id); setDraftLabel(model.label) }}>改名</button>
+                <button
+                  type="button"
+                  className="shrink-0 text-[11px] text-[#cbd5e1]"
+                  onClick={() => {
+                    if (pendingDelete === model.id) {
+                      setPendingDelete(null)
+                      onDeleteModel(model.id)
+                      return
+                    }
+                    setPendingDelete(model.id)
+                  }}
+                >
+                  {pendingDelete === model.id ? "确认" : "删除"}
+                </button>
+              </div>
+            )
+          })}
+        </div>
+      ) : null}
+      <img src={portrait} alt={custom ? (images[0]?.role === "sheet" ? "多视角设定图" : "导入的模特头像") : "大肥鱼的正面全身像，蓝发、鲸耳、蓝白女仆装"} className={`hidden w-full rounded-xl @min-[1024px]/studio:block ${images[0]?.role === "sheet" ? "max-h-56 bg-white object-contain" : "aspect-[3/4] object-cover object-top"}`} />
       <p className="hidden text-sm leading-6 text-[#cbd5e1] @min-[1024px]/studio:block">
         {custom
           ? "参考图会和姿势线稿一起交给模型。请使用成年人物的图片。"
@@ -82,7 +160,8 @@ export function CharacterDock({
         <div className="grid grid-cols-3 gap-2">
           {images.map((image) => (
             <div key={image.id} className="relative">
-              <img src={`data:${image.mediaType};base64,${image.dataBase64}`} alt="导入的模特参考" className="aspect-[3/4] w-full rounded-lg object-cover" />
+              <img src={`data:${image.mediaType};base64,${image.dataBase64}`} alt={image.role === "sheet" ? "多视角设定图" : "导入的模特参考"} className={`aspect-[3/4] w-full rounded-lg ${image.role === "sheet" ? "bg-white object-contain" : "object-cover"}`} />
+              {image.role === "sheet" ? <span className="absolute bottom-1 left-1 rounded-full bg-black/60 px-1.5 text-[10px] text-white">设定图</span> : null}
               <button
                 type="button"
                 className="absolute top-1 right-1 rounded-full bg-black/60 px-1.5 text-[10px] text-white"
@@ -99,24 +178,42 @@ export function CharacterDock({
         type="file"
         accept="image/png,image/jpeg,image/webp"
         multiple
+        aria-label="导入模特照片"
         className="sr-only"
         onChange={(event) => void addFiles(event.target.files)}
       />
       <Button
         variant="outline"
         className="hidden border-white/20 bg-white/10 text-white hover:bg-white/15 hover:text-white @min-[1024px]/studio:inline-flex"
-        disabled={busy || images.length >= 3}
+        disabled={busy || sheetBusy || photoCount >= 3}
         onClick={() => inputRef.current?.click()}
       >
         <ImagePlus />
         {busy ? "正在读图" : images.length ? "再加一张参考" : "导入其他模特"}
       </Button>
       {custom ? (
-        <Button variant="ghost" className="text-[#e2e8f0] hover:bg-white/10 hover:text-white" onClick={() => onChange([])}>
+        <Button
+          variant="outline"
+          className="border-white/20 bg-white/10 text-white hover:bg-white/15 hover:text-white"
+          disabled={sheetBusy}
+          onClick={() => {
+            if (!hasKey) {
+              onOpenSettings()
+              return
+            }
+            onGenerateSheet()
+          }}
+        >
+          {sheetBusy ? "正在生成" : "生成多视角 sheet"}
+        </Button>
+      ) : null}
+      {custom ? (
+        <Button variant="ghost" className="text-[#e2e8f0] hover:bg-white/10 hover:text-white" onClick={onUseDefault}>
           <RotateCcw />
           恢复默认模特大肥鱼
         </Button>
       ) : null}
+      {sheetError ? <p className="text-sm text-[#fecaca]">{sheetError}</p> : null}
       {error ? <p className="text-sm text-[#fecaca]">{error}</p> : null}
       <label className="mt-auto flex items-center justify-between gap-3 rounded-xl bg-white/10 px-3 py-2.5 text-sm @min-[1024px]/studio:py-3">
         <span className="min-w-0">
