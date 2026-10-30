@@ -4,8 +4,10 @@
 
 import { useEffect, useMemo, useState } from "react"
 import { Search, X } from "lucide-react"
+import { CustomReferencePanel, type CustomCard, type CustomDraft } from "@/components/custom-reference-panel"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
+import type { StudioSettings } from "@/lib/settings"
 import { studioUrl, useStudioEnv } from "@/lib/studio-env"
 
 type Costume = {
@@ -38,6 +40,12 @@ export function CostumeBrowser({
   onRequestAdult,
   selectedId,
   onSelect,
+  customCostumes,
+  onSaveCustom,
+  onDeleteCustom,
+  settings,
+  hasKey,
+  syncWarning,
 }: {
   showAdult: boolean
   focusCategory: string | null
@@ -45,11 +53,20 @@ export function CostumeBrowser({
   onRequestAdult: (categoryId: string) => void
   selectedId: string | null
   onSelect: (costume: Costume) => void
+  customCostumes: CustomCard[]
+  onSaveCustom: (draft: CustomDraft) => Promise<void>
+  onDeleteCustom: (id: string) => void
+  settings: StudioSettings
+  hasKey: boolean
+  syncWarning: string
 }) {
   const { basePath } = useStudioEnv()
   const [catalog, setCatalog] = useState<CostumeCatalog | null>(null)
   const [error, setError] = useState("")
   const [category, setCategory] = useState("春")
+  const customSection = category === "custom"
+  const visibleCustom = customCostumes.filter((item) => showAdult || !item.adult)
+  const hiddenCustomAdult = customCostumes.length - visibleCustom.length
   const [query, setQuery] = useState("")
 
   useEffect(() => {
@@ -90,6 +107,14 @@ export function CostumeBrowser({
       <div className="sticky top-0 z-10 border-b bg-white/95 px-4 py-3 backdrop-blur @min-[768px]/studio:px-6">
         <p className="mb-2 text-sm text-muted-foreground">这些图里没有人物。选一套之后，大肥鱼会换上这身衣服，脸、头发、鲸耳和鲸尾保持不变。</p>
         <div className="mb-2 flex flex-wrap gap-2">
+          <button
+            type="button"
+            onClick={() => setCategory("custom")}
+            className={`inline-flex items-center whitespace-nowrap rounded-full px-3 py-1.5 text-sm ${customSection ? "bg-primary text-primary-foreground" : "bg-white ring-1 ring-border"}`}
+          >
+            自定义
+            <span className={`ml-1.5 text-xs ${customSection ? "text-primary-foreground/80" : "text-muted-foreground"}`}>{visibleCustom.length}</span>
+          </button>
           {catalog?.categories.map((item) => (
             <button
               key={item.id}
@@ -101,15 +126,15 @@ export function CostumeBrowser({
                 }
                 setCategory(item.id)
               }}
-              className={`inline-flex items-center whitespace-nowrap rounded-full px-3 py-1.5 text-sm ${category === item.id ? "bg-primary text-primary-foreground" : "bg-white ring-1 ring-border"}`}
+              className={`inline-flex items-center whitespace-nowrap rounded-full px-3 py-1.5 text-sm ${!customSection && category === item.id ? "bg-primary text-primary-foreground" : "bg-white ring-1 ring-border"}`}
             >
               {item.label}
-              <span className={`ml-1.5 text-xs ${category === item.id ? "text-primary-foreground/80" : "text-muted-foreground"}`}>{item.count}</span>
+              <span className={`ml-1.5 text-xs ${!customSection && category === item.id ? "text-primary-foreground/80" : "text-muted-foreground"}`}>{item.count}</span>
               {item.adult ? <span className="ml-1 text-[10px]">成人向</span> : null}
             </button>
           ))}
         </div>
-        <div className="relative">
+        {customSection ? null : <div className="relative">
           <Search className="pointer-events-none absolute top-1/2 left-2.5 size-4 -translate-y-1/2 text-muted-foreground" />
           <Input
             value={query}
@@ -123,22 +148,49 @@ export function CostumeBrowser({
               <X className="size-4" />
             </button>
           ) : null}
-        </div>
+        </div>}
       </div>
       <div className="px-4 py-4 @min-[768px]/studio:px-6">
-        {!catalog && !error ? (
+        {customSection ? (
+          <CustomReferencePanel
+            kind="costume"
+            items={visibleCustom}
+            hiddenAdult={hiddenCustomAdult}
+            isSelected={(id) => selectedId === id}
+            onToggle={(id) => {
+              const item = customCostumes.find((costume) => costume.id === id)
+              if (!item) return
+              onSelect({
+                id: item.id,
+                category: "自定义",
+                label: item.label,
+                keywords: item.keywords,
+                adult: item.adult,
+                thumb: "",
+              })
+            }}
+            onDelete={onDeleteCustom}
+            onSave={onSaveCustom}
+            showAdult={showAdult}
+            onRequestAdult={() => onRequestAdult("custom")}
+            settings={settings}
+            hasKey={hasKey}
+            syncWarning={syncWarning}
+          />
+        ) : null}
+        {!customSection && !catalog && !error ? (
           <div className="grid grid-cols-2 gap-3 @min-[640px]/studio:grid-cols-3 @min-[1280px]/studio:grid-cols-4 @min-[1536px]/studio:grid-cols-5">
             {Array.from({ length: 8 }, (_, index) => <div key={index} className="aspect-[2/3] animate-pulse rounded-2xl bg-muted" />)}
           </div>
         ) : null}
-        {error ? (
+        {!customSection && error ? (
           <div className="rounded-2xl border border-dashed px-4 py-10 text-center text-sm">
             {error}
             <div className="mt-3"><Button variant="outline" onClick={() => window.location.reload()}>重新加载</Button></div>
           </div>
         ) : null}
-        {catalog && costumes.length === 0 ? <p className="py-10 text-center text-sm text-muted-foreground">没有对上的服装。</p> : null}
-        <div className="grid grid-cols-2 gap-3 @min-[640px]/studio:grid-cols-3 @min-[1280px]/studio:grid-cols-4 @min-[1536px]/studio:grid-cols-5">
+        {!customSection && catalog && costumes.length === 0 ? <p className="py-10 text-center text-sm text-muted-foreground">没有对上的服装。</p> : null}
+        {customSection ? null : <div className="grid grid-cols-2 gap-3 @min-[640px]/studio:grid-cols-3 @min-[1280px]/studio:grid-cols-4 @min-[1536px]/studio:grid-cols-5">
           {costumes.map((costume) => {
             const selected = selectedId === costume.id
             return (
@@ -165,8 +217,8 @@ export function CostumeBrowser({
               </button>
             )
           })}
-        </div>
-        {catalog ? <p className="mt-6 text-xs leading-5 text-muted-foreground">{catalog.attribution}</p> : null}
+        </div>}
+        {!customSection && catalog ? <p className="mt-6 text-xs leading-5 text-muted-foreground">{catalog.attribution}</p> : null}
       </div>
     </section>
   )

@@ -1,19 +1,48 @@
 "use client"
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react"
+import { useElapsedSeconds, withElapsed } from "@/lib/elapsed"
 import { Settings } from "lucide-react"
 import { CharacterDock } from "@/components/character-dock"
 import { Composer, type ResultCard } from "@/components/composer"
 import { CostumeBrowser } from "@/components/costume-browser"
+import type { CustomDraft } from "@/components/custom-reference-panel"
+import type { HistoryView } from "@/components/history-panel"
 import { PoseBrowser } from "@/components/pose-browser"
 import { SettingsDialog } from "@/components/settings-dialog"
 import { Button, buttonVariants } from "@/components/ui/button"
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet"
 import { WhaleMark } from "@/components/whale-mark"
+import { requestCharacterSheet } from "@/lib/character-client"
 import { readStoredCharacters, writeStoredCharacters, type StoredCharacter } from "@/lib/characters"
+import {
+  assetToWire,
+  base64ToBlob,
+  blobToBase64,
+  clearHistory,
+  deleteCustomCostume,
+  deleteCustomPose,
+  deleteHistory,
+  fileToJpegBlob,
+  listCustomCostumes,
+  listCustomPoses,
+  listHistory,
+  putCustomCostume,
+  putCustomPose,
+  putHistory,
+  readStoragePressure,
+  syncCustomLibrary,
+  type CustomAsset,
+  type HistoryEntry,
+} from "@/lib/library"
+import { deleteSavedModel, listSavedModels, putSavedModel, readActiveModelId, readBuiltinUsed, writeActiveModelId, writeBuiltinUsed, type SavedModel } from "@/lib/models"
 import { baseURLFor, DEFAULT_SETTINGS, loadSettings, modelFor, saveSettings, type StudioSettings } from "@/lib/settings"
 import { StudioEnvProvider, studioUrl, useStudioEnv, type StudioPortal } from "@/lib/studio-env"
+import { createCustomId, isCustomCostumeId, reuseFromHistory } from "@/shared/custom.mjs"
+import { messageForStatus } from "@/shared/http-status.mjs"
+import { isBuiltinModelId } from "@/shared/builtin-models.mjs"
+import { DEFAULT_MODEL_ID, activateModel, adoptCurrent, deleteFromLibrary, identityImage, renameModel, switcherEntries, syncLibrary, withGeneratedSheet } from "@/shared/models.mjs"
 import type { Catalog, Pose, PoseView, PromptCard } from "@/lib/types"
 
 type Selection = Record<string, string>
@@ -52,6 +81,11 @@ function StudioFrame({ embedded }: { embedded: boolean }) {
   const [installOpen, setInstallOpen] = useState(false)
   const [adultAsk, setAdultAsk] = useState<string | null>(null)
   const [characters, setCharacters] = useState<StoredCharacter[]>([])
+  const [models, setModels] = useState<SavedModel[]>([])
+  const [activeModelId, setActiveModelId] = useState(DEFAULT_MODEL_ID)
+  const [builtinUsed, setBuiltinUsed] = useState<Record<string, number>>({})
+  const [sheetBusy, setSheetBusy] = useState(false)
+  const [sheetError, setSheetError] = useState("")
   const [selected, setSelected] = useState<Selection>({})
   const [extraPrompt, setExtraPrompt] = useState("")
   const [prompts, setPrompts] = useState<PromptCard[]>([])
@@ -59,10 +93,19 @@ function StudioFrame({ embedded }: { embedded: boolean }) {
   const [results, setResults] = useState<ResultCard[]>([])
   const [running, setRunning] = useState(false)
   const [progress, setProgress] = useState("")
+  const waited = useElapsedSeconds(running)
   const [runError, setRunError] = useState("")
   const [limitNote, setLimitNote] = useState("")
   const [serverKey, setServerKey] = useState(false)
   const [sheetOpen, setSheetOpen] = useState(false)
+  const [customPoses, setCustomPoses] = useState<CustomAsset[]>([])
+  const [customCostumes, setCustomCostumes] = useState<CustomAsset[]>([])
+  const [history, setHistory] = useState<HistoryEntry[]>([])
+  const [storageHigh, setStorageHigh] = useState(false)
+  const [syncWarning, setSyncWarning] = useState("")
+  const [reuseNote, setReuseNote] = useState("")
+  const libraryReady = useRef(false)
+  const modelLoadGen = useRef(0)
   const clearRequestedSystem = useCallback(() => setRequestedSystem(null), [])
   const clearCostumeFocus = useCallback(() => setCostumeFocus(null), [])
   const abortRef = useRef<AbortController | null>(null)
@@ -104,33 +147,200 @@ function StudioFrame({ embedded }: { embedded: boolean }) {
       .catch(() => setSettings(local))
   }, [basePath])
   useEffect(() => {
-    readStoredCharacters().then(setCharacters).catch(() => {})
+    const gen = ++modelLoadGen.current
+    Promise.all([readStoredCharacters(), listSavedModels(), readActiveModelId()])
+      .then(([images, saved, activeId]) => {
+        if (modelLoadGen.current !== gen) return
+        const adopted = adoptCurrent(saved, images, activeId || DEFAULT_MODEL_ID, Date.now())
+        const active = adopted.activeId || DEFAULT_MODEL_ID
+        const builtin = isBuiltinModelId(active)
+        setModels(adopted.models)
+        setActiveModelId(active)
+        setCharacters(builtin ? [] : (adopted.models.find((model) => model.id === active)?.images as StoredCharacter[] | undefined) ?? images)
+        setBuiltinUsed(readBuiltinUsed())
+        if (builtin && images.length) void writeStoredCharacters([])
+        if (adopted.adopted && adopted.entry) {
+          void putSavedModel(adopted.entry as SavedModel)
+          void writeActiveModelId(adopted.activeId)
+        } else if (!activeId) {
+          void writeActiveModelId(DEFAULT_MODEL_ID)
+        }
+      })
+      .catch(() => {})
   }, [])
+  useEffect(() => {
+    let cancelled = false
+    Promise.all([listCustomPoses(), listCustomCostumes(), listHistory(), readStoragePressure()])
+      .then(([poses, costumes, entries, pressure]) => {
+        if (cancelled) return
+        libraryReady.current = true
+        setCustomPoses(poses)
+        setCustomCostumes(costumes)
+        setHistory(entries)
+        setStorageHigh(pressure.high)
+      })
+      .catch(() => {
+        libraryReady.current = true
+      })
+    return () => {
+      cancelled = true
+    }
+  }, [])
+  useEffect(() => {
+    if (!libraryReady.current) return
+    const timer = window.setTimeout(() => {
+      syncCustomLibrary(basePath, customPoses, customCostumes)
+        .then(() => setSyncWarning(""))
+        .catch(() => setSyncWarning("自定义参考还没同步给 Agent。刷新工作室后再试。"))
+    }, 250)
+    return () => window.clearTimeout(timer)
+  }, [basePath, customPoses, customCostumes])
 
   function updateSettings(next: StudioSettings) {
     setSettings(next)
     saveSettings(next)
   }
 
-  function updateCharacters(next: StoredCharacter[]) {
-    setCharacters(next)
-    writeStoredCharacters(next).catch(() => {})
+  function commitLibrary(nextImages: StoredCharacter[], baseModels: SavedModel[], baseActive: string | null) {
+    modelLoadGen.current += 1
+    const synced = syncLibrary(baseModels, baseActive, nextImages, Date.now())
+    setCharacters(nextImages)
+    setModels(synced.models)
+    setActiveModelId(synced.activeId || DEFAULT_MODEL_ID)
+    if (synced.activeId && isBuiltinModelId(synced.activeId)) rememberBuiltin(synced.activeId)
+    void writeStoredCharacters(nextImages)
+    void writeActiveModelId(synced.activeId || DEFAULT_MODEL_ID)
+    if (synced.removedId) void deleteSavedModel(synced.removedId)
+    else if (synced.entry) void putSavedModel(synced.entry as SavedModel)
   }
+
+  function updateCharacters(next: StoredCharacter[]) {
+    setSheetError("")
+    commitLibrary(next, models, activeModelId)
+  }
+
+  function rememberBuiltin(id: string) {
+    const next = { ...builtinUsed, [id]: Date.now() }
+    setBuiltinUsed(next)
+    writeBuiltinUsed(next)
+  }
+
+  function selectSavedModel(id: string) {
+    modelLoadGen.current += 1
+    setSheetError("")
+    if (isBuiltinModelId(id)) {
+      setCharacters([])
+      setActiveModelId(id)
+      void writeStoredCharacters([])
+      void writeActiveModelId(id)
+      return
+    }
+    try {
+      const model = activateModel(models, id)
+      setCharacters(model.images as StoredCharacter[])
+      setActiveModelId(model.id)
+      void writeStoredCharacters(model.images as StoredCharacter[])
+      void writeActiveModelId(model.id)
+    } catch (error) {
+      setSheetError(error instanceof Error ? error.message : "找不到这个模特")
+    }
+  }
+
+  function renameSavedModel(id: string, label: string) {
+    try {
+      const next = renameModel(models, id, label)
+      setModels(next)
+      const entry = next.find((model) => model.id === id)
+      if (entry) void putSavedModel(entry)
+    } catch (error) {
+      setSheetError(error instanceof Error ? error.message : "没有改名")
+    }
+  }
+
+  function removeSavedModel(id: string) {
+    const result = deleteFromLibrary(models, id, activeModelId)
+    modelLoadGen.current += 1
+    setModels(result.models)
+    void deleteSavedModel(id)
+    if (result.cleared) {
+      setCharacters([])
+      setActiveModelId(result.activeId || DEFAULT_MODEL_ID)
+      rememberBuiltin(result.activeId || DEFAULT_MODEL_ID)
+      void writeStoredCharacters([])
+      void writeActiveModelId(result.activeId || DEFAULT_MODEL_ID)
+    }
+  }
+
+  async function generateModelSheet() {
+    if (!settings.apiKey.trim() && !serverKey) {
+      setSettingsOpen(true)
+      setSheetError("先在设置里填写 API Key。")
+      return
+    }
+    const identity = identityImage(characters)
+    if (!identity?.dataBase64) {
+      setSheetError("先导入一张模特照片。")
+      return
+    }
+    const startedModels = models
+    const startedId = activeModelId
+    const snapshot = characters
+    setSheetBusy(true)
+    setSheetError("")
+    try {
+      const image = await requestCharacterSheet(basePath, settings, {
+        id: identity.id,
+        mediaType: "image/jpeg",
+        dataBase64: identity.dataBase64,
+        role: identity.role === "sheet" ? "sheet" : "photo",
+      })
+      const blob = await fileToJpegBlob(base64ToBlob(image.imageBase64, image.mediaType))
+      const dataBase64 = await blobToBase64(blob)
+      const next = withGeneratedSheet(snapshot, {
+        id: `sheet-${crypto.randomUUID()}`,
+        mediaType: "image/jpeg",
+        dataBase64,
+        role: "sheet",
+      }) as StoredCharacter[]
+      commitLibrary(next, startedModels, startedId)
+    } catch (error) {
+      setSheetError(error instanceof Error ? error.message : "多视角 sheet 没有生成")
+    } finally {
+      setSheetBusy(false)
+    }
+  }
+
+  const poseUrls = useBlobUrls(customPoses)
+  const costumeUrls = useBlobUrls(customCostumes)
+  const historyUrls = useBlobUrls(history)
 
   const poseById = useMemo(() => {
     const map = new Map<string, Pose>()
     catalog?.poses.forEach((pose) => map.set(pose.id, pose))
+    for (const asset of customPoses) {
+      map.set(asset.id, {
+        id: asset.id,
+        system: "自定义",
+        systemId: "custom",
+        code: "自定义",
+        category: "自定义",
+        name: asset.label,
+        adult: asset.adult,
+        people: 1,
+        views: [{ id: asset.id, angle: "自定义", angleId: "custom", thumb: "", full: "" }],
+      })
+    }
     return map
-  }, [catalog])
+  }, [catalog, customPoses])
 
   const chosen = useMemo(() => {
     return Object.entries(selected).flatMap(([poseId, viewId]) => {
       const pose = poseById.get(poseId)
       const view = pose?.views.find((item) => item.id === viewId)
       if (!pose || !view) return []
-      return [{ poseId, viewId, title: pose.name, angle: view.angle }]
+      return [{ poseId, viewId, title: pose.name, angle: view.angle, thumbSrc: poseUrls[poseId] }]
     })
-  }, [selected, poseById])
+  }, [selected, poseById, poseUrls])
 
   const selectionKey = chosen.map((item) => item.viewId).join("|")
 
@@ -142,17 +352,21 @@ function StudioFrame({ embedded }: { embedded: boolean }) {
     }
     const controller = new AbortController()
     const timer = window.setTimeout(() => {
-      fetch(studioUrl(basePath, "/api/prompt"), {
+      const viewIds = selectionKey.split("|")
+      void customReferenceBody(viewIds, costume?.id ?? "", customPoses, customCostumes).then((customReferences) => {
+        if (controller.signal.aborted) return
+        return fetch(studioUrl(basePath, "/api/prompt"), {
         method: "POST",
         headers: { "content-type": "application/json" },
         body: JSON.stringify({
           provider: settings.provider,
           mode: settings.mode,
-          viewIds: selectionKey.split("|"),
+          viewIds,
           keepOutfit: settings.keepOutfit,
           extraPrompt,
           characterCount: characters.length,
           costumeId: costume?.id ?? "",
+          customReferences,
         }),
         signal: controller.signal,
       })
@@ -166,12 +380,13 @@ function StudioFrame({ embedded }: { embedded: boolean }) {
           if (error instanceof DOMException && error.name === "AbortError") return
           setPromptError(error instanceof Error ? error.message : "提示词没有生成")
         })
+      }).catch(() => {})
     }, 280)
     return () => {
       window.clearTimeout(timer)
       controller.abort()
     }
-  }, [basePath, selectionKey, extraPrompt, characters.length, costume?.id, settings.provider, settings.mode, settings.keepOutfit])
+  }, [basePath, selectionKey, extraPrompt, characters.length, costume?.id, settings.provider, settings.mode, settings.keepOutfit, customPoses, customCostumes])
 
   function togglePose(pose: Pose, view: PoseView) {
     if (selected[pose.id] === view.id) {
@@ -206,6 +421,7 @@ function StudioFrame({ embedded }: { embedded: boolean }) {
     setRunning(true)
     setRunError("")
     setResults([])
+    const costumePick = costume ? { id: costume.id, label: costume.label, keywords: costume.keywords } : null
     const bodyBase = {
       provider: settings.provider,
       apiKey: settings.apiKey,
@@ -217,19 +433,33 @@ function StudioFrame({ embedded }: { embedded: boolean }) {
       costumeId: costume?.id ?? "",
       characterImages: characters.map((image) => ({ mediaType: image.mediaType, dataBase64: image.dataBase64 })),
     }
+    const snapshotBase = {
+      extraPrompt,
+      provider: settings.provider,
+      model: settings.model,
+      aspectRatio: settings.aspectRatio,
+      mode: settings.mode,
+      keepOutfit: costume ? false : settings.keepOutfit,
+      costume: costumePick,
+    }
     try {
       if (settings.mode === "sheet") {
         setProgress("正在画姿势拼图")
-        const batch = await requestGenerate(basePath, { ...bodyBase, mode: "sheet", viewIds }, controller.signal)
+        const customReferences = await customReferenceBody(viewIds, costume?.id ?? "", customPoses, customCostumes)
+        const batch = await requestGenerate(basePath, { ...bodyBase, mode: "sheet", viewIds, customReferences }, controller.signal)
         setResults(batch)
+        await rememberResults(batch, { ...snapshotBase, selection: chosen })
       } else {
         const collected: ResultCard[] = []
         for (let index = 0; index < chosen.length; index += 1) {
           const item = chosen[index]
           setProgress(`正在画第 ${index + 1} 张，共 ${chosen.length} 张`)
-          const batch = await requestGenerate(basePath, { ...bodyBase, mode: "each", viewIds: [item.viewId] }, controller.signal)
-          collected.push(...batch.map((result, resultIndex) => ({ ...result, key: `${item.viewId}-${resultIndex}` })))
+          const customReferences = await customReferenceBody([item.viewId], costume?.id ?? "", customPoses, customCostumes)
+          const batch = await requestGenerate(basePath, { ...bodyBase, mode: "each", viewIds: [item.viewId], customReferences }, controller.signal)
+          const stamped = batch.map((result, resultIndex) => ({ ...result, key: `${item.viewId}-${resultIndex}` }))
+          collected.push(...stamped)
           setResults([...collected])
+          await rememberResults(stamped, { ...snapshotBase, mode: "each", selection: [item] })
         }
       }
     } catch (error) {
@@ -241,6 +471,131 @@ function StudioFrame({ embedded }: { embedded: boolean }) {
       abortRef.current = null
     }
   }
+
+  async function rememberResults(batch: ResultCard[], snapshot: {
+    extraPrompt: string
+    provider: string
+    model: string
+    aspectRatio: string
+    mode: string
+    keepOutfit: boolean
+    costume: { id: string; label: string; keywords: string } | null
+    selection: Array<{ poseId: string; viewId: string; title: string; angle: string }>
+  }) {
+    for (const result of batch) {
+      if (!result.ok || !result.src) continue
+      try {
+        const image = await fileToJpegBlob(await (await fetch(result.src)).blob())
+        const entry: HistoryEntry = {
+          id: `history-${crypto.randomUUID()}`,
+          createdAt: Date.now(),
+          title: result.title,
+          prompt: result.prompt,
+          extraPrompt: snapshot.extraPrompt,
+          provider: snapshot.provider,
+          model: snapshot.model,
+          aspectRatio: snapshot.aspectRatio,
+          mode: snapshot.mode,
+          keepOutfit: snapshot.keepOutfit,
+          costume: snapshot.costume,
+          selection: snapshot.selection,
+          mediaType: "image/jpeg",
+          image,
+        }
+        await putHistory(entry)
+        setHistory((current) => [entry, ...current])
+      } catch (error) {
+        setStorageHigh(true)
+        setRunError(error instanceof Error ? error.message : "成图没有写入历史")
+      }
+    }
+    const pressure = await readStoragePressure().catch(() => null)
+    if (pressure?.high) setStorageHigh(true)
+  }
+
+  async function saveCustom(kind: "pose" | "costume", draft: CustomDraft) {
+    const asset: CustomAsset = {
+      id: createCustomId(kind),
+      createdAt: Date.now(),
+      label: draft.label,
+      keywords: draft.keywords,
+      source: draft.source,
+      userPrompt: draft.userPrompt,
+      beautifiedPrompt: draft.beautifiedPrompt,
+      adult: draft.adult,
+      mediaType: draft.mediaType,
+      image: draft.blob,
+    }
+    if (kind === "pose") {
+      await putCustomPose(asset)
+      setCustomPoses((current) => [asset, ...current])
+    } else {
+      await putCustomCostume(asset)
+      setCustomCostumes((current) => [asset, ...current])
+    }
+    const pressure = await readStoragePressure().catch(() => null)
+    if (pressure?.high) setStorageHigh(true)
+  }
+
+  async function removeCustomPose(id: string) {
+    await deleteCustomPose(id)
+    setCustomPoses((current) => current.filter((item) => item.id !== id))
+    setSelected((current) => {
+      if (!current[id]) return current
+      const next = { ...current }
+      delete next[id]
+      return next
+    })
+  }
+
+  async function removeCustomCostume(id: string) {
+    await deleteCustomCostume(id)
+    setCustomCostumes((current) => current.filter((item) => item.id !== id))
+    setCostume((current) => current?.id === id ? null : current)
+  }
+
+  function reuse(entry: HistoryView) {
+    const restored = reuseFromHistory(entry)
+    const missingPose = entry.selection.some((item) => !poseById.has(item.poseId))
+    const missingCostume = Boolean(restored.costume && isCustomCostumeId(restored.costume.id) && !customCostumes.some((item) => item.id === restored.costume?.id))
+    setSelected(restored.selected)
+    setExtraPrompt(restored.extraPrompt)
+    setCostume(restored.costume)
+    setReuseNote(missingPose || missingCostume
+      ? "已恢复还能找到的选择。有的自定义参考已经删除，请重新上传或生成后再出图。"
+      : "已恢复那次的姿势和描述，可以再次生图。")
+    if (window.innerWidth < 1024) setSheetOpen(true)
+  }
+
+  const historyViews: HistoryView[] = history.map((entry) => ({
+    id: entry.id,
+    createdAt: entry.createdAt,
+    title: entry.title,
+    prompt: entry.prompt,
+    extraPrompt: entry.extraPrompt,
+    provider: entry.provider,
+    model: entry.model,
+    aspectRatio: entry.aspectRatio,
+    mode: entry.mode,
+    keepOutfit: entry.keepOutfit,
+    costume: entry.costume,
+    selection: entry.selection,
+    thumbUrl: historyUrls[entry.id] || "",
+  }))
+  const customPoseCards = customPoses.map((asset) => ({
+    id: asset.id,
+    label: asset.label,
+    keywords: asset.keywords,
+    adult: asset.adult,
+    thumbUrl: poseUrls[asset.id] || "",
+  }))
+  const customCostumeCards = customCostumes.map((asset) => ({
+    id: asset.id,
+    label: asset.label,
+    keywords: asset.keywords,
+    adult: asset.adult,
+    thumbUrl: costumeUrls[asset.id] || "",
+  }))
 
   const composer = (
     <Composer
@@ -258,11 +613,11 @@ function StudioFrame({ embedded }: { embedded: boolean }) {
       aspectRatio={settings.aspectRatio}
       mode={settings.mode}
       keepOutfit={settings.keepOutfit}
-      costume={costume}
+      costume={costume ? { ...costume, thumbSrc: costumeUrls[costume.id] } : null}
       onClearCostume={() => setCostume(null)}
       hasKey={Boolean(settings.apiKey.trim()) || serverKey}
       running={running}
-      progress={progress}
+      progress={withElapsed(progress, waited)}
       runError={runError}
       prompts={prompts}
       promptError={promptError}
@@ -271,6 +626,19 @@ function StudioFrame({ embedded }: { embedded: boolean }) {
       onGenerate={() => void generate()}
       onStop={() => abortRef.current?.abort()}
       onOpenSettings={() => setSettingsOpen(true)}
+      history={historyViews}
+      onReuseHistory={reuse}
+      onDeleteHistory={(id) => {
+        void deleteHistory(id).then(() => setHistory((current) => current.filter((item) => item.id !== id))).catch((error: unknown) => {
+          setRunError(error instanceof Error ? error.message : "没有删掉这条历史")
+        })
+      }}
+      onClearHistory={() => {
+        void clearHistory().then(() => setHistory([])).catch((error: unknown) => {
+          setRunError(error instanceof Error ? error.message : "没有清空历史")
+        })
+      }}
+      reuseNote={reuseNote}
     />
   )
 
@@ -316,6 +684,12 @@ function StudioFrame({ embedded }: { embedded: boolean }) {
           </Button>
         </div>
       </header>
+      {storageHigh ? (
+        <p className="shrink-0 border-b bg-amber-50 px-4 py-2 text-sm text-amber-950">
+          本机存储快满了。可以删除历史或自定义参考图。
+          <button type="button" className="ml-2 underline" onClick={() => void clearHistory().then(() => setHistory([])).then(() => readStoragePressure()).then((pressure) => setStorageHigh(pressure.high))}>清空历史</button>
+        </p>
+      ) : null}
       <div className="flex min-h-0 flex-1 flex-col @min-[1024px]/studio:grid @min-[1024px]/studio:grid-cols-[300px_minmax(0,1fr)_340px] @min-[1024px]/studio:grid-rows-[minmax(0,1fr)]">
         <CharacterDock
           images={characters}
@@ -323,6 +697,31 @@ function StudioFrame({ embedded }: { embedded: boolean }) {
           keepOutfit={settings.keepOutfit}
           onKeepOutfit={(keepOutfit) => updateSettings({ ...settings, keepOutfit })}
           outfitLocked={Boolean(costume)}
+          switchItems={switcherEntries({ models }).map((item) => {
+            const saved = models.find((model) => model.id === item.id)
+            const thumb = saved?.images[0]
+            return {
+              id: item.id,
+              label: item.label,
+              builtin: item.builtin,
+              thumbSrc: thumb
+                ? `data:${thumb.mediaType};base64,${thumb.dataBase64}`
+                : studioUrl(basePath, item.portrait || "/muse/dafeiyu-portrait.jpg"),
+            }
+          })}
+          activeModelId={activeModelId}
+          activeLabel={models.find((model) => model.id === activeModelId)?.label ?? ""}
+          onSelectModel={selectSavedModel}
+          onRenameModel={renameSavedModel}
+          onDeleteModel={removeSavedModel}
+          onGenerateSheet={() => void generateModelSheet()}
+          sheetBusy={sheetBusy}
+          sheetError={sheetError}
+          hasKey={Boolean(settings.apiKey.trim()) || serverKey}
+          onOpenSettings={() => {
+            setSheetError("先在设置里填写 API Key。")
+            setSettingsOpen(true)
+          }}
         />
         <main className="order-2 min-h-0 min-w-0 flex-1 overflow-y-auto @min-[1024px]/studio:order-none @min-[1024px]/studio:pb-8">
           {library === "poses" ? (
@@ -337,6 +736,12 @@ function StudioFrame({ embedded }: { embedded: boolean }) {
               onRequestAdult={(systemId) => setAdultAsk(systemId)}
               selected={selected}
               onToggle={togglePose}
+              customPoses={customPoseCards}
+              onSaveCustom={(draft) => saveCustom("pose", draft)}
+              onDeleteCustom={(id) => void removeCustomPose(id)}
+              settings={settings}
+              hasKey={Boolean(settings.apiKey.trim()) || serverKey}
+              syncWarning={syncWarning}
             />
           ) : (
             <CostumeBrowser
@@ -346,6 +751,12 @@ function StudioFrame({ embedded }: { embedded: boolean }) {
               onRequestAdult={(categoryId) => setAdultAsk(`costume:${categoryId}`)}
               selectedId={costume?.id ?? null}
               onSelect={(item) => setCostume((current) => current?.id === item.id ? null : { id: item.id, label: item.label, keywords: item.keywords })}
+              customCostumes={customCostumeCards}
+              onSaveCustom={(draft) => saveCustom("costume", draft)}
+              onDeleteCustom={(id) => void removeCustomCostume(id)}
+              settings={settings}
+              hasKey={Boolean(settings.apiKey.trim()) || serverKey}
+              syncWarning={syncWarning}
             />
           )}
         </main>
@@ -380,9 +791,11 @@ function StudioFrame({ embedded }: { embedded: boolean }) {
       <Dialog open={adultAsk !== null} onOpenChange={(open) => { if (!open) setAdultAsk(null) }}>
         <DialogContent className="max-w-[min(28rem,calc(100%-2rem))]">
           <DialogHeader>
-            <DialogTitle>{adultAsk?.startsWith("costume:") ? "这些是成人向服装" : "这些是成人向姿势"}</DialogTitle>
+            <DialogTitle>{adultAsk === "custom" || adultAsk === "costume:custom" ? "这些是成人向自定义参考" : adultAsk?.startsWith("costume:") ? "这些是成人向服装" : "这些是成人向姿势"}</DialogTitle>
             <DialogDescription>
-              {adultAsk?.startsWith("costume:")
+              {adultAsk === "custom" || adultAsk === "costume:custom"
+                ? "自定义参考里标成成人向的图默认不显示。打开之后才能点选。生图仍要求角色是成年人。"
+                : adultAsk?.startsWith("costume:")
                 ? "内衣、泳装和性感分类里的图仍然没有人物，只是衣服本身更暴露。打开之后可以点选。生图会换成这套衣服，并保留角色的脸、头发、鲸耳和鲸尾。"
                 : "来自原图库的性感系、双人缠绵，以及上半身里的大胆分类。画面仍是结构线稿。打开之后，生图默认继续保持模特的服装，只借用姿势。"}
             </DialogDescription>
@@ -415,6 +828,28 @@ function GithubMark() {
   )
 }
 
+function useBlobUrls(items: Array<{ id: string; image: Blob }>) {
+  const [urls, setUrls] = useState<Record<string, string>>({})
+  useEffect(() => {
+    const created: Record<string, string> = {}
+    for (const item of items) created[item.id] = URL.createObjectURL(item.image)
+    setUrls(created)
+    return () => {
+      for (const url of Object.values(created)) URL.revokeObjectURL(url)
+    }
+  }, [items])
+  return urls
+}
+
+async function customReferenceBody(viewIds: string[], costumeId: string, poses: CustomAsset[], costumes: CustomAsset[]) {
+  const poseAssets = poses.filter((item) => viewIds.includes(item.id))
+  const costumeAsset = costumes.find((item) => item.id === costumeId)
+  return {
+    poses: await Promise.all(poseAssets.map((item) => assetToWire(item))),
+    costumes: costumeAsset ? [await assetToWire(costumeAsset)] : [],
+  }
+}
+
 async function requestGenerate(basePath: string, body: unknown, signal: AbortSignal): Promise<ResultCard[]> {
   const response = await fetch(studioUrl(basePath, "/api/generate"), {
     method: "POST",
@@ -422,8 +857,14 @@ async function requestGenerate(basePath: string, body: unknown, signal: AbortSig
     body: JSON.stringify(body),
     signal,
   })
-  const payload = await response.json() as { results?: Array<{ viewId: string; title: string; prompt: string; ok: boolean; error?: string; mediaType?: string; imageBase64?: string; warning?: string }>; error?: string }
-  if (!response.ok) throw new Error(payload.error || "生图失败")
+  const text = await response.text()
+  if (!response.ok) throw new Error(messageForStatus(response.status, text, "生图失败"))
+  let payload: { results?: Array<{ viewId: string; title: string; prompt: string; ok: boolean; error?: string; mediaType?: string; imageBase64?: string; warning?: string }> }
+  try {
+    payload = JSON.parse(text) as typeof payload
+  } catch {
+    throw new Error("生图失败")
+  }
   return (payload.results ?? []).map((item, index) => ({
     key: `${item.viewId}-${index}`,
     title: item.title,

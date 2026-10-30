@@ -8,6 +8,7 @@ const nextConfig: NextConfig = {
     "/api/costume-image": ["./data/costumes.json"],
     "/api/pose-image": ["./data/catalog.json"],
     "/api/prompt": ["./data/catalog.json", "./data/costumes.json"],
+    "/api/character-sheet": ["./public/muse/dafeiyu-sheet.png"],
     "/api/generate": [
       "./data/catalog.json",
       "./data/costumes.json",

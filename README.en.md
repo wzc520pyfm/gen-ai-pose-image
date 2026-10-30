@@ -51,6 +51,8 @@ Open [http://127.0.0.1:43123](http://127.0.0.1:43123).
 3. Import another model on the left, or keep Dafeiyu. After a costume is selected, “保持服装” steps aside for that outfit.
 4. Fill in a Gemini or OpenAI-compatible key under Image settings at the top right. The key stays in this browser.
 5. Without a key, the right side still writes a prompt for each image. Copy it into an installed `dsh-image-gen`. When a costume is selected, the reference order is character, outfit with no person, then pose sketch.
+6. Both the pose and costume pages have a Custom section. Upload a reference, or write a short description and let the current provider expand it into an image prompt before generating a reference. Pose references lean toward line art. Costume references lean toward a person-free flat lay. With no key, or when the text API is unavailable, the prompt is expanded locally and can still be copied. Custom items stay in this browser.
+7. Successful images show up under History on the right and remain after refresh. Open one to see the parameters. Use again restores the poses, costume, and extra prompt so you can generate again. Delete one entry or clear them all. A warning appears when browser storage is nearly full.
 
 Seedream uses Volcengine Ark at `https://ark.cn-beijing.volces.com/api/v3`, default model `doubao-seedream-5-0-flash-260915`. It sends the model image, the optional costume image, and the pose sketch together. Gemini defaults to `gemini-2.5-flash-image`. An OpenAI-compatible API tries `images/edits` first. If the endpoint cannot edit, it falls back to text-to-image and says so on the result.
 
@@ -77,7 +79,7 @@ The package name is `gen-ai-pose-image`. Before it is published, or when you are
 After restarting that profile:
 
 - The left sidebar gains 「澜姿 / 工作室」, next to Plugins and Automation tasks. Opening it shows the full studio: poses, costumes, the model, and image generation.
-- The agent can call `search_poses`, `search_costumes`, and `generate_pose_images`. Pass a costume id as `costume_id` to change clothes.
+- The agent can call `search_poses`, `search_costumes`, and `generate_pose_images`. Pass a costume id as `costume_id` to change clothes. After the studio has been opened, custom poses and costumes are included in search and marked `source: custom`. `generate_pose_images` accepts those ids. If the reference image is not on this machine, the tool says to upload or generate it in the studio first and does not substitute another catalog item.
 - With `POSE_MUSE_API_KEY` set on the process, the tools generate images and attach them to the session. Without a key, they return the written prompts for `generate_image` / `edit_image` in `dsh-image-gen`.
 
 Adult poses and adult costumes stay out of search results. Pass `include_adult: true` to `search_poses` or `search_costumes` only when that is explicitly requested.

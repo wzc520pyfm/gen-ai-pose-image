@@ -26,6 +26,7 @@ export function searchCostumes(query?: {
   category?: string
   includeAdult?: boolean
   limit?: number
+  custom?: Array<{ id?: string; label?: string; keywords?: string; adult?: boolean; userPrompt?: string; dataBase64?: string }>
 }): Costume[]
 export function isSafeCostumePath(relativePath: string): boolean
 export function costumeFile(costume: Costume, size: "thumb" | "preview" | "full"): string

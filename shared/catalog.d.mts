@@ -12,4 +12,5 @@ export function searchPoses(query?: {
   category?: string
   includeAdult?: boolean
   limit?: number
+  custom?: Array<{ id?: string; label?: string; name?: string; adult?: boolean; userPrompt?: string; dataBase64?: string }>
 }): Pose[]

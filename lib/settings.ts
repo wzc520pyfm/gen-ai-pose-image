@@ -5,6 +5,7 @@ export type StudioSettings = {
   apiKey: string
   baseURL: string
   model: string
+  textModel: string
   aspectRatio: AspectRatio
   keepOutfit: boolean
   mode: GenerateMode
@@ -16,6 +17,7 @@ export const DEFAULT_SETTINGS: StudioSettings = {
   apiKey: "",
   baseURL: "",
   model: "gemini-2.5-flash-image",
+  textModel: "",
   aspectRatio: "3:4",
   keepOutfit: true,
   mode: "each",
@@ -38,6 +40,7 @@ export function loadSettings(): StudioSettings {
       apiKey: typeof parsed.apiKey === "string" ? parsed.apiKey : "",
       baseURL: typeof parsed.baseURL === "string" ? parsed.baseURL : "",
       model: typeof parsed.model === "string" && parsed.model.trim() ? parsed.model : DEFAULT_SETTINGS.model,
+      textModel: typeof parsed.textModel === "string" ? parsed.textModel : "",
       aspectRatio,
       keepOutfit: parsed.keepOutfit !== false,
       mode: parsed.mode === "sheet" ? "sheet" : "each",
