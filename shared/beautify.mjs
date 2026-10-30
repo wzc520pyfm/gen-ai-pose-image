@@ -11,8 +11,19 @@ export function textModelFor(provider, model) {
     if (!name || /image|dall-e|gpt-image/i.test(name)) return "gpt-4o-mini"
     return name
   }
-  if (!name || /seedream|image/i.test(name)) return "doubao-seed-1-6-flash-250715"
+  if (!name || /seedream|image/i.test(name)) return "doubao-seed-2-1-pro-260628"
   return name
+}
+
+function describedError(payload, status, secret) {
+  const error = payload?.error
+  const code = typeof error === "object" && error && typeof error.code === "string" ? error.code.trim() : ""
+  const message = typeof error === "object" && error && typeof error.message === "string"
+    ? error.message.trim()
+    : typeof error === "string"
+      ? error.trim()
+      : ""
+  return redact([code, message].filter(Boolean).join("：") || `文本接口失败（${status}）`, secret)
 }
 
 export function beautifyInstruction({ kind, userPrompt = "", adult = false }) {
@@ -77,7 +88,7 @@ async function geminiText({ apiKey, baseURL, model, instruction, fetchImpl, sign
   })
   const payload = await readJson(response, apiKey)
   if (!response.ok) {
-    throw new Error(redact(payload?.error?.message || `文本接口失败（${response.status}）`, apiKey))
+    throw new Error(describedError(payload, response.status, apiKey))
   }
   const parts = (payload?.candidates ?? []).flatMap((candidate) => candidate?.content?.parts ?? [])
   const text = parts.map((part) => part?.text).filter(Boolean).join("\n").trim()
@@ -104,7 +115,7 @@ async function chatText({ provider, apiKey, baseURL, model, instruction, fetchIm
   })
   const payload = await readJson(response, apiKey)
   if (!response.ok) {
-    throw new Error(redact(payload?.error?.message || `文本接口失败（${response.status}）`, apiKey))
+    throw new Error(describedError(payload, response.status, apiKey))
   }
   const content = payload?.choices?.[0]?.message?.content
   const text = Array.isArray(content)
@@ -155,7 +166,8 @@ export async function beautifyPrompt({
     const prompt = cleanBeautifiedText(text)
     if (!prompt) return templateResult(input, "文本接口没有返回内容，已改用本地扩写。")
     return { prompt, source: "model", notice: "" }
-  } catch {
-    return templateResult(input, "文本接口不可用，已改用本地扩写。")
+  } catch (error) {
+    const detail = redact(error instanceof Error ? error.message : String(error ?? ""), key).trim()
+    return templateResult(input, detail ? `文本接口不可用，已改用本地扩写。${detail}` : "文本接口不可用，已改用本地扩写。")
   }
 }

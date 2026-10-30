@@ -239,6 +239,8 @@ test("custom generation attaches stored blobs and does not fetch the catalog", a
 test("beautify uses the provider text API and falls back to the local template", async () => {
   assert.equal(textModelFor("gemini", "gemini-2.5-flash-image"), "gemini-2.5-flash")
   assert.equal(textModelFor("openai", "gpt-image-1"), "gpt-4o-mini")
+  assert.equal(textModelFor("seedream", "doubao-seedream-5-0-flash-260915"), "doubao-seed-2-1-pro-260628")
+  assert.equal(textModelFor("seedream", ""), "doubao-seed-2-1-pro-260628")
   const offline = await beautifyPrompt({
     provider: "gemini",
     apiKey: "",
@@ -288,4 +290,32 @@ test("beautify uses the provider text API and falls back to the local template",
   assert.equal(failed.source, "template")
   assert.match(failed.prompt, /举手/)
   assert.match(failed.notice, /本地扩写/)
+  assert.match(failed.notice, /no such model/)
+
+  const secret = "ark-secret-value"
+  const seedream = await beautifyPrompt({
+    provider: "seedream",
+    apiKey: secret,
+    model: "doubao-seedream-5-0-flash-260915",
+    kind: "pose",
+    userPrompt: "举手",
+    adult: false,
+    fetchImpl: async (url, init) => {
+      assert.match(String(url), /\/chat\/completions$/)
+      const body = JSON.parse(init.body)
+      assert.equal(body.model, "doubao-seed-2-1-pro-260628")
+      return new Response(JSON.stringify({
+        error: {
+          code: "InvalidEndpointOrModel.NotFound",
+          message: `The model does not exist for ${secret}`,
+        },
+      }), { status: 404 })
+    },
+  })
+  assert.equal(seedream.source, "template")
+  assert.match(seedream.prompt, /举手/)
+  assert.match(seedream.notice, /文本接口不可用，已改用本地扩写。/)
+  assert.match(seedream.notice, /InvalidEndpointOrModel\.NotFound/)
+  assert.match(seedream.notice, /The model does not exist/)
+  assert.doesNotMatch(seedream.notice, /ark-secret-value/)
 })
