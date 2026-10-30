@@ -3,6 +3,7 @@
 /* eslint-disable @next/next/no-img-element -- custom references are local object URLs */
 
 import { useEffect, useRef, useState } from "react"
+import { useElapsedSeconds, withElapsed } from "@/lib/elapsed"
 import { base64ToBlob, fileToJpegBlob } from "@/lib/library"
 import { requestBeautify, requestReferenceImage } from "@/lib/reference-client"
 import type { StudioSettings } from "@/lib/settings"
@@ -74,22 +75,10 @@ export function CustomReferencePanel({
   const [previewBlob, setPreviewBlob] = useState<Blob | null>(null)
   const [previewUrl, setPreviewUrl] = useState("")
   const [busy, setBusy] = useState("")
-  const [waited, setWaited] = useState(0)
+  const waited = useElapsedSeconds(busy === "正在生成参考图" || busy === "正在扩写提示词")
   const [error, setError] = useState("")
   const [pendingDelete, setPendingDelete] = useState<string | null>(null)
   const noun = kind === "pose" ? "姿势" : "服装"
-
-  useEffect(() => {
-    if (busy !== "正在生成参考图") {
-      setWaited(0)
-      return
-    }
-    const started = Date.now()
-    const timer = window.setInterval(() => {
-      setWaited(Math.max(1, Math.round((Date.now() - started) / 1000)))
-    }, 1000)
-    return () => window.clearInterval(timer)
-  }, [busy])
 
   useEffect(() => {
     if (!previewBlob) {
@@ -306,7 +295,7 @@ export function CustomReferencePanel({
                   void fillPrompt(description, showAdult && adult)
                 }}
               >
-                扩写提示词
+                {busy === "正在扩写提示词" ? withElapsed(busy, waited) : "扩写提示词"}
               </Button>
             </label>
           ) : null}
@@ -348,12 +337,13 @@ export function CustomReferencePanel({
             {mode !== "upload" ? (
               <>
                 <Button type="button" variant="outline" disabled={!prompt.trim()} onClick={() => void navigator.clipboard.writeText(prompt)}>复制提示词</Button>
-                <Button type="button" variant="outline" disabled={Boolean(busy)} onClick={() => void generateImage()}>{busy === "正在生成参考图" ? (waited > 0 ? `正在生成（${waited} 秒）` : "正在生成参考图") : "生成参考图"}</Button>
+                <Button type="button" variant="outline" disabled={Boolean(busy)} onClick={() => void generateImage()}>{busy === "正在生成参考图" ? withElapsed(busy, waited) : "生成参考图"}</Button>
               </>
             ) : null}
             <Button type="button" disabled={Boolean(busy) || !previewBlob} onClick={() => void save()}>{busy === "正在保存" ? busy : "保存到自定义"}</Button>
           </div>
-          {busy && busy !== "正在保存" && busy !== "正在生成参考图" ? <p className="text-xs text-muted-foreground">{busy}</p> : null}
+          {busy === "正在扩写提示词" && mode === "freeform" ? <p className="text-xs text-muted-foreground">{withElapsed(busy, waited)}</p> : null}
+          {busy === "正在读取图片" ? <p className="text-xs text-muted-foreground">{busy}</p> : null}
         </DialogContent>
       </Dialog>
     </div>

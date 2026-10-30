@@ -1,6 +1,7 @@
 "use client"
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react"
+import { useElapsedSeconds, withElapsed } from "@/lib/elapsed"
 import { Settings } from "lucide-react"
 import { CharacterDock } from "@/components/character-dock"
 import { Composer, type ResultCard } from "@/components/composer"
@@ -92,7 +93,7 @@ function StudioFrame({ embedded }: { embedded: boolean }) {
   const [results, setResults] = useState<ResultCard[]>([])
   const [running, setRunning] = useState(false)
   const [progress, setProgress] = useState("")
-  const [waited, setWaited] = useState(0)
+  const waited = useElapsedSeconds(running)
   const [runError, setRunError] = useState("")
   const [limitNote, setLimitNote] = useState("")
   const [serverKey, setServerKey] = useState(false)
@@ -108,18 +109,6 @@ function StudioFrame({ embedded }: { embedded: boolean }) {
   const clearRequestedSystem = useCallback(() => setRequestedSystem(null), [])
   const clearCostumeFocus = useCallback(() => setCostumeFocus(null), [])
   const abortRef = useRef<AbortController | null>(null)
-
-  useEffect(() => {
-    if (!running) {
-      setWaited(0)
-      return
-    }
-    const started = Date.now()
-    const timer = window.setInterval(() => {
-      setWaited(Math.max(1, Math.round((Date.now() - started) / 1000)))
-    }, 1000)
-    return () => window.clearInterval(timer)
-  }, [running])
 
   const loadCatalog = useCallback(() => {
     setLoading(true)
@@ -628,7 +617,7 @@ function StudioFrame({ embedded }: { embedded: boolean }) {
       onClearCostume={() => setCostume(null)}
       hasKey={Boolean(settings.apiKey.trim()) || serverKey}
       running={running}
-      progress={waited > 0 ? `${progress}（已等待 ${waited} 秒）` : progress}
+      progress={withElapsed(progress, waited)}
       runError={runError}
       prompts={prompts}
       promptError={promptError}

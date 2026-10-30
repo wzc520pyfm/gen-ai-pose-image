@@ -47,12 +47,12 @@ var require_use_sync_external_store_shim_production = __commonJS({
       return x === y && (0 !== x || 1 / x === 1 / y) || x !== x && y !== y;
     }
     var objectIs = "function" === typeof Object.is ? Object.is : is;
-    var useState19 = React67.useState;
-    var useEffect15 = React67.useEffect;
+    var useState20 = React67.useState;
+    var useEffect16 = React67.useEffect;
     var useLayoutEffect2 = React67.useLayoutEffect;
     var useDebugValue2 = React67.useDebugValue;
     function useSyncExternalStore$2(subscribe, getSnapshot) {
-      var value = getSnapshot(), _useState = useState19({ inst: { value, getSnapshot } }), inst = _useState[0].inst, forceUpdate = _useState[1];
+      var value = getSnapshot(), _useState = useState20({ inst: { value, getSnapshot } }), inst = _useState[0].inst, forceUpdate = _useState[1];
       useLayoutEffect2(
         function() {
           inst.value = value;
@@ -61,7 +61,7 @@ var require_use_sync_external_store_shim_production = __commonJS({
         },
         [subscribe, value, getSnapshot]
       );
-      useEffect15(
+      useEffect16(
         function() {
           checkIfSnapshotChanged(inst) && forceUpdate({ inst });
           return subscribe(function() {
@@ -115,7 +115,7 @@ var require_with_selector_production = __commonJS({
     var objectIs = "function" === typeof Object.is ? Object.is : is;
     var useSyncExternalStore3 = shim.useSyncExternalStore;
     var useRef28 = React67.useRef;
-    var useEffect15 = React67.useEffect;
+    var useEffect16 = React67.useEffect;
     var useMemo17 = React67.useMemo;
     var useDebugValue2 = React67.useDebugValue;
     exports.useSyncExternalStoreWithSelector = function(subscribe, getSnapshot, getServerSnapshot, selector, isEqual) {
@@ -159,7 +159,7 @@ var require_with_selector_production = __commonJS({
         [getSnapshot, getServerSnapshot, selector, isEqual]
       );
       var value = useSyncExternalStore3(subscribe, instRef[0], instRef[1]);
-      useEffect15(
+      useEffect16(
         function() {
           inst.hasValue = true;
           inst.value = value;
@@ -192,14 +192,35 @@ __export(harness_entry_exports, {
   name: () => name
 });
 module.exports = __toCommonJS(harness_entry_exports);
-var import_react12 = require("react");
+var import_react13 = require("react");
 var import_react_dom = require("react-dom");
 
 // components/studio.tsx
-var import_react11 = require("react");
+var import_react12 = require("react");
+
+// lib/elapsed.ts
+var import_react = require("react");
+function useElapsedSeconds(active) {
+  const [waited, setWaited] = (0, import_react.useState)(0);
+  (0, import_react.useEffect)(() => {
+    if (!active) {
+      setWaited(0);
+      return;
+    }
+    const started = Date.now();
+    const timer = window.setInterval(() => {
+      setWaited(Math.max(1, Math.round((Date.now() - started) / 1e3)));
+    }, 1e3);
+    return () => window.clearInterval(timer);
+  }, [active]);
+  return waited;
+}
+function withElapsed(label, waited) {
+  return waited > 0 ? `${label}（已等待 ${waited} 秒）` : label;
+}
 
 // node_modules/lucide-react/dist/esm/createLucideIcon.mjs
-var import_react3 = require("react");
+var import_react4 = require("react");
 
 // node_modules/lucide-react/dist/esm/shared/src/utils/toKebabCase.mjs
 var toKebabCase = (string) => string?.replace(/([a-z0-9])([A-Z])/g, "$1-$2").toLowerCase();
@@ -243,7 +264,7 @@ var toPascalCase = (string) => {
 };
 
 // node_modules/lucide-react/dist/esm/Icon.mjs
-var import_react2 = require("react");
+var import_react3 = require("react");
 
 // node_modules/lucide-react/dist/esm/shared/src/utils/mergeClasses.mjs
 var mergeClasses = (...classes) => classes.filter((className, index, array) => {
@@ -342,12 +363,12 @@ var hasA11yProp = (props) => {
 };
 
 // node_modules/lucide-react/dist/esm/context.mjs
-var import_react = require("react");
-var LucideContext = (0, import_react.createContext)({});
-var useLucideContext = () => (0, import_react.useContext)(LucideContext);
+var import_react2 = require("react");
+var LucideContext = (0, import_react2.createContext)({});
+var useLucideContext = () => (0, import_react2.useContext)(LucideContext);
 
 // node_modules/lucide-react/dist/esm/Icon.mjs
-var Icon = (0, import_react2.forwardRef)(
+var Icon = (0, import_react3.forwardRef)(
   ({
     color,
     size,
@@ -386,14 +407,14 @@ var Icon = (0, import_react2.forwardRef)(
       hasA11yProp: hasAccessibleProp,
       attributes: rest
     });
-    return (0, import_react2.createElement)(
+    return (0, import_react3.createElement)(
       name2,
       {
         ref,
         ...svgAttributes
       },
       [
-        ...builtIconNode.map(([tag, attrs]) => (0, import_react2.createElement)(tag, attrs)),
+        ...builtIconNode.map(([tag, attrs]) => (0, import_react3.createElement)(tag, attrs)),
         ...Array.isArray(children) ? children : [children]
       ]
     );
@@ -403,8 +424,8 @@ var Icon = (0, import_react2.forwardRef)(
 // node_modules/lucide-react/dist/esm/createLucideIcon.mjs
 function createLucideIcon(iconDataOrName, iconNode = [], aliases = []) {
   const iconData = typeof iconDataOrName === "string" ? toLucideIconData(iconDataOrName, iconNode, aliases) : iconDataOrName;
-  const Component = (0, import_react3.forwardRef)(
-    ({ className, ...props }, ref) => (0, import_react3.createElement)(Icon, {
+  const Component = (0, import_react4.forwardRef)(
+    ({ className, ...props }, ref) => (0, import_react4.createElement)(Icon, {
       ref,
       icon: iconData,
       className,
@@ -537,7 +558,7 @@ __iconData9.node;
 var X = createLucideIcon(__iconData9);
 
 // components/character-dock.tsx
-var import_react6 = require("react");
+var import_react7 = require("react");
 
 // node_modules/@base-ui/react/button/Button.mjs
 var React10 = __toESM(require("react"), 1);
@@ -1238,7 +1259,7 @@ function resolveStyle(style, state) {
 }
 
 // node_modules/@base-ui/react/internals/useRenderElement.mjs
-var import_react4 = require("react");
+var import_react5 = require("react");
 function useRenderElement(element, componentProps, params = {}) {
   let renderProp = componentProps.render;
   if (params.enabled !== false) {
@@ -1323,14 +1344,14 @@ function evaluateRenderProp(element, render, props, state) {
 }
 function renderTag(Tag, props) {
   if (Tag === "button") {
-    return /* @__PURE__ */ (0, import_react4.createElement)("button", {
+    return /* @__PURE__ */ (0, import_react5.createElement)("button", {
       type: "button",
       ...props,
       key: props.key
     });
   }
   if (Tag === "img") {
-    return /* @__PURE__ */ (0, import_react4.createElement)("img", {
+    return /* @__PURE__ */ (0, import_react5.createElement)("img", {
       alt: "",
       ...props,
       key: props.key
@@ -5478,9 +5499,9 @@ async function fileToCharacter(file) {
 }
 
 // lib/studio-env.tsx
-var import_react5 = require("react");
+var import_react6 = require("react");
 var import_jsx_runtime11 = require("react/jsx-runtime");
-var StudioEnvContext = (0, import_react5.createContext)({
+var StudioEnvContext = (0, import_react6.createContext)({
   basePath: "",
   portalContainer: null
 });
@@ -5492,7 +5513,7 @@ function StudioEnvProvider({
   return /* @__PURE__ */ (0, import_jsx_runtime11.jsx)(StudioEnvContext.Provider, { value: { basePath, portalContainer }, children });
 }
 function useStudioEnv() {
-  return (0, import_react5.useContext)(StudioEnvContext);
+  return (0, import_react6.useContext)(StudioEnvContext);
 }
 function studioUrl(basePath, path) {
   if (!path.startsWith("/")) return path;
@@ -5661,14 +5682,15 @@ function CharacterDock({
   hasKey,
   onOpenSettings
 }) {
-  const inputRef = (0, import_react6.useRef)(null);
-  const sheetInputRef = (0, import_react6.useRef)(null);
+  const inputRef = (0, import_react7.useRef)(null);
+  const sheetInputRef = (0, import_react7.useRef)(null);
   const { basePath } = useStudioEnv();
-  const [error, setError] = (0, import_react6.useState)("");
-  const [busy, setBusy] = (0, import_react6.useState)(false);
-  const [editingId, setEditingId] = (0, import_react6.useState)(null);
-  const [draftLabel, setDraftLabel] = (0, import_react6.useState)("");
-  const [pendingDelete, setPendingDelete] = (0, import_react6.useState)(null);
+  const [error, setError] = (0, import_react7.useState)("");
+  const [busy, setBusy] = (0, import_react7.useState)(false);
+  const [editingId, setEditingId] = (0, import_react7.useState)(null);
+  const [draftLabel, setDraftLabel] = (0, import_react7.useState)("");
+  const [pendingDelete, setPendingDelete] = (0, import_react7.useState)(null);
+  const sheetWaited = useElapsedSeconds(sheetBusy);
   const custom = images.length > 0;
   const photoCount = images.filter((image) => image.role !== "sheet").length;
   const hasSheet = images.some((image) => image.role === "sheet");
@@ -5884,7 +5906,7 @@ function CharacterDock({
           }
           onGenerateSheet();
         },
-        children: sheetBusy ? "正在生成" : "生成多视角 sheet"
+        children: sheetBusy ? withElapsed("正在生成", sheetWaited) : "生成多视角 sheet"
       }
     ) : null,
     sheetError ? /* @__PURE__ */ (0, import_jsx_runtime12.jsx)("p", { className: "text-sm text-[#fecaca]", children: sheetError }) : null,
@@ -5901,7 +5923,7 @@ function CharacterDock({
 }
 
 // components/history-panel.tsx
-var import_react7 = require("react");
+var import_react8 = require("react");
 
 // node_modules/@base-ui/react/dialog/index.parts.mjs
 var index_parts_exports3 = {};
@@ -9767,8 +9789,8 @@ function HistoryPanel({
   onDelete,
   onClear
 }) {
-  const [openId, setOpenId] = (0, import_react7.useState)(null);
-  const [confirmClear, setConfirmClear] = (0, import_react7.useState)(false);
+  const [openId, setOpenId] = (0, import_react8.useState)(null);
+  const [confirmClear, setConfirmClear] = (0, import_react8.useState)(false);
   const current = entries.find((entry) => entry.id === openId) ?? null;
   return /* @__PURE__ */ (0, import_jsx_runtime22.jsxs)("div", { className: "grid gap-3", children: [
     /* @__PURE__ */ (0, import_jsx_runtime22.jsxs)("div", { className: "flex items-center justify-between gap-3", children: [
@@ -10032,10 +10054,10 @@ ${item.prompt}`).join("\n\n")),
 }
 
 // components/costume-browser.tsx
-var import_react9 = require("react");
+var import_react10 = require("react");
 
 // components/custom-reference-panel.tsx
-var import_react8 = require("react");
+var import_react9 = require("react");
 
 // shared/custom.mjs
 function createCustomId(kind, random = () => globalThis.crypto.randomUUID()) {
@@ -10357,34 +10379,23 @@ function CustomReferencePanel({
   syncWarning
 }) {
   const { basePath } = useStudioEnv();
-  const fileRef = (0, import_react8.useRef)(null);
-  const editedRef = (0, import_react8.useRef)(false);
-  const [open3, setOpen] = (0, import_react8.useState)(false);
-  const [mode, setMode] = (0, import_react8.useState)("upload");
-  const [description, setDescription] = (0, import_react8.useState)("");
-  const [prompt, setPrompt] = (0, import_react8.useState)("");
-  const [notice, setNotice] = (0, import_react8.useState)("");
-  const [adult, setAdult] = (0, import_react8.useState)(false);
-  const [label, setLabel] = (0, import_react8.useState)("");
-  const [previewBlob, setPreviewBlob] = (0, import_react8.useState)(null);
-  const [previewUrl, setPreviewUrl] = (0, import_react8.useState)("");
-  const [busy, setBusy] = (0, import_react8.useState)("");
-  const [waited, setWaited] = (0, import_react8.useState)(0);
-  const [error, setError] = (0, import_react8.useState)("");
-  const [pendingDelete, setPendingDelete] = (0, import_react8.useState)(null);
+  const fileRef = (0, import_react9.useRef)(null);
+  const editedRef = (0, import_react9.useRef)(false);
+  const [open3, setOpen] = (0, import_react9.useState)(false);
+  const [mode, setMode] = (0, import_react9.useState)("upload");
+  const [description, setDescription] = (0, import_react9.useState)("");
+  const [prompt, setPrompt] = (0, import_react9.useState)("");
+  const [notice, setNotice] = (0, import_react9.useState)("");
+  const [adult, setAdult] = (0, import_react9.useState)(false);
+  const [label, setLabel] = (0, import_react9.useState)("");
+  const [previewBlob, setPreviewBlob] = (0, import_react9.useState)(null);
+  const [previewUrl, setPreviewUrl] = (0, import_react9.useState)("");
+  const [busy, setBusy] = (0, import_react9.useState)("");
+  const waited = useElapsedSeconds(busy === "正在生成参考图" || busy === "正在扩写提示词");
+  const [error, setError] = (0, import_react9.useState)("");
+  const [pendingDelete, setPendingDelete] = (0, import_react9.useState)(null);
   const noun = kind === "pose" ? "姿势" : "服装";
-  (0, import_react8.useEffect)(() => {
-    if (busy !== "正在生成参考图") {
-      setWaited(0);
-      return;
-    }
-    const started = Date.now();
-    const timer = window.setInterval(() => {
-      setWaited(Math.max(1, Math.round((Date.now() - started) / 1e3)));
-    }, 1e3);
-    return () => window.clearInterval(timer);
-  }, [busy]);
-  (0, import_react8.useEffect)(() => {
+  (0, import_react9.useEffect)(() => {
     if (!previewBlob) {
       setPreviewUrl("");
       return;
@@ -10589,7 +10600,7 @@ function CustomReferencePanel({
               editedRef.current = false;
               void fillPrompt(description, showAdult && adult);
             },
-            children: "扩写提示词"
+            children: busy === "正在扩写提示词" ? withElapsed(busy, waited) : "扩写提示词"
           }
         )
       ] }) : null,
@@ -10632,11 +10643,12 @@ function CustomReferencePanel({
       /* @__PURE__ */ (0, import_jsx_runtime25.jsxs)("div", { className: "flex flex-wrap gap-2", children: [
         mode !== "upload" ? /* @__PURE__ */ (0, import_jsx_runtime25.jsxs)(import_jsx_runtime25.Fragment, { children: [
           /* @__PURE__ */ (0, import_jsx_runtime25.jsx)(Button3, { type: "button", variant: "outline", disabled: !prompt.trim(), onClick: () => void navigator.clipboard.writeText(prompt), children: "复制提示词" }),
-          /* @__PURE__ */ (0, import_jsx_runtime25.jsx)(Button3, { type: "button", variant: "outline", disabled: Boolean(busy), onClick: () => void generateImage(), children: busy === "正在生成参考图" ? waited > 0 ? `正在生成（${waited} 秒）` : "正在生成参考图" : "生成参考图" })
+          /* @__PURE__ */ (0, import_jsx_runtime25.jsx)(Button3, { type: "button", variant: "outline", disabled: Boolean(busy), onClick: () => void generateImage(), children: busy === "正在生成参考图" ? withElapsed(busy, waited) : "生成参考图" })
         ] }) : null,
         /* @__PURE__ */ (0, import_jsx_runtime25.jsx)(Button3, { type: "button", disabled: Boolean(busy) || !previewBlob, onClick: () => void save(), children: busy === "正在保存" ? busy : "保存到自定义" })
       ] }),
-      busy && busy !== "正在保存" && busy !== "正在生成参考图" ? /* @__PURE__ */ (0, import_jsx_runtime25.jsx)("p", { className: "text-xs text-muted-foreground", children: busy }) : null
+      busy === "正在扩写提示词" && mode === "freeform" ? /* @__PURE__ */ (0, import_jsx_runtime25.jsx)("p", { className: "text-xs text-muted-foreground", children: withElapsed(busy, waited) }) : null,
+      busy === "正在读取图片" ? /* @__PURE__ */ (0, import_jsx_runtime25.jsx)("p", { className: "text-xs text-muted-foreground", children: busy }) : null
     ] }) })
   ] });
 }
@@ -10658,14 +10670,14 @@ function CostumeBrowser({
   syncWarning
 }) {
   const { basePath } = useStudioEnv();
-  const [catalog, setCatalog] = (0, import_react9.useState)(null);
-  const [error, setError] = (0, import_react9.useState)("");
-  const [category, setCategory] = (0, import_react9.useState)("春");
+  const [catalog, setCatalog] = (0, import_react10.useState)(null);
+  const [error, setError] = (0, import_react10.useState)("");
+  const [category, setCategory] = (0, import_react10.useState)("春");
   const customSection = category === "custom";
   const visibleCustom = customCostumes.filter((item) => showAdult || !item.adult);
   const hiddenCustomAdult = customCostumes.length - visibleCustom.length;
-  const [query, setQuery] = (0, import_react9.useState)("");
-  (0, import_react9.useEffect)(() => {
+  const [query, setQuery] = (0, import_react10.useState)("");
+  (0, import_react10.useEffect)(() => {
     const controller = new AbortController();
     fetch(studioUrl(basePath, "/api/costumes"), { signal: controller.signal }).then(async (response) => {
       if (!response.ok) throw new Error("服装目录没有加载出来");
@@ -10676,12 +10688,12 @@ function CostumeBrowser({
     });
     return () => controller.abort();
   }, [basePath]);
-  (0, import_react9.useEffect)(() => {
+  (0, import_react10.useEffect)(() => {
     if (!focusCategory || !showAdult) return;
     setCategory(focusCategory);
     onFocusApplied();
   }, [focusCategory, showAdult, onFocusApplied]);
-  const costumes = (0, import_react9.useMemo)(() => {
+  const costumes = (0, import_react10.useMemo)(() => {
     if (!catalog) return [];
     const parts = query.trim().toLowerCase().split(/\s+/).filter(Boolean);
     return catalog.costumes.filter((costume) => {
@@ -10820,7 +10832,7 @@ function CostumeBrowser({
 }
 
 // components/pose-browser.tsx
-var import_react10 = require("react");
+var import_react11 = require("react");
 
 // node_modules/@base-ui/react/use-render/useRender.mjs
 function useRender(params) {
@@ -10887,7 +10899,7 @@ function displayView(pose, selectedViewId, angle) {
 }
 function PoseFigure({ view, alt, size = "thumb" }) {
   const { basePath } = useStudioEnv();
-  const [failed, setFailed] = (0, import_react10.useState)(false);
+  const [failed, setFailed] = (0, import_react11.useState)(false);
   if (failed) {
     return /* @__PURE__ */ (0, import_jsx_runtime27.jsx)("div", { className: "grid h-full place-items-center px-3 text-center text-xs text-muted-foreground", children: "线稿暂时加载不到" });
   }
@@ -10920,14 +10932,14 @@ function PoseBrowser({
   hasKey,
   syncWarning
 }) {
-  const [systemId, setSystemId] = (0, import_react10.useState)("full");
+  const [systemId, setSystemId] = (0, import_react11.useState)("full");
   const customSection = systemId === "custom";
-  const [category, setCategory] = (0, import_react10.useState)("全部");
-  const [angle, setAngle] = (0, import_react10.useState)("");
-  const [query, setQuery] = (0, import_react10.useState)("");
-  const [preview, setPreview] = (0, import_react10.useState)(null);
-  const searchRef = (0, import_react10.useRef)(null);
-  (0, import_react10.useEffect)(() => {
+  const [category, setCategory] = (0, import_react11.useState)("全部");
+  const [angle, setAngle] = (0, import_react11.useState)("");
+  const [query, setQuery] = (0, import_react11.useState)("");
+  const [preview, setPreview] = (0, import_react11.useState)(null);
+  const searchRef = (0, import_react11.useRef)(null);
+  (0, import_react11.useEffect)(() => {
     const onKey = (event) => {
       const target = event.target;
       const typing = target instanceof HTMLElement && (target.tagName === "INPUT" || target.tagName === "TEXTAREA");
@@ -10942,7 +10954,7 @@ function PoseBrowser({
   const system = customSection ? void 0 : catalog?.systems.find((item) => item.id === systemId) ?? catalog?.systems[0];
   const visibleCustom = customPoses.filter((item) => showAdult || !item.adult);
   const hiddenCustomAdult = customPoses.length - visibleCustom.length;
-  const categories = (0, import_react10.useMemo)(() => {
+  const categories = (0, import_react11.useMemo)(() => {
     if (!catalog || !system) return ["全部"];
     const names = /* @__PURE__ */ new Set();
     for (const pose of catalog.poses) {
@@ -10952,10 +10964,10 @@ function PoseBrowser({
     }
     return ["全部", ...names];
   }, [catalog, system, showAdult]);
-  (0, import_react10.useEffect)(() => {
+  (0, import_react11.useEffect)(() => {
     if (!categories.includes(category)) setCategory("全部");
   }, [categories, category]);
-  (0, import_react10.useEffect)(() => {
+  (0, import_react11.useEffect)(() => {
     if (!requestedSystem || !showAdult) return;
     if (requestedSystem === "custom") {
       setSystemId("custom");
@@ -10967,7 +10979,7 @@ function PoseBrowser({
     setCategory("全部");
     onRequestedSystemApplied();
   }, [requestedSystem, showAdult, catalog, onRequestedSystemApplied]);
-  const poses = (0, import_react10.useMemo)(() => {
+  const poses = (0, import_react11.useMemo)(() => {
     if (!catalog || !system) return [];
     const parts = query.trim().toLowerCase().split(/\s+/).filter(Boolean);
     return catalog.poses.filter((pose) => {
@@ -11527,58 +11539,47 @@ function Studio({
 }
 function StudioFrame({ embedded }) {
   const { basePath } = useStudioEnv();
-  const [catalog, setCatalog] = (0, import_react11.useState)(null);
-  const [catalogError, setCatalogError] = (0, import_react11.useState)("");
-  const [loading, setLoading] = (0, import_react11.useState)(true);
-  const [settings, setSettings] = (0, import_react11.useState)(DEFAULT_SETTINGS);
-  const [library, setLibrary] = (0, import_react11.useState)("poses");
-  const [costume, setCostume] = (0, import_react11.useState)(null);
-  const [costumeFocus, setCostumeFocus] = (0, import_react11.useState)(null);
-  const [requestedSystem, setRequestedSystem] = (0, import_react11.useState)(null);
-  const [settingsOpen, setSettingsOpen] = (0, import_react11.useState)(false);
-  const [installOpen, setInstallOpen] = (0, import_react11.useState)(false);
-  const [adultAsk, setAdultAsk] = (0, import_react11.useState)(null);
-  const [characters, setCharacters] = (0, import_react11.useState)([]);
-  const [models, setModels] = (0, import_react11.useState)([]);
-  const [activeModelId, setActiveModelId] = (0, import_react11.useState)(DEFAULT_MODEL_ID);
-  const [builtinUsed, setBuiltinUsed] = (0, import_react11.useState)({});
-  const [sheetBusy, setSheetBusy] = (0, import_react11.useState)(false);
-  const [sheetError, setSheetError] = (0, import_react11.useState)("");
-  const [selected, setSelected] = (0, import_react11.useState)({});
-  const [extraPrompt, setExtraPrompt] = (0, import_react11.useState)("");
-  const [prompts, setPrompts] = (0, import_react11.useState)([]);
-  const [promptError, setPromptError] = (0, import_react11.useState)("");
-  const [results, setResults] = (0, import_react11.useState)([]);
-  const [running, setRunning] = (0, import_react11.useState)(false);
-  const [progress, setProgress] = (0, import_react11.useState)("");
-  const [waited, setWaited] = (0, import_react11.useState)(0);
-  const [runError, setRunError] = (0, import_react11.useState)("");
-  const [limitNote, setLimitNote] = (0, import_react11.useState)("");
-  const [serverKey, setServerKey] = (0, import_react11.useState)(false);
-  const [sheetOpen, setSheetOpen] = (0, import_react11.useState)(false);
-  const [customPoses, setCustomPoses] = (0, import_react11.useState)([]);
-  const [customCostumes, setCustomCostumes] = (0, import_react11.useState)([]);
-  const [history, setHistory] = (0, import_react11.useState)([]);
-  const [storageHigh, setStorageHigh] = (0, import_react11.useState)(false);
-  const [syncWarning, setSyncWarning] = (0, import_react11.useState)("");
-  const [reuseNote, setReuseNote] = (0, import_react11.useState)("");
-  const libraryReady = (0, import_react11.useRef)(false);
-  const modelLoadGen = (0, import_react11.useRef)(0);
-  const clearRequestedSystem = (0, import_react11.useCallback)(() => setRequestedSystem(null), []);
-  const clearCostumeFocus = (0, import_react11.useCallback)(() => setCostumeFocus(null), []);
-  const abortRef = (0, import_react11.useRef)(null);
-  (0, import_react11.useEffect)(() => {
-    if (!running) {
-      setWaited(0);
-      return;
-    }
-    const started = Date.now();
-    const timer = window.setInterval(() => {
-      setWaited(Math.max(1, Math.round((Date.now() - started) / 1e3)));
-    }, 1e3);
-    return () => window.clearInterval(timer);
-  }, [running]);
-  const loadCatalog = (0, import_react11.useCallback)(() => {
+  const [catalog, setCatalog] = (0, import_react12.useState)(null);
+  const [catalogError, setCatalogError] = (0, import_react12.useState)("");
+  const [loading, setLoading] = (0, import_react12.useState)(true);
+  const [settings, setSettings] = (0, import_react12.useState)(DEFAULT_SETTINGS);
+  const [library, setLibrary] = (0, import_react12.useState)("poses");
+  const [costume, setCostume] = (0, import_react12.useState)(null);
+  const [costumeFocus, setCostumeFocus] = (0, import_react12.useState)(null);
+  const [requestedSystem, setRequestedSystem] = (0, import_react12.useState)(null);
+  const [settingsOpen, setSettingsOpen] = (0, import_react12.useState)(false);
+  const [installOpen, setInstallOpen] = (0, import_react12.useState)(false);
+  const [adultAsk, setAdultAsk] = (0, import_react12.useState)(null);
+  const [characters, setCharacters] = (0, import_react12.useState)([]);
+  const [models, setModels] = (0, import_react12.useState)([]);
+  const [activeModelId, setActiveModelId] = (0, import_react12.useState)(DEFAULT_MODEL_ID);
+  const [builtinUsed, setBuiltinUsed] = (0, import_react12.useState)({});
+  const [sheetBusy, setSheetBusy] = (0, import_react12.useState)(false);
+  const [sheetError, setSheetError] = (0, import_react12.useState)("");
+  const [selected, setSelected] = (0, import_react12.useState)({});
+  const [extraPrompt, setExtraPrompt] = (0, import_react12.useState)("");
+  const [prompts, setPrompts] = (0, import_react12.useState)([]);
+  const [promptError, setPromptError] = (0, import_react12.useState)("");
+  const [results, setResults] = (0, import_react12.useState)([]);
+  const [running, setRunning] = (0, import_react12.useState)(false);
+  const [progress, setProgress] = (0, import_react12.useState)("");
+  const waited = useElapsedSeconds(running);
+  const [runError, setRunError] = (0, import_react12.useState)("");
+  const [limitNote, setLimitNote] = (0, import_react12.useState)("");
+  const [serverKey, setServerKey] = (0, import_react12.useState)(false);
+  const [sheetOpen, setSheetOpen] = (0, import_react12.useState)(false);
+  const [customPoses, setCustomPoses] = (0, import_react12.useState)([]);
+  const [customCostumes, setCustomCostumes] = (0, import_react12.useState)([]);
+  const [history, setHistory] = (0, import_react12.useState)([]);
+  const [storageHigh, setStorageHigh] = (0, import_react12.useState)(false);
+  const [syncWarning, setSyncWarning] = (0, import_react12.useState)("");
+  const [reuseNote, setReuseNote] = (0, import_react12.useState)("");
+  const libraryReady = (0, import_react12.useRef)(false);
+  const modelLoadGen = (0, import_react12.useRef)(0);
+  const clearRequestedSystem = (0, import_react12.useCallback)(() => setRequestedSystem(null), []);
+  const clearCostumeFocus = (0, import_react12.useCallback)(() => setCostumeFocus(null), []);
+  const abortRef = (0, import_react12.useRef)(null);
+  const loadCatalog = (0, import_react12.useCallback)(() => {
     setLoading(true);
     setCatalogError("");
     fetch(studioUrl(basePath, "/api/catalog")).then(async (response) => {
@@ -11586,10 +11587,10 @@ function StudioFrame({ embedded }) {
       return response.json();
     }).then(setCatalog).catch((error) => setCatalogError(error instanceof Error ? error.message : "姿势目录没有加载出来")).finally(() => setLoading(false));
   }, [basePath]);
-  (0, import_react11.useEffect)(() => {
+  (0, import_react12.useEffect)(() => {
     loadCatalog();
   }, [loadCatalog]);
-  (0, import_react11.useEffect)(() => {
+  (0, import_react12.useEffect)(() => {
     const local = loadSettings();
     fetch(studioUrl(basePath, "/api/status")).then((response) => response.json()).then((payload) => {
       setServerKey(Boolean(payload.keyConfigured));
@@ -11608,7 +11609,7 @@ function StudioFrame({ embedded }) {
       setSettings(local);
     }).catch(() => setSettings(local));
   }, [basePath]);
-  (0, import_react11.useEffect)(() => {
+  (0, import_react12.useEffect)(() => {
     const gen = ++modelLoadGen.current;
     Promise.all([readStoredCharacters(), listSavedModels(), readActiveModelId()]).then(([images, saved, activeId]) => {
       if (modelLoadGen.current !== gen) return;
@@ -11629,7 +11630,7 @@ function StudioFrame({ embedded }) {
     }).catch(() => {
     });
   }, []);
-  (0, import_react11.useEffect)(() => {
+  (0, import_react12.useEffect)(() => {
     let cancelled = false;
     Promise.all([listCustomPoses(), listCustomCostumes(), listHistory(), readStoragePressure()]).then(([poses, costumes, entries, pressure]) => {
       if (cancelled) return;
@@ -11645,7 +11646,7 @@ function StudioFrame({ embedded }) {
       cancelled = true;
     };
   }, []);
-  (0, import_react11.useEffect)(() => {
+  (0, import_react12.useEffect)(() => {
     if (!libraryReady.current) return;
     const timer = window.setTimeout(() => {
       syncCustomLibrary(basePath, customPoses, customCostumes).then(() => setSyncWarning("")).catch(() => setSyncWarning("自定义参考还没同步给 Agent。刷新工作室后再试。"));
@@ -11761,7 +11762,7 @@ function StudioFrame({ embedded }) {
   const poseUrls = useBlobUrls(customPoses);
   const costumeUrls = useBlobUrls(customCostumes);
   const historyUrls = useBlobUrls(history);
-  const poseById = (0, import_react11.useMemo)(() => {
+  const poseById = (0, import_react12.useMemo)(() => {
     const map = /* @__PURE__ */ new Map();
     catalog?.poses.forEach((pose) => map.set(pose.id, pose));
     for (const asset of customPoses) {
@@ -11779,7 +11780,7 @@ function StudioFrame({ embedded }) {
     }
     return map;
   }, [catalog, customPoses]);
-  const chosen = (0, import_react11.useMemo)(() => {
+  const chosen = (0, import_react12.useMemo)(() => {
     return Object.entries(selected).flatMap(([poseId, viewId]) => {
       const pose = poseById.get(poseId);
       const view = pose?.views.find((item) => item.id === viewId);
@@ -11788,7 +11789,7 @@ function StudioFrame({ embedded }) {
     });
   }, [selected, poseById, poseUrls]);
   const selectionKey = chosen.map((item) => item.viewId).join("|");
-  (0, import_react11.useEffect)(() => {
+  (0, import_react12.useEffect)(() => {
     if (!selectionKey) {
       setPrompts([]);
       setPromptError("");
@@ -12041,7 +12042,7 @@ function StudioFrame({ embedded }) {
       onClearCostume: () => setCostume(null),
       hasKey: Boolean(settings.apiKey.trim()) || serverKey,
       running,
-      progress: waited > 0 ? `${progress}（已等待 ${waited} 秒）` : progress,
+      progress: withElapsed(progress, waited),
       runError,
       prompts,
       promptError,
@@ -12237,8 +12238,8 @@ function GithubMark() {
   ] });
 }
 function useBlobUrls(items) {
-  const [urls, setUrls] = (0, import_react11.useState)({});
-  (0, import_react11.useEffect)(() => {
+  const [urls, setUrls] = (0, import_react12.useState)({});
+  (0, import_react12.useEffect)(() => {
     const created = {};
     for (const item of items) created[item.id] = URL.createObjectURL(item.image);
     setUrls(created);
@@ -12303,10 +12304,10 @@ function PosePanelIcon({ size = 16 }) {
   ] });
 }
 function PoseStudio() {
-  const hostRef = (0, import_react12.useRef)(null);
-  const [mount, setMount] = (0, import_react12.useState)(null);
-  const [portalContainer, setPortalContainer] = (0, import_react12.useState)(null);
-  (0, import_react12.useEffect)(() => {
+  const hostRef = (0, import_react13.useRef)(null);
+  const [mount, setMount] = (0, import_react13.useState)(null);
+  const [portalContainer, setPortalContainer] = (0, import_react13.useState)(null);
+  (0, import_react13.useEffect)(() => {
     const host = hostRef.current;
     if (!host) return;
     const shadow = host.shadowRoot ?? host.attachShadow({ mode: "open" });

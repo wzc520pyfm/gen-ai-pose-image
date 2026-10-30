@@ -3,6 +3,7 @@
 /* eslint-disable @next/next/no-img-element -- model photos are data URLs or the bundled muse file */
 
 import { useRef, useState } from "react"
+import { useElapsedSeconds, withElapsed } from "@/lib/elapsed"
 import { ChevronLeft, ChevronRight, ImagePlus } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -61,6 +62,7 @@ export function CharacterDock({
   const [editingId, setEditingId] = useState<string | null>(null)
   const [draftLabel, setDraftLabel] = useState("")
   const [pendingDelete, setPendingDelete] = useState<string | null>(null)
+  const sheetWaited = useElapsedSeconds(sheetBusy)
   const custom = images.length > 0
   const photoCount = images.filter((image) => image.role !== "sheet").length
   const hasSheet = images.some((image) => image.role === "sheet")
@@ -265,7 +267,7 @@ export function CharacterDock({
             onGenerateSheet()
           }}
         >
-          {sheetBusy ? "正在生成" : "生成多视角 sheet"}
+          {sheetBusy ? withElapsed("正在生成", sheetWaited) : "生成多视角 sheet"}
         </Button>
       ) : null}
       {sheetError ? <p className="text-sm text-[#fecaca]">{sheetError}</p> : null}
