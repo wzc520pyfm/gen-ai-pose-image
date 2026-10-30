@@ -1,3 +1,5 @@
+import { getBuiltinModel } from "./builtin-models.mjs"
+
 export const DEFAULT_CHARACTER = {
   id: "dafeiyu",
   name: "大肥鱼",
@@ -11,6 +13,25 @@ export const DEFAULT_CHARACTER = {
     "服装：海军蓝与白色的女仆装。白色褶边头饰，露肩白衬衫，黑色领结和蓝色宝石，深蓝色长袖短外套，金色纽扣，白色围裙上有一只小蓝鲸图案，背后系着大白蝴蝶结，深蓝色短裙带白色褶边，白色过膝袜配小蝴蝶结，深蓝色高跟玛丽珍鞋。",
     "画风：干净的动漫插画，成人身体比例。必须匹配参考图中的这个角色，不要换成白西装或其他人。",
   ].join("\n"),
+}
+
+export function characterForBuiltin(id) {
+  const model = getBuiltinModel(id)
+  if (!model || model.id === "dafeiyu") return DEFAULT_CHARACTER
+  return {
+    id: model.id,
+    name: model.name,
+    title: model.name,
+    ageNote: "成年女性",
+    summary: model.blurb,
+    prompt: [
+      `角色名：${model.name}。按第一张参考图里的这个人来画，不要画成大肥鱼，也不要换成别人。`,
+      "成年女性，五官和身体比例都是成人，不是儿童或青少年。",
+      `外貌以参考图为准：${model.blurb}`,
+      "服装、发色、耳朵、角或尾巴都跟参考图一致。参考图里没有的特征不要加。",
+      "画风：干净的动漫插画，成人身体比例。",
+    ].join("\n"),
+  }
 }
 
 export function characterFromUploads(count) {

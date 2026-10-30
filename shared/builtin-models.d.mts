@@ -3,6 +3,7 @@ export type BuiltinModel = {
   name: string
   portrait: string
   sheet: string
+  blurb: string
 }
 
 export const BUILTIN_MODELS: readonly BuiltinModel[]

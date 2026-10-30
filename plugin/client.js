@@ -5527,11 +5527,78 @@ var BUILTIN_MODELS = Object.freeze([
     id: "dafeiyu",
     name: "大肥鱼",
     portrait: "/muse/dafeiyu-portrait.jpg",
-    sheet: "/muse/dafeiyu-sheet.png"
+    sheet: "/muse/dafeiyu-sheet.png",
+    blurb: "社区鲸鱼娘的成年形象。"
+  }),
+  Object.freeze({
+    id: "claude",
+    name: "Claude 娘",
+    portrait: "/muse/claude-portrait.jpg",
+    sheet: "/muse/claude-sheet.png",
+    blurb: "长橙发，白橙礼裙，手里捧着一本书。"
+  }),
+  Object.freeze({
+    id: "gemini",
+    name: "Gemini 娘",
+    portrait: "/muse/gemini-portrait.jpg",
+    sheet: "/muse/gemini-sheet.png",
+    blurb: "蓝紫长发，猫耳，星星配饰。"
+  }),
+  Object.freeze({
+    id: "glm",
+    name: "GLM 娘",
+    portrait: "/muse/glm-portrait.jpg",
+    sheet: "/muse/glm-sheet.png",
+    blurb: "黑发狐耳，黑白长裙。"
+  }),
+  Object.freeze({
+    id: "gpt",
+    name: "GPT 娘",
+    portrait: "/muse/gpt-portrait.jpg",
+    sheet: "/muse/gpt-sheet.png",
+    blurb: "白发龙角，白裙与龙尾。"
+  }),
+  Object.freeze({
+    id: "grok",
+    name: "Grok 娘",
+    portrait: "/muse/grok-portrait.jpg",
+    sheet: "/muse/grok-sheet.png",
+    blurb: "金发双马尾，黑金礼裙。"
+  }),
+  Object.freeze({
+    id: "kimi",
+    name: "Kimi 娘",
+    portrait: "/muse/kimi-portrait.jpg",
+    sheet: "/muse/kimi-sheet.png",
+    blurb: "银白长发，星空披风与音符。"
+  }),
+  Object.freeze({
+    id: "llama",
+    name: "llama 娘",
+    portrait: "/muse/llama-portrait.jpg",
+    sheet: "/muse/llama-sheet.png",
+    blurb: "白发羊耳，宽松白裙。"
+  }),
+  Object.freeze({
+    id: "minimax",
+    name: "Minimax 娘",
+    portrait: "/muse/minimax-portrait.jpg",
+    sheet: "/muse/minimax-sheet.png",
+    blurb: "橙发白帽，粉色外套。"
+  }),
+  Object.freeze({
+    id: "qwen",
+    name: "Qwen 娘",
+    portrait: "/muse/qwen-portrait.jpg",
+    sheet: "/muse/qwen-sheet.png",
+    blurb: "蓝发侧辫，折扇与蓝白长裙。"
   })
 ]);
 function isBuiltinModelId(id) {
   return BUILTIN_MODELS.some((model) => model.id === id);
+}
+function getBuiltinModel(id) {
+  return BUILTIN_MODELS.find((model) => model.id === id) || null;
 }
 
 // shared/models.mjs
@@ -5664,6 +5731,7 @@ function switcherEntries({ models = [] } = {}) {
 
 // components/character-dock.tsx
 var import_jsx_runtime12 = require("react/jsx-runtime");
+var AUTHOR_URL = "https://www.bilibili.com/opus/1233069202138464289";
 function CharacterDock({
   images,
   onChange,
@@ -5704,8 +5772,9 @@ function CharacterDock({
     if (!canCycle) return;
     onSelectModel(cycleModelId(switchItems, activeModelId, direction));
   }
-  const portrait = custom ? `data:${images[0].mediaType};base64,${images[0].dataBase64}` : studioUrl(basePath, "/muse/dafeiyu-portrait.jpg");
-  const full = custom ? portrait : studioUrl(basePath, "/muse/dafeiyu-sheet.png");
+  const builtin = custom ? null : getBuiltinModel(activeModelId) || getBuiltinModel("dafeiyu");
+  const portrait = custom ? `data:${images[0].mediaType};base64,${images[0].dataBase64}` : studioUrl(basePath, builtin?.portrait || "/muse/dafeiyu-portrait.jpg");
+  const full = custom ? portrait : studioUrl(basePath, builtin?.sheet || "/muse/dafeiyu-sheet.png");
   async function addFiles(list) {
     if (!list || list.length === 0) return;
     setBusy(true);
@@ -5782,20 +5851,11 @@ function CharacterDock({
           ] }) : null
         ] }),
         /* @__PURE__ */ (0, import_jsx_runtime12.jsx)("p", { className: "mt-0.5 text-xs leading-5 text-[#cbd5e1] @min-[1024px]/studio:mt-2 @min-[1024px]/studio:text-sm @min-[1024px]/studio:leading-6", children: custom ? "生图时改用你导入的参考图。" : /* @__PURE__ */ (0, import_jsx_runtime12.jsxs)(import_jsx_runtime12.Fragment, { children: [
-          /* @__PURE__ */ (0, import_jsx_runtime12.jsx)("span", { className: "block", children: "社区鲸鱼娘的成年形象。" }),
+          /* @__PURE__ */ (0, import_jsx_runtime12.jsx)("span", { className: "block", children: builtin?.blurb || "社区鲸鱼娘的成年形象。" }),
           /* @__PURE__ */ (0, import_jsx_runtime12.jsxs)("span", { className: "block", children: [
             "原创作者",
             " ",
-            /* @__PURE__ */ (0, import_jsx_runtime12.jsx)(
-              "a",
-              {
-                href: "https://www.bilibili.com/opus/1233069202138464289",
-                target: "_blank",
-                rel: "noopener noreferrer",
-                className: "underline underline-offset-2 hover:text-white",
-                children: "ZipZipPipe"
-              }
-            )
+            /* @__PURE__ */ (0, import_jsx_runtime12.jsx)("a", { href: AUTHOR_URL, target: "_blank", rel: "noopener noreferrer", className: "underline underline-offset-2 hover:text-white", children: "ZipZipPipe" })
           ] })
         ] }) }),
         currentItem && !currentItem.builtin ? /* @__PURE__ */ (0, import_jsx_runtime12.jsxs)("p", { className: "mt-1 flex gap-3 text-[11px] text-[#cbd5e1]", children: [
@@ -5847,9 +5907,9 @@ function CharacterDock({
         }
       )
     ] }),
-    /* @__PURE__ */ (0, import_jsx_runtime12.jsx)("img", { src: portrait, alt: custom ? images[0]?.role === "sheet" ? "多视角设定图" : "导入的模特头像" : "大肥鱼的正面全身像，蓝发、鲸耳、蓝白女仆装", className: `hidden w-full rounded-xl @min-[1024px]/studio:block ${images[0]?.role === "sheet" ? "max-h-56 bg-white object-contain" : "aspect-[3/4] object-cover object-top"}` }),
-    /* @__PURE__ */ (0, import_jsx_runtime12.jsx)("p", { className: "hidden text-sm leading-6 text-[#cbd5e1] @min-[1024px]/studio:block", children: custom ? "参考图会和姿势线稿一起交给模型。请使用成年人物的图片。" : "长波浪蓝发、鲸耳和蓝鲸尾。三视图锁住脸和鲸尾，衣服可以换成衣装集里的一套。" }),
-    !custom ? /* @__PURE__ */ (0, import_jsx_runtime12.jsx)("img", { src: full, alt: "大肥鱼的成年三视图：正面、侧面、背面，以及头饰和裙摆细节", className: "hidden max-h-56 rounded-xl bg-white object-contain @min-[1024px]/studio:block" }) : /* @__PURE__ */ (0, import_jsx_runtime12.jsx)("div", { className: "grid grid-cols-3 gap-2", children: images.map((image) => /* @__PURE__ */ (0, import_jsx_runtime12.jsxs)("div", { className: "relative", children: [
+    /* @__PURE__ */ (0, import_jsx_runtime12.jsx)("img", { src: portrait, alt: custom ? images[0]?.role === "sheet" ? "多视角设定图" : "导入的模特头像" : `${builtin?.name || "大肥鱼"}的正面全身像`, className: `hidden w-full rounded-xl @min-[1024px]/studio:block ${images[0]?.role === "sheet" ? "max-h-56 bg-white object-contain" : "aspect-[3/4] object-cover object-top"}` }),
+    /* @__PURE__ */ (0, import_jsx_runtime12.jsx)("p", { className: "hidden text-sm leading-6 text-[#cbd5e1] @min-[1024px]/studio:block", children: custom ? "参考图会和姿势线稿一起交给模型。请使用成年人物的图片。" : builtin?.id === "dafeiyu" ? "长波浪蓝发、鲸耳和蓝鲸尾。三视图锁住脸和鲸尾，衣服可以换成衣装集里的一套。" : "三视图锁住脸和服装。衣服可以换成衣装集里的一套。" }),
+    !custom ? /* @__PURE__ */ (0, import_jsx_runtime12.jsx)("img", { src: full, alt: `${builtin?.name || "大肥鱼"}的多视角设定图`, className: "hidden max-h-56 rounded-xl bg-white object-contain @min-[1024px]/studio:block" }) : /* @__PURE__ */ (0, import_jsx_runtime12.jsx)("div", { className: "grid grid-cols-3 gap-2", children: images.map((image) => /* @__PURE__ */ (0, import_jsx_runtime12.jsxs)("div", { className: "relative", children: [
       /* @__PURE__ */ (0, import_jsx_runtime12.jsx)("img", { src: `data:${image.mediaType};base64,${image.dataBase64}`, alt: image.role === "sheet" ? "多视角设定图" : "导入的模特参考", className: `aspect-[3/4] w-full rounded-lg ${image.role === "sheet" ? "bg-white object-contain" : "object-cover"}` }),
       image.role === "sheet" ? /* @__PURE__ */ (0, import_jsx_runtime12.jsx)("span", { className: "absolute bottom-1 left-1 rounded-full bg-black/60 px-1.5 text-[10px] text-white", children: "设定图" }) : null,
       /* @__PURE__ */ (0, import_jsx_runtime12.jsx)(
@@ -9929,10 +9989,12 @@ function Composer({
   onReuseHistory,
   onDeleteHistory,
   onClearHistory,
-  reuseNote
+  reuseNote,
+  builtinName,
+  builtinSheet
 }) {
   const { basePath } = useStudioEnv();
-  const characterSrc = characters[0] ? `data:${characters[0].mediaType};base64,${characters[0].dataBase64}` : studioUrl(basePath, "/muse/dafeiyu-sheet.png");
+  const characterSrc = characters[0] ? `data:${characters[0].mediaType};base64,${characters[0].dataBase64}` : studioUrl(basePath, builtinSheet);
   const limit = mode === "sheet" ? 4 : 8;
   const poseThumb = (viewId, thumbSrc) => thumbSrc || studioUrl(basePath, `/api/pose-image?id=${encodeURIComponent(viewId)}&size=thumb`);
   const costumeThumb = costume?.thumbSrc || (costume ? studioUrl(basePath, `/api/costume-image?id=${encodeURIComponent(costume.id)}&size=thumb`) : "");
@@ -9965,7 +10027,7 @@ function Composer({
     ] }) : null,
     selected.length === 0 ? /* @__PURE__ */ (0, import_jsx_runtime24.jsxs)("p", { className: "rounded-xl bg-muted px-3 py-4 text-sm leading-6 text-muted-foreground", children: [
       "从中间点选一个或多个姿势。每一张成图都会带上",
-      characters.length ? "你导入的模特" : "大肥鱼",
+      characters.length ? "你导入的模特" : builtinName,
       "，只把身体换成对应的线稿姿势。要换衣服，先到「服装」里点一套。"
     ] }) : /* @__PURE__ */ (0, import_jsx_runtime24.jsx)("ul", { className: "flex max-h-40 flex-col gap-2 overflow-auto", children: selected.map((item) => /* @__PURE__ */ (0, import_jsx_runtime24.jsxs)("li", { className: "flex items-center gap-2 rounded-xl border bg-card px-2 py-1.5", children: [
       /* @__PURE__ */ (0, import_jsx_runtime24.jsx)("img", { src: poseThumb(item.viewId, item.thumbSrc), alt: "", className: "h-12 w-9 rounded-md bg-white object-contain" }),
@@ -9981,7 +10043,7 @@ function Composer({
         selected[0].title
       ] }),
       /* @__PURE__ */ (0, import_jsx_runtime24.jsxs)("div", { className: `mt-2 grid items-center gap-2 ${costume ? "grid-cols-3" : "grid-cols-[1fr_auto_1fr]"}`, children: [
-        /* @__PURE__ */ (0, import_jsx_runtime24.jsx)("img", { src: characterSrc, alt: characters.length ? "导入的模特" : "大肥鱼的成年三视图", className: "aspect-[3/4] rounded-lg bg-[#f8fafc] object-contain" }),
+        /* @__PURE__ */ (0, import_jsx_runtime24.jsx)("img", { src: characterSrc, alt: characters.length ? "导入的模特" : `${builtinName}的多视角设定图`, className: "aspect-[3/4] rounded-lg bg-[#f8fafc] object-contain" }),
         costume ? /* @__PURE__ */ (0, import_jsx_runtime24.jsx)("img", { src: costumeThumb, alt: `${costume.id} 的服装参考，图中没有人物`, className: "aspect-[3/4] rounded-lg bg-white object-contain" }) : /* @__PURE__ */ (0, import_jsx_runtime24.jsx)("span", { className: "text-lg text-muted-foreground", "aria-hidden": "true", children: "→" }),
         /* @__PURE__ */ (0, import_jsx_runtime24.jsx)("img", { src: poseThumb(selected[0].viewId, selected[0].thumbSrc), alt: `${selected[0].title} 的姿势线稿`, className: "aspect-[3/4] rounded-lg bg-white object-contain" })
       ] }),
@@ -11891,6 +11953,7 @@ function StudioFrame({ embedded }) {
             keepOutfit: settings.keepOutfit,
             extraPrompt,
             characterCount: characters.length,
+            builtinModelId: characters.length ? "" : activeModelId,
             costumeId: costume?.id ?? "",
             customReferences
           }),
@@ -11911,7 +11974,7 @@ function StudioFrame({ embedded }) {
       window.clearTimeout(timer);
       controller.abort();
     };
-  }, [basePath, selectionKey, extraPrompt, characters.length, costume?.id, settings.provider, settings.mode, settings.keepOutfit, customPoses, customCostumes]);
+  }, [basePath, selectionKey, extraPrompt, characters.length, activeModelId, costume?.id, settings.provider, settings.mode, settings.keepOutfit, customPoses, customCostumes]);
   function togglePose(pose, view) {
     if (selected[pose.id] === view.id) {
       setLimitNote("");
@@ -11993,7 +12056,8 @@ function StudioFrame({ embedded }) {
       keepOutfit: settings.keepOutfit,
       extraPrompt,
       costumeId: costume?.id ?? "",
-      characterImages: characters.map((image) => ({ mediaType: image.mediaType, dataBase64: image.dataBase64 }))
+      characterImages: characters.map((image) => ({ mediaType: image.mediaType, dataBase64: image.dataBase64 })),
+      builtinModelId: characters.length ? "" : activeModelId
     };
     const snapshotBase = {
       extraPrompt,
@@ -12184,7 +12248,9 @@ function StudioFrame({ embedded }) {
           setRunError(error instanceof Error ? error.message : "没有清空历史");
         });
       },
-      reuseNote
+      reuseNote,
+      builtinName: getBuiltinModel(activeModelId)?.name || "大肥鱼",
+      builtinSheet: getBuiltinModel(activeModelId)?.sheet || "/muse/dafeiyu-sheet.png"
     }
   );
   return /* @__PURE__ */ (0, import_jsx_runtime32.jsxs)("div", { className: `@container/studio flex min-h-0 flex-col overflow-hidden bg-background text-foreground ${embedded ? "h-full" : "h-dvh"}`, children: [
