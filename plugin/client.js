@@ -5781,7 +5781,23 @@ function CharacterDock({
             position.total
           ] }) : null
         ] }),
-        /* @__PURE__ */ (0, import_jsx_runtime12.jsx)("p", { className: "mt-0.5 line-clamp-2 text-xs leading-5 text-[#cbd5e1] @min-[1024px]/studio:mt-2 @min-[1024px]/studio:text-sm @min-[1024px]/studio:leading-6", children: custom ? "生图时改用你导入的参考图。" : "社区鲸鱼娘的成年形象，不是 DeepSeek 官方吉祥物。" }),
+        /* @__PURE__ */ (0, import_jsx_runtime12.jsx)("p", { className: "mt-0.5 text-xs leading-5 text-[#cbd5e1] @min-[1024px]/studio:mt-2 @min-[1024px]/studio:text-sm @min-[1024px]/studio:leading-6", children: custom ? "生图时改用你导入的参考图。" : /* @__PURE__ */ (0, import_jsx_runtime12.jsxs)(import_jsx_runtime12.Fragment, { children: [
+          /* @__PURE__ */ (0, import_jsx_runtime12.jsx)("span", { className: "block", children: "社区鲸鱼娘的成年形象。" }),
+          /* @__PURE__ */ (0, import_jsx_runtime12.jsxs)("span", { className: "block", children: [
+            "原创作者",
+            " ",
+            /* @__PURE__ */ (0, import_jsx_runtime12.jsx)(
+              "a",
+              {
+                href: "https://www.bilibili.com/opus/1233069202138464289",
+                target: "_blank",
+                rel: "noopener noreferrer",
+                className: "underline underline-offset-2 hover:text-white",
+                children: "ZipZipPipe"
+              }
+            )
+          ] })
+        ] }) }),
         currentItem && !currentItem.builtin ? /* @__PURE__ */ (0, import_jsx_runtime12.jsxs)("p", { className: "mt-1 flex gap-3 text-[11px] text-[#cbd5e1]", children: [
           /* @__PURE__ */ (0, import_jsx_runtime12.jsx)("button", { type: "button", className: "underline-offset-2 hover:underline", onClick: () => {
             setEditingId(activeModelId);
