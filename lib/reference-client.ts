@@ -53,7 +53,7 @@ export async function requestBeautify(basePath: string, settings: StudioSettings
   }
 }
 
-export async function requestReferenceImage(basePath: string, settings: StudioSettings, prompt: string) {
+export async function requestReferenceImage(basePath: string, settings: StudioSettings, prompt: string, kind: "pose" | "costume") {
   const response = await fetch(studioUrl(basePath, "/api/reference"), {
     method: "POST",
     headers: { "content-type": "application/json" },
@@ -63,6 +63,7 @@ export async function requestReferenceImage(basePath: string, settings: StudioSe
       baseURL: settings.baseURL,
       model: settings.model,
       aspectRatio: settings.aspectRatio,
+      kind,
       prompt,
     }),
   })

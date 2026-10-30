@@ -152,7 +152,7 @@ export function CustomReferencePanel({
     setBusy("正在生成参考图")
     setError("")
     try {
-      const image = await requestReferenceImage(basePath, settings, text)
+      const image = await requestReferenceImage(basePath, settings, text, kind)
       const blob = await fileToJpegBlob(base64ToBlob(image.imageBase64, image.mediaType))
       setPreviewBlob(blob)
       if (!label.trim()) setLabel(description.trim().slice(0, 80) || (kind === "pose" ? "自定义姿势" : "自定义服装"))

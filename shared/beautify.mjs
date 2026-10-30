@@ -1,4 +1,4 @@
-import { expandReferencePrompt } from "./custom.mjs"
+import { COSTUME_STYLE_LOCK, POSE_STYLE_LOCK, expandReferencePrompt } from "./custom.mjs"
 import { defaultBaseURL, redact } from "./generate.mjs"
 
 export function textModelFor(provider, model) {
@@ -17,8 +17,8 @@ export function textModelFor(provider, model) {
 
 export function beautifyInstruction({ kind, userPrompt = "", adult = false }) {
   const role = kind === "costume"
-    ? "你在写服装参考图的文生图提示词。图里只能有衣服，不能有人、人台、假人或身体。"
-    : "你在写姿势参考图的文生图提示词。图应是白底黑色线稿，只表达成年身体的姿态，不要上色，不要服装设计。"
+    ? `你在写服装参考图的文生图提示词。图里只能有衣服，不能有人、人台、假人或身体。${COSTUME_STYLE_LOCK}`
+    : `你在写姿势参考图的文生图提示词。图应是白底黑色线稿，球关节人偶，只表达成年身体的姿态，不要上色，不要服装设计。${POSE_STYLE_LOCK}`
   const safety = adult
     ? "用户已打开成人向。可以按描述包含暴露或亲密内容，但人物必须是成年人，禁止未成年人。"
     : "不要生成露骨内容：不要裸体、内衣、泳装或性暗示。"

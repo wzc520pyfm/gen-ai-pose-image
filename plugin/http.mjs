@@ -4,7 +4,8 @@ import { fileURLToPath } from "node:url"
 import { beautifyPrompt } from "../shared/beautify.mjs"
 import { getCatalog, resolveView } from "../shared/catalog.mjs"
 import { costumeFile, fetchCostumeBytes, getCostume, getCostumeCatalog } from "../shared/costumes.mjs"
-import { assertBaseURL, defaultModel, generateImage } from "../shared/generate.mjs"
+import { assertBaseURL, defaultModel } from "../shared/generate.mjs"
+import { generateStyledReference } from "../shared/style-refs.mjs"
 import { planRequest, promptCards, runGeneration } from "../shared/jobs.mjs"
 import { fetchPoseBytes, poseFileFor } from "../shared/poses.mjs"
 import { replaceCustomLibrary, upsertCustomCostume, upsertCustomPose } from "../shared/registry.mjs"
@@ -125,18 +126,20 @@ export function createPoseHandler(getConfig) {
           return json(res, 200, result)
         }
         if (path === "/api/reference") {
+          const kind = body.kind === "pose" || body.kind === "costume" ? body.kind : ""
+          if (!kind) return json(res, 400, { error: "需要说明是姿势还是服装" })
           const prompt = typeof body.prompt === "string" ? body.prompt.trim() : ""
           if (!prompt) return json(res, 400, { error: "先写好提示词" })
           if (!String(body.apiKey || "").trim()) return json(res, 400, { error: "还没有填写 API Key" })
           const provider = body.provider === "openai" || body.provider === "seedream" || body.provider === "gemini" ? body.provider : null
           if (!provider) return json(res, 400, { error: "不支持的生图接口" })
-          const image = await generateImage({
+          const image = await generateStyledReference({
+            kind,
             provider,
             apiKey: String(body.apiKey).trim(),
             baseURL: assertBaseURL(body.baseURL),
             model: String(body.model || "").trim() || defaultModel(provider),
-            prompt: prompt.slice(0, 4000),
-            images: [],
+            prompt,
             aspectRatio: ASPECTS.has(body.aspectRatio) ? body.aspectRatio : "3:4",
             signal: req.signal,
           })

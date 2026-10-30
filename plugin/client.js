@@ -8614,19 +8614,23 @@ function isStorageHigh(usage, quota, threshold = 0.8) {
   if (cap <= 0) return false;
   return used / cap >= threshold;
 }
+var POSE_STYLE_LOCK = "严格模仿参考图的线稿风格与人偶质感，只按描述改姿态。";
+var COSTUME_STYLE_LOCK = "严格模仿参考图的平铺商品图风格，只按描述改衣服。";
 function expandReferencePrompt({ kind = "pose", userPrompt = "", adult = false } = {}) {
   const note = String(userPrompt ?? "").trim().slice(0, 2e3);
   const safe = adult ? "" : "画面保持非露骨：不要裸体，不要内衣，不要性暗示。";
   if (kind === "costume") {
     return [
       "白底服装平铺参考图，只有衣服，没有人物，没有人台，没有假人，没有身体，商品摄影，光线均匀。",
+      COSTUME_STYLE_LOCK,
       safe,
       note ? `服装描述：${note}` : "一套完整的日常外衣，包含上衣和下装，剪裁清楚。",
       "不要文字，不要水印，不要人脸。"
     ].filter(Boolean).join("\n");
   }
   return [
-    "白底单人姿势线稿参考图，黑色干净线条，全身，只表现身体姿态、重心、四肢和镜头角度。",
+    "白底单人姿势线稿参考图，黑色干净线条，球关节人偶，全身，只表现身体姿态、重心、四肢和镜头角度。",
+    POSE_STYLE_LOCK,
     "不要上色，不要服装设计，不要五官细节，不要背景场景。",
     safe,
     note ? `姿势描述：${note}` : "一个清楚的站立或动态姿势，关节可读。",
@@ -8846,7 +8850,7 @@ async function requestBeautify(basePath, settings, input) {
     return fallback(input.kind, input.userPrompt, input.adult, "文本接口不可用，已改用本地扩写。");
   }
 }
-async function requestReferenceImage(basePath, settings, prompt) {
+async function requestReferenceImage(basePath, settings, prompt, kind) {
   const response = await fetch(studioUrl(basePath, "/api/reference"), {
     method: "POST",
     headers: { "content-type": "application/json" },
@@ -8856,6 +8860,7 @@ async function requestReferenceImage(basePath, settings, prompt) {
       baseURL: settings.baseURL,
       model: settings.model,
       aspectRatio: settings.aspectRatio,
+      kind,
       prompt
     })
   });
@@ -10112,7 +10117,7 @@ function CustomReferencePanel({
     setBusy("正在生成参考图");
     setError("");
     try {
-      const image = await requestReferenceImage(basePath, settings, text);
+      const image = await requestReferenceImage(basePath, settings, text, kind);
       const blob = await fileToJpegBlob(base64ToBlob(image.imageBase64, image.mediaType));
       setPreviewBlob(blob);
       if (!label.trim()) setLabel(description.trim().slice(0, 80) || (kind === "pose" ? "自定义姿势" : "自定义服装"));

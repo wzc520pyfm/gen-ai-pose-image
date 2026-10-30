@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server"
 import { applyEnvCredentials } from "@/shared/credentials.mjs"
-import { assertBaseURL, defaultModel, generateImage } from "@/shared/generate.mjs"
+import { assertBaseURL, defaultModel } from "@/shared/generate.mjs"
+import { generateStyledReference } from "@/shared/style-refs.mjs"
 
 export const maxDuration = 300
 
@@ -13,6 +14,8 @@ export async function POST(request: Request) {
   } catch {
     return NextResponse.json({ error: "请求不是 JSON" }, { status: 400 })
   }
+  const kind = body.kind === "pose" || body.kind === "costume" ? body.kind : ""
+  if (!kind) return NextResponse.json({ error: "需要说明是姿势还是服装" }, { status: 400 })
   const filled = applyEnvCredentials(body)
   const provider = filled.provider === "openai" || filled.provider === "seedream" || filled.provider === "gemini" ? filled.provider : null
   if (!provider) return NextResponse.json({ error: "不支持的生图接口" }, { status: 400 })
@@ -22,13 +25,13 @@ export async function POST(request: Request) {
   if (!apiKey) return NextResponse.json({ error: "还没有填写 API Key" }, { status: 400 })
   const aspectRatio = typeof body.aspectRatio === "string" && ASPECTS.has(body.aspectRatio) ? body.aspectRatio : "3:4"
   try {
-    const image = await generateImage({
+    const image = await generateStyledReference({
+      kind,
       provider,
       apiKey,
       baseURL: assertBaseURL(typeof filled.baseURL === "string" ? filled.baseURL : ""),
       model: (typeof filled.model === "string" && filled.model.trim()) || defaultModel(provider),
-      prompt: prompt.slice(0, 4000),
-      images: [],
+      prompt,
       aspectRatio,
       signal: request.signal,
     })
