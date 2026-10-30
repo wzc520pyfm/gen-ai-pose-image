@@ -32,8 +32,33 @@ test("random combo picks one safe pose and one safe costume", () => {
   })
   assert.equal(pick.ok, true)
   assert.equal(pick.pose.id, "safe")
-  assert.equal(pick.view.id, "safe-front")
+  assert.equal(pick.view.id, "safe-side")
+  assert.equal(pick.view.angle, "侧面")
   assert.equal(pick.costume.id, "SPR-0001")
+})
+
+test("the view is chosen from the pose's own angles, not locked to the front", () => {
+  const angles = ["正面", "斜侧", "侧面", "俯视", "仰视"]
+  const pose = {
+    id: "p",
+    adult: false,
+    views: angles.map((angle) => ({ id: `v-${angle}`, angle })),
+  }
+  const seen = []
+  for (let index = 0; index < angles.length; index += 1) {
+    let step = 0
+    const pick = pickRandomCombo({
+      poses: [pose],
+      costumes: [coat],
+      random: () => {
+        step += 1
+        if (step === 2) return index / angles.length
+        return 0
+      },
+    })
+    seen.push(pick.view.angle)
+  }
+  assert.deepEqual(seen, angles)
 })
 
 test("adult items stay available only when the adult filter is open", () => {

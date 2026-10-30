@@ -5826,7 +5826,16 @@ function CharacterDock({
   }
   return /* @__PURE__ */ (0, import_jsx_runtime12.jsxs)("aside", { className: "dock order-1 flex shrink-0 flex-col gap-3 px-3 py-3 text-[#e2e8f0] @min-[1024px]/studio:order-none @min-[1024px]/studio:h-full @min-[1024px]/studio:min-h-0 @min-[1024px]/studio:shrink @min-[1024px]/studio:gap-4 @min-[1024px]/studio:overflow-y-auto @min-[1024px]/studio:px-4 @min-[1024px]/studio:py-5", children: [
     /* @__PURE__ */ (0, import_jsx_runtime12.jsxs)("div", { className: "flex items-start gap-1", children: [
-      /* @__PURE__ */ (0, import_jsx_runtime12.jsx)("img", { src: portrait, alt: "", className: "mt-1 size-14 shrink-0 rounded-xl object-cover object-top @min-[1024px]/studio:hidden" }),
+      /* @__PURE__ */ (0, import_jsx_runtime12.jsx)(
+        ModelFigure,
+        {
+          src: portrait,
+          alt: "",
+          label: "正在加载立绘",
+          boxClassName: "relative mt-1 size-14 shrink-0 overflow-hidden rounded-xl @min-[1024px]/studio:hidden",
+          imgClassName: "size-full object-cover object-top"
+        }
+      ),
       /* @__PURE__ */ (0, import_jsx_runtime12.jsx)(
         "button",
         {
@@ -5920,9 +5929,31 @@ function CharacterDock({
         }
       )
     ] }),
-    /* @__PURE__ */ (0, import_jsx_runtime12.jsx)("img", { src: portrait, alt: custom ? images[0]?.role === "sheet" ? "多视角设定图" : "导入的模特头像" : `${builtin?.name || "大肥鱼"}的正面全身像`, className: `hidden w-full rounded-xl @min-[1024px]/studio:block ${images[0]?.role === "sheet" ? "max-h-56 bg-white object-contain" : "aspect-[3/4] object-cover object-top"}` }),
+    /* @__PURE__ */ (0, import_jsx_runtime12.jsx)(
+      ModelFigure,
+      {
+        src: portrait,
+        alt: custom ? images[0]?.role === "sheet" ? "多视角设定图" : "导入的模特头像" : `${builtin?.name || "大肥鱼"}的正面全身像`,
+        label: "正在加载立绘",
+        boxClassName: "relative hidden w-full shrink-0 overflow-hidden rounded-xl bg-white @min-[1024px]/studio:block",
+        imgClassName: `w-full ${images[0]?.role === "sheet" ? "max-h-56 object-contain" : "aspect-[3/4] object-cover object-top"}`,
+        spinnerClassName: "text-slate-500"
+      }
+    ),
     /* @__PURE__ */ (0, import_jsx_runtime12.jsx)("p", { className: "hidden text-sm leading-6 text-[#cbd5e1] @min-[1024px]/studio:block", children: custom ? "参考图会和姿势线稿一起交给模型。请使用成年人物的图片。" : builtin?.id === "dafeiyu" ? "长波浪蓝发、鲸耳和蓝鲸尾。三视图锁住脸和鲸尾，衣服可以换成衣装集里的一套。" : "三视图锁住脸和服装。衣服可以换成衣装集里的一套。" }),
-    !custom ? /* @__PURE__ */ (0, import_jsx_runtime12.jsx)("img", { src: full, alt: `${builtin?.name || "大肥鱼"}的多视角设定图`, className: "hidden max-h-56 rounded-xl bg-white object-contain @min-[1024px]/studio:block" }) : /* @__PURE__ */ (0, import_jsx_runtime12.jsx)("div", { className: "grid grid-cols-3 gap-2", children: images.map((image) => /* @__PURE__ */ (0, import_jsx_runtime12.jsxs)("div", { className: "relative", children: [
+    !custom ? /* @__PURE__ */ (0, import_jsx_runtime12.jsx)(
+      ModelFigure,
+      {
+        src: full,
+        alt: `${builtin?.name || "大肥鱼"}的多视角设定图`,
+        label: "正在加载设定图",
+        boxClassName: "relative hidden w-full shrink-0 overflow-hidden rounded-xl bg-white @min-[1024px]/studio:block",
+        imgClassName: "max-h-56 w-full rounded-xl bg-white object-contain",
+        width: builtin?.id === "dafeiyu" ? 1448 : 1536,
+        height: builtin?.id === "dafeiyu" ? 1086 : 1024,
+        spinnerClassName: "text-slate-500"
+      }
+    ) : /* @__PURE__ */ (0, import_jsx_runtime12.jsx)("div", { className: "grid grid-cols-3 gap-2", children: images.map((image) => /* @__PURE__ */ (0, import_jsx_runtime12.jsxs)("div", { className: "relative", children: [
       /* @__PURE__ */ (0, import_jsx_runtime12.jsx)("img", { src: `data:${image.mediaType};base64,${image.dataBase64}`, alt: image.role === "sheet" ? "多视角设定图" : "导入的模特参考", className: `aspect-[3/4] w-full rounded-lg ${image.role === "sheet" ? "bg-white object-contain" : "object-cover"}` }),
       image.role === "sheet" ? /* @__PURE__ */ (0, import_jsx_runtime12.jsx)("span", { className: "absolute bottom-1 left-1 rounded-full bg-black/60 px-1.5 text-[10px] text-white", children: "设定图" }) : null,
       /* @__PURE__ */ (0, import_jsx_runtime12.jsx)(
@@ -6008,6 +6039,48 @@ function CharacterDock({
       ] }),
       /* @__PURE__ */ (0, import_jsx_runtime12.jsx)(Switch, { checked: outfitLocked ? false : keepOutfit, onCheckedChange: onKeepOutfit, disabled: outfitLocked, "aria-label": "保持服装" })
     ] })
+  ] });
+}
+function cachedImage(src) {
+  if (!src || src.startsWith("data:") || typeof Image === "undefined") return true;
+  const probe = new Image();
+  probe.src = src;
+  return probe.complete && probe.naturalWidth > 0;
+}
+function ModelFigure({
+  src,
+  alt,
+  label,
+  boxClassName,
+  imgClassName,
+  width,
+  height,
+  spinnerClassName = "text-white/80"
+}) {
+  const [current, setCurrent] = (0, import_react7.useState)(src);
+  const [pending, setPending] = (0, import_react7.useState)(() => !cachedImage(src));
+  if (current !== src) {
+    setCurrent(src);
+    setPending(!cachedImage(src));
+  }
+  return /* @__PURE__ */ (0, import_jsx_runtime12.jsxs)("div", { className: boxClassName, children: [
+    /* @__PURE__ */ (0, import_jsx_runtime12.jsx)(
+      "img",
+      {
+        src,
+        alt: pending ? "" : alt,
+        width,
+        height,
+        onLoad: () => setPending(false),
+        onError: () => setPending(false),
+        style: width && height ? { aspectRatio: `${width} / ${height}` } : void 0,
+        className: `block ${width && height ? "h-auto" : ""} ${imgClassName} ${pending ? "invisible" : ""}`
+      }
+    ),
+    pending ? /* @__PURE__ */ (0, import_jsx_runtime12.jsxs)("div", { className: "absolute inset-0 z-10 grid place-items-center", role: "status", "aria-live": "polite", children: [
+      /* @__PURE__ */ (0, import_jsx_runtime12.jsx)(LoaderCircle, { className: `size-6 animate-spin ${spinnerClassName}` }),
+      /* @__PURE__ */ (0, import_jsx_runtime12.jsx)("span", { className: "sr-only", children: label })
+    ] }) : null
   ] });
 }
 
@@ -11672,13 +11745,13 @@ function visible(items, showAdult) {
   return (Array.isArray(items) ? items : []).filter((item) => item && (showAdult || item.adult !== true));
 }
 function pickRandomCombo({ poses = [], costumes = [], showAdult = false, random = Math.random } = {}) {
-  const posePool = visible(poses, showAdult).filter((pose2) => Array.isArray(pose2.views) && pose2.views.length > 0);
+  const posePool = visible(poses, showAdult).filter((pose2) => Array.isArray(pose2.views) && pose2.views.some((item) => item?.id));
   const costumePool = visible(costumes, showAdult).filter((costume) => costume.id);
   if (posePool.length === 0) return { ok: false, message: "没有可选的姿势。", pose: null, view: null, costume: null };
   if (costumePool.length === 0) return { ok: false, message: "没有可选的服装。", pose: null, view: null, costume: null };
   const pose = pickOne(posePool, random);
-  const view = pose.views.find((item) => item?.angle === "正面") || pose.views[0];
-  return { ok: true, message: "", pose, view, costume: pickOne(costumePool, random) };
+  const views = pose.views.filter((item) => item?.id);
+  return { ok: true, message: "", pose, view: pickOne(views, random), costume: pickOne(costumePool, random) };
 }
 
 // components/studio.tsx
@@ -12541,6 +12614,7 @@ function PoseStudio() {
     --color-amber-700: oklch(55.5% 0.163 48.998);
     --color-amber-800: oklch(47.3% 0.137 46.201);
     --color-amber-950: oklch(27.9% 0.077 45.635);
+    --color-slate-500: oklch(55.4% 0.046 257.417);
     --color-black: #000;
     --color-white: #fff;
     --spacing: 0.25rem;
@@ -12729,6 +12803,9 @@ function PoseStudio() {
   }
   .pointer-events-none {
     pointer-events: none;
+  }
+  .invisible {
+    visibility: hidden;
   }
   .visible {
     visibility: visible;
@@ -12992,6 +13069,9 @@ function PoseStudio() {
   }
   .h-\\[calc\\(100\\%-1px\\)\\] {
     height: calc(100% - 1px);
+  }
+  .h-auto {
+    height: auto;
   }
   .h-dvh {
     height: 100dvh;
@@ -13553,8 +13633,17 @@ function PoseStudio() {
   .text-secondary-foreground {
     color: var(--secondary-foreground);
   }
+  .text-slate-500 {
+    color: var(--color-slate-500);
+  }
   .text-white {
     color: var(--color-white);
+  }
+  .text-white\\/80 {
+    color: color-mix(in srgb, #fff 80%, transparent);
+    @supports (color: color-mix(in lab, red, red)) {
+      color: color-mix(in oklab, var(--color-white) 80%, transparent);
+    }
   }
   .underline {
     text-decoration-line: underline;

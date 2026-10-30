@@ -12,13 +12,13 @@ function visible(items, showAdult) {
   return (Array.isArray(items) ? items : []).filter((item) => item && (showAdult || item.adult !== true))
 }
 
-/** One visible pose (front view when it exists) and one visible costume. Adult items stay out unless showAdult is on. */
+/** One visible pose, one of that pose's own views, and one visible costume. Adult items stay out unless showAdult is on. */
 export function pickRandomCombo({ poses = [], costumes = [], showAdult = false, random = Math.random } = {}) {
-  const posePool = visible(poses, showAdult).filter((pose) => Array.isArray(pose.views) && pose.views.length > 0)
+  const posePool = visible(poses, showAdult).filter((pose) => Array.isArray(pose.views) && pose.views.some((item) => item?.id))
   const costumePool = visible(costumes, showAdult).filter((costume) => costume.id)
   if (posePool.length === 0) return { ok: false, message: "没有可选的姿势。", pose: null, view: null, costume: null }
   if (costumePool.length === 0) return { ok: false, message: "没有可选的服装。", pose: null, view: null, costume: null }
   const pose = pickOne(posePool, random)
-  const view = pose.views.find((item) => item?.angle === "正面") || pose.views[0]
-  return { ok: true, message: "", pose, view, costume: pickOne(costumePool, random) }
+  const views = pose.views.filter((item) => item?.id)
+  return { ok: true, message: "", pose, view: pickOne(views, random), costume: pickOne(costumePool, random) }
 }
