@@ -5667,6 +5667,8 @@ function CharacterDock({
   const [pendingDelete, setPendingDelete] = (0, import_react6.useState)(null);
   const custom = images.length > 0;
   const photoCount = images.filter((image) => image.role !== "sheet").length;
+  const hasSheet = images.some((image) => image.role === "sheet");
+  const sheetAction = hasSheet ? "替换设定图" : "导入设定图";
   const position = modelIndicator(switchItems, activeModelId);
   const currentIndex = Math.max(0, position.index - 1);
   const currentItem = switchItems.find((item) => item.id === activeModelId) ?? switchItems[currentIndex];
@@ -5836,7 +5838,7 @@ function CharacterDock({
         ref: sheetInputRef,
         type: "file",
         accept: "image/png,image/jpeg,image/webp",
-        "aria-label": "导入设定图",
+        "aria-label": sheetAction,
         className: "sr-only",
         onChange: (event) => void addSheet(event.target.files)
       }
@@ -5861,10 +5863,10 @@ function CharacterDock({
         className: "border-white/20 bg-white/10 text-white hover:bg-white/15 hover:text-white",
         disabled: busy || sheetBusy,
         onClick: () => sheetInputRef.current?.click(),
-        children: busy ? "正在读图" : "导入设定图"
+        children: busy ? "正在读图" : sheetAction
       }
     ),
-    /* @__PURE__ */ (0, import_jsx_runtime12.jsx)("p", { className: "text-xs leading-5 text-[#cbd5e1]", children: "已有完整多视角图时直接导入，会当作当前模特的设定图。只有照片时再生成。" }),
+    /* @__PURE__ */ (0, import_jsx_runtime12.jsx)("p", { className: "text-xs leading-5 text-[#cbd5e1]", children: hasSheet ? "再选一张会替换当前模特的设定图。" : "已有完整多视角图时直接导入，会当作当前模特的设定图。只有照片时再生成。" }),
     photoCount > 0 ? /* @__PURE__ */ (0, import_jsx_runtime12.jsx)(
       Button3,
       {
