@@ -129,9 +129,8 @@ export function CharacterDock({
           src={portrait}
           alt=""
           label="正在加载立绘"
-          frameClassName="relative mt-1 size-14 shrink-0 overflow-hidden rounded-xl @min-[1024px]/studio:hidden"
-          className="size-full object-cover object-top"
-          fill
+          boxClassName="relative mt-1 size-14 shrink-0 overflow-hidden rounded-xl @min-[1024px]/studio:hidden"
+          imgClassName="size-full object-cover object-top"
         />
         <button
           type="button"
@@ -219,10 +218,9 @@ export function CharacterDock({
         src={portrait}
         alt={custom ? (images[0]?.role === "sheet" ? "多视角设定图" : "导入的模特头像") : `${builtin?.name || "大肥鱼"}的正面全身像`}
         label="正在加载立绘"
-        frameClassName={`relative hidden w-full overflow-hidden rounded-xl @min-[1024px]/studio:block ${images[0]?.role === "sheet" ? "max-h-56 bg-white" : "aspect-[3/4]"}`}
-        className={images[0]?.role === "sheet" ? "max-h-56 w-full bg-white object-contain" : "size-full object-cover object-top"}
-        fill={images[0]?.role !== "sheet"}
-        spinnerClassName={images[0]?.role === "sheet" ? "text-slate-500" : "text-white/80"}
+        boxClassName="relative hidden w-full shrink-0 overflow-hidden rounded-xl bg-white @min-[1024px]/studio:block"
+        imgClassName={`w-full ${images[0]?.role === "sheet" ? "max-h-56 object-contain" : "aspect-[3/4] object-cover object-top"}`}
+        spinnerClassName="text-slate-500"
       />
       <p className="hidden text-sm leading-6 text-[#cbd5e1] @min-[1024px]/studio:block">
         {custom
@@ -236,8 +234,10 @@ export function CharacterDock({
           src={full}
           alt={`${builtin?.name || "大肥鱼"}的多视角设定图`}
           label="正在加载设定图"
-          frameClassName="relative hidden w-full overflow-hidden rounded-xl bg-white @min-[1024px]/studio:block"
-          className="max-h-56 w-full object-contain"
+          boxClassName="relative hidden w-full shrink-0 overflow-hidden rounded-xl bg-white @min-[1024px]/studio:block"
+          imgClassName="max-h-56 w-full rounded-xl bg-white object-contain"
+          width={builtin?.id === "dafeiyu" ? 1448 : 1536}
+          height={builtin?.id === "dafeiyu" ? 1086 : 1024}
           spinnerClassName="text-slate-500"
         />
       ) : (
@@ -339,17 +339,19 @@ function ModelFigure({
   src,
   alt,
   label,
-  frameClassName,
-  className,
-  fill = false,
+  boxClassName,
+  imgClassName,
+  width,
+  height,
   spinnerClassName = "text-white/80",
 }: {
   src: string
   alt: string
   label: string
-  frameClassName: string
-  className: string
-  fill?: boolean
+  boxClassName: string
+  imgClassName: string
+  width?: number
+  height?: number
   spinnerClassName?: string
 }) {
   const [current, setCurrent] = useState(src)
@@ -359,20 +361,23 @@ function ModelFigure({
     setPending(!cachedImage(src))
   }
   return (
-    <div className={`${frameClassName}${pending && !fill ? " min-h-40" : ""}`}>
+    <div className={boxClassName}>
+      <img
+        src={src}
+        alt={pending ? "" : alt}
+        width={width}
+        height={height}
+        onLoad={() => setPending(false)}
+        onError={() => setPending(false)}
+        style={width && height ? { aspectRatio: `${width} / ${height}` } : undefined}
+        className={`block ${width && height ? "h-auto" : ""} ${imgClassName} ${pending ? "invisible" : ""}`}
+      />
       {pending ? (
         <div className="absolute inset-0 z-10 grid place-items-center" role="status" aria-live="polite">
           <Loader2 className={`size-6 animate-spin ${spinnerClassName}`} />
           <span className="sr-only">{label}</span>
         </div>
       ) : null}
-      <img
-        src={src}
-        alt={pending ? "" : alt}
-        onLoad={() => setPending(false)}
-        onError={() => setPending(false)}
-        className={`${className} ${pending ? "invisible" : ""} ${fill ? "absolute inset-0 size-full" : ""}`}
-      />
     </div>
   )
 }

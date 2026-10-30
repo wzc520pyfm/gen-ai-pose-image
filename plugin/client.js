@@ -5832,9 +5832,8 @@ function CharacterDock({
           src: portrait,
           alt: "",
           label: "正在加载立绘",
-          frameClassName: "relative mt-1 size-14 shrink-0 overflow-hidden rounded-xl @min-[1024px]/studio:hidden",
-          className: "size-full object-cover object-top",
-          fill: true
+          boxClassName: "relative mt-1 size-14 shrink-0 overflow-hidden rounded-xl @min-[1024px]/studio:hidden",
+          imgClassName: "size-full object-cover object-top"
         }
       ),
       /* @__PURE__ */ (0, import_jsx_runtime12.jsx)(
@@ -5936,10 +5935,9 @@ function CharacterDock({
         src: portrait,
         alt: custom ? images[0]?.role === "sheet" ? "多视角设定图" : "导入的模特头像" : `${builtin?.name || "大肥鱼"}的正面全身像`,
         label: "正在加载立绘",
-        frameClassName: `relative hidden w-full overflow-hidden rounded-xl @min-[1024px]/studio:block ${images[0]?.role === "sheet" ? "max-h-56 bg-white" : "aspect-[3/4]"}`,
-        className: images[0]?.role === "sheet" ? "max-h-56 w-full bg-white object-contain" : "size-full object-cover object-top",
-        fill: images[0]?.role !== "sheet",
-        spinnerClassName: images[0]?.role === "sheet" ? "text-slate-500" : "text-white/80"
+        boxClassName: "relative hidden w-full shrink-0 overflow-hidden rounded-xl bg-white @min-[1024px]/studio:block",
+        imgClassName: `w-full ${images[0]?.role === "sheet" ? "max-h-56 object-contain" : "aspect-[3/4] object-cover object-top"}`,
+        spinnerClassName: "text-slate-500"
       }
     ),
     /* @__PURE__ */ (0, import_jsx_runtime12.jsx)("p", { className: "hidden text-sm leading-6 text-[#cbd5e1] @min-[1024px]/studio:block", children: custom ? "参考图会和姿势线稿一起交给模型。请使用成年人物的图片。" : builtin?.id === "dafeiyu" ? "长波浪蓝发、鲸耳和蓝鲸尾。三视图锁住脸和鲸尾，衣服可以换成衣装集里的一套。" : "三视图锁住脸和服装。衣服可以换成衣装集里的一套。" }),
@@ -5949,8 +5947,10 @@ function CharacterDock({
         src: full,
         alt: `${builtin?.name || "大肥鱼"}的多视角设定图`,
         label: "正在加载设定图",
-        frameClassName: "relative hidden w-full overflow-hidden rounded-xl bg-white @min-[1024px]/studio:block",
-        className: "max-h-56 w-full object-contain",
+        boxClassName: "relative hidden w-full shrink-0 overflow-hidden rounded-xl bg-white @min-[1024px]/studio:block",
+        imgClassName: "max-h-56 w-full rounded-xl bg-white object-contain",
+        width: builtin?.id === "dafeiyu" ? 1448 : 1536,
+        height: builtin?.id === "dafeiyu" ? 1086 : 1024,
         spinnerClassName: "text-slate-500"
       }
     ) : /* @__PURE__ */ (0, import_jsx_runtime12.jsx)("div", { className: "grid grid-cols-3 gap-2", children: images.map((image) => /* @__PURE__ */ (0, import_jsx_runtime12.jsxs)("div", { className: "relative", children: [
@@ -6051,9 +6051,10 @@ function ModelFigure({
   src,
   alt,
   label,
-  frameClassName,
-  className,
-  fill = false,
+  boxClassName,
+  imgClassName,
+  width,
+  height,
   spinnerClassName = "text-white/80"
 }) {
   const [current, setCurrent] = (0, import_react7.useState)(src);
@@ -6062,21 +6063,24 @@ function ModelFigure({
     setCurrent(src);
     setPending(!cachedImage(src));
   }
-  return /* @__PURE__ */ (0, import_jsx_runtime12.jsxs)("div", { className: `${frameClassName}${pending && !fill ? " min-h-40" : ""}`, children: [
-    pending ? /* @__PURE__ */ (0, import_jsx_runtime12.jsxs)("div", { className: "absolute inset-0 z-10 grid place-items-center", role: "status", "aria-live": "polite", children: [
-      /* @__PURE__ */ (0, import_jsx_runtime12.jsx)(LoaderCircle, { className: `size-6 animate-spin ${spinnerClassName}` }),
-      /* @__PURE__ */ (0, import_jsx_runtime12.jsx)("span", { className: "sr-only", children: label })
-    ] }) : null,
+  return /* @__PURE__ */ (0, import_jsx_runtime12.jsxs)("div", { className: boxClassName, children: [
     /* @__PURE__ */ (0, import_jsx_runtime12.jsx)(
       "img",
       {
         src,
         alt: pending ? "" : alt,
+        width,
+        height,
         onLoad: () => setPending(false),
         onError: () => setPending(false),
-        className: `${className} ${pending ? "invisible" : ""} ${fill ? "absolute inset-0 size-full" : ""}`
+        style: width && height ? { aspectRatio: `${width} / ${height}` } : void 0,
+        className: `block ${width && height ? "h-auto" : ""} ${imgClassName} ${pending ? "invisible" : ""}`
       }
-    )
+    ),
+    pending ? /* @__PURE__ */ (0, import_jsx_runtime12.jsxs)("div", { className: "absolute inset-0 z-10 grid place-items-center", role: "status", "aria-live": "polite", children: [
+      /* @__PURE__ */ (0, import_jsx_runtime12.jsx)(LoaderCircle, { className: `size-6 animate-spin ${spinnerClassName}` }),
+      /* @__PURE__ */ (0, import_jsx_runtime12.jsx)("span", { className: "sr-only", children: label })
+    ] }) : null
   ] });
 }
 
@@ -13066,6 +13070,9 @@ function PoseStudio() {
   .h-\\[calc\\(100\\%-1px\\)\\] {
     height: calc(100% - 1px);
   }
+  .h-auto {
+    height: auto;
+  }
   .h-dvh {
     height: 100dvh;
   }
@@ -13101,9 +13108,6 @@ function PoseStudio() {
   }
   .min-h-28 {
     min-height: calc(var(--spacing) * 28);
-  }
-  .min-h-40 {
-    min-height: calc(var(--spacing) * 40);
   }
   .w-9 {
     width: calc(var(--spacing) * 9);
