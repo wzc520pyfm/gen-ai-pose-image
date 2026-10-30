@@ -10,7 +10,10 @@ import { Input } from "@/components/ui/input"
 import { Switch } from "@/components/ui/switch"
 import { fileToCharacter, type StoredCharacter } from "@/lib/characters"
 import { studioUrl, useStudioEnv } from "@/lib/studio-env"
+import { getBuiltinModel } from "@/shared/builtin-models.mjs"
 import { cycleModelId, modelIndicator, withUploadedSheet } from "@/shared/models.mjs"
+
+const AUTHOR_URL = "https://www.bilibili.com/opus/1233069202138464289"
 
 export type ModelSwitchItem = {
   id: string
@@ -77,8 +80,9 @@ export function CharacterDock({
     if (!canCycle) return
     onSelectModel(cycleModelId(switchItems, activeModelId, direction))
   }
-  const portrait = custom ? `data:${images[0].mediaType};base64,${images[0].dataBase64}` : studioUrl(basePath, "/muse/dafeiyu-portrait.jpg")
-  const full = custom ? portrait : studioUrl(basePath, "/muse/dafeiyu-sheet.png")
+  const builtin = custom ? null : (getBuiltinModel(activeModelId) || getBuiltinModel("dafeiyu"))
+  const portrait = custom ? `data:${images[0].mediaType};base64,${images[0].dataBase64}` : studioUrl(basePath, builtin?.portrait || "/muse/dafeiyu-portrait.jpg")
+  const full = custom ? portrait : studioUrl(basePath, builtin?.sheet || "/muse/dafeiyu-sheet.png")
 
   async function addFiles(list: FileList | null) {
     if (!list || list.length === 0) return
@@ -156,17 +160,10 @@ export function CharacterDock({
           <p className="mt-0.5 text-xs leading-5 text-[#cbd5e1] @min-[1024px]/studio:mt-2 @min-[1024px]/studio:text-sm @min-[1024px]/studio:leading-6">
             {custom ? "生图时改用你导入的参考图。" : (
               <>
-                <span className="block">社区鲸鱼娘的成年形象。</span>
+                <span className="block">{builtin?.blurb || "社区鲸鱼娘的成年形象。"}</span>
                 <span className="block">
                   原创作者{" "}
-                  <a
-                    href="https://www.bilibili.com/opus/1233069202138464289"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="underline underline-offset-2 hover:text-white"
-                  >
-                    ZipZipPipe
-                  </a>
+                  <a href={AUTHOR_URL} target="_blank" rel="noopener noreferrer" className="underline underline-offset-2 hover:text-white">ZipZipPipe</a>
                 </span>
               </>
             )}
@@ -211,14 +208,16 @@ export function CharacterDock({
           {busy ? "读图" : "导入"}
         </Button>
       </div>
-      <img src={portrait} alt={custom ? (images[0]?.role === "sheet" ? "多视角设定图" : "导入的模特头像") : "大肥鱼的正面全身像，蓝发、鲸耳、蓝白女仆装"} className={`hidden w-full rounded-xl @min-[1024px]/studio:block ${images[0]?.role === "sheet" ? "max-h-56 bg-white object-contain" : "aspect-[3/4] object-cover object-top"}`} />
+      <img src={portrait} alt={custom ? (images[0]?.role === "sheet" ? "多视角设定图" : "导入的模特头像") : `${builtin?.name || "大肥鱼"}的正面全身像`} className={`hidden w-full rounded-xl @min-[1024px]/studio:block ${images[0]?.role === "sheet" ? "max-h-56 bg-white object-contain" : "aspect-[3/4] object-cover object-top"}`} />
       <p className="hidden text-sm leading-6 text-[#cbd5e1] @min-[1024px]/studio:block">
         {custom
           ? "参考图会和姿势线稿一起交给模型。请使用成年人物的图片。"
-          : "长波浪蓝发、鲸耳和蓝鲸尾。三视图锁住脸和鲸尾，衣服可以换成衣装集里的一套。"}
+          : builtin?.id === "dafeiyu"
+            ? "长波浪蓝发、鲸耳和蓝鲸尾。三视图锁住脸和鲸尾，衣服可以换成衣装集里的一套。"
+            : "三视图锁住脸和服装。衣服可以换成衣装集里的一套。"}
       </p>
       {!custom ? (
-        <img src={full} alt="大肥鱼的成年三视图：正面、侧面、背面，以及头饰和裙摆细节" className="hidden max-h-56 rounded-xl bg-white object-contain @min-[1024px]/studio:block" />
+        <img src={full} alt={`${builtin?.name || "大肥鱼"}的多视角设定图`} className="hidden max-h-56 rounded-xl bg-white object-contain @min-[1024px]/studio:block" />
       ) : (
         <div className="grid grid-cols-3 gap-2">
           {images.map((image) => (

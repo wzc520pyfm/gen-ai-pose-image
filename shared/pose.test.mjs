@@ -77,6 +77,16 @@ test("plan rejects unknown poses and builds one prompt per view", () => {
   assert.equal(plan.aspectRatio, "16:9")
   assert.equal(plan.model, "gpt-image-1")
   assert.match(plan.items[0].prompt, /大肥鱼/)
+  const claude = planRequest({
+    provider: "gemini",
+    viewIds: [pose.views[0].id],
+    builtinModelId: "claude",
+  })
+  assert.equal(claude.character.name, "Claude 娘")
+  assert.equal(claude.builtinModelId, "claude")
+  assert.match(claude.items[0].prompt, /Claude 娘/)
+  assert.doesNotMatch(claude.items[0].prompt, /鲸尾/)
+  assert.equal(planRequest({ provider: "gemini", viewIds: [pose.views[0].id], builtinModelId: "nope" }).character.id, "dafeiyu")
   assert.equal(promptCards(plan).length, 2)
 })
 

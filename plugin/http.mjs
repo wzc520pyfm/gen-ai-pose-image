@@ -83,12 +83,17 @@ export function createPoseHandler(getConfig) {
         res.end(image.buffer)
         return
       }
-      if (req.method === "GET" && (path === "/muse/dafeiyu-sheet.png" || path === "/muse/dafeiyu-portrait.jpg")) {
-        const file = join(ROOT, "public", path.slice(1))
-        const data = await readFile(file)
-        const mediaType = path.endsWith(".png") ? "image/png" : "image/jpeg"
-        res.writeHead(200, { "content-type": mediaType, "cache-control": "public, max-age=86400" })
-        res.end(data)
+      if (req.method === "GET" && path.startsWith("/muse/")) {
+        const name = path.slice("/muse/".length)
+        if (!/^[\w.-]+$/.test(name)) return json(res, 404, { error: "找不到文件" })
+        try {
+          const data = await readFile(join(ROOT, "public", "muse", name))
+          const mediaType = name.endsWith(".png") ? "image/png" : name.endsWith(".webp") ? "image/webp" : "image/jpeg"
+          res.writeHead(200, { "content-type": mediaType, "cache-control": "public, max-age=86400" })
+          res.end(data)
+        } catch {
+          return json(res, 404, { error: "找不到文件" })
+        }
         return
       }
       if (req.method === "PUT" && path === "/api/custom-library") {

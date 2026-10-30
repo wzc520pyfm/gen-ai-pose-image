@@ -31,6 +31,14 @@ export const THIRD_PARTY_NOTICES = [
     included: "public/muse/dafeiyu-sheet.png 是该仓库的 dafeiyu-mature-character-sheet.png。public/muse/dafeiyu-portrait.jpg 是同一张设定图的界面裁切。",
     terms: "设定图来自社区仓库 TreapGoGo/deepseek-whale-girl，版权所有 (c) 2026 TreapGoGo，按该仓库的 MIT 许可使用。这是非官方社区形象，不代表深度求索。",
   },
+  {
+    id: "zipzippipe",
+    title: "社区角色设定图",
+    holder: "ZipZipPipe",
+    source: "https://www.bilibili.com/opus/1233069202138464289",
+    included: "public/muse/ 里 Claude 娘、Gemini 娘、GLM 娘、GPT 娘、Grok 娘、Kimi 娘、llama 娘、Minimax 娘、Qwen 娘的肖像和多视角设定图。",
+    terms: "这些图是 ZipZipPipe 的社区创作。澜姿把它们用作界面和生图参考，不表示这些角色是各公司的官方形象，也不表示获得了额外的商标授权。",
+  },
 ]
 
 export function licenseNotices() {
