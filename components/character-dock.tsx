@@ -9,7 +9,7 @@ import { Input } from "@/components/ui/input"
 import { Switch } from "@/components/ui/switch"
 import { fileToCharacter, type StoredCharacter } from "@/lib/characters"
 import { studioUrl, useStudioEnv } from "@/lib/studio-env"
-import { cycleModelId, withUploadedSheet } from "@/shared/models.mjs"
+import { cycleModelId, modelIndicator, withUploadedSheet } from "@/shared/models.mjs"
 
 export type ModelSwitchItem = {
   id: string
@@ -63,9 +63,10 @@ export function CharacterDock({
   const [pendingDelete, setPendingDelete] = useState<string | null>(null)
   const custom = images.length > 0
   const photoCount = images.filter((image) => image.role !== "sheet").length
-  const currentIndex = Math.max(0, switchItems.findIndex((item) => item.id === activeModelId))
-  const currentItem = switchItems[currentIndex]
-  const canCycle = switchItems.length > 1
+  const position = modelIndicator(switchItems, activeModelId)
+  const currentIndex = Math.max(0, position.index - 1)
+  const currentItem = switchItems.find((item) => item.id === activeModelId) ?? switchItems[currentIndex]
+  const canCycle = position.total > 1
   const title = custom ? (activeLabel || "导入的模特") : (currentItem?.label || "大肥鱼")
 
   function stepModel(direction: "prev" | "next") {
@@ -145,7 +146,7 @@ export function CharacterDock({
           ) : (
             <h2 className="flex items-baseline gap-2 text-lg font-semibold text-white @min-[1024px]/studio:text-2xl">
               <span className="truncate">{title}</span>
-              {canCycle ? <span className="shrink-0 text-xs font-normal text-[#cbd5e1]">{currentIndex + 1}/{switchItems.length}</span> : null}
+              {canCycle ? <span className="shrink-0 text-xs font-normal text-[#cbd5e1]">{position.index}/{position.total}</span> : null}
             </h2>
           )}
           <p className="mt-0.5 line-clamp-2 text-xs leading-5 text-[#cbd5e1] @min-[1024px]/studio:mt-2 @min-[1024px]/studio:text-sm @min-[1024px]/studio:leading-6">{custom ? "生图时改用你导入的参考图。" : "社区鲸鱼娘的成年形象，不是 DeepSeek 官方吉祥物。"}</p>

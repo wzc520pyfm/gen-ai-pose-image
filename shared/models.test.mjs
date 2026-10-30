@@ -6,8 +6,10 @@ import {
   adoptCurrent,
   deleteFromLibrary,
   identityImage,
+  markModelUsed,
   renameModel,
   cycleModelId,
+  modelIndicator,
   syncLibrary,
   switcherEntries,
   withGeneratedSheet,
@@ -152,6 +154,13 @@ test("the switcher always lists 大肥鱼 with customs, newest first, and builti
   assert.equal(cycleModelId(order, "dafeiyu", "next"), "model-new")
   assert.equal(cycleModelId(order, "model-new", "next"), "dafeiyu")
   assert.equal(cycleModelId(order, "dafeiyu", "prev"), "model-new")
+  assert.deepEqual(modelIndicator(order, "dafeiyu"), { index: 1, total: 2 })
+  assert.deepEqual(modelIndicator(order, "model-new"), { index: 2, total: 2 })
+  const resorted = switcherEntries({
+    models: markModelUsed(created.models, "model-new", 90),
+    builtinUsed: { dafeiyu: 50 },
+  })
+  assert.deepEqual(modelIndicator(resorted, "model-new"), { index: 1, total: 2 })
   const stayed = adoptCurrent([], [photo], "dafeiyu", 90)
   assert.equal(stayed.adopted, false)
   assert.equal(stayed.models.length, 0)

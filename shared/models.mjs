@@ -119,6 +119,13 @@ export function cycleModelId(entries, activeId, direction) {
   return list[(start + delta + list.length) % list.length].id
 }
 
+/** 1-based position in the current cycle. The list order must not change just because the selection did. */
+export function modelIndicator(entries, activeId) {
+  const list = Array.isArray(entries) ? entries : []
+  const found = list.findIndex((item) => item.id === activeId)
+  return { index: found < 0 ? 1 : found + 1, total: list.length }
+}
+
 export function switcherEntries({ models = [], builtinUsed = {} } = {}) {
   const builtins = BUILTIN_MODELS.map((model) => ({
     id: model.id,

@@ -41,7 +41,7 @@ import { StudioEnvProvider, studioUrl, useStudioEnv, type StudioPortal } from "@
 import { createCustomId, isCustomCostumeId, reuseFromHistory } from "@/shared/custom.mjs"
 import { messageForStatus } from "@/shared/http-status.mjs"
 import { isBuiltinModelId } from "@/shared/builtin-models.mjs"
-import { DEFAULT_MODEL_ID, activateModel, adoptCurrent, deleteFromLibrary, identityImage, markModelUsed, renameModel, switcherEntries, syncLibrary, withGeneratedSheet } from "@/shared/models.mjs"
+import { DEFAULT_MODEL_ID, activateModel, adoptCurrent, deleteFromLibrary, identityImage, renameModel, switcherEntries, syncLibrary, withGeneratedSheet } from "@/shared/models.mjs"
 import type { Catalog, Pose, PoseView, PromptCard } from "@/lib/types"
 
 type Selection = Record<string, string>
@@ -242,20 +242,14 @@ function StudioFrame({ embedded }: { embedded: boolean }) {
     if (isBuiltinModelId(id)) {
       setCharacters([])
       setActiveModelId(id)
-      rememberBuiltin(id)
       void writeStoredCharacters([])
       void writeActiveModelId(id)
       return
     }
     try {
       const model = activateModel(models, id)
-      const now = Date.now()
-      const nextModels = markModelUsed(models, id, now)
-      setModels(nextModels)
       setCharacters(model.images as StoredCharacter[])
       setActiveModelId(model.id)
-      const entry = nextModels.find((item) => item.id === id)
-      if (entry) void putSavedModel(entry)
       void writeStoredCharacters(model.images as StoredCharacter[])
       void writeActiveModelId(model.id)
     } catch (error) {

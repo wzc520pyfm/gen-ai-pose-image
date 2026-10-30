@@ -5602,14 +5602,6 @@ function deleteFromLibrary(models, id, activeId) {
     cleared: activeId === id
   };
 }
-function markModelUsed(models, id, now = Date.now()) {
-  if (isBuiltinModelId(id)) return models;
-  const list = Array.isArray(models) ? models.slice() : [];
-  const index = list.findIndex((model) => model.id === id);
-  if (index < 0) throw new Error("找不到这个模特");
-  list[index] = { ...list[index], lastUsedAt: now };
-  return list;
-}
 function cycleModelId(entries, activeId, direction) {
   const list = Array.isArray(entries) ? entries : [];
   if (list.length === 0) return activeId || "";
@@ -5617,6 +5609,11 @@ function cycleModelId(entries, activeId, direction) {
   const start = index < 0 ? 0 : index;
   const delta = direction === "prev" ? -1 : 1;
   return list[(start + delta + list.length) % list.length].id;
+}
+function modelIndicator(entries, activeId) {
+  const list = Array.isArray(entries) ? entries : [];
+  const found = list.findIndex((item) => item.id === activeId);
+  return { index: found < 0 ? 1 : found + 1, total: list.length };
 }
 function switcherEntries({ models = [], builtinUsed = {} } = {}) {
   const builtins = BUILTIN_MODELS.map((model) => ({
@@ -5672,9 +5669,10 @@ function CharacterDock({
   const [pendingDelete, setPendingDelete] = (0, import_react6.useState)(null);
   const custom = images.length > 0;
   const photoCount = images.filter((image) => image.role !== "sheet").length;
-  const currentIndex = Math.max(0, switchItems.findIndex((item) => item.id === activeModelId));
-  const currentItem = switchItems[currentIndex];
-  const canCycle = switchItems.length > 1;
+  const position = modelIndicator(switchItems, activeModelId);
+  const currentIndex = Math.max(0, position.index - 1);
+  const currentItem = switchItems.find((item) => item.id === activeModelId) ?? switchItems[currentIndex];
+  const canCycle = position.total > 1;
   const title = custom ? activeLabel || "导入的模特" : currentItem?.label || "大肥鱼";
   function stepModel(direction) {
     if (!canCycle) return;
@@ -5752,9 +5750,9 @@ function CharacterDock({
         ) : /* @__PURE__ */ (0, import_jsx_runtime12.jsxs)("h2", { className: "flex items-baseline gap-2 text-lg font-semibold text-white @min-[1024px]/studio:text-2xl", children: [
           /* @__PURE__ */ (0, import_jsx_runtime12.jsx)("span", { className: "truncate", children: title }),
           canCycle ? /* @__PURE__ */ (0, import_jsx_runtime12.jsxs)("span", { className: "shrink-0 text-xs font-normal text-[#cbd5e1]", children: [
-            currentIndex + 1,
+            position.index,
             "/",
-            switchItems.length
+            position.total
           ] }) : null
         ] }),
         /* @__PURE__ */ (0, import_jsx_runtime12.jsx)("p", { className: "mt-0.5 line-clamp-2 text-xs leading-5 text-[#cbd5e1] @min-[1024px]/studio:mt-2 @min-[1024px]/studio:text-sm @min-[1024px]/studio:leading-6", children: custom ? "生图时改用你导入的参考图。" : "社区鲸鱼娘的成年形象，不是 DeepSeek 官方吉祥物。" }),
@@ -11681,20 +11679,14 @@ function StudioFrame({ embedded }) {
     if (isBuiltinModelId(id)) {
       setCharacters([]);
       setActiveModelId(id);
-      rememberBuiltin(id);
       void writeStoredCharacters([]);
       void writeActiveModelId(id);
       return;
     }
     try {
       const model = activateModel(models, id);
-      const now = Date.now();
-      const nextModels = markModelUsed(models, id, now);
-      setModels(nextModels);
       setCharacters(model.images);
       setActiveModelId(model.id);
-      const entry = nextModels.find((item) => item.id === id);
-      if (entry) void putSavedModel(entry);
       void writeStoredCharacters(model.images);
       void writeActiveModelId(model.id);
     } catch (error) {
