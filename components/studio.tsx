@@ -37,6 +37,7 @@ import {
   type HistoryEntry,
 } from "@/lib/library"
 import { deleteSavedModel, listSavedModels, putSavedModel, readActiveModelId, readBuiltinUsed, writeActiveModelId, writeBuiltinUsed, type SavedModel } from "@/lib/models"
+import { pickRandomCombo } from "@/shared/random-combo.mjs"
 import { baseURLFor, DEFAULT_SETTINGS, loadSettings, modelFor, saveSettings, type StudioSettings } from "@/lib/settings"
 import { StudioEnvProvider, studioUrl, useStudioEnv, type StudioPortal } from "@/lib/studio-env"
 import { createCustomId, isCustomCostumeId, reuseFromHistory } from "@/shared/custom.mjs"
@@ -71,6 +72,9 @@ function StudioFrame({ embedded }: { embedded: boolean }) {
   const { basePath } = useStudioEnv()
   const [catalog, setCatalog] = useState<Catalog | null>(null)
   const [catalogError, setCatalogError] = useState("")
+  const [costumeCatalog, setCostumeCatalog] = useState<Array<{ id: string; label: string; keywords: string; adult?: boolean }>>([])
+  const [costumeCatalogReady, setCostumeCatalogReady] = useState(false)
+  const [costumeCatalogError, setCostumeCatalogError] = useState("")
   const [loading, setLoading] = useState(true)
   const [settings, setSettings] = useState<StudioSettings>(DEFAULT_SETTINGS)
   const [library, setLibrary] = useState<Library>("poses")
@@ -124,6 +128,25 @@ function StudioFrame({ embedded }: { embedded: boolean }) {
   }, [basePath])
 
   useEffect(() => { loadCatalog() }, [loadCatalog])
+  useEffect(() => {
+    const controller = new AbortController()
+    fetch(studioUrl(basePath, "/api/costumes"), { signal: controller.signal })
+      .then(async (response) => {
+        if (!response.ok) throw new Error("服装目录没有加载出来")
+        return response.json() as Promise<{ costumes?: Array<{ id: string; label: string; keywords: string; adult?: boolean }> }>
+      })
+      .then((payload) => {
+        setCostumeCatalog(Array.isArray(payload.costumes) ? payload.costumes : [])
+        setCostumeCatalogError("")
+        setCostumeCatalogReady(true)
+      })
+      .catch((error: unknown) => {
+        if (error instanceof DOMException && error.name === "AbortError") return
+        setCostumeCatalogError(error instanceof Error ? error.message : "服装目录没有加载出来")
+        setCostumeCatalogReady(true)
+      })
+    return () => controller.abort()
+  }, [basePath])
   useEffect(() => {
     const local = loadSettings()
     fetch(studioUrl(basePath, "/api/status"))
@@ -407,6 +430,46 @@ function StudioFrame({ embedded }: { embedded: boolean }) {
     setSelected((current) => ({ ...current, [pose.id]: view.id }))
   }
 
+  function randomizeCombo() {
+    if (!catalog) {
+      setLimitNote(catalogError || "姿势目录还没加载出来。")
+      return
+    }
+    if (!costumeCatalogReady) {
+      setLimitNote("服装目录还在加载。")
+      return
+    }
+    if (costumeCatalogError && costumeCatalog.length === 0 && customCostumes.length === 0) {
+      setLimitNote(costumeCatalogError)
+      return
+    }
+    const poses = [
+      ...catalog.poses,
+      ...customPoses.map((asset) => ({
+        id: asset.id,
+        adult: asset.adult,
+        views: [{ id: asset.id, angle: "自定义" }],
+      })),
+    ]
+    const costumes = [
+      ...costumeCatalog,
+      ...customCostumes.map((asset) => ({
+        id: asset.id,
+        label: asset.label,
+        keywords: asset.keywords,
+        adult: asset.adult,
+      })),
+    ]
+    const pick = pickRandomCombo({ poses, costumes, showAdult: settings.showAdult })
+    if (!pick.ok || !pick.pose || !pick.view || !pick.costume) {
+      setLimitNote(pick.message)
+      return
+    }
+    setLimitNote("")
+    setSelected({ [pick.pose.id]: pick.view.id })
+    setCostume({ id: pick.costume.id, label: pick.costume.label, keywords: pick.costume.keywords })
+  }
+
   async function generate() {
     if (!settings.apiKey.trim() && !serverKey) {
       setSettingsOpen(true)
@@ -606,6 +669,7 @@ function StudioFrame({ embedded }: { embedded: boolean }) {
         return next
       })}
       onClear={() => setSelected({})}
+      onRandom={randomizeCombo}
       characters={characters}
       extraPrompt={extraPrompt}
       onExtraPrompt={setExtraPrompt}

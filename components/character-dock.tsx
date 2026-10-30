@@ -153,7 +153,24 @@ export function CharacterDock({
               {canCycle ? <span className="shrink-0 text-xs font-normal text-[#cbd5e1]">{position.index}/{position.total}</span> : null}
             </h2>
           )}
-          <p className="mt-0.5 line-clamp-2 text-xs leading-5 text-[#cbd5e1] @min-[1024px]/studio:mt-2 @min-[1024px]/studio:text-sm @min-[1024px]/studio:leading-6">{custom ? "生图时改用你导入的参考图。" : "社区鲸鱼娘的成年形象，不是 DeepSeek 官方吉祥物。"}</p>
+          <p className="mt-0.5 text-xs leading-5 text-[#cbd5e1] @min-[1024px]/studio:mt-2 @min-[1024px]/studio:text-sm @min-[1024px]/studio:leading-6">
+            {custom ? "生图时改用你导入的参考图。" : (
+              <>
+                <span className="block">社区鲸鱼娘的成年形象。</span>
+                <span className="block">
+                  原创作者{" "}
+                  <a
+                    href="https://www.bilibili.com/opus/1233069202138464289"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="underline underline-offset-2 hover:text-white"
+                  >
+                    ZipZipPipe
+                  </a>
+                </span>
+              </>
+            )}
+          </p>
           {currentItem && !currentItem.builtin ? (
             <p className="mt-1 flex gap-3 text-[11px] text-[#cbd5e1]">
               <button type="button" className="underline-offset-2 hover:underline" onClick={() => { setEditingId(activeModelId); setDraftLabel(title) }}>改名</button>
