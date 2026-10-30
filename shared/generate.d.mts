@@ -16,4 +16,5 @@ export function generateImage(input: {
   aspectRatio: string
   signal?: AbortSignal
   fetchImpl?: typeof fetch
+  allowReferenceFallback?: boolean
 }): Promise<{ mediaType: string; buffer: Buffer; referencesSent: boolean; warning?: string; model: string }>

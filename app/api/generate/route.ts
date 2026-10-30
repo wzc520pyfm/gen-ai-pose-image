@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server"
+import { statusForStudioError } from "@/shared/http-status.mjs"
 import { runGeneration } from "@/shared/jobs.mjs"
 
 export const maxDuration = 300
@@ -29,6 +30,6 @@ export async function POST(request: Request) {
     return NextResponse.json({ results })
   } catch (error) {
     const message = error instanceof Error ? error.message : "生图失败"
-    return NextResponse.json({ error: message }, { status: 400 })
+    return NextResponse.json({ error: message }, { status: statusForStudioError(error) })
   }
 }

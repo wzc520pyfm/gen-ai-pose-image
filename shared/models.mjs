@@ -16,6 +16,10 @@ export function withGeneratedSheet(images, sheet) {
   return [{ ...sheet, role: "sheet" }, ...photos]
 }
 
+export function withUploadedSheet(images, sheet) {
+  return withGeneratedSheet(images, sheet)
+}
+
 export function syncLibrary(models, activeId, images, now = Date.now(), random = () => globalThis.crypto.randomUUID()) {
   const list = Array.isArray(models) ? models.slice() : []
   if (!images?.length) {

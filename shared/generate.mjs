@@ -115,6 +115,18 @@ async function asBuffer(extracted, secret, signal) {
   return { mediaType, buffer }
 }
 
+function linkSignal(signal, ms) {
+  const timeout = AbortSignal.timeout(ms)
+  if (!signal) return timeout
+  if (typeof AbortSignal.any === "function") return AbortSignal.any([signal, timeout])
+  return signal
+}
+
+function timeoutMessage(error) {
+  if (error?.name === "TimeoutError") return "生图超时。模型这次没有在时限内返回，请再试一次。"
+  return ""
+}
+
 export async function generateImage({
   provider,
   apiKey,
@@ -125,19 +137,27 @@ export async function generateImage({
   aspectRatio,
   signal,
   fetchImpl = fetch,
+  allowReferenceFallback = true,
 }) {
   if (!apiKey) throw new Error("还没有填写 API Key")
+  const linked = linkSignal(signal, 240000)
   const chosenModel = model || defaultModel(provider)
-  if (provider === "gemini") {
-    return generateGemini({ apiKey, baseURL, model: chosenModel, prompt, images, aspectRatio, signal, fetchImpl })
+  try {
+    if (provider === "gemini") {
+      return await generateGemini({ apiKey, baseURL, model: chosenModel, prompt, images, aspectRatio, signal: linked, fetchImpl })
+    }
+    if (provider === "seedream") {
+      return await generateSeedream({ apiKey, baseURL, model: chosenModel, prompt, images, aspectRatio, signal: linked, fetchImpl, allowReferenceFallback })
+    }
+    return await generateOpenAI({ apiKey, baseURL, model: chosenModel, prompt, images, aspectRatio, signal: linked, fetchImpl, allowReferenceFallback })
+  } catch (error) {
+    const timedOut = timeoutMessage(error)
+    if (timedOut && !signal?.aborted) throw new Error(timedOut)
+    throw error
   }
-  if (provider === "seedream") {
-    return generateSeedream({ apiKey, baseURL, model: chosenModel, prompt, images, aspectRatio, signal, fetchImpl })
-  }
-  return generateOpenAI({ apiKey, baseURL, model: chosenModel, prompt, images, aspectRatio, signal, fetchImpl })
 }
 
-async function generateSeedream({ apiKey, baseURL, model, prompt, images, aspectRatio, signal, fetchImpl }) {
+async function generateSeedream({ apiKey, baseURL, model, prompt, images, aspectRatio, signal, fetchImpl, allowReferenceFallback = true }) {
   const root = (baseURL || defaultBaseURL("seedream")).replace(/\/$/, "")
   const send = async (withReferences) => {
     const body = {
@@ -165,7 +185,7 @@ async function generateSeedream({ apiKey, baseURL, model, prompt, images, aspect
   }
   let usedReferences = images.length > 0
   let { response, payload } = await send(usedReferences)
-  if (!response.ok && usedReferences) {
+  if (!response.ok && usedReferences && allowReferenceFallback) {
     const message = payload?.error?.message || ""
     if (/image|reference|参考图|参考图片/i.test(message)) {
       usedReferences = false
@@ -224,14 +244,14 @@ function canFallBack(status, message) {
   return /edits|not supported|unknown|multipart|invalid endpoint|no such/i.test(message)
 }
 
-async function generateOpenAI({ apiKey, baseURL, model, prompt, images, aspectRatio, signal, fetchImpl }) {
+async function generateOpenAI({ apiKey, baseURL, model, prompt, images, aspectRatio, signal, fetchImpl, allowReferenceFallback = true }) {
   const root = (baseURL || defaultBaseURL("openai")).replace(/\/$/, "")
   const size = openAISize(aspectRatio)
   if (images.length > 0) {
     try {
       return await openAIEdits({ apiKey, root, model, prompt, images, size, signal, fetchImpl })
     } catch (error) {
-      if (!error.fallback) throw error
+      if (!error.fallback || !allowReferenceFallback) throw error
     }
   }
   const image = await openAIGenerations({ apiKey, root, model, prompt, size, signal, fetchImpl })

@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server"
 import { applyEnvCredentials } from "@/shared/credentials.mjs"
 import { assertBaseURL, defaultModel } from "@/shared/generate.mjs"
+import { statusForStudioError } from "@/shared/http-status.mjs"
 import { generateStyledReference } from "@/shared/style-refs.mjs"
 
 export const maxDuration = 300
@@ -41,6 +42,6 @@ export async function POST(request: Request) {
     })
   } catch (error) {
     const message = error instanceof Error ? error.message : "参考图没有生成"
-    return NextResponse.json({ error: message }, { status: 400 })
+    return NextResponse.json({ error: message }, { status: statusForStudioError(error) })
   }
 }

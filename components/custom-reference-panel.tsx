@@ -74,9 +74,22 @@ export function CustomReferencePanel({
   const [previewBlob, setPreviewBlob] = useState<Blob | null>(null)
   const [previewUrl, setPreviewUrl] = useState("")
   const [busy, setBusy] = useState("")
+  const [waited, setWaited] = useState(0)
   const [error, setError] = useState("")
   const [pendingDelete, setPendingDelete] = useState<string | null>(null)
   const noun = kind === "pose" ? "姿势" : "服装"
+
+  useEffect(() => {
+    if (busy !== "正在生成参考图") {
+      setWaited(0)
+      return
+    }
+    const started = Date.now()
+    const timer = window.setInterval(() => {
+      setWaited(Math.max(1, Math.round((Date.now() - started) / 1000)))
+    }, 1000)
+    return () => window.clearInterval(timer)
+  }, [busy])
 
   useEffect(() => {
     if (!previewBlob) {
@@ -335,7 +348,7 @@ export function CustomReferencePanel({
             {mode !== "upload" ? (
               <>
                 <Button type="button" variant="outline" disabled={!prompt.trim()} onClick={() => void navigator.clipboard.writeText(prompt)}>复制提示词</Button>
-                <Button type="button" variant="outline" disabled={Boolean(busy)} onClick={() => void generateImage()}>{busy === "正在生成参考图" ? busy : "生成参考图"}</Button>
+                <Button type="button" variant="outline" disabled={Boolean(busy)} onClick={() => void generateImage()}>{busy === "正在生成参考图" ? (waited > 0 ? `正在生成（${waited} 秒）` : "正在生成参考图") : "生成参考图"}</Button>
               </>
             ) : null}
             <Button type="button" disabled={Boolean(busy) || !previewBlob} onClick={() => void save()}>{busy === "正在保存" ? busy : "保存到自定义"}</Button>

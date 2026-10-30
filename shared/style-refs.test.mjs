@@ -1,6 +1,7 @@
 import assert from "node:assert/strict"
 import { test } from "node:test"
 import { beautifyInstruction } from "./beautify.mjs"
+import { messageForStatus, statusForStudioError } from "./http-status.mjs"
 import {
   COSTUME_STYLE_PATHS,
   POSE_STYLE_PATHS,
@@ -9,12 +10,7 @@ import {
 } from "./style-refs.mjs"
 
 function pngBuffer() {
-  const bytes = Buffer.alloc(64, 0)
-  bytes[0] = 0x89
-  bytes[1] = 0x50
-  bytes[2] = 0x4e
-  bytes[3] = 0x47
-  return bytes
+  return Buffer.from("iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg==", "base64")
 }
 
 test("style samples are a fixed pair of catalog files", () => {
@@ -49,7 +45,8 @@ test("pose reference generation hands two style images to generateImage", async 
   assert.equal(image.referencesSent, true)
   assert.deepEqual(fetched, [...POSE_STYLE_PATHS])
   assert.equal(generated.images.length, 2)
-  assert.ok(generated.images.every((item) => item.buffer.byteLength >= 32))
+  assert.equal(generated.allowReferenceFallback, false)
+  assert.ok(generated.images.every((item) => item.mediaType === "image/jpeg" && item.buffer.byteLength >= 32))
   assert.match(generated.prompt, /单手向前伸出/)
   assert.match(generated.prompt, /严格模仿参考图的线稿风格与人偶质感，只按描述改姿态/)
 })
@@ -107,6 +104,14 @@ test("a missing style sample errors and does not call text-only generation", asy
     },
   }), /需要说明是姿势还是服装/)
   assert.equal(generated, false)
+})
+
+test("gateway timeouts become a readable studio error", () => {
+  assert.equal(statusForStudioError(new Error("生图超时。模型这次没有在时限内返回，请再试一次。")), 504)
+  assert.equal(statusForStudioError(new Error("姿势风格参考没有读到（img/a.png）。读取失败。")), 502)
+  assert.equal(statusForStudioError(new Error("还没有填写 API Key")), 400)
+  assert.equal(messageForStatus(504, "<html>timeout</html>", "生图失败"), "生图超时。模型这次没有在时限内返回，请再试一次。")
+  assert.equal(messageForStatus(400, JSON.stringify({ error: "姿势风格参考没有读到（img/a.png）。" }), "生图失败"), "姿势风格参考没有读到（img/a.png）。")
 })
 
 test("beautify instructions tell the model to copy the reference style", () => {

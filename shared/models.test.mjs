@@ -9,6 +9,7 @@ import {
   renameModel,
   syncLibrary,
   withGeneratedSheet,
+  withUploadedSheet,
 } from "./models.mjs"
 
 function pngBuffer() {
@@ -84,6 +85,11 @@ test("a generated sheet stays first and the original photos stay", () => {
   assert.equal(identityImage(first).id, "photo-1")
   const again = withGeneratedSheet(first, { id: "sheet-2", dataBase64: "bmV3", role: "sheet" })
   assert.deepEqual(again.map((image) => image.id), ["sheet-2", "photo-1", "photo-2"])
+  const uploaded = withUploadedSheet([photo], sheet)
+  assert.deepEqual(uploaded.map((image) => [image.id, image.role]), [["sheet-1", "sheet"], ["photo-1", "photo"]])
+  const sheetOnly = withUploadedSheet([], sheet)
+  assert.deepEqual(sheetOnly.map((image) => image.role), ["sheet"])
+  assert.equal(identityImage(sheetOnly).id, "sheet-1")
 })
 
 test("library save, switch, rename, and delete keep the selected model", () => {

@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server"
 import { generateCharacterSheet } from "@/shared/character-sheet.mjs"
+import { statusForStudioError } from "@/shared/http-status.mjs"
 import { applyEnvCredentials } from "@/shared/credentials.mjs"
 import { assertBaseURL, defaultModel } from "@/shared/generate.mjs"
 
@@ -39,6 +40,6 @@ export async function POST(request: Request) {
     })
   } catch (error) {
     const message = error instanceof Error ? error.message : "多视角 sheet 没有生成"
-    return NextResponse.json({ error: message }, { status: 400 })
+    return NextResponse.json({ error: message }, { status: statusForStudioError(error) })
   }
 }

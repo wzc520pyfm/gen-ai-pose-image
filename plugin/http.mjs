@@ -6,6 +6,7 @@ import { getCatalog, resolveView } from "../shared/catalog.mjs"
 import { costumeFile, fetchCostumeBytes, getCostume, getCostumeCatalog } from "../shared/costumes.mjs"
 import { assertBaseURL, defaultModel } from "../shared/generate.mjs"
 import { generateCharacterSheet } from "../shared/character-sheet.mjs"
+import { statusForStudioError } from "../shared/http-status.mjs"
 import { generateStyledReference } from "../shared/style-refs.mjs"
 import { planRequest, promptCards, runGeneration } from "../shared/jobs.mjs"
 import { fetchPoseBytes, poseFileFor } from "../shared/poses.mjs"
@@ -173,7 +174,7 @@ export function createPoseHandler(getConfig) {
       return json(res, 404, { error: "not-found" })
     } catch (error) {
       const message = error instanceof Error ? error.message : "请求失败"
-      if (!res.headersSent) json(res, 400, { error: message })
+      if (!res.headersSent) json(res, statusForStudioError(error), { error: message })
     }
   }
 }

@@ -39,6 +39,7 @@ import { deleteSavedModel, listSavedModels, putSavedModel, readActiveModelId, wr
 import { baseURLFor, DEFAULT_SETTINGS, loadSettings, modelFor, saveSettings, type StudioSettings } from "@/lib/settings"
 import { StudioEnvProvider, studioUrl, useStudioEnv, type StudioPortal } from "@/lib/studio-env"
 import { createCustomId, isCustomCostumeId, reuseFromHistory } from "@/shared/custom.mjs"
+import { messageForStatus } from "@/shared/http-status.mjs"
 import { activateModel, adoptCurrent, deleteFromLibrary, identityImage, renameModel, syncLibrary, withGeneratedSheet } from "@/shared/models.mjs"
 import type { Catalog, Pose, PoseView, PromptCard } from "@/lib/types"
 
@@ -89,6 +90,7 @@ function StudioFrame({ embedded }: { embedded: boolean }) {
   const [results, setResults] = useState<ResultCard[]>([])
   const [running, setRunning] = useState(false)
   const [progress, setProgress] = useState("")
+  const [waited, setWaited] = useState(0)
   const [runError, setRunError] = useState("")
   const [limitNote, setLimitNote] = useState("")
   const [serverKey, setServerKey] = useState(false)
@@ -104,6 +106,18 @@ function StudioFrame({ embedded }: { embedded: boolean }) {
   const clearRequestedSystem = useCallback(() => setRequestedSystem(null), [])
   const clearCostumeFocus = useCallback(() => setCostumeFocus(null), [])
   const abortRef = useRef<AbortController | null>(null)
+
+  useEffect(() => {
+    if (!running) {
+      setWaited(0)
+      return
+    }
+    const started = Date.now()
+    const timer = window.setInterval(() => {
+      setWaited(Math.max(1, Math.round((Date.now() - started) / 1000)))
+    }, 1000)
+    return () => window.clearInterval(timer)
+  }, [running])
 
   const loadCatalog = useCallback(() => {
     setLoading(true)
@@ -600,7 +614,7 @@ function StudioFrame({ embedded }: { embedded: boolean }) {
       onClearCostume={() => setCostume(null)}
       hasKey={Boolean(settings.apiKey.trim()) || serverKey}
       running={running}
-      progress={progress}
+      progress={waited > 0 ? `${progress}（已等待 ${waited} 秒）` : progress}
       runError={runError}
       prompts={prompts}
       promptError={promptError}
@@ -830,8 +844,14 @@ async function requestGenerate(basePath: string, body: unknown, signal: AbortSig
     body: JSON.stringify(body),
     signal,
   })
-  const payload = await response.json() as { results?: Array<{ viewId: string; title: string; prompt: string; ok: boolean; error?: string; mediaType?: string; imageBase64?: string; warning?: string }>; error?: string }
-  if (!response.ok) throw new Error(payload.error || "生图失败")
+  const text = await response.text()
+  if (!response.ok) throw new Error(messageForStatus(response.status, text, "生图失败"))
+  let payload: { results?: Array<{ viewId: string; title: string; prompt: string; ok: boolean; error?: string; mediaType?: string; imageBase64?: string; warning?: string }> }
+  try {
+    payload = JSON.parse(text) as typeof payload
+  } catch {
+    throw new Error("生图失败")
+  }
   return (payload.results ?? []).map((item, index) => ({
     key: `${item.viewId}-${index}`,
     title: item.title,

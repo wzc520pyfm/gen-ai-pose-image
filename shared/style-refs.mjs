@@ -27,16 +27,40 @@ function missingStyleMessage(kind, relativePath, detail) {
   return `${label}风格参考没有读到（${relativePath}）。${detail}。不会改成纯文字生图。`
 }
 
+async function readStyleFile(fetchFile, relativePath) {
+  try {
+    return await fetchFile(relativePath)
+  } catch (first) {
+    try {
+      return await fetchFile(relativePath)
+    } catch {
+      throw first
+    }
+  }
+}
+
+async function shrinkStyleImage(image) {
+  const { default: sharp } = await import("sharp")
+  const buffer = await sharp(image.buffer)
+    .resize({ width: 1024, height: 1024, fit: "inside", withoutEnlargement: true })
+    .jpeg({ quality: 86 })
+    .toBuffer()
+  if (!buffer || buffer.byteLength < 32) throw new Error("风格参考压缩失败")
+  return { mediaType: "image/jpeg", buffer, role: image.role }
+}
+
 export async function loadStyleRefs(kind, deps = {}) {
   const paths = stylePaths(kind)
   const fetchPose = deps.fetchPose ?? fetchPoseBytes
   const fetchCostume = deps.fetchCostume ?? fetchCostumeBytes
   const normalize = deps.modelImage ?? modelImage
+  const shrink = deps.shrinkStyleImage ?? shrinkStyleImage
   const images = []
   for (const relativePath of paths) {
     try {
-      const raw = kind === "pose" ? await fetchPose(relativePath) : await fetchCostume(relativePath)
-      const image = await normalize(raw)
+      const raw = await readStyleFile(kind === "pose" ? fetchPose : fetchCostume, relativePath)
+      const normalized = await normalize(raw)
+      const image = await shrink(normalized)
       if (!image?.buffer || image.buffer.byteLength < 32) throw new Error("风格参考是空的")
       images.push({
         mediaType: image.mediaType,
@@ -79,5 +103,6 @@ export async function generateStyledReference(input = {}) {
     images,
     aspectRatio: input.aspectRatio,
     signal: input.signal,
+    allowReferenceFallback: false,
   })
 }

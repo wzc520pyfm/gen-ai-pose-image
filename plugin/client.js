@@ -5471,6 +5471,88 @@ async function fileToCharacter(file) {
   };
 }
 
+// shared/models.mjs
+function createModelId(random = () => globalThis.crypto.randomUUID()) {
+  return `model-${random()}`;
+}
+function photosOnly(images) {
+  return (Array.isArray(images) ? images : []).filter((image) => image && image.dataBase64 && image.role !== "sheet");
+}
+function identityImage(images) {
+  return photosOnly(images)[0] || (Array.isArray(images) ? images.find((image) => image?.dataBase64) : null) || null;
+}
+function withGeneratedSheet(images, sheet) {
+  if (!sheet?.dataBase64) throw new Error("多视角 sheet 是空的");
+  const photos = photosOnly(images).map((image) => ({ ...image, role: "photo" }));
+  return [{ ...sheet, role: "sheet" }, ...photos];
+}
+function withUploadedSheet(images, sheet) {
+  return withGeneratedSheet(images, sheet);
+}
+function syncLibrary(models, activeId, images, now = Date.now(), random = () => globalThis.crypto.randomUUID()) {
+  const list = Array.isArray(models) ? models.slice() : [];
+  if (!images?.length) {
+    if (!activeId) return { models: list, activeId: null, removedId: null, entry: null };
+    return {
+      models: list.filter((model) => model.id !== activeId),
+      activeId: null,
+      removedId: activeId,
+      entry: null
+    };
+  }
+  const index = list.findIndex((model) => model.id === activeId);
+  if (index >= 0) {
+    const entry2 = { ...list[index], images, updatedAt: now };
+    const next = list.slice();
+    next[index] = entry2;
+    return { models: next, activeId, removedId: null, entry: entry2 };
+  }
+  const entry = {
+    id: createModelId(random),
+    label: `模特 ${list.length + 1}`,
+    createdAt: now,
+    updatedAt: now,
+    images
+  };
+  return { models: [entry, ...list], activeId: entry.id, removedId: null, entry };
+}
+function adoptCurrent(models, images, activeId, now = Date.now(), random = () => globalThis.crypto.randomUUID()) {
+  const list = Array.isArray(models) ? models.slice() : [];
+  const known = activeId && list.some((model) => model.id === activeId) ? activeId : null;
+  if (!images?.length) return { models: list, activeId: known, adopted: false, entry: null };
+  if (known) return { models: list, activeId: known, adopted: false, entry: null };
+  const entry = {
+    id: createModelId(random),
+    label: `模特 ${list.length + 1}`,
+    createdAt: now,
+    updatedAt: now,
+    images
+  };
+  return { models: [entry, ...list], activeId: entry.id, adopted: true, entry };
+}
+function activateModel(models, id) {
+  const found = (Array.isArray(models) ? models : []).find((model) => model.id === id);
+  if (!found) throw new Error("找不到这个模特");
+  return found;
+}
+function renameModel(models, id, label) {
+  const text = String(label || "").trim().slice(0, 40);
+  if (!text) throw new Error("模特名称不能为空");
+  const list = Array.isArray(models) ? models.slice() : [];
+  const index = list.findIndex((model) => model.id === id);
+  if (index < 0) throw new Error("找不到这个模特");
+  list[index] = { ...list[index], label: text };
+  return list;
+}
+function deleteFromLibrary(models, id, activeId) {
+  const list = (Array.isArray(models) ? models : []).filter((model) => model.id !== id);
+  return {
+    models: list,
+    activeId: activeId === id ? null : activeId,
+    cleared: activeId === id
+  };
+}
+
 // lib/studio-env.tsx
 var import_react5 = require("react");
 var import_jsx_runtime11 = require("react/jsx-runtime");
@@ -5516,6 +5598,7 @@ function CharacterDock({
   onOpenSettings
 }) {
   const inputRef = (0, import_react6.useRef)(null);
+  const sheetInputRef = (0, import_react6.useRef)(null);
   const { basePath } = useStudioEnv();
   const [error, setError] = (0, import_react6.useState)("");
   const [busy, setBusy] = (0, import_react6.useState)(false);
@@ -5538,12 +5621,28 @@ function CharacterDock({
         next.push(await fileToCharacter(file));
       }
       if (next.length === images.length) setError("没有读到可用的图片");
-      else onChange(next.slice(0, 3));
+      else onChange(next);
     } catch (cause) {
       setError(cause instanceof Error ? cause.message : "图片导入失败");
     } finally {
       setBusy(false);
       if (inputRef.current) inputRef.current.value = "";
+    }
+  }
+  async function addSheet(list) {
+    const file = list?.[0];
+    if (!file) return;
+    setBusy(true);
+    setError("");
+    try {
+      if (!file.type.startsWith("image/")) throw new Error("这张图片读不了");
+      const image = await fileToCharacter(file);
+      onChange(withUploadedSheet(images, { ...image, role: "sheet" }));
+    } catch (cause) {
+      setError(cause instanceof Error ? cause.message : "设定图导入失败");
+    } finally {
+      setBusy(false);
+      if (sheetInputRef.current) sheetInputRef.current.value = "";
     }
   }
   return /* @__PURE__ */ (0, import_jsx_runtime12.jsxs)("aside", { className: "dock order-1 flex shrink-0 flex-col gap-3 px-3 py-3 text-[#e2e8f0] @min-[1024px]/studio:order-none @min-[1024px]/studio:h-full @min-[1024px]/studio:min-h-0 @min-[1024px]/studio:shrink @min-[1024px]/studio:gap-4 @min-[1024px]/studio:overflow-y-auto @min-[1024px]/studio:px-4 @min-[1024px]/studio:py-5", children: [
@@ -5641,6 +5740,17 @@ function CharacterDock({
         onChange: (event) => void addFiles(event.target.files)
       }
     ),
+    /* @__PURE__ */ (0, import_jsx_runtime12.jsx)(
+      "input",
+      {
+        ref: sheetInputRef,
+        type: "file",
+        accept: "image/png,image/jpeg,image/webp",
+        "aria-label": "导入设定图",
+        className: "sr-only",
+        onChange: (event) => void addSheet(event.target.files)
+      }
+    ),
     /* @__PURE__ */ (0, import_jsx_runtime12.jsxs)(
       Button3,
       {
@@ -5654,7 +5764,18 @@ function CharacterDock({
         ]
       }
     ),
-    custom ? /* @__PURE__ */ (0, import_jsx_runtime12.jsx)(
+    /* @__PURE__ */ (0, import_jsx_runtime12.jsx)(
+      Button3,
+      {
+        variant: "outline",
+        className: "border-white/20 bg-white/10 text-white hover:bg-white/15 hover:text-white",
+        disabled: busy || sheetBusy,
+        onClick: () => sheetInputRef.current?.click(),
+        children: busy ? "正在读图" : "导入设定图"
+      }
+    ),
+    /* @__PURE__ */ (0, import_jsx_runtime12.jsx)("p", { className: "text-xs leading-5 text-[#cbd5e1]", children: "已有完整多视角图时直接导入，会当作当前模特的设定图。只有照片时再生成。" }),
+    photoCount > 0 ? /* @__PURE__ */ (0, import_jsx_runtime12.jsx)(
       Button3,
       {
         variant: "outline",
@@ -10046,6 +10167,22 @@ async function syncCustomLibrary(basePath, poses, costumes) {
   }
 }
 
+// shared/http-status.mjs
+function messageForStatus(status, bodyText, fallback2) {
+  const text = String(bodyText || "").trim();
+  if (text) {
+    try {
+      const payload = JSON.parse(text);
+      if (typeof payload?.error === "string" && payload.error.trim()) return payload.error.trim();
+      if (typeof payload?.error?.message === "string" && payload.error.message.trim()) return payload.error.message.trim();
+    } catch {
+    }
+  }
+  if (status === 504 || status === 408) return "生图超时。模型这次没有在时限内返回，请再试一次。";
+  if (status === 502 || status === 503) return "生图接口暂时没有连上，请再试一次。";
+  return fallback2;
+}
+
 // lib/reference-client.ts
 function fallback(kind, userPrompt, adult, notice) {
   return {
@@ -10099,8 +10236,15 @@ async function requestReferenceImage(basePath, settings, prompt, kind) {
       prompt
     })
   });
-  const payload = await response.json();
-  if (!response.ok || !payload.imageBase64) throw new Error(payload.error || "参考图没有生成");
+  const text = await response.text();
+  if (!response.ok) throw new Error(messageForStatus(response.status, text, "参考图没有生成"));
+  let payload;
+  try {
+    payload = JSON.parse(text);
+  } catch {
+    throw new Error("参考图没有生成");
+  }
+  if (!payload.imageBase64) throw new Error("参考图没有生成");
   return { mediaType: payload.mediaType || "image/png", imageBase64: payload.imageBase64 };
 }
 
@@ -10133,9 +10277,21 @@ function CustomReferencePanel({
   const [previewBlob, setPreviewBlob] = (0, import_react8.useState)(null);
   const [previewUrl, setPreviewUrl] = (0, import_react8.useState)("");
   const [busy, setBusy] = (0, import_react8.useState)("");
+  const [waited, setWaited] = (0, import_react8.useState)(0);
   const [error, setError] = (0, import_react8.useState)("");
   const [pendingDelete, setPendingDelete] = (0, import_react8.useState)(null);
   const noun = kind === "pose" ? "姿势" : "服装";
+  (0, import_react8.useEffect)(() => {
+    if (busy !== "正在生成参考图") {
+      setWaited(0);
+      return;
+    }
+    const started = Date.now();
+    const timer = window.setInterval(() => {
+      setWaited(Math.max(1, Math.round((Date.now() - started) / 1e3)));
+    }, 1e3);
+    return () => window.clearInterval(timer);
+  }, [busy]);
   (0, import_react8.useEffect)(() => {
     if (!previewBlob) {
       setPreviewUrl("");
@@ -10384,7 +10540,7 @@ function CustomReferencePanel({
       /* @__PURE__ */ (0, import_jsx_runtime25.jsxs)("div", { className: "flex flex-wrap gap-2", children: [
         mode !== "upload" ? /* @__PURE__ */ (0, import_jsx_runtime25.jsxs)(import_jsx_runtime25.Fragment, { children: [
           /* @__PURE__ */ (0, import_jsx_runtime25.jsx)(Button3, { type: "button", variant: "outline", disabled: !prompt.trim(), onClick: () => void navigator.clipboard.writeText(prompt), children: "复制提示词" }),
-          /* @__PURE__ */ (0, import_jsx_runtime25.jsx)(Button3, { type: "button", variant: "outline", disabled: Boolean(busy), onClick: () => void generateImage(), children: busy === "正在生成参考图" ? busy : "生成参考图" })
+          /* @__PURE__ */ (0, import_jsx_runtime25.jsx)(Button3, { type: "button", variant: "outline", disabled: Boolean(busy), onClick: () => void generateImage(), children: busy === "正在生成参考图" ? waited > 0 ? `正在生成（${waited} 秒）` : "正在生成参考图" : "生成参考图" })
         ] }) : null,
         /* @__PURE__ */ (0, import_jsx_runtime25.jsx)(Button3, { type: "button", disabled: Boolean(busy) || !previewBlob, onClick: () => void save(), children: busy === "正在保存" ? busy : "保存到自定义" })
       ] }),
@@ -11181,8 +11337,15 @@ async function requestCharacterSheet(basePath, settings, image) {
       image: { mediaType: image.mediaType, dataBase64: image.dataBase64 }
     })
   });
-  const payload = await response.json();
-  if (!response.ok || !payload.imageBase64) throw new Error(payload.error || "多视角 sheet 没有生成");
+  const text = await response.text();
+  if (!response.ok) throw new Error(messageForStatus(response.status, text, "多视角 sheet 没有生成"));
+  let payload;
+  try {
+    payload = JSON.parse(text);
+  } catch {
+    throw new Error("多视角 sheet 没有生成");
+  }
+  if (!payload.imageBase64) throw new Error("多视角 sheet 没有生成");
   return { mediaType: payload.mediaType || "image/png", imageBase64: payload.imageBase64 };
 }
 
@@ -11243,85 +11406,6 @@ async function writeActiveModelId(id) {
   });
 }
 
-// shared/models.mjs
-function createModelId(random = () => globalThis.crypto.randomUUID()) {
-  return `model-${random()}`;
-}
-function photosOnly(images) {
-  return (Array.isArray(images) ? images : []).filter((image) => image && image.dataBase64 && image.role !== "sheet");
-}
-function identityImage(images) {
-  return photosOnly(images)[0] || (Array.isArray(images) ? images.find((image) => image?.dataBase64) : null) || null;
-}
-function withGeneratedSheet(images, sheet) {
-  if (!sheet?.dataBase64) throw new Error("多视角 sheet 是空的");
-  const photos = photosOnly(images).map((image) => ({ ...image, role: "photo" }));
-  return [{ ...sheet, role: "sheet" }, ...photos];
-}
-function syncLibrary(models, activeId, images, now = Date.now(), random = () => globalThis.crypto.randomUUID()) {
-  const list = Array.isArray(models) ? models.slice() : [];
-  if (!images?.length) {
-    if (!activeId) return { models: list, activeId: null, removedId: null, entry: null };
-    return {
-      models: list.filter((model) => model.id !== activeId),
-      activeId: null,
-      removedId: activeId,
-      entry: null
-    };
-  }
-  const index = list.findIndex((model) => model.id === activeId);
-  if (index >= 0) {
-    const entry2 = { ...list[index], images, updatedAt: now };
-    const next = list.slice();
-    next[index] = entry2;
-    return { models: next, activeId, removedId: null, entry: entry2 };
-  }
-  const entry = {
-    id: createModelId(random),
-    label: `模特 ${list.length + 1}`,
-    createdAt: now,
-    updatedAt: now,
-    images
-  };
-  return { models: [entry, ...list], activeId: entry.id, removedId: null, entry };
-}
-function adoptCurrent(models, images, activeId, now = Date.now(), random = () => globalThis.crypto.randomUUID()) {
-  const list = Array.isArray(models) ? models.slice() : [];
-  const known = activeId && list.some((model) => model.id === activeId) ? activeId : null;
-  if (!images?.length) return { models: list, activeId: known, adopted: false, entry: null };
-  if (known) return { models: list, activeId: known, adopted: false, entry: null };
-  const entry = {
-    id: createModelId(random),
-    label: `模特 ${list.length + 1}`,
-    createdAt: now,
-    updatedAt: now,
-    images
-  };
-  return { models: [entry, ...list], activeId: entry.id, adopted: true, entry };
-}
-function activateModel(models, id) {
-  const found = (Array.isArray(models) ? models : []).find((model) => model.id === id);
-  if (!found) throw new Error("找不到这个模特");
-  return found;
-}
-function renameModel(models, id, label) {
-  const text = String(label || "").trim().slice(0, 40);
-  if (!text) throw new Error("模特名称不能为空");
-  const list = Array.isArray(models) ? models.slice() : [];
-  const index = list.findIndex((model) => model.id === id);
-  if (index < 0) throw new Error("找不到这个模特");
-  list[index] = { ...list[index], label: text };
-  return list;
-}
-function deleteFromLibrary(models, id, activeId) {
-  const list = (Array.isArray(models) ? models : []).filter((model) => model.id !== id);
-  return {
-    models: list,
-    activeId: activeId === id ? null : activeId,
-    cleared: activeId === id
-  };
-}
-
 // components/studio.tsx
 var import_jsx_runtime32 = require("react/jsx-runtime");
 var REPOSITORY_URL = "https://github.com/wzc520pyfm/gen-ai-pose-image";
@@ -11357,6 +11441,7 @@ function StudioFrame({ embedded }) {
   const [results, setResults] = (0, import_react11.useState)([]);
   const [running, setRunning] = (0, import_react11.useState)(false);
   const [progress, setProgress] = (0, import_react11.useState)("");
+  const [waited, setWaited] = (0, import_react11.useState)(0);
   const [runError, setRunError] = (0, import_react11.useState)("");
   const [limitNote, setLimitNote] = (0, import_react11.useState)("");
   const [serverKey, setServerKey] = (0, import_react11.useState)(false);
@@ -11372,6 +11457,17 @@ function StudioFrame({ embedded }) {
   const clearRequestedSystem = (0, import_react11.useCallback)(() => setRequestedSystem(null), []);
   const clearCostumeFocus = (0, import_react11.useCallback)(() => setCostumeFocus(null), []);
   const abortRef = (0, import_react11.useRef)(null);
+  (0, import_react11.useEffect)(() => {
+    if (!running) {
+      setWaited(0);
+      return;
+    }
+    const started = Date.now();
+    const timer = window.setInterval(() => {
+      setWaited(Math.max(1, Math.round((Date.now() - started) / 1e3)));
+    }, 1e3);
+    return () => window.clearInterval(timer);
+  }, [running]);
   const loadCatalog = (0, import_react11.useCallback)(() => {
     setLoading(true);
     setCatalogError("");
@@ -11823,7 +11919,7 @@ function StudioFrame({ embedded }) {
       onClearCostume: () => setCostume(null),
       hasKey: Boolean(settings.apiKey.trim()) || serverKey,
       running,
-      progress,
+      progress: waited > 0 ? `${progress}（已等待 ${waited} 秒）` : progress,
       runError,
       prompts,
       promptError,
@@ -12037,8 +12133,14 @@ async function requestGenerate(basePath, body, signal) {
     body: JSON.stringify(body),
     signal
   });
-  const payload = await response.json();
-  if (!response.ok) throw new Error(payload.error || "生图失败");
+  const text = await response.text();
+  if (!response.ok) throw new Error(messageForStatus(response.status, text, "生图失败"));
+  let payload;
+  try {
+    payload = JSON.parse(text);
+  } catch {
+    throw new Error("生图失败");
+  }
   return (payload.results ?? []).map((item, index) => ({
     key: `${item.viewId}-${index}`,
     title: item.title,

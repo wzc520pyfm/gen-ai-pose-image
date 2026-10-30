@@ -17,6 +17,7 @@ export function createModelId(random?: () => string): string
 export function photosOnly(images: ModelImage[]): ModelImage[]
 export function identityImage(images: ModelImage[]): ModelImage | null
 export function withGeneratedSheet(images: ModelImage[], sheet: ModelImage): ModelImage[]
+export function withUploadedSheet(images: ModelImage[], sheet: ModelImage): ModelImage[]
 export function syncLibrary(models: SavedModel[], activeId: string | null, images: ModelImage[], now?: number, random?: () => string): {
   models: SavedModel[]
   activeId: string | null

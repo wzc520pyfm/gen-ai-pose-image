@@ -9,6 +9,7 @@ import { Input } from "@/components/ui/input"
 import { Switch } from "@/components/ui/switch"
 import { fileToCharacter, type StoredCharacter } from "@/lib/characters"
 import type { SavedModel } from "@/lib/models"
+import { withUploadedSheet } from "@/shared/models.mjs"
 import { studioUrl, useStudioEnv } from "@/lib/studio-env"
 
 export function CharacterDock({
@@ -49,6 +50,7 @@ export function CharacterDock({
   onOpenSettings: () => void
 }) {
   const inputRef = useRef<HTMLInputElement>(null)
+  const sheetInputRef = useRef<HTMLInputElement>(null)
   const { basePath } = useStudioEnv()
   const [error, setError] = useState("")
   const [busy, setBusy] = useState(false)
@@ -72,12 +74,29 @@ export function CharacterDock({
         next.push(await fileToCharacter(file))
       }
       if (next.length === images.length) setError("没有读到可用的图片")
-      else onChange(next.slice(0, 3))
+      else onChange(next)
     } catch (cause) {
       setError(cause instanceof Error ? cause.message : "图片导入失败")
     } finally {
       setBusy(false)
       if (inputRef.current) inputRef.current.value = ""
+    }
+  }
+
+  async function addSheet(list: FileList | null) {
+    const file = list?.[0]
+    if (!file) return
+    setBusy(true)
+    setError("")
+    try {
+      if (!file.type.startsWith("image/")) throw new Error("这张图片读不了")
+      const image = await fileToCharacter(file)
+      onChange(withUploadedSheet(images, { ...image, role: "sheet" }))
+    } catch (cause) {
+      setError(cause instanceof Error ? cause.message : "设定图导入失败")
+    } finally {
+      setBusy(false)
+      if (sheetInputRef.current) sheetInputRef.current.value = ""
     }
   }
 
@@ -182,6 +201,14 @@ export function CharacterDock({
         className="sr-only"
         onChange={(event) => void addFiles(event.target.files)}
       />
+      <input
+        ref={sheetInputRef}
+        type="file"
+        accept="image/png,image/jpeg,image/webp"
+        aria-label="导入设定图"
+        className="sr-only"
+        onChange={(event) => void addSheet(event.target.files)}
+      />
       <Button
         variant="outline"
         className="hidden border-white/20 bg-white/10 text-white hover:bg-white/15 hover:text-white @min-[1024px]/studio:inline-flex"
@@ -191,7 +218,16 @@ export function CharacterDock({
         <ImagePlus />
         {busy ? "正在读图" : images.length ? "再加一张参考" : "导入其他模特"}
       </Button>
-      {custom ? (
+      <Button
+        variant="outline"
+        className="border-white/20 bg-white/10 text-white hover:bg-white/15 hover:text-white"
+        disabled={busy || sheetBusy}
+        onClick={() => sheetInputRef.current?.click()}
+      >
+        {busy ? "正在读图" : "导入设定图"}
+      </Button>
+      <p className="text-xs leading-5 text-[#cbd5e1]">已有完整多视角图时直接导入，会当作当前模特的设定图。只有照片时再生成。</p>
+      {photoCount > 0 ? (
         <Button
           variant="outline"
           className="border-white/20 bg-white/10 text-white hover:bg-white/15 hover:text-white"
