@@ -57,7 +57,15 @@ export function createPoseHandler(getConfig) {
       }
       if (req.method === "GET" && path === "/api/status") {
         const config = getConfig()
-        return json(res, 200, { keyConfigured: Boolean(process.env.POSE_MUSE_API_KEY || config.apiKey) })
+        const fromEnv = process.env.POSE_MUSE_PROVIDER
+        const named = fromEnv || config.provider || ""
+        const provider = named === "seedream" || named === "openai" || named === "gemini" ? named : ""
+        return json(res, 200, {
+          keyConfigured: Boolean(process.env.POSE_MUSE_API_KEY || config.apiKey),
+          provider,
+          model: process.env.POSE_MUSE_MODEL?.trim() || config.model || "",
+          baseURL: process.env.POSE_MUSE_BASE_URL?.trim() || config.baseURL || "",
+        })
       }
       if (req.method === "GET" && path === "/api/pose-image") {
         const found = resolveView(url.searchParams.get("id") ?? "")

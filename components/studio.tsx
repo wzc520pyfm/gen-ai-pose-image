@@ -13,6 +13,7 @@ import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sh
 import { WhaleMark } from "@/components/whale-mark"
 import { readStoredCharacters, writeStoredCharacters, type StoredCharacter } from "@/lib/characters"
 import { baseURLFor, DEFAULT_SETTINGS, loadSettings, modelFor, saveSettings, type StudioSettings } from "@/lib/settings"
+import { StudioEnvProvider, studioUrl, useStudioEnv, type StudioPortal } from "@/lib/studio-env"
 import type { Catalog, Pose, PoseView, PromptCard } from "@/lib/types"
 
 type Selection = Record<string, string>
@@ -21,7 +22,24 @@ type CostumePick = { id: string; label: string; keywords: string }
 
 const REPOSITORY_URL = "https://github.com/wzc520pyfm/gen-ai-pose-image"
 
-export function Studio() {
+export function Studio({
+  basePath = "",
+  embedded = false,
+  portalContainer = null,
+}: {
+  basePath?: string
+  embedded?: boolean
+  portalContainer?: StudioPortal
+}) {
+  return (
+    <StudioEnvProvider basePath={basePath} portalContainer={portalContainer}>
+      <StudioFrame embedded={embedded} />
+    </StudioEnvProvider>
+  )
+}
+
+function StudioFrame({ embedded }: { embedded: boolean }) {
+  const { basePath } = useStudioEnv()
   const [catalog, setCatalog] = useState<Catalog | null>(null)
   const [catalogError, setCatalogError] = useState("")
   const [loading, setLoading] = useState(true)
@@ -52,7 +70,7 @@ export function Studio() {
   const loadCatalog = useCallback(() => {
     setLoading(true)
     setCatalogError("")
-    fetch("/api/catalog")
+    fetch(studioUrl(basePath, "/api/catalog"))
       .then(async (response) => {
         if (!response.ok) throw new Error("姿势目录没有加载出来")
         return response.json() as Promise<Catalog>
@@ -60,12 +78,12 @@ export function Studio() {
       .then(setCatalog)
       .catch((error: unknown) => setCatalogError(error instanceof Error ? error.message : "姿势目录没有加载出来"))
       .finally(() => setLoading(false))
-  }, [])
+  }, [basePath])
 
   useEffect(() => { loadCatalog() }, [loadCatalog])
   useEffect(() => {
     const local = loadSettings()
-    fetch("/api/status")
+    fetch(studioUrl(basePath, "/api/status"))
       .then((response) => response.json())
       .then((payload: { keyConfigured?: boolean; provider?: string; model?: string; baseURL?: string }) => {
         setServerKey(Boolean(payload.keyConfigured))
@@ -84,7 +102,7 @@ export function Studio() {
         setSettings(local)
       })
       .catch(() => setSettings(local))
-  }, [])
+  }, [basePath])
   useEffect(() => {
     readStoredCharacters().then(setCharacters).catch(() => {})
   }, [])
@@ -124,7 +142,7 @@ export function Studio() {
     }
     const controller = new AbortController()
     const timer = window.setTimeout(() => {
-      fetch("/api/prompt", {
+      fetch(studioUrl(basePath, "/api/prompt"), {
         method: "POST",
         headers: { "content-type": "application/json" },
         body: JSON.stringify({
@@ -153,7 +171,7 @@ export function Studio() {
       window.clearTimeout(timer)
       controller.abort()
     }
-  }, [selectionKey, extraPrompt, characters.length, costume?.id, settings.provider, settings.mode, settings.keepOutfit])
+  }, [basePath, selectionKey, extraPrompt, characters.length, costume?.id, settings.provider, settings.mode, settings.keepOutfit])
 
   function togglePose(pose: Pose, view: PoseView) {
     if (selected[pose.id] === view.id) {
@@ -202,14 +220,14 @@ export function Studio() {
     try {
       if (settings.mode === "sheet") {
         setProgress("正在画姿势拼图")
-        const batch = await requestGenerate({ ...bodyBase, mode: "sheet", viewIds }, controller.signal)
+        const batch = await requestGenerate(basePath, { ...bodyBase, mode: "sheet", viewIds }, controller.signal)
         setResults(batch)
       } else {
         const collected: ResultCard[] = []
         for (let index = 0; index < chosen.length; index += 1) {
           const item = chosen[index]
           setProgress(`正在画第 ${index + 1} 张，共 ${chosen.length} 张`)
-          const batch = await requestGenerate({ ...bodyBase, mode: "each", viewIds: [item.viewId] }, controller.signal)
+          const batch = await requestGenerate(basePath, { ...bodyBase, mode: "each", viewIds: [item.viewId] }, controller.signal)
           collected.push(...batch.map((result, resultIndex) => ({ ...result, key: `${item.viewId}-${resultIndex}` })))
           setResults([...collected])
         }
@@ -257,8 +275,8 @@ export function Studio() {
   )
 
   return (
-    <div className="flex h-dvh flex-col overflow-hidden text-foreground">
-      <header className="flex min-h-14 shrink-0 flex-wrap items-center gap-x-3 gap-y-2 border-b bg-white px-3 py-2 sm:px-4 md:px-5">
+    <div className={`@container/studio flex min-h-0 flex-col overflow-hidden bg-background text-foreground ${embedded ? "h-full" : "h-dvh"}`}>
+      <header className="flex min-h-14 shrink-0 flex-wrap items-center gap-x-3 gap-y-2 border-b bg-white px-3 py-2 @min-[640px]/studio:px-4 @min-[768px]/studio:px-5">
         <WhaleMark className="size-8 shrink-0" />
         <h1 className="shrink-0 text-base font-semibold">澜姿</h1>
         <div className="flex shrink-0 rounded-lg bg-muted p-1" role="tablist" aria-label="图库">
@@ -281,9 +299,9 @@ export function Studio() {
             服装
           </button>
         </div>
-        {costume ? <span className="hidden min-w-0 truncate text-sm text-primary sm:inline">{costume.id}</span> : null}
+        {costume ? <span className="hidden min-w-0 truncate text-sm text-primary @min-[640px]/studio:inline">{costume.id}</span> : null}
         <div className="ml-auto flex shrink-0 items-center gap-2">
-          <Button variant="outline" size="sm" className="max-sm:hidden" onClick={() => setInstallOpen(true)}>装进 Harness</Button>
+          <Button variant="outline" size="sm" className="@max-[640px]/studio:hidden" onClick={() => setInstallOpen(true)}>装进 Harness</Button>
           <a
             href={REPOSITORY_URL}
             target="_blank"
@@ -298,7 +316,7 @@ export function Studio() {
           </Button>
         </div>
       </header>
-      <div className="flex min-h-0 flex-1 flex-col lg:grid lg:grid-cols-[300px_minmax(0,1fr)_340px] lg:grid-rows-[minmax(0,1fr)]">
+      <div className="flex min-h-0 flex-1 flex-col @min-[1024px]/studio:grid @min-[1024px]/studio:grid-cols-[300px_minmax(0,1fr)_340px] @min-[1024px]/studio:grid-rows-[minmax(0,1fr)]">
         <CharacterDock
           images={characters}
           onChange={updateCharacters}
@@ -306,7 +324,7 @@ export function Studio() {
           onKeepOutfit={(keepOutfit) => updateSettings({ ...settings, keepOutfit })}
           outfitLocked={Boolean(costume)}
         />
-        <main className="order-2 min-h-0 min-w-0 flex-1 overflow-y-auto lg:order-none lg:pb-8">
+        <main className="order-2 min-h-0 min-w-0 flex-1 overflow-y-auto @min-[1024px]/studio:order-none @min-[1024px]/studio:pb-8">
           {library === "poses" ? (
             <PoseBrowser
               catalog={catalog}
@@ -331,17 +349,17 @@ export function Studio() {
             />
           )}
         </main>
-        <aside className="hidden min-h-0 border-l bg-white px-4 py-5 lg:block lg:overflow-y-auto">
+        <aside className="hidden min-h-0 border-l bg-white px-4 py-5 @min-[1024px]/studio:block @min-[1024px]/studio:overflow-y-auto">
           {composer}
         </aside>
       </div>
-      <div className="shrink-0 border-t bg-white p-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] lg:hidden">
+      <div className="shrink-0 border-t bg-white p-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] @min-[1024px]/studio:hidden">
         <Button className="h-11 w-full" onClick={() => setSheetOpen(true)}>
           已选 {chosen.length} 个姿势{costume ? ` · ${costume.id}` : ""} · 去生图
         </Button>
       </div>
       <Sheet open={sheetOpen} onOpenChange={setSheetOpen}>
-        <SheetContent side="bottom" className="max-h-[85dvh] overflow-y-auto rounded-t-3xl">
+        <SheetContent side="bottom" className="max-h-[min(85dvh,85%)] overflow-y-auto rounded-t-3xl">
           <SheetHeader>
             <SheetTitle>生图</SheetTitle>
           </SheetHeader>
@@ -350,17 +368,17 @@ export function Studio() {
       </Sheet>
       <SettingsDialog open={settingsOpen} onOpenChange={setSettingsOpen} settings={settings} onChange={updateSettings} />
       <Dialog open={installOpen} onOpenChange={setInstallOpen}>
-        <DialogContent className="sm:max-w-lg">
+        <DialogContent className="max-w-[min(32rem,calc(100%-2rem))]">
           <DialogHeader>
             <DialogTitle>装进 DeepSeek Harness</DialogTitle>
-            <DialogDescription>澜姿发布在 npm，包名是 gen-ai-pose-image。在已经装好 Harness 的机器上执行下面的命令，重启后左侧栏会出现「姿势」，Agent 也能直接调用姿势生图。</DialogDescription>
+            <DialogDescription>澜姿发布在 npm，包名是 gen-ai-pose-image。在已经装好 Harness 的机器上执行下面的命令，重启后左侧栏会出现「澜姿 / 工作室」，Agent 也能直接调用姿势生图。</DialogDescription>
           </DialogHeader>
           <pre className="overflow-auto rounded-xl bg-muted p-3 text-xs leading-5">dsh plugin --profile web add gen-ai-pose-image</pre>
           <p className="text-xs leading-5 text-muted-foreground">网页工作室要在设置里填自己的 API Key。Harness 插件出图时，用启动环境里的 POSE_MUSE_API_KEY。</p>
         </DialogContent>
       </Dialog>
       <Dialog open={adultAsk !== null} onOpenChange={(open) => { if (!open) setAdultAsk(null) }}>
-        <DialogContent className="sm:max-w-md">
+        <DialogContent className="max-w-[min(28rem,calc(100%-2rem))]">
           <DialogHeader>
             <DialogTitle>{adultAsk?.startsWith("costume:") ? "这些是成人向服装" : "这些是成人向姿势"}</DialogTitle>
             <DialogDescription>
@@ -397,8 +415,8 @@ function GithubMark() {
   )
 }
 
-async function requestGenerate(body: unknown, signal: AbortSignal): Promise<ResultCard[]> {
-  const response = await fetch("/api/generate", {
+async function requestGenerate(basePath: string, body: unknown, signal: AbortSignal): Promise<ResultCard[]> {
+  const response = await fetch(studioUrl(basePath, "/api/generate"), {
     method: "POST",
     headers: { "content-type": "application/json" },
     body: JSON.stringify(body),

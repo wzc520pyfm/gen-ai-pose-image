@@ -26,6 +26,7 @@
 .netlify
 agent-tools/
 pose-muse-output/
+scripts/.generated/
 
 # debug
 npm-debug.log*

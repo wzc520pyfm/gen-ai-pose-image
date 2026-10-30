@@ -164,10 +164,15 @@ test("the browser module id matches the npm package name", () => {
   const pkg = JSON.parse(readFileSync(new URL("../package.json", import.meta.url), "utf8"))
   const client = readFileSync(new URL("../plugin/client.js", import.meta.url), "utf8")
   assert.match(client, new RegExp(`__ModuleLoader__\\.load\\(\\{ id: "${pkg.name}"`))
-  assert.match(client, new RegExp(`exports\\.name = "${pkg.name}"`))
+  assert.match(client, /module\.exports\.name = "gen-ai-pose-image"/)
   assert.match(client, /sidebar\.panellist/)
-  assert.match(client, /key: "pose-muse"/)
+  assert.match(client, /key:\s*"pose-muse"/)
+  assert.match(client, /澜姿 \/ 工作室/)
+  assert.doesNotMatch(client, /完整画廊在独立工作室里/)
   assert.doesNotMatch(client, /conversation\.view/)
+  const requires = [...client.matchAll(/require\((["'])([^"']+)\1\)/g)].map((match) => match[2])
+  const allowed = new Set(["react", "react/jsx-runtime", "react-dom", "react-dom/client"])
+  for (const id of new Set(requires)) assert.ok(allowed.has(id), id)
   assert.deepEqual(pkg.dsh.client.inject, [
     "@deepseek-ai/dsh-client-ui-layout",
     "@deepseek-ai/dsh-client-ui-sidebar",

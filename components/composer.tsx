@@ -8,6 +8,7 @@ import { Textarea } from "@/components/ui/textarea"
 import type { StoredCharacter } from "@/lib/characters"
 import type { AspectRatio, GenerateMode, PromptCard } from "@/lib/types"
 import { ASPECT_LABEL } from "@/lib/types"
+import { studioUrl, useStudioEnv } from "@/lib/studio-env"
 
 export type ResultCard = {
   key: string
@@ -68,9 +69,10 @@ export function Composer({
   onStop: () => void
   onOpenSettings: () => void
 }) {
+  const { basePath } = useStudioEnv()
   const characterSrc = characters[0]
     ? `data:${characters[0].mediaType};base64,${characters[0].dataBase64}`
-    : "/muse/dafeiyu-sheet.png"
+    : studioUrl(basePath, "/muse/dafeiyu-sheet.png")
   const limit = mode === "sheet" ? 4 : 8
 
   return (
@@ -86,7 +88,7 @@ export function Composer({
 
       {costume ? (
         <div className="flex items-center gap-2 rounded-xl border border-primary/40 bg-card px-2 py-1.5">
-          <img src={`/api/costume-image?id=${encodeURIComponent(costume.id)}&size=thumb`} alt="" className="h-14 w-10 rounded-md bg-white object-contain" />
+          <img src={studioUrl(basePath, `/api/costume-image?id=${encodeURIComponent(costume.id)}&size=thumb`)} alt="" className="h-14 w-10 rounded-md bg-white object-contain" />
           <span className="min-w-0 flex-1">
             <span className="block truncate text-sm">换成 {costume.id}</span>
             <span className="line-clamp-2 text-xs text-muted-foreground">{costume.label} · {costume.keywords}</span>
@@ -103,7 +105,7 @@ export function Composer({
         <ul className="flex max-h-40 flex-col gap-2 overflow-auto">
           {selected.map((item) => (
             <li key={item.poseId} className="flex items-center gap-2 rounded-xl border bg-card px-2 py-1.5">
-              <img src={`/api/pose-image?id=${encodeURIComponent(item.viewId)}&size=thumb`} alt="" className="h-12 w-9 rounded-md bg-white object-contain" />
+              <img src={studioUrl(basePath, `/api/pose-image?id=${encodeURIComponent(item.viewId)}&size=thumb`)} alt="" className="h-12 w-9 rounded-md bg-white object-contain" />
               <span className="min-w-0 flex-1">
                 <span className="block truncate text-sm">{item.title}</span>
                 <span className="text-xs text-muted-foreground">{item.angle}</span>
@@ -120,11 +122,11 @@ export function Composer({
           <div className={`mt-2 grid items-center gap-2 ${costume ? "grid-cols-3" : "grid-cols-[1fr_auto_1fr]"}`}>
             <img src={characterSrc} alt={characters.length ? "导入的模特" : "大肥鱼的成年三视图"} className="aspect-[3/4] rounded-lg bg-[#f8fafc] object-contain" />
             {costume ? (
-              <img src={`/api/costume-image?id=${encodeURIComponent(costume.id)}&size=thumb`} alt={`${costume.id} 的服装参考，图中没有人物`} className="aspect-[3/4] rounded-lg bg-white object-contain" />
+              <img src={studioUrl(basePath, `/api/costume-image?id=${encodeURIComponent(costume.id)}&size=thumb`)} alt={`${costume.id} 的服装参考，图中没有人物`} className="aspect-[3/4] rounded-lg bg-white object-contain" />
             ) : (
               <span className="text-lg text-muted-foreground" aria-hidden="true">→</span>
             )}
-            <img src={`/api/pose-image?id=${encodeURIComponent(selected[0].viewId)}&size=thumb`} alt={`${selected[0].title} 的姿势线稿`} className="aspect-[3/4] rounded-lg bg-white object-contain" />
+            <img src={studioUrl(basePath, `/api/pose-image?id=${encodeURIComponent(selected[0].viewId)}&size=thumb`)} alt={`${selected[0].title} 的姿势线稿`} className="aspect-[3/4] rounded-lg bg-white object-contain" />
           </div>
           <p className="mt-2 text-xs leading-5 text-muted-foreground">
             {costume ? "左边锁脸和鲸尾，中间是没有人物的衣服，右边只提供姿势。这还不是成图。" : "左边锁脸和衣服，右边只提供姿势。这还不是成图。"}
@@ -133,7 +135,7 @@ export function Composer({
       ) : costume ? (
         <div className="rounded-xl border bg-card p-3">
           <p className="text-xs text-muted-foreground">已选服装 · {costume.id}</p>
-          <img src={`/api/costume-image?id=${encodeURIComponent(costume.id)}&size=thumb`} alt={`${costume.id}，${costume.keywords}`} className="mt-2 aspect-[2/3] max-h-48 rounded-lg bg-white object-contain" />
+          <img src={studioUrl(basePath, `/api/costume-image?id=${encodeURIComponent(costume.id)}&size=thumb`)} alt={`${costume.id}，${costume.keywords}`} className="mt-2 aspect-[2/3] max-h-48 rounded-lg bg-white object-contain" />
           <p className="mt-2 text-xs leading-5 text-muted-foreground">还没选姿势。选好姿势后，角色会穿上这套衣服出图。</p>
         </div>
       ) : null}

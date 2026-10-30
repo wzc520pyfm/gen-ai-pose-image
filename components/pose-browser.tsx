@@ -9,6 +9,7 @@ import { Button } from "@/components/ui/button"
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { Input } from "@/components/ui/input"
 import type { Catalog, Pose, PoseView } from "@/lib/types"
+import { studioUrl, useStudioEnv } from "@/lib/studio-env"
 
 const ANGLES = ["正面", "斜侧", "侧面", "俯视", "仰视"]
 
@@ -29,13 +30,14 @@ function displayView(pose: Pose, selectedViewId: string | undefined, angle: stri
 }
 
 function PoseFigure({ view, alt, size = "thumb" }: { view: PoseView; alt: string; size?: "thumb" | "full" }) {
+  const { basePath } = useStudioEnv()
   const [failed, setFailed] = useState(false)
   if (failed) {
     return <div className="grid h-full place-items-center px-3 text-center text-xs text-muted-foreground">线稿暂时加载不到</div>
   }
   return (
     <img
-      src={`/api/pose-image?id=${encodeURIComponent(view.id)}&size=${size}`}
+      src={studioUrl(basePath, `/api/pose-image?id=${encodeURIComponent(view.id)}&size=${size}`)}
       alt={alt}
       loading="lazy"
       onError={() => setFailed(true)}
@@ -131,7 +133,7 @@ export function PoseBrowser({
 
   return (
     <section className="flex min-h-0 flex-col">
-      <div className="sticky top-0 z-10 border-b bg-white/95 px-4 py-3 backdrop-blur md:px-6">
+      <div className="sticky top-0 z-10 border-b bg-white/95 px-4 py-3 backdrop-blur @min-[768px]/studio:px-6">
         <div className="flex flex-wrap gap-2">
           {catalog?.systems.map((item) => {
             const active = item.id === system?.id
@@ -179,7 +181,7 @@ export function PoseBrowser({
             <FilterChip key={item} active={angle === item} onClick={() => setAngle(item)}>{item}</FilterChip>
           ))}
         </div>
-        <label className="mt-2 block text-xs text-muted-foreground md:hidden">
+        <label className="mt-2 block text-xs text-muted-foreground @min-[768px]/studio:hidden">
           分类
           <select
             className="mt-1 h-10 w-full rounded-lg border bg-card px-2 text-sm text-foreground"
@@ -192,14 +194,14 @@ export function PoseBrowser({
             ))}
           </select>
         </label>
-        <div className="mt-2 hidden flex-wrap gap-1.5 md:flex">
+        <div className="mt-2 hidden flex-wrap gap-1.5 @min-[768px]/studio:flex">
           {categories.map((item) => (
             <FilterChip key={item} active={category === item} onClick={() => setCategory(item)}>{item}</FilterChip>
           ))}
         </div>
       </div>
 
-      <div className="px-4 py-4 md:px-6">
+      <div className="px-4 py-4 @min-[768px]/studio:px-6">
         {loading ? <PoseSkeleton /> : null}
         {error ? (
           <div className="rounded-2xl border border-dashed border-border bg-card px-4 py-10 text-center">
@@ -218,7 +220,7 @@ export function PoseBrowser({
             ) : null}
           </div>
         ) : null}
-        <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5">
+        <div className="grid grid-cols-2 gap-3 @min-[640px]/studio:grid-cols-3 @min-[1280px]/studio:grid-cols-4 @min-[1536px]/studio:grid-cols-5">
           {poses.map((pose) => {
             const view = displayView(pose, selected[pose.id], angle)
             if (!view) return null
@@ -232,12 +234,12 @@ export function PoseBrowser({
                     ) : null}
                     <span className="absolute right-2 bottom-2 rounded-full bg-black/60 px-2 py-0.5 text-[11px] text-white">{view.angle}</span>
                   </div>
-                  <div className="space-y-1 px-2.5 py-2 sm:px-3 sm:py-2.5">
+                  <div className="space-y-1 px-2.5 py-2 @min-[640px]/studio:px-3 @min-[640px]/studio:py-2.5">
                     <h3 className="line-clamp-2 text-sm leading-5 font-medium">{pose.name}</h3>
                     <p className="truncate text-xs text-muted-foreground">{pose.code} · {pose.category}</p>
                   </div>
                 </button>
-                <div className="flex items-center justify-between gap-2 px-2.5 pb-2.5 sm:px-3 sm:pb-3">
+                <div className="flex items-center justify-between gap-2 px-2.5 pb-2.5 @min-[640px]/studio:px-3 @min-[640px]/studio:pb-3">
                   <button type="button" className="shrink-0 text-xs text-primary underline-offset-2 hover:underline" onClick={() => setPreview({ pose, view })}>
                     看线稿
                   </button>
@@ -255,7 +257,7 @@ export function PoseBrowser({
       </div>
 
       <Dialog open={preview !== null} onOpenChange={(open) => { if (!open) setPreview(null) }}>
-        <DialogContent className="sm:max-w-xl">
+        <DialogContent className="max-w-[min(36rem,calc(100%-2rem))]">
           {preview ? (
             <>
               <DialogHeader>
@@ -297,7 +299,7 @@ function FilterChip({ active, onClick, children }: { active: boolean; onClick: (
 
 function PoseSkeleton() {
   return (
-    <div className="mb-4 grid grid-cols-2 gap-3 sm:grid-cols-3 xl:grid-cols-4">
+    <div className="mb-4 grid grid-cols-2 gap-3 @min-[640px]/studio:grid-cols-3 @min-[1280px]/studio:grid-cols-4">
       {Array.from({ length: 8 }, (_, index) => (
         <div key={index} className="aspect-[3/4] animate-pulse rounded-2xl bg-muted" />
       ))}
