@@ -11672,13 +11672,13 @@ function visible(items, showAdult) {
   return (Array.isArray(items) ? items : []).filter((item) => item && (showAdult || item.adult !== true));
 }
 function pickRandomCombo({ poses = [], costumes = [], showAdult = false, random = Math.random } = {}) {
-  const posePool = visible(poses, showAdult).filter((pose2) => Array.isArray(pose2.views) && pose2.views.length > 0);
+  const posePool = visible(poses, showAdult).filter((pose2) => Array.isArray(pose2.views) && pose2.views.some((item) => item?.id));
   const costumePool = visible(costumes, showAdult).filter((costume) => costume.id);
   if (posePool.length === 0) return { ok: false, message: "没有可选的姿势。", pose: null, view: null, costume: null };
   if (costumePool.length === 0) return { ok: false, message: "没有可选的服装。", pose: null, view: null, costume: null };
   const pose = pickOne(posePool, random);
-  const view = pose.views.find((item) => item?.angle === "正面") || pose.views[0];
-  return { ok: true, message: "", pose, view, costume: pickOne(costumePool, random) };
+  const views = pose.views.filter((item) => item?.id);
+  return { ok: true, message: "", pose, view: pickOne(views, random), costume: pickOne(costumePool, random) };
 }
 
 // components/studio.tsx
