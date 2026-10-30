@@ -469,8 +469,21 @@ var __iconData3 = {
 __iconData3.node;
 var Download = createLucideIcon(__iconData3);
 
-// node_modules/lucide-react/dist/esm/icons/image-plus.mjs
+// node_modules/lucide-react/dist/esm/icons/external-link.mjs
 var __iconData4 = {
+  name: "external-link",
+  size: 24,
+  node: [
+    ["path", { d: "M15 3h6v6", key: "1q9fwt" }],
+    ["path", { d: "M10 14 21 3", key: "gplh6r" }],
+    ["path", { d: "M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6", key: "a6xqqp" }]
+  ]
+};
+__iconData4.node;
+var ExternalLink = createLucideIcon(__iconData4);
+
+// node_modules/lucide-react/dist/esm/icons/image-plus.mjs
+var __iconData5 = {
   name: "image-plus",
   size: 24,
   node: [
@@ -481,21 +494,21 @@ var __iconData4 = {
     ["circle", { cx: "9", cy: "9", r: "2", key: "af1f0g" }]
   ]
 };
-__iconData4.node;
-var ImagePlus = createLucideIcon(__iconData4);
+__iconData5.node;
+var ImagePlus = createLucideIcon(__iconData5);
 
 // node_modules/lucide-react/dist/esm/icons/loader-circle.mjs
-var __iconData5 = {
+var __iconData6 = {
   name: "loader-circle",
   size: 24,
   node: [["path", { d: "M21 12a9 9 0 1 1-6.219-8.56", key: "13zald" }]],
   aliases: ["loader-2"]
 };
-__iconData5.node;
-var LoaderCircle = createLucideIcon(__iconData5);
+__iconData6.node;
+var LoaderCircle = createLucideIcon(__iconData6);
 
 // node_modules/lucide-react/dist/esm/icons/search.mjs
-var __iconData6 = {
+var __iconData7 = {
   name: "search",
   size: 24,
   node: [
@@ -503,11 +516,11 @@ var __iconData6 = {
     ["circle", { cx: "11", cy: "11", r: "8", key: "4ej97u" }]
   ]
 };
-__iconData6.node;
-var Search = createLucideIcon(__iconData6);
+__iconData7.node;
+var Search = createLucideIcon(__iconData7);
 
 // node_modules/lucide-react/dist/esm/icons/settings.mjs
-var __iconData7 = {
+var __iconData8 = {
   name: "settings",
   size: 24,
   node: [
@@ -521,11 +534,11 @@ var __iconData7 = {
     ["circle", { cx: "12", cy: "12", r: "3", key: "1v7zrd" }]
   ]
 };
-__iconData7.node;
-var Settings = createLucideIcon(__iconData7);
+__iconData8.node;
+var Settings = createLucideIcon(__iconData8);
 
 // node_modules/lucide-react/dist/esm/icons/sparkles.mjs
-var __iconData8 = {
+var __iconData9 = {
   name: "sparkles",
   size: 24,
   node: [
@@ -542,11 +555,11 @@ var __iconData8 = {
   ],
   aliases: ["stars"]
 };
-__iconData8.node;
-var Sparkles = createLucideIcon(__iconData8);
+__iconData9.node;
+var Sparkles = createLucideIcon(__iconData9);
 
 // node_modules/lucide-react/dist/esm/icons/x.mjs
-var __iconData9 = {
+var __iconData10 = {
   name: "x",
   size: 24,
   node: [
@@ -554,8 +567,8 @@ var __iconData9 = {
     ["path", { d: "m6 6 12 12", key: "d8bk6v" }]
   ]
 };
-__iconData9.node;
-var X = createLucideIcon(__iconData9);
+__iconData10.node;
+var X = createLucideIcon(__iconData10);
 
 // components/character-dock.tsx
 var import_react7 = require("react");
@@ -11375,7 +11388,24 @@ function SettingsDialog({
         /* @__PURE__ */ (0, import_jsx_runtime29.jsx)(Button3, { variant: settings.provider === "openai" ? "default" : "outline", onClick: () => chooseProvider("openai"), children: "OpenAI" })
       ] }),
       /* @__PURE__ */ (0, import_jsx_runtime29.jsx)("p", { className: "text-xs leading-5 text-muted-foreground", children: settings.provider === "seedream" ? "火山方舟 Seedream。会把模特图和姿势线稿一起提交，默认生图模型 doubao-seedream-5-0-flash-260915。" : settings.provider === "gemini" ? "默认生图模型 gemini-2.5-flash-image。官方地址留空即可；中转站把根地址填进下面。" : "会先把模特图和姿势线稿交给 images/edits。接口不支持编辑时，自动改走文生图，并在结果上标明。" }),
-      /* @__PURE__ */ (0, import_jsx_runtime29.jsx)(Field, { label: "API Key", children: /* @__PURE__ */ (0, import_jsx_runtime29.jsx)(Input3, { type: "password", autoComplete: "off", value: settings.apiKey, onChange: (event) => patch({ apiKey: event.target.value }), placeholder: settings.provider === "seedream" ? "填入火山方舟 API Key" : "填入 API Key" }) }),
+      /* @__PURE__ */ (0, import_jsx_runtime29.jsxs)("div", { className: "grid gap-1.5 text-sm", children: [
+        /* @__PURE__ */ (0, import_jsx_runtime29.jsxs)("div", { className: "flex items-center gap-1", children: [
+          /* @__PURE__ */ (0, import_jsx_runtime29.jsx)("span", { children: "API Key" }),
+          settings.provider === "seedream" ? /* @__PURE__ */ (0, import_jsx_runtime29.jsx)(
+            "a",
+            {
+              href: "https://exp.volcengine.com/ark/gen_image?model=doubao-seedream-5-0-flash-260915",
+              target: "_blank",
+              rel: "noopener noreferrer",
+              "aria-label": "去申请 API Key",
+              title: "去申请 API Key",
+              className: "inline-flex size-5 items-center justify-center rounded-md text-muted-foreground hover:bg-muted hover:text-foreground",
+              children: /* @__PURE__ */ (0, import_jsx_runtime29.jsx)(ExternalLink, { className: "size-3.5" })
+            }
+          ) : null
+        ] }),
+        /* @__PURE__ */ (0, import_jsx_runtime29.jsx)(Input3, { type: "password", autoComplete: "off", value: settings.apiKey, onChange: (event) => patch({ apiKey: event.target.value }), placeholder: settings.provider === "seedream" ? "填入火山方舟 API Key" : "填入 API Key" })
+      ] }),
       /* @__PURE__ */ (0, import_jsx_runtime29.jsx)(Field, { label: "接口根地址", children: /* @__PURE__ */ (0, import_jsx_runtime29.jsx)(
         Input3,
         {
@@ -12897,9 +12927,17 @@ function PoseStudio() {
   .aspect-\\[3\\/4\\] {
     aspect-ratio: 3/4;
   }
+  .size-3\\.5 {
+    width: calc(var(--spacing) * 3.5);
+    height: calc(var(--spacing) * 3.5);
+  }
   .size-4 {
     width: calc(var(--spacing) * 4);
     height: calc(var(--spacing) * 4);
+  }
+  .size-5 {
+    width: calc(var(--spacing) * 5);
+    height: calc(var(--spacing) * 5);
   }
   .size-6 {
     width: calc(var(--spacing) * 6);

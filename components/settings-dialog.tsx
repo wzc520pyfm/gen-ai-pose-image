@@ -1,6 +1,7 @@
 "use client"
 
 import type { ReactNode } from "react"
+import { ExternalLink } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog"
@@ -57,9 +58,24 @@ export function SettingsDialog({
                 ? "默认生图模型 gemini-2.5-flash-image。官方地址留空即可；中转站把根地址填进下面。"
                 : "会先把模特图和姿势线稿交给 images/edits。接口不支持编辑时，自动改走文生图，并在结果上标明。"}
           </p>
-          <Field label="API Key">
+          <div className="grid gap-1.5 text-sm">
+            <div className="flex items-center gap-1">
+              <span>API Key</span>
+              {settings.provider === "seedream" ? (
+                <a
+                  href="https://exp.volcengine.com/ark/gen_image?model=doubao-seedream-5-0-flash-260915"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  aria-label="去申请 API Key"
+                  title="去申请 API Key"
+                  className="inline-flex size-5 items-center justify-center rounded-md text-muted-foreground hover:bg-muted hover:text-foreground"
+                >
+                  <ExternalLink className="size-3.5" />
+                </a>
+              ) : null}
+            </div>
             <Input type="password" autoComplete="off" value={settings.apiKey} onChange={(event) => patch({ apiKey: event.target.value })} placeholder={settings.provider === "seedream" ? "填入火山方舟 API Key" : "填入 API Key"} />
-          </Field>
+          </div>
           <Field label="接口根地址">
             <Input
               value={settings.baseURL}
