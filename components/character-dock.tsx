@@ -3,13 +3,13 @@
 /* eslint-disable @next/next/no-img-element -- model photos are data URLs or the bundled muse file */
 
 import { useRef, useState } from "react"
-import { ImagePlus } from "lucide-react"
+import { ChevronLeft, ChevronRight, ImagePlus } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Switch } from "@/components/ui/switch"
 import { fileToCharacter, type StoredCharacter } from "@/lib/characters"
 import { studioUrl, useStudioEnv } from "@/lib/studio-env"
-import { withUploadedSheet } from "@/shared/models.mjs"
+import { cycleModelId, withUploadedSheet } from "@/shared/models.mjs"
 
 export type ModelSwitchItem = {
   id: string
@@ -63,6 +63,15 @@ export function CharacterDock({
   const [pendingDelete, setPendingDelete] = useState<string | null>(null)
   const custom = images.length > 0
   const photoCount = images.filter((image) => image.role !== "sheet").length
+  const currentIndex = Math.max(0, switchItems.findIndex((item) => item.id === activeModelId))
+  const currentItem = switchItems[currentIndex]
+  const canCycle = switchItems.length > 1
+  const title = custom ? (activeLabel || "导入的模特") : (currentItem?.label || "大肥鱼")
+
+  function stepModel(direction: "prev" | "next") {
+    if (!canCycle) return
+    onSelectModel(cycleModelId(switchItems, activeModelId, direction))
+  }
   const portrait = custom ? `data:${images[0].mediaType};base64,${images[0].dataBase64}` : studioUrl(basePath, "/muse/dafeiyu-portrait.jpg")
   const full = custom ? portrait : studioUrl(basePath, "/muse/dafeiyu-sheet.png")
 
@@ -106,71 +115,79 @@ export function CharacterDock({
 
   return (
     <aside className="dock order-1 flex shrink-0 flex-col gap-3 px-3 py-3 text-[#e2e8f0] @min-[1024px]/studio:order-none @min-[1024px]/studio:h-full @min-[1024px]/studio:min-h-0 @min-[1024px]/studio:shrink @min-[1024px]/studio:gap-4 @min-[1024px]/studio:overflow-y-auto @min-[1024px]/studio:px-4 @min-[1024px]/studio:py-5">
-      <div className="flex items-center gap-3">
-        <img src={portrait} alt="" className="size-14 shrink-0 rounded-xl object-cover object-top @min-[1024px]/studio:hidden" />
+      <div className="flex items-start gap-1">
+        <img src={portrait} alt="" className="mt-1 size-14 shrink-0 rounded-xl object-cover object-top @min-[1024px]/studio:hidden" />
+        <button
+          type="button"
+          className="mt-1 grid size-7 shrink-0 place-items-center rounded-full text-white hover:bg-white/10 disabled:opacity-30"
+          aria-label="上一个模特"
+          disabled={!canCycle}
+          onClick={() => stepModel("prev")}
+        >
+          <ChevronLeft className="size-4" />
+        </button>
         <div className="min-w-0 flex-1">
-          <h2 className="text-lg font-semibold text-white @min-[1024px]/studio:text-2xl">{custom ? (activeLabel || "导入的模特") : "大肥鱼"}</h2>
+          {editingId === activeModelId ? (
+            <Input
+              value={draftLabel}
+              aria-label="模特名称"
+              autoFocus
+              className="h-8 border-white/20 bg-white/10 text-white"
+              onChange={(event) => setDraftLabel(event.target.value)}
+              onBlur={() => {
+                onRenameModel(activeModelId, draftLabel)
+                setEditingId(null)
+              }}
+              onKeyDown={(event) => {
+                if (event.key === "Enter") (event.target as HTMLInputElement).blur()
+              }}
+            />
+          ) : (
+            <h2 className="flex items-baseline gap-2 text-lg font-semibold text-white @min-[1024px]/studio:text-2xl">
+              <span className="truncate">{title}</span>
+              {canCycle ? <span className="shrink-0 text-xs font-normal text-[#cbd5e1]">{currentIndex + 1}/{switchItems.length}</span> : null}
+            </h2>
+          )}
           <p className="mt-0.5 line-clamp-2 text-xs leading-5 text-[#cbd5e1] @min-[1024px]/studio:mt-2 @min-[1024px]/studio:text-sm @min-[1024px]/studio:leading-6">{custom ? "生图时改用你导入的参考图。" : "社区鲸鱼娘的成年形象，不是 DeepSeek 官方吉祥物。"}</p>
+          {currentItem && !currentItem.builtin ? (
+            <p className="mt-1 flex gap-3 text-[11px] text-[#cbd5e1]">
+              <button type="button" className="underline-offset-2 hover:underline" onClick={() => { setEditingId(activeModelId); setDraftLabel(title) }}>改名</button>
+              <button
+                type="button"
+                className="underline-offset-2 hover:underline"
+                onClick={() => {
+                  if (pendingDelete === activeModelId) {
+                    setPendingDelete(null)
+                    onDeleteModel(activeModelId)
+                    return
+                  }
+                  setPendingDelete(activeModelId)
+                }}
+              >
+                {pendingDelete === activeModelId ? "确认删除" : "删除"}
+              </button>
+            </p>
+          ) : null}
         </div>
+        <button
+          type="button"
+          className="mt-1 grid size-7 shrink-0 place-items-center rounded-full text-white hover:bg-white/10 disabled:opacity-30"
+          aria-label="下一个模特"
+          disabled={!canCycle}
+          onClick={() => stepModel("next")}
+        >
+          <ChevronRight className="size-4" />
+        </button>
         <Button
           variant="outline"
           size="sm"
-          className="shrink border-white/20 bg-white/10 text-white hover:bg-white/15 hover:text-white @min-[1024px]/studio:hidden"
+          className="mt-1 shrink border-white/20 bg-white/10 text-white hover:bg-white/15 hover:text-white @min-[1024px]/studio:hidden"
           disabled={busy || sheetBusy || photoCount >= 3}
           onClick={() => inputRef.current?.click()}
         >
           <ImagePlus />
           {busy ? "读图" : "导入"}
         </Button>
-      </div>
-      <div className="grid max-h-40 gap-2 overflow-y-auto" role="listbox" aria-label="模特">
-        <p className="text-xs text-[#cbd5e1]">模特</p>
-        {switchItems.map((model) => {
-          const selected = model.id === activeModelId
-          return (
-            <div key={model.id} className={`flex items-center gap-2 rounded-xl px-2 py-1.5 ${selected ? "bg-white/15 ring-1 ring-white/30" : "bg-white/5"}`}>
-              <img src={model.thumbSrc} alt="" className={`h-10 w-8 shrink-0 rounded-md bg-white ${model.builtin ? "object-cover object-top" : "object-contain"}`} />
-              {editingId === model.id ? (
-                <Input
-                  value={draftLabel}
-                  aria-label={`模特名称 ${model.label}`}
-                  className="h-8 border-white/20 bg-white/10 text-white"
-                  onChange={(event) => setDraftLabel(event.target.value)}
-                  onBlur={() => {
-                    onRenameModel(model.id, draftLabel)
-                    setEditingId(null)
-                  }}
-                  onKeyDown={(event) => {
-                    if (event.key === "Enter") (event.target as HTMLInputElement).blur()
-                  }}
-                />
-              ) : (
-                <button type="button" role="option" aria-selected={selected} className="min-w-0 flex-1 truncate text-left text-sm text-white" onClick={() => onSelectModel(model.id)}>
-                  {model.label}
-                </button>
-              )}
-              {model.builtin ? <span className="shrink-0 text-[11px] text-[#cbd5e1]">内置</span> : (
-                <>
-                  <button type="button" className="shrink-0 text-[11px] text-[#cbd5e1]" onClick={() => { setEditingId(model.id); setDraftLabel(model.label) }}>改名</button>
-                  <button
-                    type="button"
-                    className="shrink-0 text-[11px] text-[#cbd5e1]"
-                    onClick={() => {
-                      if (pendingDelete === model.id) {
-                        setPendingDelete(null)
-                        onDeleteModel(model.id)
-                        return
-                      }
-                      setPendingDelete(model.id)
-                    }}
-                  >
-                    {pendingDelete === model.id ? "确认" : "删除"}
-                  </button>
-                </>
-              )}
-            </div>
-          )
-        })}
       </div>
       <img src={portrait} alt={custom ? (images[0]?.role === "sheet" ? "多视角设定图" : "导入的模特头像") : "大肥鱼的正面全身像，蓝发、鲸耳、蓝白女仆装"} className={`hidden w-full rounded-xl @min-[1024px]/studio:block ${images[0]?.role === "sheet" ? "max-h-56 bg-white object-contain" : "aspect-[3/4] object-cover object-top"}`} />
       <p className="hidden text-sm leading-6 text-[#cbd5e1] @min-[1024px]/studio:block">

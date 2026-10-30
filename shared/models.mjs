@@ -110,6 +110,15 @@ export function markModelUsed(models, id, now = Date.now()) {
   return list
 }
 
+export function cycleModelId(entries, activeId, direction) {
+  const list = Array.isArray(entries) ? entries : []
+  if (list.length === 0) return activeId || ""
+  const index = list.findIndex((item) => item.id === activeId)
+  const start = index < 0 ? 0 : index
+  const delta = direction === "prev" ? -1 : 1
+  return list[(start + delta + list.length) % list.length].id
+}
+
 export function switcherEntries({ models = [], builtinUsed = {} } = {}) {
   const builtins = BUILTIN_MODELS.map((model) => ({
     id: model.id,

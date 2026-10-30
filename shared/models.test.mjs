@@ -7,6 +7,7 @@ import {
   deleteFromLibrary,
   identityImage,
   renameModel,
+  cycleModelId,
   syncLibrary,
   switcherEntries,
   withGeneratedSheet,
@@ -144,6 +145,13 @@ test("the switcher always lists 大肥鱼 with customs, newest first, and builti
   assert.deepEqual(recentCustom.map((item) => item.id), ["model-new", "dafeiyu"])
   assert.throws(() => renameModel([], "dafeiyu", "别的名字"), /不能改名/)
   assert.throws(() => deleteFromLibrary([], "dafeiyu", "dafeiyu"), /不能删除/)
+  const order = switcherEntries({
+    models: created.models,
+    builtinUsed: { dafeiyu: 50 },
+  })
+  assert.equal(cycleModelId(order, "dafeiyu", "next"), "model-new")
+  assert.equal(cycleModelId(order, "model-new", "next"), "dafeiyu")
+  assert.equal(cycleModelId(order, "dafeiyu", "prev"), "model-new")
   const stayed = adoptCurrent([], [photo], "dafeiyu", 90)
   assert.equal(stayed.adopted, false)
   assert.equal(stayed.models.length, 0)

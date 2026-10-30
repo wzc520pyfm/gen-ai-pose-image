@@ -417,8 +417,26 @@ function createLucideIcon(iconDataOrName, iconNode = [], aliases = []) {
   return Component;
 }
 
-// node_modules/lucide-react/dist/esm/icons/download.mjs
+// node_modules/lucide-react/dist/esm/icons/chevron-right.mjs
 var __iconData = {
+  name: "chevron-right",
+  size: 24,
+  node: [["path", { d: "m9 18 6-6-6-6", key: "mthhwq" }]]
+};
+__iconData.node;
+var ChevronRight = createLucideIcon(__iconData);
+
+// node_modules/lucide-react/dist/esm/icons/chevron-left.mjs
+var __iconData2 = {
+  name: "chevron-left",
+  size: 24,
+  node: [["path", { d: "m15 18-6-6 6-6", key: "1wnfg3" }]]
+};
+__iconData2.node;
+var ChevronLeft = createLucideIcon(__iconData2);
+
+// node_modules/lucide-react/dist/esm/icons/download.mjs
+var __iconData3 = {
   name: "download",
   size: 24,
   node: [
@@ -427,11 +445,11 @@ var __iconData = {
     ["path", { d: "m7 10 5 5 5-5", key: "brsn70" }]
   ]
 };
-__iconData.node;
-var Download = createLucideIcon(__iconData);
+__iconData3.node;
+var Download = createLucideIcon(__iconData3);
 
 // node_modules/lucide-react/dist/esm/icons/image-plus.mjs
-var __iconData2 = {
+var __iconData4 = {
   name: "image-plus",
   size: 24,
   node: [
@@ -442,21 +460,21 @@ var __iconData2 = {
     ["circle", { cx: "9", cy: "9", r: "2", key: "af1f0g" }]
   ]
 };
-__iconData2.node;
-var ImagePlus = createLucideIcon(__iconData2);
+__iconData4.node;
+var ImagePlus = createLucideIcon(__iconData4);
 
 // node_modules/lucide-react/dist/esm/icons/loader-circle.mjs
-var __iconData3 = {
+var __iconData5 = {
   name: "loader-circle",
   size: 24,
   node: [["path", { d: "M21 12a9 9 0 1 1-6.219-8.56", key: "13zald" }]],
   aliases: ["loader-2"]
 };
-__iconData3.node;
-var LoaderCircle = createLucideIcon(__iconData3);
+__iconData5.node;
+var LoaderCircle = createLucideIcon(__iconData5);
 
 // node_modules/lucide-react/dist/esm/icons/search.mjs
-var __iconData4 = {
+var __iconData6 = {
   name: "search",
   size: 24,
   node: [
@@ -464,11 +482,11 @@ var __iconData4 = {
     ["circle", { cx: "11", cy: "11", r: "8", key: "4ej97u" }]
   ]
 };
-__iconData4.node;
-var Search = createLucideIcon(__iconData4);
+__iconData6.node;
+var Search = createLucideIcon(__iconData6);
 
 // node_modules/lucide-react/dist/esm/icons/settings.mjs
-var __iconData5 = {
+var __iconData7 = {
   name: "settings",
   size: 24,
   node: [
@@ -482,11 +500,11 @@ var __iconData5 = {
     ["circle", { cx: "12", cy: "12", r: "3", key: "1v7zrd" }]
   ]
 };
-__iconData5.node;
-var Settings = createLucideIcon(__iconData5);
+__iconData7.node;
+var Settings = createLucideIcon(__iconData7);
 
 // node_modules/lucide-react/dist/esm/icons/sparkles.mjs
-var __iconData6 = {
+var __iconData8 = {
   name: "sparkles",
   size: 24,
   node: [
@@ -503,11 +521,11 @@ var __iconData6 = {
   ],
   aliases: ["stars"]
 };
-__iconData6.node;
-var Sparkles = createLucideIcon(__iconData6);
+__iconData8.node;
+var Sparkles = createLucideIcon(__iconData8);
 
 // node_modules/lucide-react/dist/esm/icons/x.mjs
-var __iconData7 = {
+var __iconData9 = {
   name: "x",
   size: 24,
   node: [
@@ -515,8 +533,8 @@ var __iconData7 = {
     ["path", { d: "m6 6 12 12", key: "d8bk6v" }]
   ]
 };
-__iconData7.node;
-var X = createLucideIcon(__iconData7);
+__iconData9.node;
+var X = createLucideIcon(__iconData9);
 
 // components/character-dock.tsx
 var import_react6 = require("react");
@@ -5592,6 +5610,14 @@ function markModelUsed(models, id, now = Date.now()) {
   list[index] = { ...list[index], lastUsedAt: now };
   return list;
 }
+function cycleModelId(entries, activeId, direction) {
+  const list = Array.isArray(entries) ? entries : [];
+  if (list.length === 0) return activeId || "";
+  const index = list.findIndex((item) => item.id === activeId);
+  const start = index < 0 ? 0 : index;
+  const delta = direction === "prev" ? -1 : 1;
+  return list[(start + delta + list.length) % list.length].id;
+}
 function switcherEntries({ models = [], builtinUsed = {} } = {}) {
   const builtins = BUILTIN_MODELS.map((model) => ({
     id: model.id,
@@ -5646,6 +5672,14 @@ function CharacterDock({
   const [pendingDelete, setPendingDelete] = (0, import_react6.useState)(null);
   const custom = images.length > 0;
   const photoCount = images.filter((image) => image.role !== "sheet").length;
+  const currentIndex = Math.max(0, switchItems.findIndex((item) => item.id === activeModelId));
+  const currentItem = switchItems[currentIndex];
+  const canCycle = switchItems.length > 1;
+  const title = custom ? activeLabel || "导入的模特" : currentItem?.label || "大肥鱼";
+  function stepModel(direction) {
+    if (!canCycle) return;
+    onSelectModel(cycleModelId(switchItems, activeModelId, direction));
+  }
   const portrait = custom ? `data:${images[0].mediaType};base64,${images[0].dataBase64}` : studioUrl(basePath, "/muse/dafeiyu-portrait.jpg");
   const full = custom ? portrait : studioUrl(basePath, "/muse/dafeiyu-sheet.png");
   async function addFiles(list) {
@@ -5685,18 +5719,85 @@ function CharacterDock({
     }
   }
   return /* @__PURE__ */ (0, import_jsx_runtime12.jsxs)("aside", { className: "dock order-1 flex shrink-0 flex-col gap-3 px-3 py-3 text-[#e2e8f0] @min-[1024px]/studio:order-none @min-[1024px]/studio:h-full @min-[1024px]/studio:min-h-0 @min-[1024px]/studio:shrink @min-[1024px]/studio:gap-4 @min-[1024px]/studio:overflow-y-auto @min-[1024px]/studio:px-4 @min-[1024px]/studio:py-5", children: [
-    /* @__PURE__ */ (0, import_jsx_runtime12.jsxs)("div", { className: "flex items-center gap-3", children: [
-      /* @__PURE__ */ (0, import_jsx_runtime12.jsx)("img", { src: portrait, alt: "", className: "size-14 shrink-0 rounded-xl object-cover object-top @min-[1024px]/studio:hidden" }),
+    /* @__PURE__ */ (0, import_jsx_runtime12.jsxs)("div", { className: "flex items-start gap-1", children: [
+      /* @__PURE__ */ (0, import_jsx_runtime12.jsx)("img", { src: portrait, alt: "", className: "mt-1 size-14 shrink-0 rounded-xl object-cover object-top @min-[1024px]/studio:hidden" }),
+      /* @__PURE__ */ (0, import_jsx_runtime12.jsx)(
+        "button",
+        {
+          type: "button",
+          className: "mt-1 grid size-7 shrink-0 place-items-center rounded-full text-white hover:bg-white/10 disabled:opacity-30",
+          "aria-label": "上一个模特",
+          disabled: !canCycle,
+          onClick: () => stepModel("prev"),
+          children: /* @__PURE__ */ (0, import_jsx_runtime12.jsx)(ChevronLeft, { className: "size-4" })
+        }
+      ),
       /* @__PURE__ */ (0, import_jsx_runtime12.jsxs)("div", { className: "min-w-0 flex-1", children: [
-        /* @__PURE__ */ (0, import_jsx_runtime12.jsx)("h2", { className: "text-lg font-semibold text-white @min-[1024px]/studio:text-2xl", children: custom ? activeLabel || "导入的模特" : "大肥鱼" }),
-        /* @__PURE__ */ (0, import_jsx_runtime12.jsx)("p", { className: "mt-0.5 line-clamp-2 text-xs leading-5 text-[#cbd5e1] @min-[1024px]/studio:mt-2 @min-[1024px]/studio:text-sm @min-[1024px]/studio:leading-6", children: custom ? "生图时改用你导入的参考图。" : "社区鲸鱼娘的成年形象，不是 DeepSeek 官方吉祥物。" })
+        editingId === activeModelId ? /* @__PURE__ */ (0, import_jsx_runtime12.jsx)(
+          Input3,
+          {
+            value: draftLabel,
+            "aria-label": "模特名称",
+            autoFocus: true,
+            className: "h-8 border-white/20 bg-white/10 text-white",
+            onChange: (event) => setDraftLabel(event.target.value),
+            onBlur: () => {
+              onRenameModel(activeModelId, draftLabel);
+              setEditingId(null);
+            },
+            onKeyDown: (event) => {
+              if (event.key === "Enter") event.target.blur();
+            }
+          }
+        ) : /* @__PURE__ */ (0, import_jsx_runtime12.jsxs)("h2", { className: "flex items-baseline gap-2 text-lg font-semibold text-white @min-[1024px]/studio:text-2xl", children: [
+          /* @__PURE__ */ (0, import_jsx_runtime12.jsx)("span", { className: "truncate", children: title }),
+          canCycle ? /* @__PURE__ */ (0, import_jsx_runtime12.jsxs)("span", { className: "shrink-0 text-xs font-normal text-[#cbd5e1]", children: [
+            currentIndex + 1,
+            "/",
+            switchItems.length
+          ] }) : null
+        ] }),
+        /* @__PURE__ */ (0, import_jsx_runtime12.jsx)("p", { className: "mt-0.5 line-clamp-2 text-xs leading-5 text-[#cbd5e1] @min-[1024px]/studio:mt-2 @min-[1024px]/studio:text-sm @min-[1024px]/studio:leading-6", children: custom ? "生图时改用你导入的参考图。" : "社区鲸鱼娘的成年形象，不是 DeepSeek 官方吉祥物。" }),
+        currentItem && !currentItem.builtin ? /* @__PURE__ */ (0, import_jsx_runtime12.jsxs)("p", { className: "mt-1 flex gap-3 text-[11px] text-[#cbd5e1]", children: [
+          /* @__PURE__ */ (0, import_jsx_runtime12.jsx)("button", { type: "button", className: "underline-offset-2 hover:underline", onClick: () => {
+            setEditingId(activeModelId);
+            setDraftLabel(title);
+          }, children: "改名" }),
+          /* @__PURE__ */ (0, import_jsx_runtime12.jsx)(
+            "button",
+            {
+              type: "button",
+              className: "underline-offset-2 hover:underline",
+              onClick: () => {
+                if (pendingDelete === activeModelId) {
+                  setPendingDelete(null);
+                  onDeleteModel(activeModelId);
+                  return;
+                }
+                setPendingDelete(activeModelId);
+              },
+              children: pendingDelete === activeModelId ? "确认删除" : "删除"
+            }
+          )
+        ] }) : null
       ] }),
+      /* @__PURE__ */ (0, import_jsx_runtime12.jsx)(
+        "button",
+        {
+          type: "button",
+          className: "mt-1 grid size-7 shrink-0 place-items-center rounded-full text-white hover:bg-white/10 disabled:opacity-30",
+          "aria-label": "下一个模特",
+          disabled: !canCycle,
+          onClick: () => stepModel("next"),
+          children: /* @__PURE__ */ (0, import_jsx_runtime12.jsx)(ChevronRight, { className: "size-4" })
+        }
+      ),
       /* @__PURE__ */ (0, import_jsx_runtime12.jsxs)(
         Button3,
         {
           variant: "outline",
           size: "sm",
-          className: "shrink border-white/20 bg-white/10 text-white hover:bg-white/15 hover:text-white @min-[1024px]/studio:hidden",
+          className: "mt-1 shrink border-white/20 bg-white/10 text-white hover:bg-white/15 hover:text-white @min-[1024px]/studio:hidden",
           disabled: busy || sheetBusy || photoCount >= 3,
           onClick: () => inputRef.current?.click(),
           children: [
@@ -5705,53 +5806,6 @@ function CharacterDock({
           ]
         }
       )
-    ] }),
-    /* @__PURE__ */ (0, import_jsx_runtime12.jsxs)("div", { className: "grid max-h-40 gap-2 overflow-y-auto", role: "listbox", "aria-label": "模特", children: [
-      /* @__PURE__ */ (0, import_jsx_runtime12.jsx)("p", { className: "text-xs text-[#cbd5e1]", children: "模特" }),
-      switchItems.map((model) => {
-        const selected = model.id === activeModelId;
-        return /* @__PURE__ */ (0, import_jsx_runtime12.jsxs)("div", { className: `flex items-center gap-2 rounded-xl px-2 py-1.5 ${selected ? "bg-white/15 ring-1 ring-white/30" : "bg-white/5"}`, children: [
-          /* @__PURE__ */ (0, import_jsx_runtime12.jsx)("img", { src: model.thumbSrc, alt: "", className: `h-10 w-8 shrink-0 rounded-md bg-white ${model.builtin ? "object-cover object-top" : "object-contain"}` }),
-          editingId === model.id ? /* @__PURE__ */ (0, import_jsx_runtime12.jsx)(
-            Input3,
-            {
-              value: draftLabel,
-              "aria-label": `模特名称 ${model.label}`,
-              className: "h-8 border-white/20 bg-white/10 text-white",
-              onChange: (event) => setDraftLabel(event.target.value),
-              onBlur: () => {
-                onRenameModel(model.id, draftLabel);
-                setEditingId(null);
-              },
-              onKeyDown: (event) => {
-                if (event.key === "Enter") event.target.blur();
-              }
-            }
-          ) : /* @__PURE__ */ (0, import_jsx_runtime12.jsx)("button", { type: "button", role: "option", "aria-selected": selected, className: "min-w-0 flex-1 truncate text-left text-sm text-white", onClick: () => onSelectModel(model.id), children: model.label }),
-          model.builtin ? /* @__PURE__ */ (0, import_jsx_runtime12.jsx)("span", { className: "shrink-0 text-[11px] text-[#cbd5e1]", children: "内置" }) : /* @__PURE__ */ (0, import_jsx_runtime12.jsxs)(import_jsx_runtime12.Fragment, { children: [
-            /* @__PURE__ */ (0, import_jsx_runtime12.jsx)("button", { type: "button", className: "shrink-0 text-[11px] text-[#cbd5e1]", onClick: () => {
-              setEditingId(model.id);
-              setDraftLabel(model.label);
-            }, children: "改名" }),
-            /* @__PURE__ */ (0, import_jsx_runtime12.jsx)(
-              "button",
-              {
-                type: "button",
-                className: "shrink-0 text-[11px] text-[#cbd5e1]",
-                onClick: () => {
-                  if (pendingDelete === model.id) {
-                    setPendingDelete(null);
-                    onDeleteModel(model.id);
-                    return;
-                  }
-                  setPendingDelete(model.id);
-                },
-                children: pendingDelete === model.id ? "确认" : "删除"
-              }
-            )
-          ] })
-        ] }, model.id);
-      })
     ] }),
     /* @__PURE__ */ (0, import_jsx_runtime12.jsx)("img", { src: portrait, alt: custom ? images[0]?.role === "sheet" ? "多视角设定图" : "导入的模特头像" : "大肥鱼的正面全身像，蓝发、鲸耳、蓝白女仆装", className: `hidden w-full rounded-xl @min-[1024px]/studio:block ${images[0]?.role === "sheet" ? "max-h-56 bg-white object-contain" : "aspect-[3/4] object-cover object-top"}` }),
     /* @__PURE__ */ (0, import_jsx_runtime12.jsx)("p", { className: "hidden text-sm leading-6 text-[#cbd5e1] @min-[1024px]/studio:block", children: custom ? "参考图会和姿势线稿一起交给模型。请使用成年人物的图片。" : "长波浪蓝发、鲸耳和蓝鲸尾。三视图锁住脸和鲸尾，衣服可以换成衣装集里的一套。" }),
@@ -12288,6 +12342,7 @@ function PoseStudio() {
     --text-lg--line-height: calc(1.75 / 1.125);
     --text-2xl: 1.5rem;
     --text-2xl--line-height: calc(2 / 1.5);
+    --font-weight-normal: 400;
     --font-weight-medium: 500;
     --font-weight-semibold: 600;
     --radius-md: calc(var(--radius) * 0.8);
@@ -12752,9 +12807,6 @@ function PoseStudio() {
   .min-h-28 {
     min-height: calc(var(--spacing) * 28);
   }
-  .w-8 {
-    width: calc(var(--spacing) * 8);
-  }
   .w-9 {
     width: calc(var(--spacing) * 9);
   }
@@ -12838,11 +12890,17 @@ function PoseStudio() {
   .place-items-center {
     place-items: center;
   }
+  .items-baseline {
+    align-items: baseline;
+  }
   .items-center {
     align-items: center;
   }
   .items-end {
     align-items: flex-end;
+  }
+  .items-start {
+    align-items: flex-start;
   }
   .justify-between {
     justify-content: space-between;
@@ -13052,22 +13110,10 @@ function PoseStudio() {
   .bg-white {
     background-color: var(--color-white);
   }
-  .bg-white\\/5 {
-    background-color: color-mix(in srgb, #fff 5%, transparent);
-    @supports (color: color-mix(in lab, red, red)) {
-      background-color: color-mix(in oklab, var(--color-white) 5%, transparent);
-    }
-  }
   .bg-white\\/10 {
     background-color: color-mix(in srgb, #fff 10%, transparent);
     @supports (color: color-mix(in lab, red, red)) {
       background-color: color-mix(in oklab, var(--color-white) 10%, transparent);
-    }
-  }
-  .bg-white\\/15 {
-    background-color: color-mix(in srgb, #fff 15%, transparent);
-    @supports (color: color-mix(in lab, red, red)) {
-      background-color: color-mix(in oklab, var(--color-white) 15%, transparent);
     }
   }
   .bg-white\\/95 {
@@ -13220,6 +13266,10 @@ function PoseStudio() {
     --tw-font-weight: var(--font-weight-medium);
     font-weight: var(--font-weight-medium);
   }
+  .font-normal {
+    --tw-font-weight: var(--font-weight-normal);
+    font-weight: var(--font-weight-normal);
+  }
   .font-semibold {
     --tw-font-weight: var(--font-weight-semibold);
     font-weight: var(--font-weight-semibold);
@@ -13337,12 +13387,6 @@ function PoseStudio() {
     --tw-ring-color: var(--primary);
     @supports (color: color-mix(in lab, red, red)) {
       --tw-ring-color: color-mix(in oklab, var(--primary) 25%, transparent);
-    }
-  }
-  .ring-white\\/30 {
-    --tw-ring-color: color-mix(in srgb, #fff 30%, transparent);
-    @supports (color: color-mix(in lab, red, red)) {
-      --tw-ring-color: color-mix(in oklab, var(--color-white) 30%, transparent);
     }
   }
   .outline {
@@ -13572,6 +13616,14 @@ function PoseStudio() {
         background-color: color-mix(in oklab, var(--primary) 80%, transparent);
       }
     }
+    .hover\\:bg-white\\/10:hover {
+      background-color: color-mix(in srgb, #fff 10%, transparent);
+    }
+    @supports (color: color-mix(in lab, red, red)) {
+      .hover\\:bg-white\\/10:hover {
+        background-color: color-mix(in oklab, var(--color-white) 10%, transparent);
+      }
+    }
     .hover\\:bg-white\\/15:hover {
       background-color: color-mix(in srgb, #fff 15%, transparent);
     }
@@ -13644,6 +13696,9 @@ function PoseStudio() {
     @supports (color: color-mix(in lab, red, red)) {
       background-color: color-mix(in oklab, var(--input) 50%, transparent);
     }
+  }
+  .disabled\\:opacity-30:disabled {
+    opacity: 30%;
   }
   .disabled\\:opacity-50:disabled {
     opacity: 50%;

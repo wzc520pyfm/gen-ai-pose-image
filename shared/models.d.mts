@@ -41,6 +41,7 @@ export function deleteFromLibrary(models: SavedModel[], id: string, activeId: st
   cleared: boolean
 }
 export function markModelUsed(models: SavedModel[], id: string, now?: number): SavedModel[]
+export function cycleModelId(entries: Array<{ id: string }>, activeId: string, direction: "prev" | "next"): string
 export function switcherEntries(input?: {
   models?: SavedModel[]
   builtinUsed?: Record<string, number>
