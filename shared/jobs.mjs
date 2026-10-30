@@ -3,7 +3,8 @@ import { mkdtemp, readFile, rm, writeFile } from "node:fs/promises"
 import { tmpdir } from "node:os"
 import { dirname, join } from "node:path"
 import { fileURLToPath } from "node:url"
-import { characterFromUploads, DEFAULT_CHARACTER } from "./character.mjs"
+import { getBuiltinModel } from "./builtin-models.mjs"
+import { characterForBuiltin, characterFromUploads } from "./character.mjs"
 import { resolveView } from "./catalog.mjs"
 import { isCustomCostumeId, isCustomPoseId, missingCustomCostumeMessage, missingCustomPoseMessage } from "./custom.mjs"
 import { costumeFile, fetchCostumeBytes, getCostume } from "./costumes.mjs"
@@ -57,8 +58,15 @@ export async function modelImage(image) {
   return { mediaType: "image/jpeg", buffer: await webpToJpeg(image.buffer), role: image.role }
 }
 
-export async function loadDefaultCharacterImage() {
-  const buffer = await readFile(DEFAULT_CHARACTER_FILE)
+export function builtinSheetFile(id) {
+  const model = getBuiltinModel(id) || getBuiltinModel("dafeiyu")
+  const name = String(model?.sheet || "").replace(/^\/muse\//, "")
+  if (!/^[\w.-]+$/.test(name)) throw new Error("内置模特设定图路径无效")
+  return join(ROOT, "public", "muse", name)
+}
+
+export async function loadDefaultCharacterImage(id = "dafeiyu") {
+  const buffer = await readFile(id ? builtinSheetFile(id) : DEFAULT_CHARACTER_FILE)
   return { mediaType: "image/png", buffer, role: "character" }
 }
 
@@ -184,7 +192,9 @@ export function planRequest(input = {}) {
   const declaredCount = Number(input.characterCount) || 0
   const characterCount = uploads.length || declaredCount
   if (characterCount > 4) throw new Error("模特参考图最多 4 张")
-  const character = characterCount > 0 ? characterFromUploads(characterCount) : DEFAULT_CHARACTER
+  const requestedBuiltin = typeof input.builtinModelId === "string" ? input.builtinModelId.trim() : ""
+  const builtinModelId = characterCount > 0 ? "" : (getBuiltinModel(requestedBuiltin)?.id || "dafeiyu")
+  const character = characterCount > 0 ? characterFromUploads(characterCount) : characterForBuiltin(builtinModelId)
   const costumeId = typeof input.costumeId === "string" ? input.costumeId.trim() : ""
   const costume = planCostume(costumeId, input)
   const keepOutfit = costume ? false : input.keepOutfit !== false
@@ -207,6 +217,7 @@ export function planRequest(input = {}) {
     aspectRatio,
     mode,
     character,
+    builtinModelId,
     costume,
     items,
     uploads,
@@ -226,7 +237,7 @@ export function promptCards(plan) {
 }
 
 export async function resolveCharacterImages(plan) {
-  if (plan.uploads.length === 0) return [await loadDefaultCharacterImage()]
+  if (plan.uploads.length === 0) return [await loadDefaultCharacterImage(plan.builtinModelId)]
   return plan.uploads.map(decodeCharacterImage)
 }
 

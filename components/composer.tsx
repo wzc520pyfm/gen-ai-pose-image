@@ -51,6 +51,8 @@ export function Composer({
   onDeleteHistory,
   onClearHistory,
   reuseNote,
+  builtinName,
+  builtinSheet,
 }: {
   selected: Array<{ poseId: string; viewId: string; title: string; angle: string; thumbSrc?: string }>
   onRemove: (poseId: string) => void
@@ -81,11 +83,13 @@ export function Composer({
   onDeleteHistory: (id: string) => void
   onClearHistory: () => void
   reuseNote: string
+  builtinName: string
+  builtinSheet: string
 }) {
   const { basePath } = useStudioEnv()
   const characterSrc = characters[0]
     ? `data:${characters[0].mediaType};base64,${characters[0].dataBase64}`
-    : studioUrl(basePath, "/muse/dafeiyu-sheet.png")
+    : studioUrl(basePath, builtinSheet)
   const limit = mode === "sheet" ? 4 : 8
   const poseThumb = (viewId: string, thumbSrc?: string) => thumbSrc || studioUrl(basePath, `/api/pose-image?id=${encodeURIComponent(viewId)}&size=thumb`)
   const costumeThumb = costume?.thumbSrc || (costume ? studioUrl(basePath, `/api/costume-image?id=${encodeURIComponent(costume.id)}&size=thumb`) : "")
@@ -115,7 +119,7 @@ export function Composer({
 
       {selected.length === 0 ? (
         <p className="rounded-xl bg-muted px-3 py-4 text-sm leading-6 text-muted-foreground">
-          从中间点选一个或多个姿势。每一张成图都会带上{characters.length ? "你导入的模特" : "大肥鱼"}，只把身体换成对应的线稿姿势。要换衣服，先到「服装」里点一套。
+          从中间点选一个或多个姿势。每一张成图都会带上{characters.length ? "你导入的模特" : builtinName}，只把身体换成对应的线稿姿势。要换衣服，先到「服装」里点一套。
         </p>
       ) : (
         <ul className="flex max-h-40 flex-col gap-2 overflow-auto">
@@ -136,7 +140,7 @@ export function Composer({
         <div className="rounded-xl border bg-card p-3">
           <p className="text-xs text-muted-foreground">参考对照 · {selected[0].title}</p>
           <div className={`mt-2 grid items-center gap-2 ${costume ? "grid-cols-3" : "grid-cols-[1fr_auto_1fr]"}`}>
-            <img src={characterSrc} alt={characters.length ? "导入的模特" : "大肥鱼的成年三视图"} className="aspect-[3/4] rounded-lg bg-[#f8fafc] object-contain" />
+            <img src={characterSrc} alt={characters.length ? "导入的模特" : `${builtinName}的多视角设定图`} className="aspect-[3/4] rounded-lg bg-[#f8fafc] object-contain" />
             {costume ? (
               <img src={costumeThumb} alt={`${costume.id} 的服装参考，图中没有人物`} className="aspect-[3/4] rounded-lg bg-white object-contain" />
             ) : (

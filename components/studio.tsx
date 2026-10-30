@@ -37,6 +37,7 @@ import {
   type HistoryEntry,
 } from "@/lib/library"
 import { deleteSavedModel, listSavedModels, putSavedModel, readActiveModelId, readBuiltinUsed, writeActiveModelId, writeBuiltinUsed, type SavedModel } from "@/lib/models"
+import { getBuiltinModel } from "@/shared/builtin-models.mjs"
 import { pickRandomCombo } from "@/shared/random-combo.mjs"
 import { baseURLFor, DEFAULT_SETTINGS, loadSettings, modelFor, saveSettings, type StudioSettings } from "@/lib/settings"
 import { StudioEnvProvider, studioUrl, useStudioEnv, type StudioPortal } from "@/lib/studio-env"
@@ -388,6 +389,7 @@ function StudioFrame({ embedded }: { embedded: boolean }) {
           keepOutfit: settings.keepOutfit,
           extraPrompt,
           characterCount: characters.length,
+          builtinModelId: characters.length ? "" : activeModelId,
           costumeId: costume?.id ?? "",
           customReferences,
         }),
@@ -409,7 +411,7 @@ function StudioFrame({ embedded }: { embedded: boolean }) {
       window.clearTimeout(timer)
       controller.abort()
     }
-  }, [basePath, selectionKey, extraPrompt, characters.length, costume?.id, settings.provider, settings.mode, settings.keepOutfit, customPoses, customCostumes])
+  }, [basePath, selectionKey, extraPrompt, characters.length, activeModelId, costume?.id, settings.provider, settings.mode, settings.keepOutfit, customPoses, customCostumes])
 
   function togglePose(pose: Pose, view: PoseView) {
     if (selected[pose.id] === view.id) {
@@ -495,6 +497,7 @@ function StudioFrame({ embedded }: { embedded: boolean }) {
       extraPrompt,
       costumeId: costume?.id ?? "",
       characterImages: characters.map((image) => ({ mediaType: image.mediaType, dataBase64: image.dataBase64 })),
+      builtinModelId: characters.length ? "" : activeModelId,
     }
     const snapshotBase = {
       extraPrompt,
@@ -703,6 +706,8 @@ function StudioFrame({ embedded }: { embedded: boolean }) {
         })
       }}
       reuseNote={reuseNote}
+      builtinName={getBuiltinModel(activeModelId)?.name || "大肥鱼"}
+      builtinSheet={getBuiltinModel(activeModelId)?.sheet || "/muse/dafeiyu-sheet.png"}
     />
   )
 
