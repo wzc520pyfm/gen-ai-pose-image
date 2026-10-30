@@ -12,6 +12,7 @@ import { ASPECT_LABEL } from "@/lib/types"
 import { studioUrl, useStudioEnv } from "@/lib/studio-env"
 
 export type ResultCard = {
+  viewId?: string
   key: string
   title: string
   prompt: string
@@ -22,6 +23,7 @@ export type ResultCard = {
 }
 
 export function Composer({
+  localMode = false,
   selected,
   onRemove,
   onClear,
@@ -54,6 +56,7 @@ export function Composer({
   builtinName,
   builtinSheet,
 }: {
+  localMode?: boolean
   selected: Array<{ poseId: string; viewId: string; title: string; angle: string; thumbSrc?: string }>
   onRemove: (poseId: string) => void
   onClear: () => void
@@ -117,7 +120,7 @@ export function Composer({
         </div>
       ) : null}
 
-      {selected.length === 0 ? (
+      {selected.length === 0 && !(localMode && costume) ? (
         <p className="rounded-xl bg-muted px-3 py-4 text-sm leading-6 text-muted-foreground">
           从中间点选一个或多个姿势。每一张成图都会带上{characters.length ? "你导入的模特" : builtinName}，只把身体换成对应的线稿姿势。要换衣服，先到「服装」里点一套。
         </p>
@@ -156,7 +159,7 @@ export function Composer({
         <div className="rounded-xl border bg-card p-3">
           <p className="text-xs text-muted-foreground">已选服装 · {costume.id}</p>
           <img src={costumeThumb} alt={`${costume.id}，${costume.keywords}`} className="mt-2 aspect-[2/3] max-h-48 rounded-lg bg-white object-contain" />
-          <p className="mt-2 text-xs leading-5 text-muted-foreground">还没选姿势。选好姿势后，角色会穿上这套衣服出图。</p>
+          <p className="mt-2 text-xs leading-5 text-muted-foreground">{localMode ? "未选择姿势，将保留人物原姿势，只更换服装。" : "还没选姿势。选好姿势后，角色会穿上这套衣服出图。"}</p>
         </div>
       ) : null}
 
@@ -202,9 +205,9 @@ export function Composer({
       {selected.length > limit ? <p className="text-sm text-amber-800">当前方式一次最多 {limit} 个姿势。</p> : null}
 
       <div className="flex gap-2">
-        <Button className="h-11 flex-1" disabled={running || selected.length === 0 || selected.length > limit} onClick={onGenerate}>
+        <Button className="h-11 flex-1" disabled={running || (selected.length === 0 && !(localMode && costume)) || selected.length > limit} onClick={onGenerate}>
           {running ? <Loader2 className="animate-spin" /> : <Sparkles />}
-          {running ? progress || "正在生图" : hasKey ? "按所选姿势生图" : "填写密钥后生图"}
+          {running ? progress || "正在生图" : hasKey ? (localMode && selected.length === 0 ? "仅换装生图" : "按所选姿势生图") : "填写密钥后生图"}
         </Button>
         {running ? <Button variant="outline" className="h-11" onClick={onStop}>停止</Button> : null}
       </div>
