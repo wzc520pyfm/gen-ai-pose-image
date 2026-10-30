@@ -31,9 +31,9 @@ DeepSeek Harness 插件，也是一个可以单独打开的姿势工作室。从
 
 ![手机宽度下的服装页](docs/studio-costumes.jpg)
 
-装进 Harness 之后，左侧栏的「姿势」按窗口宽度排成一到四列。补充描述和 API Key 收在底部，出图按钮一直看得到。
+装进 Harness 之后，左侧栏是「澜姿 / 工作室」。点开后用的是同一套工作室：模特、姿势、服装、生图设置和出图都在这一页里。面板够宽时仍是三栏；窄面板收成一列，出图按钮留在底部。
 
-![Harness 里的姿势页](docs/harness.jpg)
+![Harness 里的澜姿工作室](docs/harness.jpg)
 
 ## 本地工作室
 
@@ -76,7 +76,7 @@ dsh plugin --profile web add gen-ai-pose-image
 
 重启对应 profile 后：
 
-- 左侧栏多一项「姿势」，和「插件」「自动化任务」排在一起。点开后可多选标准全身姿势并生图。
+- 左侧栏多一项「澜姿 / 工作室」，和「插件」「自动化任务」排在一起。点开后是完整工作室，可以选姿势、换服装、换模特并生图。
 - Agent 可以使用 `search_poses`、`search_costumes` 和 `generate_pose_images`。换装时把服装编号传给 `costume_id`。
 - 给进程设置 `POSE_MUSE_API_KEY` 后，工具会直接出图并挂到会话里。没有密钥时，工具返回写好的提示词，方便交给 `dsh-image-gen` 的 `generate_image` / `edit_image`。
 

@@ -6,6 +6,7 @@ import { useEffect, useMemo, useState } from "react"
 import { Search, X } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
+import { studioUrl, useStudioEnv } from "@/lib/studio-env"
 
 type Costume = {
   id: string
@@ -45,6 +46,7 @@ export function CostumeBrowser({
   selectedId: string | null
   onSelect: (costume: Costume) => void
 }) {
+  const { basePath } = useStudioEnv()
   const [catalog, setCatalog] = useState<CostumeCatalog | null>(null)
   const [error, setError] = useState("")
   const [category, setCategory] = useState("春")
@@ -52,7 +54,7 @@ export function CostumeBrowser({
 
   useEffect(() => {
     const controller = new AbortController()
-    fetch("/api/costumes", { signal: controller.signal })
+    fetch(studioUrl(basePath, "/api/costumes"), { signal: controller.signal })
       .then(async (response) => {
         if (!response.ok) throw new Error("服装目录没有加载出来")
         return response.json() as Promise<CostumeCatalog>
@@ -63,7 +65,7 @@ export function CostumeBrowser({
         setError(cause instanceof Error ? cause.message : "服装目录没有加载出来")
       })
     return () => controller.abort()
-  }, [])
+  }, [basePath])
 
   useEffect(() => {
     if (!focusCategory || !showAdult) return
@@ -85,7 +87,7 @@ export function CostumeBrowser({
 
   return (
     <section>
-      <div className="sticky top-0 z-10 border-b bg-white/95 px-4 py-3 backdrop-blur md:px-6">
+      <div className="sticky top-0 z-10 border-b bg-white/95 px-4 py-3 backdrop-blur @min-[768px]/studio:px-6">
         <p className="mb-2 text-sm text-muted-foreground">这些图里没有人物。选一套之后，大肥鱼会换上这身衣服，脸、头发、鲸耳和鲸尾保持不变。</p>
         <div className="mb-2 flex flex-wrap gap-2">
           {catalog?.categories.map((item) => (
@@ -123,9 +125,9 @@ export function CostumeBrowser({
           ) : null}
         </div>
       </div>
-      <div className="px-4 py-4 md:px-6">
+      <div className="px-4 py-4 @min-[768px]/studio:px-6">
         {!catalog && !error ? (
-          <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5">
+          <div className="grid grid-cols-2 gap-3 @min-[640px]/studio:grid-cols-3 @min-[1280px]/studio:grid-cols-4 @min-[1536px]/studio:grid-cols-5">
             {Array.from({ length: 8 }, (_, index) => <div key={index} className="aspect-[2/3] animate-pulse rounded-2xl bg-muted" />)}
           </div>
         ) : null}
@@ -136,7 +138,7 @@ export function CostumeBrowser({
           </div>
         ) : null}
         {catalog && costumes.length === 0 ? <p className="py-10 text-center text-sm text-muted-foreground">没有对上的服装。</p> : null}
-        <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5">
+        <div className="grid grid-cols-2 gap-3 @min-[640px]/studio:grid-cols-3 @min-[1280px]/studio:grid-cols-4 @min-[1536px]/studio:grid-cols-5">
           {costumes.map((costume) => {
             const selected = selectedId === costume.id
             return (
@@ -147,9 +149,9 @@ export function CostumeBrowser({
                 aria-pressed={selected}
                 className={`overflow-hidden rounded-xl border bg-card text-left shadow-sm ${selected ? "border-primary ring-2 ring-primary/25" : "border-border hover:border-primary/40"}`}
               >
-                <div className="relative aspect-[3/4] bg-white sm:aspect-[2/3]">
+                <div className="relative aspect-[3/4] bg-white @min-[640px]/studio:aspect-[2/3]">
                   <img
-                    src={`/api/costume-image?id=${encodeURIComponent(costume.id)}&size=thumb`}
+                    src={studioUrl(basePath, `/api/costume-image?id=${encodeURIComponent(costume.id)}&size=thumb`)}
                     alt={`${costume.id}，${costume.keywords}`}
                     loading="lazy"
                     className="h-full w-full object-contain"
@@ -158,7 +160,7 @@ export function CostumeBrowser({
                 </div>
                 <div className="space-y-1 px-3 py-2.5">
                   <p className="text-sm font-medium">{costume.id}</p>
-                  <p className="line-clamp-1 text-xs text-muted-foreground sm:line-clamp-2">{costume.label} · {costume.keywords}</p>
+                  <p className="line-clamp-1 text-xs text-muted-foreground @min-[640px]/studio:line-clamp-2">{costume.label} · {costume.keywords}</p>
                 </div>
               </button>
             )

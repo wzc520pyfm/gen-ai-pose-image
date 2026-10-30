@@ -38,7 +38,7 @@ export function SettingsDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-h-[85dvh] overflow-y-auto sm:max-w-lg">
+      <DialogContent className="max-h-[min(85dvh,85%)] max-w-[min(32rem,calc(100%-2rem))] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>生图设置</DialogTitle>
           <DialogDescription>密钥存在这台浏览器的本地存储里，不会写进仓库，也不会出现在提示词里。</DialogDescription>

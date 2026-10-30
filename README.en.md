@@ -31,9 +31,9 @@ Costume categories wrap, and the card text stays on screen.
 
 ![Costume page at phone width](docs/studio-costumes.jpg)
 
-Inside Harness, the Pose page in the left sidebar uses one to four columns depending on the pane width. Extra notes and the API key fold into the bottom, and the generate button stays visible.
+Inside Harness, the sidebar item is 「澜姿 / 工作室」. Opening it shows the same studio: model, poses, costumes, generation settings, and the generate flow. A wide panel keeps the three columns; a narrow panel stacks them and leaves the generate button at the bottom.
 
-![Pose page inside Harness](docs/harness.jpg)
+![Studio inside Harness](docs/harness.jpg)
 
 ## Local studio
 
@@ -76,7 +76,7 @@ The package name is `gen-ai-pose-image`. Before it is published, or when you are
 
 After restarting that profile:
 
-- The left sidebar gains Pose, next to Plugins and Automation tasks. Open it to select standard full-body poses and generate.
+- The left sidebar gains 「澜姿 / 工作室」, next to Plugins and Automation tasks. Opening it shows the full studio: poses, costumes, the model, and image generation.
 - The agent can call `search_poses`, `search_costumes`, and `generate_pose_images`. Pass a costume id as `costume_id` to change clothes.
 - With `POSE_MUSE_API_KEY` set on the process, the tools generate images and attach them to the session. Without a key, they return the written prompts for `generate_image` / `edit_image` in `dsh-image-gen`.
 

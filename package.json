@@ -48,7 +48,8 @@
     "start": "next start -H 0.0.0.0 -p 43123",
     "lint": "eslint",
     "typecheck": "tsc --noEmit",
-    "test": "node --test shared/pose.test.mjs"
+    "build:client": "node scripts/build-client.mjs",
+    "test": "npm run build:client && node --test shared/pose.test.mjs"
   },
   "dependencies": {
     "@base-ui/react": "^1.9.0",
@@ -64,10 +65,12 @@
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3",
+    "@fontsource-variable/outfit": "^5.3.0",
     "@tailwindcss/postcss": "^4",
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",
+    "esbuild": "^0.28.2",
     "eslint": "^9",
     "eslint-config-next": "15.5.28",
     "tailwindcss": "^4",
