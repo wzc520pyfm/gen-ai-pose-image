@@ -11,9 +11,18 @@ export type RandomCostume = {
   adult?: boolean
 }
 
+export type RandomFace = {
+  id: string
+  section?: string
+  hair?: string
+  label?: string
+  keywords?: string
+}
+
 export function pickRandomCombo(input?: {
   poses?: RandomPose[]
   costumes?: RandomCostume[]
+  faces?: RandomFace[]
   showAdult?: boolean
   random?: () => number
 }): {
@@ -22,4 +31,5 @@ export function pickRandomCombo(input?: {
   pose: RandomPose | null
   view: { id: string; angle?: string } | null
   costume: RandomCostume | null
+  face: RandomFace | null
 }

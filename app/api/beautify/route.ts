@@ -23,6 +23,7 @@ export async function POST(request: Request) {
     kind,
     userPrompt: typeof body.userPrompt === "string" ? body.userPrompt : "",
     adult: body.adult === true,
+    sensitivePromptOptimize: body.sensitivePromptOptimize === true,
     signal: request.signal,
   })
   return NextResponse.json(result)

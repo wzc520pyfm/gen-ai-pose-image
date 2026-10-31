@@ -6,6 +6,7 @@ import { Settings } from "lucide-react"
 import { CharacterDock } from "@/components/character-dock"
 import { Composer, type ResultCard } from "@/components/composer"
 import { CostumeBrowser } from "@/components/costume-browser"
+import { FaceBrowser, type FaceItem } from "@/components/face-browser"
 import type { CustomDraft } from "@/components/custom-reference-panel"
 import type { HistoryView } from "@/components/history-panel"
 import { PoseBrowser } from "@/components/pose-browser"
@@ -48,8 +49,9 @@ import { DEFAULT_MODEL_ID, activateModel, adoptCurrent, deleteFromLibrary, ident
 import type { Catalog, Pose, PoseView, PromptCard } from "@/lib/types"
 
 type Selection = Record<string, string>
-type Library = "poses" | "costumes"
+type Library = "poses" | "costumes" | "faces"
 type CostumePick = { id: string; label: string; keywords: string }
+type FacePick = { id: string; section: string; hair: string; label: string; keywords: string }
 
 const REPOSITORY_URL = "https://github.com/wzc520pyfm/gen-ai-pose-image"
 
@@ -76,10 +78,14 @@ function StudioFrame({ embedded }: { embedded: boolean }) {
   const [costumeCatalog, setCostumeCatalog] = useState<Array<{ id: string; label: string; keywords: string; adult?: boolean }>>([])
   const [costumeCatalogReady, setCostumeCatalogReady] = useState(false)
   const [costumeCatalogError, setCostumeCatalogError] = useState("")
+  const [faceCatalog, setFaceCatalog] = useState<FacePick[]>([])
+  const [faceCatalogReady, setFaceCatalogReady] = useState(false)
+  const [faceCatalogError, setFaceCatalogError] = useState("")
   const [loading, setLoading] = useState(true)
   const [settings, setSettings] = useState<StudioSettings>(DEFAULT_SETTINGS)
   const [library, setLibrary] = useState<Library>("poses")
   const [costume, setCostume] = useState<CostumePick | null>(null)
+  const [face, setFace] = useState<FacePick | null>(null)
   const [costumeFocus, setCostumeFocus] = useState<string | null>(null)
   const [requestedSystem, setRequestedSystem] = useState<string | null>(null)
   const [settingsOpen, setSettingsOpen] = useState(false)
@@ -146,6 +152,25 @@ function StudioFrame({ embedded }: { embedded: boolean }) {
         if (error instanceof DOMException && error.name === "AbortError") return
         setCostumeCatalogError(error instanceof Error ? error.message : "服装目录没有加载出来")
         setCostumeCatalogReady(true)
+      })
+    return () => controller.abort()
+  }, [basePath])
+  useEffect(() => {
+    const controller = new AbortController()
+    fetch(studioUrl(basePath, "/api/faces"), { signal: controller.signal })
+      .then(async (response) => {
+        if (!response.ok) throw new Error("脸部目录没有加载出来")
+        return response.json() as Promise<{ faces?: FacePick[] }>
+      })
+      .then((payload) => {
+        setFaceCatalog(Array.isArray(payload.faces) ? payload.faces : [])
+        setFaceCatalogError("")
+        setFaceCatalogReady(true)
+      })
+      .catch((error: unknown) => {
+        if (error instanceof DOMException && error.name === "AbortError") return
+        setFaceCatalogError(error instanceof Error ? error.message : "脸部目录没有加载出来")
+        setFaceCatalogReady(true)
       })
     return () => controller.abort()
   }, [basePath])
@@ -393,6 +418,7 @@ function StudioFrame({ embedded }: { embedded: boolean }) {
           characterCount: characters.length,
           builtinModelId: characters.length ? "" : activeModelId,
           costumeId: costume?.id ?? "",
+          faceId: face?.id ?? "",
           customReferences,
         }),
         signal: controller.signal,
@@ -413,7 +439,7 @@ function StudioFrame({ embedded }: { embedded: boolean }) {
       window.clearTimeout(timer)
       controller.abort()
     }
-  }, [basePath, selectionKey, extraPrompt, characters.length, activeModelId, costume?.id, settings.engine, settings.provider, settings.mode, settings.keepOutfit, customPoses, customCostumes])
+  }, [basePath, selectionKey, extraPrompt, characters.length, activeModelId, costume?.id, face?.id, settings.engine, settings.provider, settings.mode, settings.keepOutfit, customPoses, customCostumes])
 
   function togglePose(pose: Pose, view: PoseView) {
     if (selected[pose.id] === view.id) {
@@ -443,8 +469,16 @@ function StudioFrame({ embedded }: { embedded: boolean }) {
       setLimitNote("服装目录还在加载。")
       return
     }
+    if (!faceCatalogReady) {
+      setLimitNote("脸部目录还在加载。")
+      return
+    }
     if (costumeCatalogError && costumeCatalog.length === 0 && customCostumes.length === 0) {
       setLimitNote(costumeCatalogError)
+      return
+    }
+    if (faceCatalogError && faceCatalog.length === 0) {
+      setLimitNote(faceCatalogError)
       return
     }
     const poses = [
@@ -464,14 +498,21 @@ function StudioFrame({ embedded }: { embedded: boolean }) {
         adult: asset.adult,
       })),
     ]
-    const pick = pickRandomCombo({ poses, costumes, showAdult: settings.showAdult })
-    if (!pick.ok || !pick.pose || !pick.view || !pick.costume) {
+    const pick = pickRandomCombo({ poses, costumes, faces: faceCatalog, showAdult: settings.showAdult })
+    if (!pick.ok || !pick.pose || !pick.view || !pick.costume || !pick.face) {
       setLimitNote(pick.message)
       return
     }
     setLimitNote("")
     setSelected({ [pick.pose.id]: pick.view.id })
     setCostume({ id: pick.costume.id, label: pick.costume.label, keywords: pick.costume.keywords })
+    setFace({
+      id: pick.face.id,
+      section: pick.face.section ?? "",
+      hair: pick.face.hair ?? "",
+      label: pick.face.label ?? "",
+      keywords: pick.face.keywords ?? "",
+    })
   }
 
   async function generate() {
@@ -499,6 +540,7 @@ function StudioFrame({ embedded }: { embedded: boolean }) {
       keepOutfit: settings.keepOutfit,
       extraPrompt,
       costumeId: costume?.id ?? "",
+      faceId: face?.id ?? "",
       characterImages: characters.map((image) => ({ mediaType: image.mediaType, dataBase64: image.dataBase64 })),
       builtinModelId: characters.length ? "" : activeModelId,
     }
@@ -510,6 +552,7 @@ function StudioFrame({ embedded }: { embedded: boolean }) {
       mode: settings.mode,
       keepOutfit: costume ? false : settings.keepOutfit,
       costume: costumePick,
+      face: face ? { id: face.id, section: face.section, hair: face.hair, label: face.label, keywords: face.keywords } : null,
     }
     try {
       if (settings.mode === "sheet" || chosen.length === 0) {
@@ -551,6 +594,7 @@ function StudioFrame({ embedded }: { embedded: boolean }) {
     mode: string
     keepOutfit: boolean
     costume: { id: string; label: string; keywords: string } | null
+    face: FacePick | null
     selection: Array<{ poseId: string; viewId: string; title: string; angle: string }>
   }) {
     for (const result of batch) {
@@ -569,6 +613,7 @@ function StudioFrame({ embedded }: { embedded: boolean }) {
           mode: snapshot.mode,
           keepOutfit: snapshot.keepOutfit,
           costume: snapshot.costume,
+          face: snapshot.face,
           selection: result.viewId && !result.viewId.includes(",") ? snapshot.selection.filter((item) => item.viewId === result.viewId) : snapshot.selection,
           mediaType: "image/jpeg",
           image,
@@ -633,6 +678,7 @@ function StudioFrame({ embedded }: { embedded: boolean }) {
     setSelected(restored.selected)
     setExtraPrompt(restored.extraPrompt)
     setCostume(restored.costume)
+    setFace(restored.face)
     setReuseNote(missingPose || missingCostume
       ? "已恢复还能找到的选择。有的自定义参考已经删除，请重新上传或生成后再出图。"
       : "已恢复那次的姿势和描述，可以再次生图。")
@@ -651,6 +697,7 @@ function StudioFrame({ embedded }: { embedded: boolean }) {
     mode: entry.mode,
     keepOutfit: entry.keepOutfit,
     costume: entry.costume,
+    face: entry.face ?? null,
     selection: entry.selection,
     thumbUrl: historyUrls[entry.id] || "",
   }))
@@ -689,6 +736,8 @@ function StudioFrame({ embedded }: { embedded: boolean }) {
       keepOutfit={settings.keepOutfit}
       costume={costume ? { ...costume, thumbSrc: costumeUrls[costume.id] } : null}
       onClearCostume={() => setCostume(null)}
+      face={face}
+      onClearFace={() => setFace(null)}
       hasKey={settings.engine === "comfyui" || Boolean(settings.apiKey.trim()) || serverKey}
       running={running}
       progress={withElapsed(progress, waited)}
@@ -742,7 +791,17 @@ function StudioFrame({ embedded }: { embedded: boolean }) {
           >
             服装
           </button>
+          <button
+            type="button"
+            role="tab"
+            aria-selected={library === "faces"}
+            onClick={() => setLibrary("faces")}
+            className={`rounded-md px-3 py-1 text-sm whitespace-nowrap ${library === "faces" ? "bg-white font-medium shadow-sm" : "text-muted-foreground"}`}
+          >
+            脸部
+          </button>
         </div>
+        {face ? <span className="hidden min-w-0 truncate text-sm text-primary @min-[640px]/studio:inline">{face.id}</span> : null}
         {costume ? <span className="hidden min-w-0 truncate text-sm text-primary @min-[640px]/studio:inline">{costume.id}</span> : null}
         <div className="ml-auto flex shrink-0 items-center gap-2">
           <Button variant="outline" size="sm" className="@max-[640px]/studio:hidden" onClick={() => setInstallOpen(true)}>装进 Harness</Button>
@@ -802,7 +861,18 @@ function StudioFrame({ embedded }: { embedded: boolean }) {
           }}
         />
         <main className="order-2 min-h-0 min-w-0 flex-1 overflow-y-auto @min-[1024px]/studio:order-none @min-[1024px]/studio:pb-8">
-          {library === "poses" ? (
+          {library === "faces" ? (
+            <FaceBrowser
+              selectedId={face?.id ?? null}
+              onSelect={(item: FaceItem) => setFace((current) => current?.id === item.id ? null : {
+                id: item.id,
+                section: item.section,
+                hair: item.hair,
+                label: item.label,
+                keywords: item.keywords,
+              })}
+            />
+          ) : library === "poses" ? (
             <PoseBrowser
               catalog={catalog}
               loading={loading}
@@ -835,6 +905,7 @@ function StudioFrame({ embedded }: { embedded: boolean }) {
               settings={settings}
               hasKey={Boolean(settings.apiKey.trim()) || serverKey}
               syncWarning={syncWarning}
+              onChangeSettings={updateSettings}
             />
           )}
         </main>
@@ -844,7 +915,7 @@ function StudioFrame({ embedded }: { embedded: boolean }) {
       </div>
       <div className="shrink-0 border-t bg-white p-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] @min-[1024px]/studio:hidden">
         <Button className="h-11 w-full" onClick={() => setSheetOpen(true)}>
-          已选 {chosen.length} 个姿势{costume ? ` · ${costume.id}` : ""} · 去生图
+          已选 {chosen.length} 个姿势{face ? ` · ${face.id}` : ""}{costume ? ` · ${costume.id}` : ""} · 去生图
         </Button>
       </div>
       <Sheet open={sheetOpen} onOpenChange={setSheetOpen}>

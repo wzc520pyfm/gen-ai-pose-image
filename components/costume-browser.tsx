@@ -46,6 +46,7 @@ export function CostumeBrowser({
   settings,
   hasKey,
   syncWarning,
+  onChangeSettings,
 }: {
   showAdult: boolean
   focusCategory: string | null
@@ -59,6 +60,7 @@ export function CostumeBrowser({
   settings: StudioSettings
   hasKey: boolean
   syncWarning: string
+  onChangeSettings: (settings: StudioSettings) => void
 }) {
   const { basePath } = useStudioEnv()
   const [catalog, setCatalog] = useState<CostumeCatalog | null>(null)
@@ -176,6 +178,7 @@ export function CostumeBrowser({
             settings={settings}
             hasKey={hasKey}
             syncWarning={syncWarning}
+            onChangeSettings={onChangeSettings}
           />
         ) : null}
         {!customSection && !catalog && !error ? (

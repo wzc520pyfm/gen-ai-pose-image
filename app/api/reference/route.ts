@@ -34,11 +34,13 @@ export async function POST(request: Request) {
       model: (typeof filled.model === "string" && filled.model.trim()) || defaultModel(provider),
       prompt,
       aspectRatio,
+      sensitivePromptOptimize: body.sensitivePromptOptimize === true,
       signal: request.signal,
     })
     return NextResponse.json({
       mediaType: image.mediaType,
       imageBase64: image.buffer.toString("base64"),
+      ...(image.warning ? { warning: image.warning } : {}),
     })
   } catch (error) {
     const message = error instanceof Error ? error.message : "参考图没有生成"

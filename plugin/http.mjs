@@ -5,6 +5,7 @@ import { fileURLToPath } from "node:url"
 import { beautifyPrompt } from "../shared/beautify.mjs"
 import { getCatalog, resolveView } from "../shared/catalog.mjs"
 import { costumeFile, fetchCostumeBytes, getCostume, getCostumeCatalog } from "../shared/costumes.mjs"
+import { faceFile, fetchFaceBytes, getFace, getFaceCatalog } from "../shared/faces.mjs"
 import { assertBaseURL, defaultModel } from "../shared/generate.mjs"
 import { generateCharacterSheet } from "../shared/character-sheet.mjs"
 import { statusForStudioError } from "../shared/http-status.mjs"
@@ -57,6 +58,16 @@ export function createPoseHandler(getConfig) {
       }
       if (req.method === "GET" && path === "/api/catalog") return json(res, 200, getCatalog())
       if (req.method === "GET" && path === "/api/costumes") return json(res, 200, getCostumeCatalog())
+      if (req.method === "GET" && path === "/api/faces") return json(res, 200, getFaceCatalog())
+      if (req.method === "GET" && path === "/api/face-image") {
+        const face = getFace(url.searchParams.get("id") ?? "")
+        if (!face) return json(res, 404, { error: "找不到脸部参考" })
+        const size = url.searchParams.get("size") === "full" ? "full" : "thumb"
+        const image = await fetchFaceBytes(faceFile(face, size))
+        res.writeHead(200, { "content-type": image.mediaType, "cache-control": "public, max-age=86400" })
+        res.end(image.buffer)
+        return
+      }
       if (req.method === "GET" && path === "/api/costume-image") {
         const costume = getCostume(url.searchParams.get("id") ?? "")
         if (!costume) return json(res, 404, { error: "找不到服装" })
@@ -134,6 +145,7 @@ export function createPoseHandler(getConfig) {
             kind,
             userPrompt: typeof body.userPrompt === "string" ? body.userPrompt : "",
             adult: body.adult === true,
+            sensitivePromptOptimize: body.sensitivePromptOptimize === true,
             signal: req.signal,
           })
           return json(res, 200, result)
@@ -154,9 +166,14 @@ export function createPoseHandler(getConfig) {
             model: String(body.model || "").trim() || defaultModel(provider),
             prompt,
             aspectRatio: ASPECTS.has(body.aspectRatio) ? body.aspectRatio : "3:4",
+            sensitivePromptOptimize: body.sensitivePromptOptimize === true,
             signal: req.signal,
           })
-          return json(res, 200, { mediaType: image.mediaType, imageBase64: image.buffer.toString("base64") })
+          return json(res, 200, {
+            mediaType: image.mediaType,
+            imageBase64: image.buffer.toString("base64"),
+            ...(image.warning ? { warning: image.warning } : {}),
+          })
         }
         if (path === "/api/character-sheet") {
           const source = body.image

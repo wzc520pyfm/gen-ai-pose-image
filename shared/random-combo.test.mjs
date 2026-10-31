@@ -92,5 +92,29 @@ test("a missing costume catalog does not invent a selection", () => {
   const pick = pickRandomCombo({ poses: [safePose], costumes: [], showAdult: false })
   assert.equal(pick.ok, false)
   assert.equal(pick.costume, null)
+  assert.equal(pick.face, null)
   assert.equal(pick.message, "没有可选的服装。")
+})
+
+test("a face catalog adds one face after the pose and costume picks", () => {
+  const faces = [
+    { id: "f009cba9893", section: "脸部特写", hair: "短发", label: "内收短发" },
+    { id: "f71f980dde3", section: "脸部特写", hair: "短发", label: "" },
+  ]
+  const skipped = pickRandomCombo({ poses: [safePose], costumes: [coat], showAdult: false, random: () => 0 })
+  assert.equal(skipped.face, null)
+  const pick = pickRandomCombo({
+    poses: [safePose],
+    costumes: [coat],
+    faces,
+    showAdult: false,
+    random: () => 0,
+  })
+  assert.equal(pick.ok, true)
+  assert.equal(pick.pose.id, "safe")
+  assert.equal(pick.costume.id, "SPR-0001")
+  assert.equal(pick.face.id, "f009cba9893")
+  const missing = pickRandomCombo({ poses: [safePose], costumes: [coat], faces: [], showAdult: false })
+  assert.equal(missing.ok, false)
+  assert.equal(missing.message, "没有可选的脸部参考。")
 })
