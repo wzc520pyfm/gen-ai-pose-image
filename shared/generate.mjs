@@ -122,6 +122,21 @@ function linkSignal(signal, ms) {
   return signal
 }
 
+/**
+ * Hobby rejects maxDuration above 300s. The provider timer and the result-download timer run one after the other inside that function, so their sum stays under 300s.
+ * A face call gets 270s for Seedream and 20s to save the image (290s). Other calls stay at 240s plus the same 20s download (260s).
+ * An explicit timeoutMs still wins. Reference fetches that hit their own cap abort before the provider call, so those caps are not added on top.
+ */
+export const HOST_MAX_DURATION_MS = 300_000
+export const FACE_GENERATION_TIMEOUT_MS = 270_000
+export const DEFAULT_GENERATION_TIMEOUT_MS = 240_000
+export const RESULT_DOWNLOAD_TIMEOUT_MS = 20_000
+
+export function generationTimeoutMs(images, timeoutMs) {
+  if (Number.isFinite(timeoutMs)) return timeoutMs
+  return images?.some((image) => image?.role === "face") ? FACE_GENERATION_TIMEOUT_MS : DEFAULT_GENERATION_TIMEOUT_MS
+}
+
 function timeoutMessage(error) {
   if (error?.name === "TimeoutError") return "生图超时。模型这次没有在时限内返回，请再试一次。"
   return ""
@@ -139,19 +154,20 @@ export async function generateImage({
   fetchImpl = fetch,
   allowReferenceFallback = true,
   watermark = true,
-  timeoutMs = 240000,
+  timeoutMs,
 }) {
   if (!apiKey) throw new Error("还没有填写 API Key")
-  const linked = linkSignal(signal, timeoutMs)
+  const linked = linkSignal(signal, generationTimeoutMs(images, timeoutMs))
+  const downloadSignal = linkSignal(signal, RESULT_DOWNLOAD_TIMEOUT_MS)
   const chosenModel = model || defaultModel(provider)
   try {
     if (provider === "gemini") {
-      return await generateGemini({ apiKey, baseURL, model: chosenModel, prompt, images, aspectRatio, signal: linked, fetchImpl })
+      return await generateGemini({ apiKey, baseURL, model: chosenModel, prompt, images, aspectRatio, signal: linked, downloadSignal, fetchImpl })
     }
     if (provider === "seedream") {
-      return await generateSeedream({ apiKey, baseURL, model: chosenModel, prompt, images, aspectRatio, signal: linked, fetchImpl, allowReferenceFallback, watermark })
+      return await generateSeedream({ apiKey, baseURL, model: chosenModel, prompt, images, aspectRatio, signal: linked, downloadSignal, fetchImpl, allowReferenceFallback, watermark })
     }
-    return await generateOpenAI({ apiKey, baseURL, model: chosenModel, prompt, images, aspectRatio, signal: linked, fetchImpl, allowReferenceFallback })
+    return await generateOpenAI({ apiKey, baseURL, model: chosenModel, prompt, images, aspectRatio, signal: linked, downloadSignal, fetchImpl, allowReferenceFallback })
   } catch (error) {
     const timedOut = timeoutMessage(error)
     if (timedOut && !signal?.aborted) throw new Error(timedOut)
@@ -159,7 +175,7 @@ export async function generateImage({
   }
 }
 
-async function generateSeedream({ apiKey, baseURL, model, prompt, images, aspectRatio, signal, fetchImpl, allowReferenceFallback = true, watermark = true }) {
+async function generateSeedream({ apiKey, baseURL, model, prompt, images, aspectRatio, signal, downloadSignal, fetchImpl, allowReferenceFallback = true, watermark = true }) {
   const root = (baseURL || defaultBaseURL("seedream")).replace(/\/$/, "")
   const send = async (withReferences) => {
     const body = {
@@ -196,7 +212,7 @@ async function generateSeedream({ apiKey, baseURL, model, prompt, images, aspect
   }
   if (!response.ok) fail(payload, response, apiKey, "Seedream 生图失败")
   const extracted = extractOpenAIImage(payload)
-  const image = await asBuffer(extracted, apiKey, signal)
+  const image = await asBuffer(extracted, apiKey, downloadSignal || signal)
   return {
     ...image,
     referencesSent: usedReferences,
@@ -205,7 +221,7 @@ async function generateSeedream({ apiKey, baseURL, model, prompt, images, aspect
   }
 }
 
-async function generateGemini({ apiKey, baseURL, model, prompt, images, aspectRatio, signal, fetchImpl }) {
+async function generateGemini({ apiKey, baseURL, model, prompt, images, aspectRatio, signal, downloadSignal, fetchImpl }) {
   const endpoint = geminiEndpoint(baseURL, model)
   const body = {
     contents: [{
@@ -237,7 +253,7 @@ async function generateGemini({ apiKey, baseURL, model, prompt, images, aspectRa
   const payload = await readPayload(response, apiKey)
   if (!response.ok) fail(payload, response, apiKey, "Gemini 生图失败")
   const extracted = extractGeminiImage(payload)
-  const image = await asBuffer(extracted, apiKey, signal)
+  const image = await asBuffer(extracted, apiKey, downloadSignal || signal)
   return { ...image, referencesSent: images.length > 0, model }
 }
 
@@ -246,17 +262,17 @@ function canFallBack(status, message) {
   return /edits|not supported|unknown|multipart|invalid endpoint|no such/i.test(message)
 }
 
-async function generateOpenAI({ apiKey, baseURL, model, prompt, images, aspectRatio, signal, fetchImpl, allowReferenceFallback = true }) {
+async function generateOpenAI({ apiKey, baseURL, model, prompt, images, aspectRatio, signal, downloadSignal, fetchImpl, allowReferenceFallback = true }) {
   const root = (baseURL || defaultBaseURL("openai")).replace(/\/$/, "")
   const size = openAISize(aspectRatio)
   if (images.length > 0) {
     try {
-      return await openAIEdits({ apiKey, root, model, prompt, images, size, signal, fetchImpl })
+      return await openAIEdits({ apiKey, root, model, prompt, images, size, signal, downloadSignal, fetchImpl })
     } catch (error) {
       if (!error.fallback || !allowReferenceFallback) throw error
     }
   }
-  const image = await openAIGenerations({ apiKey, root, model, prompt, size, signal, fetchImpl })
+  const image = await openAIGenerations({ apiKey, root, model, prompt, size, signal, downloadSignal, fetchImpl })
   return {
     ...image,
     referencesSent: false,
@@ -265,7 +281,7 @@ async function generateOpenAI({ apiKey, baseURL, model, prompt, images, aspectRa
   }
 }
 
-async function openAIEdits({ apiKey, root, model, prompt, images, size, signal, fetchImpl }) {
+async function openAIEdits({ apiKey, root, model, prompt, images, size, signal, downloadSignal, fetchImpl }) {
   const form = new FormData()
   form.set("model", model)
   form.set("prompt", prompt)
@@ -290,11 +306,11 @@ async function openAIEdits({ apiKey, root, model, prompt, images, size, signal, 
     throw error
   }
   const extracted = extractOpenAIImage(payload)
-  const image = await asBuffer(extracted, apiKey, signal)
+  const image = await asBuffer(extracted, apiKey, downloadSignal || signal)
   return { ...image, referencesSent: true, model }
 }
 
-async function openAIGenerations({ apiKey, root, model, prompt, size, signal, fetchImpl }) {
+async function openAIGenerations({ apiKey, root, model, prompt, size, signal, downloadSignal, fetchImpl }) {
   const send = async (withFormat) => {
     const body = { model, prompt, size, n: 1 }
     if (withFormat) body.response_format = "b64_json"
@@ -315,7 +331,7 @@ async function openAIGenerations({ apiKey, root, model, prompt, size, signal, fe
   if (formatRejected) ({ response, payload } = await send(false))
   if (!response.ok) fail(payload, response, apiKey, "文生图失败")
   const extracted = extractOpenAIImage(payload)
-  return asBuffer(extracted, apiKey, signal)
+  return asBuffer(extracted, apiKey, downloadSignal || signal)
 }
 
 function box4(value) {

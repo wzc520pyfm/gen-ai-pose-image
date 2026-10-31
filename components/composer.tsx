@@ -2,14 +2,17 @@
 
 /* eslint-disable @next/next/no-img-element -- results are data URLs and pose thumbs are proxied */
 
+import { useState } from "react"
 import { Download, Loader2, Sparkles } from "lucide-react"
 import { Button } from "@/components/ui/button"
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { HistoryPanel, type HistoryView } from "@/components/history-panel"
 import { Textarea } from "@/components/ui/textarea"
 import type { StoredCharacter } from "@/lib/characters"
 import type { AspectRatio, GenerateMode, PromptCard } from "@/lib/types"
 import { ASPECT_LABEL } from "@/lib/types"
 import { studioUrl, useStudioEnv } from "@/lib/studio-env"
+import { IDENTITY_REQUIRED } from "@/shared/models.mjs"
 
 export type ResultCard = {
   viewId?: string
@@ -57,6 +60,7 @@ export function Composer({
   reuseNote,
   builtinName,
   builtinSheet,
+  modelSelected = true,
 }: {
   localMode?: boolean
   selected: Array<{ poseId: string; viewId: string; title: string; angle: string; thumbSrc?: string }>
@@ -92,8 +96,10 @@ export function Composer({
   reuseNote: string
   builtinName: string
   builtinSheet: string
+  modelSelected?: boolean
 }) {
   const { basePath } = useStudioEnv()
+  const [zoom, setZoom] = useState<{ src: string; alt: string } | null>(null)
   const characterSrc = characters[0]
     ? `data:${characters[0].mediaType};base64,${characters[0].dataBase64}`
     : studioUrl(basePath, builtinSheet)
@@ -102,6 +108,9 @@ export function Composer({
   const costumeThumb = costume?.thumbSrc || (costume ? studioUrl(basePath, `/api/costume-image?id=${encodeURIComponent(costume.id)}&size=thumb`) : "")
   const faceThumb = face ? studioUrl(basePath, `/api/face-image?id=${encodeURIComponent(face.id)}&size=thumb`) : ""
   const faceCaption = face ? [face.section, face.hair, face.label].filter(Boolean).join(" · ") : ""
+  const hasIdentity = modelSelected || Boolean(face)
+  const missingPose = selected.length === 0 && !(localMode && costume)
+  const openZoom = (src: string, alt: string) => setZoom({ src, alt })
 
   return (
     <div className="flex flex-col gap-4">
@@ -139,7 +148,9 @@ export function Composer({
 
       {selected.length === 0 && !(localMode && costume) ? (
         <p className="rounded-xl bg-muted px-3 py-4 text-sm leading-6 text-muted-foreground">
-          从中间点选一个或多个姿势。每一张成图都会带上{characters.length ? "你导入的模特" : builtinName}，只把身体换成对应的线稿姿势。要换衣服，先到「服装」里点一套。要换脸或表情，先到「脸部」里点一张。
+          从中间点选一个或多个姿势。{modelSelected
+            ? `每一张成图都会带上${characters.length ? "你导入的模特" : builtinName}，只把身体换成对应的线稿姿势。`
+            : "这次没有选模特。选一张脸部参考后，可以只按这张脸、服装和姿势出图。"}要换衣服，先到「服装」里点一套。要换脸或表情，先到「脸部」里点一张。
         </p>
       ) : (
         <ul className="flex max-h-40 flex-col gap-2 overflow-auto">
@@ -159,27 +170,29 @@ export function Composer({
       {selected[0] ? (
         <div className="rounded-xl border bg-card p-3">
           <p className="text-xs text-muted-foreground">参考对照 · {selected[0].title}</p>
-          <div className={`mt-2 grid items-center gap-2 ${face || costume ? (face && costume ? "grid-cols-4" : "grid-cols-3") : "grid-cols-[1fr_auto_1fr]"}`}>
-            <img src={characterSrc} alt={characters.length ? "导入的模特" : `${builtinName}的多视角设定图`} className="aspect-[3/4] rounded-lg bg-[#f8fafc] object-contain" />
+          <div className={`mt-2 grid items-center gap-2 ${referenceColumns(modelSelected, Boolean(face), Boolean(costume))}`}>
+            {modelSelected ? (
+              <ZoomThumb src={characterSrc} alt={characters.length ? "导入的模特" : `${builtinName}的多视角设定图`} className="aspect-[3/4] rounded-lg bg-[#f8fafc] object-contain" onZoom={openZoom} />
+            ) : null}
             {face ? (
-              <img src={faceThumb} alt={`${face.id} 的脸部参考，只取五官、表情和发型`} className="aspect-[3/4] rounded-lg bg-white object-cover" />
+              <ZoomThumb src={faceThumb} alt={`${face.id} 的脸部参考，只取五官、表情和发型`} className="aspect-[3/4] rounded-lg bg-white object-cover" onZoom={openZoom} />
             ) : null}
             {costume ? (
-              <img src={costumeThumb} alt={`${costume.id} 的服装参考，图中没有人物`} className="aspect-[3/4] rounded-lg bg-white object-contain" />
-            ) : face ? null : (
+              <ZoomThumb src={costumeThumb} alt={`${costume.id} 的服装参考，图中没有人物`} className="aspect-[3/4] rounded-lg bg-white object-contain" onZoom={openZoom} />
+            ) : modelSelected && !face ? (
               <span className="text-lg text-muted-foreground" aria-hidden="true">→</span>
-            )}
-            <img src={poseThumb(selected[0].viewId, selected[0].thumbSrc)} alt={`${selected[0].title} 的姿势线稿`} className="aspect-[3/4] rounded-lg bg-white object-contain" />
+            ) : null}
+            <ZoomThumb src={poseThumb(selected[0].viewId, selected[0].thumbSrc)} alt={`${selected[0].title} 的姿势线稿`} className="aspect-[3/4] rounded-lg bg-white object-contain" onZoom={openZoom} />
           </div>
           <p className="mt-2 text-xs leading-5 text-muted-foreground">
-            {referenceCaption(Boolean(face), Boolean(costume))}
+            {referenceCaption(Boolean(face), Boolean(costume), modelSelected)}
           </p>
         </div>
       ) : costume ? (
         <div className="rounded-xl border bg-card p-3">
           <p className="text-xs text-muted-foreground">已选服装 · {costume.id}</p>
-          <img src={costumeThumb} alt={`${costume.id}，${costume.keywords}`} className="mt-2 aspect-[2/3] max-h-48 rounded-lg bg-white object-contain" />
-          <p className="mt-2 text-xs leading-5 text-muted-foreground">{localMode ? "未选择姿势，将保留人物原姿势，只更换服装。" : "还没选姿势。选好姿势后，角色会穿上这套衣服出图。"}</p>
+          <ZoomThumb src={costumeThumb} alt={`${costume.id}，${costume.keywords}`} className="mt-2 aspect-[2/3] max-h-48 rounded-lg bg-white object-contain" onZoom={openZoom} />
+          <p className="mt-2 text-xs leading-5 text-muted-foreground">{!modelSelected && !face ? "还没选模特。选一张脸部参考后，可以不带模特换衣服出图。" : localMode ? "未选择姿势，将保留人物原姿势，只更换服装。" : "还没选姿势。选好姿势后，角色会穿上这套衣服出图。"}</p>
         </div>
       ) : null}
 
@@ -224,8 +237,9 @@ export function Composer({
       {limitNote ? <p className="text-sm text-amber-800">{limitNote}</p> : null}
       {selected.length > limit ? <p className="text-sm text-amber-800">当前方式一次最多 {limit} 个姿势。</p> : null}
 
+      {!hasIdentity ? <p className="text-sm text-amber-800">{IDENTITY_REQUIRED}</p> : null}
       <div className="flex gap-2">
-        <Button className="h-11 flex-1" disabled={running || (selected.length === 0 && !(localMode && costume)) || selected.length > limit} onClick={onGenerate}>
+        <Button className="h-11 flex-1" disabled={running || !hasIdentity || missingPose || selected.length > limit} onClick={onGenerate}>
           {running ? <Loader2 className="animate-spin" /> : <Sparkles />}
           {running ? progress || "正在生图" : hasKey ? (localMode && selected.length === 0 ? "仅换装生图" : "按所选姿势生图") : "填写密钥后生图"}
         </Button>
@@ -240,7 +254,12 @@ export function Composer({
           <h3 className="text-sm font-medium">成图</h3>
           {results.map((item) => (
             <article key={item.key} className="overflow-hidden rounded-xl border bg-card">
-              {item.ok && item.src ? <img src={item.src} alt={item.title} className="w-full bg-[#f7f4ee] object-contain" /> : null}
+              {item.ok && item.src ? (
+                <button type="button" className="relative block w-full cursor-zoom-in" onClick={() => openZoom(item.src || "", item.title)} aria-label={`放大成图 ${item.title}`}>
+                  <img src={item.src} alt={item.title} className="w-full bg-[#f7f4ee] object-contain" />
+                  <span className="pointer-events-none absolute right-2 bottom-2 rounded-full bg-black/60 px-2 py-0.5 text-[11px] text-white">放大</span>
+                </button>
+              ) : null}
               <div className="space-y-2 px-3 py-3">
                 <p className="text-sm font-medium">{item.title}</p>
                 {item.error ? <p className="text-sm text-destructive">{item.error}</p> : null}
@@ -257,11 +276,54 @@ export function Composer({
         </div>
       ) : null}
       <HistoryPanel entries={history} onReuse={onReuseHistory} onDelete={onDeleteHistory} onClear={onClearHistory} />
+      <Dialog open={zoom !== null} onOpenChange={(open) => { if (!open) setZoom(null) }}>
+        <DialogContent className="max-h-[min(92dvh,92%)] max-w-[min(72rem,calc(100%-2rem))] overflow-y-auto">
+          {zoom ? (
+            <>
+              <DialogHeader>
+                <DialogTitle>{zoom.alt}</DialogTitle>
+                <DialogDescription>点击外面或按 Esc 关闭。</DialogDescription>
+              </DialogHeader>
+              <img src={zoom.src} alt={zoom.alt} className="max-h-[78dvh] w-full rounded-xl bg-[#f7f4ee] object-contain" />
+            </>
+          ) : null}
+        </DialogContent>
+      </Dialog>
     </div>
   )
 }
 
-function referenceCaption(hasFace: boolean, hasCostume: boolean) {
+function ZoomThumb({
+  src,
+  alt,
+  className,
+  onZoom,
+}: {
+  src: string
+  alt: string
+  className: string
+  onZoom: (src: string, alt: string) => void
+}) {
+  return (
+    <button type="button" className="block w-full cursor-zoom-in" onClick={() => onZoom(src, alt)} aria-label={`放大 ${alt}`}>
+      <img src={src} alt={alt} className={className} />
+    </button>
+  )
+}
+
+function referenceColumns(hasCharacter: boolean, hasFace: boolean, hasCostume: boolean) {
+  if (hasCharacter && !hasFace && !hasCostume) return "grid-cols-[1fr_auto_1fr]"
+  const count = Number(hasCharacter) + Number(hasFace) + Number(hasCostume) + 1
+  if (count >= 4) return "grid-cols-4"
+  if (count === 3) return "grid-cols-3"
+  if (count === 2) return "grid-cols-2"
+  return "grid-cols-1"
+}
+
+function referenceCaption(hasFace: boolean, hasCostume: boolean, hasCharacter: boolean) {
+  if (!hasCharacter && hasFace && hasCostume) return "顺序是脸部参考、没有人物的衣服、姿势线稿。没有角色设定图，身份以这张脸为准。这还不是成图。"
+  if (!hasCharacter && hasFace) return "左边是脸部参考，右边只提供姿势。没有角色设定图，身份以这张脸为准。这还不是成图。"
+  if (!hasCharacter) return "还没选模特。选一张脸部参考后可以出图，也可以改回一位模特。这还不是成图。"
   if (hasFace && hasCostume) return "顺序是角色、脸部参考、没有人物的衣服、姿势线稿。脸部图只提供五官、表情和发型。这还不是成图。"
   if (hasFace) return "左边是角色，中间这张脸提供五官、表情和发型，右边只提供姿势。衣服仍按角色参考。这还不是成图。"
   if (hasCostume) return "左边锁脸和鲸尾，中间是没有人物的衣服，右边只提供姿势。这还不是成图。"

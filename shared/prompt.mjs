@@ -1,3 +1,5 @@
+import { IDENTITY_REQUIRED } from "./models.mjs"
+
 const ANGLE_NOTE = {
   正面: "front view at chest height",
   斜侧: "three-quarter view",
@@ -6,7 +8,17 @@ const ANGLE_NOTE = {
   仰视: "low angle, camera looking up",
 }
 
-function referenceOrder({ characterCount, costume }) {
+function referenceOrder({ characterCount, costume, faceOnly = false }) {
+  if (faceOnly) {
+    const parts = ["第 1 张是脸部参考，只取五官、表情、脸型和发型"]
+    let index = 2
+    if (costume) {
+      parts.push(`第 ${index} 张是没有人物的服装图`)
+      index += 1
+    }
+    parts.push(`从第 ${index} 张起是姿势结构线稿`)
+    return `根据参考图重绘。${parts.join("，")}。这次没有角色设定图，身份以脸部参考为准。`
+  }
   const count = Math.max(1, Number(characterCount) || 1)
   const parts = [count === 1 ? "第 1 张是角色" : `前 ${count} 张是同一角色`]
   let index = count + 1
@@ -22,7 +34,9 @@ function referenceOrder({ characterCount, costume }) {
 
 function faceLines(face, character) {
   const bits = [face.section, face.hair, face.label].filter(Boolean)
-  const ears = character.id === "dafeiyu"
+  const ears = !character
+    ? "没有角色参考。身份、五官、表情和发型都以这张脸部参考为准。不要添加鲸耳、鲸尾、角或其他这张图里没有的特征。"
+    : character.id === "dafeiyu"
     ? "鲸耳要长在这张脸上，鲸尾仍按角色参考保留。脸部参考里没有鲸耳或鲸尾，不要因此把它们去掉。"
     : "角色参考里已有的耳朵、角或尾巴仍然保留。脸部参考里没有这些特征，不要因此去掉。"
   return [
@@ -34,6 +48,17 @@ function faceLines(face, character) {
 }
 
 function outfitLines({ character, costume, keepOutfit, face }) {
+  if (!character) {
+    if (costume) {
+      return [
+        "服装参考图只有衣服，没有人物。把人物换成这套衣服，包括颜色、层次、鞋袜和配饰。脸、表情、发色和发型以脸部参考为准。",
+        `服装编号 ${costume.id}。描述：${costume.keywords}。`,
+        "不要画出服装图里的人台、假人或空白身体。",
+      ].join("\n")
+    }
+    if (keepOutfit) return "没有角色服装参考。画一套完整的日常外衣。脸、表情、发色和发型以脸部参考为准。"
+    return "可以按用户补充更换服装。脸、表情和发型以脸部参考为准。这是成年人物。"
+  }
   if (costume) {
     const identity = character.id === "dafeiyu"
       ? face
@@ -67,19 +92,24 @@ function outfitLines({ character, costume, keepOutfit, face }) {
 }
 
 export function composePrompt({ character, poses, extraPrompt = "", keepOutfit = true, mode = "each", costume = null, face = null, characterCount = 1 }) {
+  if (!character && !face) throw new Error(IDENTITY_REQUIRED)
   const lines = [
     face
-      ? referenceOrder({ characterCount, costume })
+      ? referenceOrder({ characterCount, costume, faceOnly: !character })
       : costume
         ? "根据参考图重绘指定角色。第一张是角色，接着是没有人物的服装图，最后是姿势结构线稿。"
         : "根据参考图重绘指定角色。排在前面的参考图是角色，后面的参考图是姿势结构线稿。",
     "只从线稿提取身体姿态、重心、四肢位置和镜头角度。不要把线稿、关节圆、比例辅助线画进成图。",
     "",
-    "角色（必须保持身份）：",
-    character.prompt,
-    ...(face ? [character.id === "dafeiyu"
-      ? "角色描述里关于脸、发色和发型的句子，这次让位给脸部参考。年龄、鲸耳和鲸尾仍然有效。"
-      : "角色描述里关于脸、发色和发型的句子，这次让位给脸部参考。年龄，以及参考图里的耳朵、角或尾巴，仍然有效。"] : []),
+    ...(character
+      ? [
+        "角色（必须保持身份）：",
+        character.prompt,
+        ...(face ? [character.id === "dafeiyu"
+          ? "角色描述里关于脸、发色和发型的句子，这次让位给脸部参考。年龄、鲸耳和鲸尾仍然有效。"
+          : "角色描述里关于脸、发色和发型的句子，这次让位给脸部参考。年龄，以及参考图里的耳朵、角或尾巴，仍然有效。"] : []),
+      ]
+      : ["这次没有角色设定图。身份、五官、表情、发色和发型都以脸部参考为准。不要换成大肥鱼，不要添加鲸耳或鲸尾。"]),
     "这是成年人物。禁止画成儿童、幼儿或青少年，脸和身体都用成人比例。",
     ...(face ? [faceLines(face, character)] : []),
     outfitLines({ character, costume, keepOutfit, face }),
@@ -92,7 +122,9 @@ export function composePrompt({ character, poses, extraPrompt = "", keepOutfit =
     const camera = ANGLE_NOTE[pose.angle] ?? pose.angle
     lines.push(`${index + 1}. ${pose.name}。分类：${pose.category}。体系：${pose.system}。视角：${pose.angle}（${camera}）。`)
     if (pose.people > 1) {
-      lines.push("   这是双人姿势。人数和相互位置必须匹配线稿。主角使用上面的角色；另一人画成服装完整的成年人物，面部从简。")
+      lines.push(character
+        ? "   这是双人姿势。人数和相互位置必须匹配线稿。主角使用上面的角色；另一人画成服装完整的成年人物，面部从简。"
+        : "   这是双人姿势。人数和相互位置必须匹配线稿。主角使用脸部参考的身份；另一人画成服装完整的成年人物，面部从简。")
     }
   })
   const note = String(extraPrompt).trim()
