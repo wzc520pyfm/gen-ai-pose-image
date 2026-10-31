@@ -1,4 +1,5 @@
-import { COSTUME_STYLE_LOCK, POSE_STYLE_LOCK } from "./custom.mjs"
+import { generateGhostCostume } from "./costume-ghost.mjs"
+import { POSE_STYLE_LOCK } from "./custom.mjs"
 import { fetchCostumeBytes } from "./costumes.mjs"
 import { generateImage } from "./generate.mjs"
 import { modelImage } from "./jobs.mjs"
@@ -10,10 +11,10 @@ export const POSE_STYLE_PATHS = Object.freeze([
   "img/full_single_P001_front.png",
 ])
 
-/** Fixed clothing-only flat lays from the costume gallery. */
+/** Catalog plates for the wear step: stance, drape, and studio framing. */
 export const COSTUME_STYLE_PATHS = Object.freeze([
-  "png/SPR-0001.png",
-  "png/SUM-0001.png",
+  "png/SUM-0174.png",
+  "png/AUT-0010.png",
 ])
 
 export function stylePaths(kind) {
@@ -88,21 +89,41 @@ function withStyleLock(prompt, lock) {
   return `${text.slice(0, room)}\n${lock}`
 }
 
+function referenceResult(image) {
+  return {
+    mediaType: image.mediaType,
+    buffer: image.buffer,
+    referencesSent: image.referencesSent,
+    warning: typeof image.warning === "string" ? image.warning : "",
+  }
+}
+
 export async function generateStyledReference(input = {}) {
   const kind = input.kind === "pose" || input.kind === "costume" ? input.kind : ""
   if (!kind) throw new Error("需要说明是姿势还是服装")
+  if (kind === "costume") {
+    const run = input.generateGhostCostume ?? generateGhostCostume
+    let poseRefs = Array.isArray(input.poseRefs) ? input.poseRefs : null
+    if (!poseRefs) {
+      try {
+        poseRefs = await loadStyleRefs("costume", input)
+      } catch {
+        poseRefs = []
+      }
+    }
+    return referenceResult(await run({ ...input, poseRefs }))
+  }
   const images = await loadStyleRefs(kind, input)
-  const lock = kind === "pose" ? POSE_STYLE_LOCK : COSTUME_STYLE_LOCK
   const generate = input.generate ?? generateImage
-  return generate({
+  return referenceResult(await generate({
     provider: input.provider,
     apiKey: input.apiKey,
     baseURL: input.baseURL ?? "",
     model: input.model,
-    prompt: withStyleLock(input.prompt, lock),
+    prompt: withStyleLock(input.prompt, POSE_STYLE_LOCK),
     images,
     aspectRatio: input.aspectRatio,
     signal: input.signal,
     allowReferenceFallback: false,
-  })
+  }))
 }

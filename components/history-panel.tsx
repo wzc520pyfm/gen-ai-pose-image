@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button"
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import type { HistoryEntry } from "@/lib/library"
 
-export type HistoryView = Pick<HistoryEntry, "id" | "createdAt" | "title" | "prompt" | "extraPrompt" | "provider" | "model" | "aspectRatio" | "mode" | "keepOutfit" | "costume" | "selection"> & {
+export type HistoryView = Pick<HistoryEntry, "id" | "createdAt" | "title" | "prompt" | "extraPrompt" | "provider" | "model" | "aspectRatio" | "mode" | "keepOutfit" | "costume" | "face" | "selection"> & {
   thumbUrl: string
 }
 
@@ -56,7 +56,7 @@ export function HistoryPanel({
               </DialogHeader>
               <img src={current.thumbUrl} alt={current.title} className="w-full rounded-xl bg-[#f7f4ee] object-contain" />
               <p className="text-xs leading-5 text-muted-foreground">
-                {current.provider} · {current.aspectRatio} · {current.mode === "sheet" ? "拼图" : "逐张"} · {current.costume ? `换成 ${current.costume.id}` : current.keepOutfit ? "保持服装" : "允许换衣服"}
+                {current.provider} · {current.aspectRatio} · {current.mode === "sheet" ? "拼图" : "逐张"} · {current.face ? `脸部 ${current.face.id}` : "保持原脸"} · {current.costume ? `换成 ${current.costume.id}` : current.keepOutfit ? "保持服装" : "允许换衣服"}
                 {current.model ? ` · ${current.model}` : ""}
               </p>
               {current.selection.length > 0 ? (

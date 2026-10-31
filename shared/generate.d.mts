@@ -17,4 +17,25 @@ export function generateImage(input: {
   signal?: AbortSignal
   fetchImpl?: typeof fetch
   allowReferenceFallback?: boolean
+  watermark?: boolean
+  timeoutMs?: number
 }): Promise<{ mediaType: string; buffer: Buffer; referencesSent: boolean; warning?: string; model: string }>
+
+export function parseSeedreamLayers(payload: unknown): {
+  base: { zIndex: number; name: string; description: string; absolute: number[] | null; normalized: number[] | null; url: string; base64: string; mediaType: string }
+  layers: Array<{ zIndex: number; name: string; description: string; absolute: number[] | null; normalized: number[] | null; url: string; base64: string; mediaType: string }>
+}
+
+export function decomposeSeedreamImage(input: {
+  apiKey: string
+  baseURL?: string
+  model?: string
+  prompt?: string
+  image: { mediaType?: string; buffer: Buffer }
+  signal?: AbortSignal
+  fetchImpl?: typeof fetch
+  timeoutMs?: number
+}): Promise<{
+  base: { buffer: Buffer; mediaType: string }
+  layers: Array<{ zIndex: number; name: string; description: string; absolute: number[] | null; normalized: number[] | null; buffer: Buffer; mediaType: string }>
+}>

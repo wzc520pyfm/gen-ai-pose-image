@@ -8,6 +8,7 @@ import { characterForBuiltin, characterFromUploads } from "./character.mjs"
 import { resolveView } from "./catalog.mjs"
 import { isCustomCostumeId, isCustomPoseId, missingCustomCostumeMessage, missingCustomPoseMessage } from "./custom.mjs"
 import { costumeFile, fetchCostumeBytes, getCostume } from "./costumes.mjs"
+import { faceFile, fetchFaceBytes, getFace } from "./faces.mjs"
 import { assertBaseURL, defaultModel, generateImage } from "./generate.mjs"
 import { fetchPoseBytes } from "./poses.mjs"
 import { composePrompt } from "./prompt.mjs"
@@ -178,8 +179,24 @@ async function costumeReferences(plan, fetchCostume) {
   return [await modelImage(await fetchCostume(costumeFile(plan.costume, "preview")))]
 }
 
+function planFace(faceId) {
+  if (!faceId) return null
+  const face = getFace(faceId)
+  if (!face) throw new Error(`找不到脸部参考 ${faceId}`)
+  return face
+}
+
+async function faceReferences(plan, fetchFace) {
+  if (!plan.face) return []
+  return [await modelImage(await fetchFace(faceFile(plan.face, "full")))]
+}
+
+export function referenceImages({ characterImages, faceImages = [], costumeImages = [], poseImages = [] }) {
+  return [...characterImages, ...faceImages, ...costumeImages, ...poseImages]
+}
+
 export function planRequest(input = {}) {
-  if (input.engine === "comfyui") throw new Error("不再支持服务端执行 ComfyUI，请使用新版网页直接连接。")
+  if (input.engine === "comfyui") throw new Error("ComfyUI 不再支持服务端执行，请使用新版网页的浏览器直连。")
   const provider = input.provider === "openai" || input.provider === "gemini" || input.provider === "seedream" ? input.provider : null
   if (!provider) throw new Error("不支持的生图接口")
   const mode = input.mode === "sheet" ? "sheet" : "each"
@@ -198,15 +215,19 @@ export function planRequest(input = {}) {
   const character = characterCount > 0 ? characterFromUploads(characterCount) : characterForBuiltin(builtinModelId)
   const costumeId = typeof input.costumeId === "string" ? input.costumeId.trim() : ""
   const costume = planCostume(costumeId, input)
+  const faceId = typeof input.faceId === "string" ? input.faceId.trim() : ""
+  const face = planFace(faceId)
   const keepOutfit = costume ? false : input.keepOutfit !== false
   const extraPrompt = typeof input.extraPrompt === "string" ? input.extraPrompt.replace(/[^\S\n]+/g, " ").trim().slice(0, 2000) : ""
   const aspectRatio = ASPECTS.has(input.aspectRatio) ? input.aspectRatio : "3:4"
   const costumePrompt = costume ? { id: costume.id, keywords: costume.keywords } : null
-  const sheetPrompt = composePrompt({ character, poses: items.map((item) => item.pose), extraPrompt, keepOutfit, mode: "sheet", costume: costumePrompt })
+  const facePrompt = face ? { id: face.id, section: face.section, hair: face.hair, label: face.label, keywords: face.keywords } : null
+  const promptInput = { character, extraPrompt, keepOutfit, costume: costumePrompt, face: facePrompt, characterCount: characterCount || 1 }
+  const sheetPrompt = composePrompt({ ...promptInput, poses: items.map((item) => item.pose).filter(Boolean), mode: "sheet" })
   for (const item of items) {
     item.prompt = mode === "sheet"
       ? sheetPrompt
-      : composePrompt({ character, poses: [item.pose], extraPrompt, keepOutfit, mode: "each", costume: costumePrompt })
+      : composePrompt({ ...promptInput, poses: [item.pose].filter(Boolean), mode: "each" })
   }
   const modelText = typeof input.model === "string" ? input.model.trim() : ""
   if (modelText.length > 120) throw new Error("模型名过长")
@@ -220,8 +241,10 @@ export function planRequest(input = {}) {
     character,
     builtinModelId,
     costume,
+    face,
     items,
     uploads,
+    extraPrompt,
     sheetPrompt,
   }
 }
@@ -249,7 +272,9 @@ export async function runGeneration(input, deps = {}) {
   const generate = deps.generate ?? generateImage
   const characterImages = await resolveCharacterImages(plan)
   const fetchCostume = deps.fetchCostume ?? fetchCostumeBytes
+  const fetchFace = deps.fetchFace ?? fetchFaceBytes
   const costumeImages = await costumeReferences(plan, fetchCostume)
+  const faceImages = await faceReferences(plan, fetchFace)
   const signal = deps.signal
   if (plan.mode === "sheet") {
     const poseImages = []
@@ -260,7 +285,7 @@ export async function runGeneration(input, deps = {}) {
       baseURL: plan.baseURL,
       model: plan.model,
       prompt: plan.sheetPrompt,
-      images: [...characterImages, ...costumeImages, ...poseImages],
+      images: referenceImages({ characterImages, faceImages, costumeImages, poseImages }),
       aspectRatio: plan.aspectRatio,
       signal,
     })
@@ -288,7 +313,7 @@ export async function runGeneration(input, deps = {}) {
         baseURL: plan.baseURL,
         model: plan.model,
         prompt: item.prompt,
-        images: [...characterImages, ...costumeImages, poseImage],
+        images: referenceImages({ characterImages, faceImages, costumeImages, poseImages: [poseImage] }),
         aspectRatio: plan.aspectRatio,
         signal,
       })

@@ -38,6 +38,7 @@ export type HistoryEntry = {
   mode: string
   keepOutfit: boolean
   costume: { id: string; label: string; keywords: string } | null
+  face?: { id: string; section: string; hair: string; label: string; keywords: string } | null
   selection: HistorySelection[]
   mediaType: string
   image: Blob

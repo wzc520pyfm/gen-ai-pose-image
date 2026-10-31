@@ -7,7 +7,8 @@ import type { AspectRatio, CharacterImageInput, GeneratedResult, GenerateMode } 
 
 export type ComfyItem = { viewId: string; title: string; pose: ComfyPose | null }
 type Costume = { id: string; label: string; keywords: string } | null
-type PromptInput = { items: ComfyItem[]; costume: Costume; extraPrompt: string; keepOutfit: boolean; characterCount: number; mode: GenerateMode }
+type Face = { id: string; section: string; hair: string; label: string; keywords: string } | null
+type PromptInput = { items: ComfyItem[]; costume: Costume; face?: Face; extraPrompt: string; keepOutfit: boolean; characterCount: number; mode: GenerateMode }
 
 export function comfyPromptCards(input: PromptInput) {
   const cards = input.items.map((item) => {
@@ -98,6 +99,7 @@ export async function requestComfyGenerate(basePath: string, settings: StudioSet
   const characters = await Promise.all(sources.map((blob) => prepareComfyImage(blob, input.aspectRatio)))
   const customGarment = input.customReferences.costumes.find((c) => c.id === input.costume?.id)
   const garment = input.costume ? await prepareComfyImage(customGarment ? wireImage(customGarment) : await publicImage(`/api/costume-image?id=${encodeURIComponent(input.costume.id)}&size=preview`)) : undefined
+  const faceImage = input.face ? await prepareComfyImage(await publicImage(`/api/face-image?id=${encodeURIComponent(input.face.id)}&size=full`)) : undefined
   const key = input.mode === "sheet" && input.localRunId ? Array.from(new Uint8Array(await crypto.subtle.digest("SHA-256", new TextEncoder().encode(JSON.stringify({ input, url, token: settings.comfyuiToken }))))).map((n) => n.toString(16).padStart(2, "0")).join("") : ""
   const cells = key ? sheetCache.cells(key) : new Map<string, Blob>()
   const cards = comfyPromptCards({ ...input, mode: "each", characterCount: characters.length })
@@ -111,7 +113,7 @@ export async function requestComfyGenerate(basePath: string, settings: StudioSet
       if (!image) {
         const customPose = input.customReferences.poses.find((p) => p.id === item.viewId)
         const poseImage = item.pose ? await prepareComfyImage(customPose ? wireImage(customPose) : await publicImage(`/api/pose-image?id=${encodeURIComponent(item.viewId)}&size=full`)) : undefined
-        image = await prepareComfyImage(await generateComfyTask({ url, token: settings.comfyuiToken, characters, garment, poseImage, pose: item.pose, costume: input.costume, aspectRatio: input.aspectRatio, extraPrompt: input.extraPrompt, keepOutfit: input.keepOutfit, signal }))
+        image = await prepareComfyImage(await generateComfyTask({ url, token: settings.comfyuiToken, characters, garment, poseImage, faceImage, face: input.face, pose: item.pose, costume: input.costume, aspectRatio: input.aspectRatio, extraPrompt: input.extraPrompt, keepOutfit: input.keepOutfit, signal }))
         cells.set(item.viewId, image)
       }
       images.push(image)

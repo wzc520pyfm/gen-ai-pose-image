@@ -49,6 +49,8 @@ test("prompt locks the adult default character and the chosen pose", () => {
   assert.match(text, /禁止画成儿童/)
   assert.match(text, /后仰坐・单膝立起/)
   assert.match(text, /必须保留角色参考图中的服装/)
+  assert.match(text, /完整日常外衣/)
+  assert.doesNotMatch(text, /裸体|裸露|内衣|性暗示|色情/)
   const changed = composePrompt({
     character: DEFAULT_CHARACTER,
     poses: [{ name: "双人", category: "贴脸系", system: "双人缠绵", angle: "侧面", people: 2 }],
@@ -182,7 +184,8 @@ test("the browser module id matches the npm package name", () => {
 test("tool output schemas declare whether extra fields are allowed", () => {
   const source = readFileSync(new URL("../plugin/index.mjs", import.meta.url), "utf8")
   const schemas = [...source.matchAll(/schema:\s*\{([^}]+)\}/g)].map((match) => match[1])
-  assert.equal(schemas.length, 3)
+  assert.match(source, /name: "search_faces"/)
+  assert.equal(schemas.length, 4)
   for (const schema of schemas) {
     assert.match(schema, /type:\s*"object"/)
     assert.match(schema, /additionalProperties:\s*true/)

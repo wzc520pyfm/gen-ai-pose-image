@@ -48,6 +48,7 @@ export function CustomReferencePanel({
   settings,
   hasKey,
   syncWarning,
+  onChangeSettings,
 }: {
   kind: "pose" | "costume"
   items: CustomCard[]
@@ -61,6 +62,7 @@ export function CustomReferencePanel({
   settings: StudioSettings
   hasKey: boolean
   syncWarning: string
+  onChangeSettings?: (settings: StudioSettings) => void
 }) {
   const { basePath } = useStudioEnv()
   const fileRef = useRef<HTMLInputElement>(null)
@@ -75,7 +77,8 @@ export function CustomReferencePanel({
   const [previewBlob, setPreviewBlob] = useState<Blob | null>(null)
   const [previewUrl, setPreviewUrl] = useState("")
   const [busy, setBusy] = useState("")
-  const waited = useElapsedSeconds(busy === "正在生成参考图" || busy === "正在扩写提示词")
+  const generateBusy = "正在生成"
+  const waited = useElapsedSeconds(busy === generateBusy || busy === "正在扩写提示词")
   const [error, setError] = useState("")
   const [pendingDelete, setPendingDelete] = useState<string | null>(null)
   const noun = kind === "pose" ? "姿势" : "服装"
@@ -103,7 +106,7 @@ export function CustomReferencePanel({
     setBusy("")
   }
 
-  async function fillPrompt(userPrompt: string, allowAdult: boolean) {
+  async function fillPrompt(userPrompt: string, allowAdult: boolean, optimize = settings.sensitivePromptOptimize) {
     setBusy("正在扩写提示词")
     setError("")
     const result = await requestBeautify(basePath, settings, {
@@ -111,6 +114,7 @@ export function CustomReferencePanel({
       userPrompt,
       adult: allowAdult,
       hasKey,
+      sensitivePromptOptimize: optimize,
     })
     if (!editedRef.current) {
       setPrompt(result.prompt)
@@ -153,12 +157,13 @@ export function CustomReferencePanel({
         : "没有密钥，不能生成参考图。提示词可以复制。")
       return
     }
-    setBusy("正在生成参考图")
+    setBusy(generateBusy)
     setError("")
     try {
       const image = await requestReferenceImage(basePath, settings, text, kind)
       const blob = await fileToJpegBlob(base64ToBlob(image.imageBase64, image.mediaType))
       setPreviewBlob(blob)
+      if (image.warning) setNotice(image.warning)
       if (!label.trim()) setLabel(description.trim().slice(0, 80) || (kind === "pose" ? "自定义姿势" : "自定义服装"))
     } catch (cause) {
       setError(cause instanceof Error ? cause.message : "参考图没有生成")
@@ -199,7 +204,7 @@ export function CustomReferencePanel({
       <p className="mb-3 text-sm leading-6 text-muted-foreground">
         {kind === "pose"
           ? "自定义姿势只存在这台浏览器。上传或生成的图会当作姿势参考，出图顺序仍是角色、服装、姿势。"
-          : "自定义服装只存在这台浏览器。生成时会偏向没有人物的平铺衣服。"}
+          : "自定义服装只存在这台浏览器。上传或生成的图会当作服装参考。"}
       </p>
       <div className="mb-3 flex flex-wrap gap-2">
         <Button type="button" variant="outline" size="sm" onClick={() => openDialog("upload")}>上传</Button>
@@ -262,7 +267,7 @@ export function CustomReferencePanel({
             <DialogDescription>
               {kind === "pose"
                 ? "姿势参考偏向白底线稿，只表达身体姿态。确认之后才会放进自定义库。"
-                : "服装参考偏向没有人物的平铺衣服。确认之后才会放进自定义库。"}
+                : "按描述生成一套服装参考。确认之后才会放进自定义库。"}
             </DialogDescription>
           </DialogHeader>
           {mode === "upload" ? (
@@ -316,6 +321,22 @@ export function CustomReferencePanel({
             </label>
           ) : null}
           {notice ? <p className="text-xs leading-5 text-muted-foreground">{notice}</p> : null}
+          {kind === "costume" && onChangeSettings ? (
+            <label className="flex items-center justify-between gap-3 rounded-xl bg-muted px-3 py-3 text-sm">
+              <span>
+                <span className="block font-medium">违禁词优化</span>
+                <span className="mt-1 block text-xs leading-5 text-muted-foreground">关闭时直接写不要头、不要腿、不要皮肤。打开后改成委婉说法，避开审核敏感词。切换后会按当前描述重新扩写。</span>
+              </span>
+              <Switch
+                checked={settings.sensitivePromptOptimize}
+                onCheckedChange={(value) => {
+                  onChangeSettings({ ...settings, sensitivePromptOptimize: value })
+                  if (mode !== "upload" && !editedRef.current) void fillPrompt(description, showAdult && adult, value)
+                }}
+                aria-label="违禁词优化"
+              />
+            </label>
+          ) : null}
           {showAdult ? (
             <label className="flex items-center justify-between gap-3 rounded-xl bg-muted px-3 py-3 text-sm">
               <span>标成成人向参考。默认关闭，未打开成人向时不会用来出图。</span>
@@ -339,7 +360,7 @@ export function CustomReferencePanel({
             {mode !== "upload" ? (
               <>
                 <Button type="button" variant="outline" disabled={!prompt.trim()} onClick={() => void navigator.clipboard.writeText(prompt)}>复制提示词</Button>
-                <Button type="button" variant="outline" disabled={Boolean(busy)} onClick={() => void generateImage()}>{busy === "正在生成参考图" ? withElapsed(busy, waited) : "生成参考图"}</Button>
+                <Button type="button" variant="outline" disabled={Boolean(busy)} onClick={() => void generateImage()}>{busy === generateBusy ? withElapsed(busy, waited) : "生成参考图"}</Button>
               </>
             ) : null}
             <Button type="button" disabled={Boolean(busy) || !previewBlob} onClick={() => void save()}>{busy === "正在保存" ? busy : "保存到自定义"}</Button>

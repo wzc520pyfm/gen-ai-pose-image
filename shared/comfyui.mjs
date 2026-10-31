@@ -5,7 +5,17 @@ export function dimensions(aspect = "3:4") {
   return sizes[aspect] || sizes["3:4"]
 }
 
-export function localPrompts({ pose, costume, extraPrompt = "", characterCount = 1, keepOutfit = true }) {
+function faceSlot(characterCount, costume) {
+  return Math.max(1, Number(characterCount) || 1) + (costume ? 4 : 3)
+}
+
+function applyFacePrompt(text, face, index) {
+  const label = [face.section, face.hair, face.label].filter(Boolean).join(", ")
+  const line = `Use <image${index}> as the only face, expression, bone structure and hairstyle reference${face.id ? ` (${face.id}${label ? `, ${label}` : ""})` : ""}. Keep non-face identity markers from the character references, including whale ears and a whale tail when the character has them. Do not copy clothes, body, or background from <image${index}>.`
+  return `${text} ${line}`
+}
+
+export function localPrompts({ pose, costume, face = null, extraPrompt = "", characterCount = 1, keepOutfit = true }) {
   const people = pose?.people > 1 ? "exactly two adult people, matching their positions and interaction in the pose reference; the main person matches the identity references, the other person is fully clothed" : "exactly one adult person, a single subject, no duplicate people"
   const action = pose ? `${pose.name}; ${pose.angle}; ${pose.category}` : "keep the original pose and framing"
   const half = pose?.system?.includes("半身")
@@ -21,6 +31,32 @@ export function localPrompts({ pose, costume, extraPrompt = "", characterCount =
         : `Create a full-body portrait of ${people}. Use <image1> only for body pose and framing: ${action}. The face, identity, skin tone and hairstyle must match <image2>, not <image1>. Replace clothing on <image1> with the same outfit worn by the person in <image3>, matching the clothing, colors, fabric, sleeves and neckline. Do not copy clothes from <image1>. If the lower body is not visible in <image3>, add opaque full-length trousers or a long skirt appropriate to the outfit. Fully clothed. ${identity} Entire body and feet visible, natural anatomy. No collage, no text. ${extraPrompt}`,
   }
   if (!costume && !keepOutfit) prompts.final = `Create one image of ${people}, ${framing}. Use ${half ? "<image2>" : "<image1>"} only for the body pose: ${action}. Preserve the face, hair and identity from ${half ? "<image1>" : "<image2>"}. You may change the clothes according to the following description, keeping every person fully clothed in opaque clothing. ${identity} No collage, no text. ${extraPrompt}`
+  if (face) {
+    const index = faceSlot(characterCount, costume)
+    if (costume) {
+      prompts.final = prompts.final.replace(
+        "The main person's face and identity must precisely match the original in <image4>.",
+        "Keep identity markers such as ears, horns, or a tail from the character references.",
+      )
+    } else if (!keepOutfit) {
+      prompts.final = prompts.final.replace(
+        `Preserve the face, hair and identity from ${half ? "<image1>" : "<image2>"}.`,
+        "Preserve non-face identity markers from the character references.",
+      )
+    } else if (half) {
+      prompts.final = prompts.final.replace(
+        "Her face, facial features, hair, skin tone and visible clothes must precisely match <image1> and <image3>.",
+        "Skin tone and visible clothes must match the character references.",
+      )
+    } else {
+      prompts.final = prompts.final.replace(
+        "The face, identity, skin tone and hairstyle must match <image2>, not <image1>.",
+        "Skin tone and non-face identity markers must match the character references, not <image1>.",
+      )
+    }
+    prompts.outfit = `${prompts.outfit} Keep the original face for this clothing edit; the face reference is applied in the final image.`
+    prompts.final = applyFacePrompt(prompts.final, face, index)
+  }
   return prompts
 }
 
@@ -58,7 +94,7 @@ export function activeGraph(source, output) {
   return result
 }
 
-export async function buildLocalGraph({ files, pose, costume, aspectRatio, seed = 42, extraPrompt = "", keepOutfit = true, prefix = "tryon/lanpose" }) {
+export async function buildLocalGraph({ files, pose, costume, face = null, aspectRatio, seed = 42, extraPrompt = "", keepOutfit = true, prefix = "tryon/lanpose" }) {
   if (!pose && !costume) throw new Error("至少启用换装或姿势。")
   const { graph, mapping: m } = structuredClone(workflow)
   const set = (slot, value) => { const [id, key] = slot; graph[id].inputs[key] = value }
@@ -67,7 +103,7 @@ export async function buildLocalGraph({ files, pose, costume, aspectRatio, seed 
   set(m.pose, files.pose || files.characters[0])
   for (const slot of m.outfitSwitches) set(slot, Boolean(costume))
   set(m.poseSwitch, Boolean(pose))
-  const prompts = localPrompts({ pose, costume, extraPrompt, characterCount: files.characters.length, keepOutfit })
+  const prompts = localPrompts({ pose, costume, face, extraPrompt, characterCount: files.characters.length, keepOutfit })
   set(m.outfitPrompt, prompts.outfit)
   set(m.posePrompt, prompts.scaffold)
   set(m.finalPrompt, prompts.final)
@@ -90,6 +126,11 @@ export async function buildLocalGraph({ files, pose, costume, aspectRatio, seed 
     graph[id] = { class_type: "LoadImage", inputs: { image: files.characters[i] } }
     graph[m.outfitPrompt[0]].inputs[`images.image_${i + 2}`] = [id, 0]
     graph[m.finalPrompt[0]].inputs[`images.image_${i + (costume ? 4 : 3)}`] = [id, 0]
+  }
+  if (files.face) {
+    const slot = faceSlot(files.characters.length, costume)
+    graph["510"] = { class_type: "LoadImage", inputs: { image: files.face } }
+    graph[m.finalPrompt[0]].inputs[`images.image_${slot}`] = ["510", 0]
   }
   return { graph: activeGraph(graph, m.output), output: String(m.output), prompts }
 }
