@@ -114,6 +114,7 @@ function StudioFrame({ embedded }: { embedded: boolean }) {
   const clearRequestedSystem = useCallback(() => setRequestedSystem(null), [])
   const clearCostumeFocus = useCallback(() => setCostumeFocus(null), [])
   const abortRef = useRef<AbortController | null>(null)
+  const localRetry = useRef("")
 
   const loadCatalog = useCallback(() => {
     setLoading(true)
@@ -369,20 +370,21 @@ function StudioFrame({ embedded }: { embedded: boolean }) {
   const selectionKey = chosen.map((item) => item.viewId).join("|")
 
   useEffect(() => {
-    if (!selectionKey) {
+    if (!selectionKey && !(settings.engine === "comfyui" && costume?.id)) {
       setPrompts([])
       setPromptError("")
       return
     }
     const controller = new AbortController()
     const timer = window.setTimeout(() => {
-      const viewIds = selectionKey.split("|")
+      const viewIds = selectionKey ? selectionKey.split("|") : []
       void customReferenceBody(viewIds, costume?.id ?? "", customPoses, customCostumes).then((customReferences) => {
         if (controller.signal.aborted) return
         return fetch(studioUrl(basePath, "/api/prompt"), {
         method: "POST",
         headers: { "content-type": "application/json" },
         body: JSON.stringify({
+          engine: settings.engine,
           provider: settings.provider,
           mode: settings.mode,
           viewIds,
@@ -411,7 +413,7 @@ function StudioFrame({ embedded }: { embedded: boolean }) {
       window.clearTimeout(timer)
       controller.abort()
     }
-  }, [basePath, selectionKey, extraPrompt, characters.length, activeModelId, costume?.id, settings.provider, settings.mode, settings.keepOutfit, customPoses, customCostumes])
+  }, [basePath, selectionKey, extraPrompt, characters.length, activeModelId, costume?.id, settings.engine, settings.provider, settings.mode, settings.keepOutfit, customPoses, customCostumes])
 
   function togglePose(pose: Pose, view: PoseView) {
     if (selected[pose.id] === view.id) {
@@ -473,14 +475,14 @@ function StudioFrame({ embedded }: { embedded: boolean }) {
   }
 
   async function generate() {
-    if (!settings.apiKey.trim() && !serverKey) {
+    if (settings.engine !== "comfyui" && !settings.apiKey.trim() && !serverKey) {
       setSettingsOpen(true)
       setRunError("先在设置里填写 API Key。")
       setSheetOpen(true)
       return
     }
     const viewIds = chosen.map((item) => item.viewId)
-    if (viewIds.length === 0) return
+    if (viewIds.length === 0 && !(settings.engine === "comfyui" && costume)) return
     const controller = new AbortController()
     abortRef.current = controller
     setRunning(true)
@@ -488,9 +490,10 @@ function StudioFrame({ embedded }: { embedded: boolean }) {
     setResults([])
     const costumePick = costume ? { id: costume.id, label: costume.label, keywords: costume.keywords } : null
     const bodyBase = {
+      engine: settings.engine,
       provider: settings.provider,
-      apiKey: settings.apiKey,
-      baseURL: settings.baseURL,
+      apiKey: settings.engine === "comfyui" ? "" : settings.apiKey,
+      baseURL: settings.engine === "comfyui" ? "" : settings.baseURL,
       model: settings.model,
       aspectRatio: settings.aspectRatio,
       keepOutfit: settings.keepOutfit,
@@ -501,18 +504,20 @@ function StudioFrame({ embedded }: { embedded: boolean }) {
     }
     const snapshotBase = {
       extraPrompt,
-      provider: settings.provider,
-      model: settings.model,
+      provider: settings.engine === "comfyui" ? "comfyui" : settings.provider,
+      model: settings.engine === "comfyui" ? "统一换装与姿势工作流" : settings.model,
       aspectRatio: settings.aspectRatio,
       mode: settings.mode,
       keepOutfit: costume ? false : settings.keepOutfit,
       costume: costumePick,
     }
     try {
-      if (settings.mode === "sheet") {
-        setProgress("正在画姿势拼图")
+      if (settings.mode === "sheet" || chosen.length === 0) {
+        setProgress(chosen.length === 0 ? "正在本机换装" : settings.engine === "comfyui" ? "正在逐格生成姿势拼图" : "正在画姿势拼图")
         const customReferences = await customReferenceBody(viewIds, costume?.id ?? "", customPoses, customCostumes)
-        const batch = await requestGenerate(basePath, { ...bodyBase, mode: "sheet", viewIds, customReferences }, controller.signal)
+        const localRunId = localRetry.current || crypto.randomUUID()
+        const batch = await requestGenerate(basePath, { ...bodyBase, mode: settings.mode, viewIds, customReferences, localRunId }, controller.signal)
+        localRetry.current = settings.engine === "comfyui" && batch.some((item) => !item.ok) ? localRunId : ""
         setResults(batch)
         await rememberResults(batch, { ...snapshotBase, selection: chosen })
       } else {
@@ -564,7 +569,7 @@ function StudioFrame({ embedded }: { embedded: boolean }) {
           mode: snapshot.mode,
           keepOutfit: snapshot.keepOutfit,
           costume: snapshot.costume,
-          selection: snapshot.selection,
+          selection: result.viewId && !result.viewId.includes(",") ? snapshot.selection.filter((item) => item.viewId === result.viewId) : snapshot.selection,
           mediaType: "image/jpeg",
           image,
         }
@@ -621,6 +626,7 @@ function StudioFrame({ embedded }: { embedded: boolean }) {
   }
 
   function reuse(entry: HistoryView) {
+    updateSettings({ ...settings, engine: entry.provider === "comfyui" ? "comfyui" : "cloud" })
     const restored = reuseFromHistory(entry)
     const missingPose = entry.selection.some((item) => !poseById.has(item.poseId))
     const missingCostume = Boolean(restored.costume && isCustomCostumeId(restored.costume.id) && !customCostumes.some((item) => item.id === restored.costume?.id))
@@ -676,13 +682,14 @@ function StudioFrame({ embedded }: { embedded: boolean }) {
       characters={characters}
       extraPrompt={extraPrompt}
       onExtraPrompt={setExtraPrompt}
-      providerLabel={settings.provider === "seedream" ? "Seedream" : settings.provider === "openai" ? "OpenAI" : "Gemini"}
+      localMode={settings.engine === "comfyui"}
+      providerLabel={settings.engine === "comfyui" ? "ComfyUI 本地" : settings.provider === "seedream" ? "Seedream" : settings.provider === "openai" ? "OpenAI" : "Gemini"}
       aspectRatio={settings.aspectRatio}
       mode={settings.mode}
       keepOutfit={settings.keepOutfit}
       costume={costume ? { ...costume, thumbSrc: costumeUrls[costume.id] } : null}
       onClearCostume={() => setCostume(null)}
-      hasKey={Boolean(settings.apiKey.trim()) || serverKey}
+      hasKey={settings.engine === "comfyui" || Boolean(settings.apiKey.trim()) || serverKey}
       running={running}
       progress={withElapsed(progress, waited)}
       runError={runError}
@@ -935,6 +942,7 @@ async function requestGenerate(basePath: string, body: unknown, signal: AbortSig
     throw new Error("生图失败")
   }
   return (payload.results ?? []).map((item, index) => ({
+    viewId: item.viewId,
     key: `${item.viewId}-${index}`,
     title: item.title,
     prompt: item.prompt,

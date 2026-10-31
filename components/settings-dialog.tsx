@@ -1,6 +1,6 @@
 "use client"
 
-import type { ReactNode } from "react"
+import { useState, type ReactNode } from "react"
 import { ExternalLink } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
@@ -11,6 +11,7 @@ import { Switch } from "@/components/ui/switch"
 import { textModelFor } from "@/shared/beautify.mjs"
 import { baseURLFor, modelFor, type StudioSettings } from "@/lib/settings"
 import { ASPECT_LABEL, ASPECT_RATIOS, type AspectRatio, type ProviderId } from "@/lib/types"
+import { studioUrl, useStudioEnv } from "@/lib/studio-env"
 
 export function SettingsDialog({
   open,
@@ -23,6 +24,19 @@ export function SettingsDialog({
   settings: StudioSettings
   onChange: (settings: StudioSettings) => void
 }) {
+  const { basePath } = useStudioEnv()
+  const [connection, setConnection] = useState("")
+  const [checking, setChecking] = useState(false)
+  async function checkConnection() {
+    setChecking(true)
+    setConnection("")
+    try {
+      const response = await fetch(studioUrl(basePath, "/api/comfyui"))
+      const body = await response.json() as { error?: string; workflow?: string }
+      setConnection(response.ok ? `已连接：${body.workflow}。节点和模型将在生成前检查。` : body.error || "连接失败")
+    } catch { setConnection("无法连接，请确认本机工作室和 ComfyUI 已启动。") }
+    finally { setChecking(false) }
+  }
   function patch(partial: Partial<StudioSettings>) {
     onChange({ ...settings, ...partial })
   }
@@ -46,6 +60,18 @@ export function SettingsDialog({
           <DialogDescription>密钥存在这台浏览器的本地存储里，不会写进仓库，也不会出现在提示词里。</DialogDescription>
         </DialogHeader>
         <div className="grid gap-4">
+          <div className="flex gap-2">
+            <Button variant={settings.engine === "cloud" ? "default" : "outline"} onClick={() => patch({ engine: "cloud" })}>云端生成</Button>
+            <Button variant={settings.engine === "comfyui" ? "default" : "outline"} onClick={() => patch({ engine: "comfyui" })}>ComfyUI 本地</Button>
+          </div>
+          {settings.engine === "comfyui" ? (
+            <div className="grid gap-2 rounded-xl bg-muted p-3 text-sm">
+              <p>统一换装与姿势工作流：选择服装、姿势或两者，网页自动切换分支。拼图逐格生成后排版，无需生图 API Key。</p>
+              <p className="text-xs leading-5 text-muted-foreground">请在同一台电脑启动工作室和 ComfyUI。服务需设置 LANPOSE_COMFYUI=1，默认连接 127.0.0.1:8188。人物和参考图会存入本机 ComfyUI 的 input，结果保存在 output。下方云端配置保留给文字润色及其他云端功能。</p>
+              <Button variant="outline" disabled={checking} onClick={() => void checkConnection()}>{checking ? "检查中…" : "测试本机连接"}</Button>
+              {connection ? <p role="status" className="text-xs leading-5">{connection}</p> : null}
+            </div>
+          ) : null}
           <div className="flex flex-wrap gap-2">
             <Button variant={settings.provider === "seedream" ? "default" : "outline"} onClick={() => chooseProvider("seedream")}>Seedream</Button>
             <Button variant={settings.provider === "gemini" ? "default" : "outline"} onClick={() => chooseProvider("gemini")}>Gemini</Button>

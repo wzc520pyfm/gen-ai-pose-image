@@ -2,6 +2,8 @@
 
 # 澜姿
 
+可选的 **ComfyUI 本地生成**：保留原工作室和云端功能，用一套带开关的工作流完成换装、换姿势、两者组合、双人姿势及逐格拼图。需要在同一电脑运行工作室和 ComfyUI，详见[启动与工作流说明](docs/comfyui-local.md)。
+
 DeepSeek Harness 插件，也是一个可以单独打开的姿势工作室。从 [ai-pose-gallery-zh](https://github.com/anhao/ai-pose-gallery-zh) 的 288 组、1439 张姿势线稿里选一个或多个姿势，生成同一位模特的图。
 
 默认模特是 **大肥鱼**：社区鲸鱼娘的成年形象，长波浪蓝发、鲸耳、蓝鲸尾，穿海军蓝与白色女仆装。参考图用的是 [TreapGoGo](https://github.com/TreapGoGo) 的 [deepseek-whale-girl](https://github.com/TreapGoGo/deepseek-whale-girl) 里的 `dafeiyu-mature-character-sheet.png`。可以导入最多三张别的模特照片，用来替换脸和衣服。姿势图只提供身体姿态，默认不会把线稿里的空白身体画进成图。

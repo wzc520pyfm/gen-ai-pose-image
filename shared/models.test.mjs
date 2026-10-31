@@ -37,7 +37,7 @@ test("character sheet prompt keeps the imported person and only borrows layout",
   assert.match(CHARACTER_SHEET_PROMPT, /第二张/)
   assert.match(CHARACTER_SHEET_PROMPT, /不要画成大肥鱼/)
   assert.match(CHARACTER_SHEET_PROMPT, /成人比例/)
-  assert.match(LAYOUT_SHEET_FILE, /public\/muse\/dafeiyu-sheet\.png$/)
+  assert.match(LAYOUT_SHEET_FILE.replaceAll("\\", "/"), /public\/muse\/dafeiyu-sheet\.png$/)
 })
 
 test("character sheet generation sends the user photo and the layout sheet", async () => {

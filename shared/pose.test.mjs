@@ -1,8 +1,6 @@
 import assert from "node:assert/strict"
-import { spawnSync } from "node:child_process"
-import { mkdtempSync, readFileSync, rmSync } from "node:fs"
-import { tmpdir } from "node:os"
-import { join } from "node:path"
+import { readFileSync } from "node:fs"
+import sharp from "sharp"
 import { test } from "node:test"
 import { DEFAULT_CHARACTER } from "./character.mjs"
 import { getCatalog, resolveView, searchPoses } from "./catalog.mjs"
@@ -130,25 +128,17 @@ test("a chosen costume replaces the locked outfit", () => {
 })
 
 test("webp costume references become jpeg before they are sent", async () => {
-  const dir = mkdtempSync(join(tmpdir(), "pose-muse-test-"))
-  try {
-    const source = join(dir, "swatch.webp")
-    const made = spawnSync("ffmpeg", ["-hide_banner", "-loglevel", "error", "-y", "-f", "lavfi", "-i", "color=c=red:s=16x16", "-frames:v", "1", source])
-    assert.equal(made.status, 0)
-    const converted = await modelImage({ mediaType: "image/webp", buffer: readFileSync(source), role: "costume" })
-    assert.equal(converted.mediaType, "image/jpeg")
-    assert.equal(converted.buffer[0], 0xff)
-    assert.equal(converted.buffer[1], 0xd8)
-    const png = Buffer.from([0x89, 0x50, 0x4e, 0x47])
-    const kept = await modelImage({ mediaType: "image/png", buffer: png, role: "character" })
-    assert.equal(kept.buffer, png)
-  } finally {
-    rmSync(dir, { recursive: true, force: true })
-  }
+  const buffer = await sharp({ create: { width: 16, height: 16, channels: 3, background: "red" } }).webp().toBuffer()
+  const converted = await modelImage({ mediaType: "image/webp", buffer, role: "costume" })
+  assert.equal(converted.mediaType, "image/jpeg")
+  assert.equal(converted.buffer[0], 0xff)
+  assert.equal(converted.buffer[1], 0xd8)
+  const png = Buffer.from([0x89, 0x50, 0x4e, 0x47])
+  assert.equal((await modelImage({ mediaType: "image/png", buffer: png, role: "character" })).buffer, png)
 })
 
 test("project license is MIT and names every outside source", () => {
-  const license = readFileSync(new URL("../LICENSE", import.meta.url), "utf8")
+  const license = readFileSync(new URL("../LICENSE", import.meta.url), "utf8").replaceAll("\r\n", "\n")
   assert.equal(PROJECT_LICENSE.spdx, "MIT")
   assert.match(license, /^MIT License/)
   assert.match(license, new RegExp(PROJECT_LICENSE.copyright.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")))

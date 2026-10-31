@@ -2,6 +2,8 @@
 
 # Lanpose
 
+Optional **local ComfyUI generation** preserves the existing studio and cloud providers. A unified workflow supports outfit edits, poses, combined edits, two-person poses, and sequential contact sheets. Run the studio server and ComfyUI on the same computer; see the [setup and workflow guide (Chinese)](docs/comfyui-local.md).
+
 A DeepSeek Harness plugin, and a pose studio you can open on its own. Pick one or more sketches from the 288 groups and 1,439 views in [ai-pose-gallery-zh](https://github.com/anhao/ai-pose-gallery-zh), then generate images of the same model.
 
 The default model is **Dafeiyu** (大肥鱼): an adult community whale-girl, with long wavy blue hair, whale ears, and a blue whale tail, wearing a navy-and-white maid outfit. The reference is `dafeiyu-mature-character-sheet.png` from [TreapGoGo](https://github.com/TreapGoGo)'s [deepseek-whale-girl](https://github.com/TreapGoGo/deepseek-whale-girl). You can import up to three other model photos to replace the face and clothes. Pose sketches supply body posture only. By default, the blank body in the sketch is not drawn into the result.

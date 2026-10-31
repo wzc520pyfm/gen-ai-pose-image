@@ -1,6 +1,7 @@
 import type { AspectRatio, GenerateMode, ProviderId } from "@/lib/types"
 
 export type StudioSettings = {
+  engine: "cloud" | "comfyui"
   provider: ProviderId
   apiKey: string
   baseURL: string
@@ -13,6 +14,7 @@ export type StudioSettings = {
 }
 
 export const DEFAULT_SETTINGS: StudioSettings = {
+  engine: "cloud",
   provider: "gemini",
   apiKey: "",
   baseURL: "",
@@ -36,6 +38,7 @@ export function loadSettings(): StudioSettings {
     const aspect = parsed.aspectRatio
     const aspectRatio = aspect === "1:1" || aspect === "3:4" || aspect === "4:3" || aspect === "9:16" || aspect === "16:9" ? aspect : "3:4"
     return {
+      engine: parsed.engine === "comfyui" ? "comfyui" : "cloud",
       provider,
       apiKey: typeof parsed.apiKey === "string" ? parsed.apiKey : "",
       baseURL: typeof parsed.baseURL === "string" ? parsed.baseURL : "",

@@ -47,12 +47,12 @@ var require_use_sync_external_store_shim_production = __commonJS({
       return x === y && (0 !== x || 1 / x === 1 / y) || x !== x && y !== y;
     }
     var objectIs = "function" === typeof Object.is ? Object.is : is;
-    var useState20 = React67.useState;
+    var useState21 = React67.useState;
     var useEffect16 = React67.useEffect;
     var useLayoutEffect2 = React67.useLayoutEffect;
     var useDebugValue2 = React67.useDebugValue;
     function useSyncExternalStore$2(subscribe, getSnapshot) {
-      var value = getSnapshot(), _useState = useState20({ inst: { value, getSnapshot } }), inst = _useState[0].inst, forceUpdate = _useState[1];
+      var value = getSnapshot(), _useState = useState21({ inst: { value, getSnapshot } }), inst = _useState[0].inst, forceUpdate = _useState[1];
       useLayoutEffect2(
         function() {
           inst.value = value;
@@ -192,11 +192,11 @@ __export(harness_entry_exports, {
   name: () => name
 });
 module.exports = __toCommonJS(harness_entry_exports);
-var import_react13 = require("react");
+var import_react14 = require("react");
 var import_react_dom = require("react-dom");
 
 // components/studio.tsx
-var import_react12 = require("react");
+var import_react13 = require("react");
 
 // lib/elapsed.ts
 var import_react = require("react");
@@ -10047,6 +10047,7 @@ var ASPECT_LABEL = {
 // components/composer.tsx
 var import_jsx_runtime24 = require("react/jsx-runtime");
 function Composer({
+  localMode = false,
   selected,
   onRemove,
   onClear,
@@ -10111,7 +10112,7 @@ function Composer({
       ] }),
       /* @__PURE__ */ (0, import_jsx_runtime24.jsx)("button", { type: "button", className: "px-1 text-xs text-muted-foreground", onClick: onClearCostume, "aria-label": `取消服装 ${costume.id}`, children: "取消" })
     ] }) : null,
-    selected.length === 0 ? /* @__PURE__ */ (0, import_jsx_runtime24.jsxs)("p", { className: "rounded-xl bg-muted px-3 py-4 text-sm leading-6 text-muted-foreground", children: [
+    selected.length === 0 && !(localMode && costume) ? /* @__PURE__ */ (0, import_jsx_runtime24.jsxs)("p", { className: "rounded-xl bg-muted px-3 py-4 text-sm leading-6 text-muted-foreground", children: [
       "从中间点选一个或多个姿势。每一张成图都会带上",
       characters.length ? "你导入的模特" : builtinName,
       "，只把身体换成对应的线稿姿势。要换衣服，先到「服装」里点一套。"
@@ -10140,7 +10141,7 @@ function Composer({
         costume.id
       ] }),
       /* @__PURE__ */ (0, import_jsx_runtime24.jsx)("img", { src: costumeThumb, alt: `${costume.id}，${costume.keywords}`, className: "mt-2 aspect-[2/3] max-h-48 rounded-lg bg-white object-contain" }),
-      /* @__PURE__ */ (0, import_jsx_runtime24.jsx)("p", { className: "mt-2 text-xs leading-5 text-muted-foreground", children: "还没选姿势。选好姿势后，角色会穿上这套衣服出图。" })
+      /* @__PURE__ */ (0, import_jsx_runtime24.jsx)("p", { className: "mt-2 text-xs leading-5 text-muted-foreground", children: localMode ? "未选择姿势，将保留人物原姿势，只更换服装。" : "还没选姿势。选好姿势后，角色会穿上这套衣服出图。" })
     ] }) : null,
     prompts.length > 0 ? /* @__PURE__ */ (0, import_jsx_runtime24.jsxs)("div", { className: "grid gap-2", children: [
       /* @__PURE__ */ (0, import_jsx_runtime24.jsxs)("div", { className: "flex items-center justify-between", children: [
@@ -10193,9 +10194,9 @@ ${item.prompt}`).join("\n\n")),
       " 个姿势。"
     ] }) : null,
     /* @__PURE__ */ (0, import_jsx_runtime24.jsxs)("div", { className: "flex gap-2", children: [
-      /* @__PURE__ */ (0, import_jsx_runtime24.jsxs)(Button3, { className: "h-11 flex-1", disabled: running || selected.length === 0 || selected.length > limit, onClick: onGenerate, children: [
+      /* @__PURE__ */ (0, import_jsx_runtime24.jsxs)(Button3, { className: "h-11 flex-1", disabled: running || selected.length === 0 && !(localMode && costume) || selected.length > limit, onClick: onGenerate, children: [
         running ? /* @__PURE__ */ (0, import_jsx_runtime24.jsx)(LoaderCircle, { className: "animate-spin" }) : /* @__PURE__ */ (0, import_jsx_runtime24.jsx)(Sparkles, {}),
-        running ? progress || "正在生图" : hasKey ? "按所选姿势生图" : "填写密钥后生图"
+        running ? progress || "正在生图" : hasKey ? localMode && selected.length === 0 ? "仅换装生图" : "按所选姿势生图" : "填写密钥后生图"
       ] }),
       running ? /* @__PURE__ */ (0, import_jsx_runtime24.jsx)(Button3, { variant: "outline", className: "h-11", onClick: onStop, children: "停止" }) : null
     ] }),
@@ -11352,6 +11353,9 @@ function PoseSkeleton() {
   return /* @__PURE__ */ (0, import_jsx_runtime27.jsx)("div", { className: "mb-4 grid grid-cols-2 gap-3 @min-[640px]/studio:grid-cols-3 @min-[1280px]/studio:grid-cols-4", children: Array.from({ length: 8 }, (_, index) => /* @__PURE__ */ (0, import_jsx_runtime27.jsx)("div", { className: "aspect-[3/4] animate-pulse rounded-2xl bg-muted" }, index)) });
 }
 
+// components/settings-dialog.tsx
+var import_react12 = require("react");
+
 // components/ui/label.tsx
 var import_jsx_runtime28 = require("react/jsx-runtime");
 function Label({ className, ...props }) {
@@ -11379,6 +11383,7 @@ function textModelFor(provider, textModel) {
 
 // lib/settings.ts
 var DEFAULT_SETTINGS = {
+  engine: "cloud",
   provider: "gemini",
   apiKey: "",
   baseURL: "",
@@ -11400,6 +11405,7 @@ function loadSettings() {
     const aspect = parsed.aspectRatio;
     const aspectRatio = aspect === "1:1" || aspect === "3:4" || aspect === "4:3" || aspect === "9:16" || aspect === "16:9" ? aspect : "3:4";
     return {
+      engine: parsed.engine === "comfyui" ? "comfyui" : "cloud",
       provider,
       apiKey: typeof parsed.apiKey === "string" ? parsed.apiKey : "",
       baseURL: typeof parsed.baseURL === "string" ? parsed.baseURL : "",
@@ -11436,6 +11442,22 @@ function SettingsDialog({
   settings,
   onChange
 }) {
+  const { basePath } = useStudioEnv();
+  const [connection, setConnection] = (0, import_react12.useState)("");
+  const [checking, setChecking] = (0, import_react12.useState)(false);
+  async function checkConnection() {
+    setChecking(true);
+    setConnection("");
+    try {
+      const response = await fetch(studioUrl(basePath, "/api/comfyui"));
+      const body = await response.json();
+      setConnection(response.ok ? `已连接：${body.workflow}。节点和模型将在生成前检查。` : body.error || "连接失败");
+    } catch {
+      setConnection("无法连接，请确认本机工作室和 ComfyUI 已启动。");
+    } finally {
+      setChecking(false);
+    }
+  }
   function patch(partial) {
     onChange({ ...settings, ...partial });
   }
@@ -11455,6 +11477,16 @@ function SettingsDialog({
       /* @__PURE__ */ (0, import_jsx_runtime29.jsx)(DialogDescription3, { children: "密钥存在这台浏览器的本地存储里，不会写进仓库，也不会出现在提示词里。" })
     ] }),
     /* @__PURE__ */ (0, import_jsx_runtime29.jsxs)("div", { className: "grid gap-4", children: [
+      /* @__PURE__ */ (0, import_jsx_runtime29.jsxs)("div", { className: "flex gap-2", children: [
+        /* @__PURE__ */ (0, import_jsx_runtime29.jsx)(Button3, { variant: settings.engine === "cloud" ? "default" : "outline", onClick: () => patch({ engine: "cloud" }), children: "云端生成" }),
+        /* @__PURE__ */ (0, import_jsx_runtime29.jsx)(Button3, { variant: settings.engine === "comfyui" ? "default" : "outline", onClick: () => patch({ engine: "comfyui" }), children: "ComfyUI 本地" })
+      ] }),
+      settings.engine === "comfyui" ? /* @__PURE__ */ (0, import_jsx_runtime29.jsxs)("div", { className: "grid gap-2 rounded-xl bg-muted p-3 text-sm", children: [
+        /* @__PURE__ */ (0, import_jsx_runtime29.jsx)("p", { children: "统一换装与姿势工作流：选择服装、姿势或两者，网页自动切换分支。拼图逐格生成后排版，无需生图 API Key。" }),
+        /* @__PURE__ */ (0, import_jsx_runtime29.jsx)("p", { className: "text-xs leading-5 text-muted-foreground", children: "请在同一台电脑启动工作室和 ComfyUI。服务需设置 LANPOSE_COMFYUI=1，默认连接 127.0.0.1:8188。人物和参考图会存入本机 ComfyUI 的 input，结果保存在 output。下方云端配置保留给文字润色及其他云端功能。" }),
+        /* @__PURE__ */ (0, import_jsx_runtime29.jsx)(Button3, { variant: "outline", disabled: checking, onClick: () => void checkConnection(), children: checking ? "检查中…" : "测试本机连接" }),
+        connection ? /* @__PURE__ */ (0, import_jsx_runtime29.jsx)("p", { role: "status", className: "text-xs leading-5", children: connection }) : null
+      ] }) : null,
       /* @__PURE__ */ (0, import_jsx_runtime29.jsxs)("div", { className: "flex flex-wrap gap-2", children: [
         /* @__PURE__ */ (0, import_jsx_runtime29.jsx)(Button3, { variant: settings.provider === "seedream" ? "default" : "outline", onClick: () => chooseProvider("seedream"), children: "Seedream" }),
         /* @__PURE__ */ (0, import_jsx_runtime29.jsx)(Button3, { variant: settings.provider === "gemini" ? "default" : "outline", onClick: () => chooseProvider("gemini"), children: "Gemini" }),
@@ -11766,50 +11798,51 @@ function Studio({
 }
 function StudioFrame({ embedded }) {
   const { basePath } = useStudioEnv();
-  const [catalog, setCatalog] = (0, import_react12.useState)(null);
-  const [catalogError, setCatalogError] = (0, import_react12.useState)("");
-  const [costumeCatalog, setCostumeCatalog] = (0, import_react12.useState)([]);
-  const [costumeCatalogReady, setCostumeCatalogReady] = (0, import_react12.useState)(false);
-  const [costumeCatalogError, setCostumeCatalogError] = (0, import_react12.useState)("");
-  const [loading, setLoading] = (0, import_react12.useState)(true);
-  const [settings, setSettings] = (0, import_react12.useState)(DEFAULT_SETTINGS);
-  const [library, setLibrary] = (0, import_react12.useState)("poses");
-  const [costume, setCostume] = (0, import_react12.useState)(null);
-  const [costumeFocus, setCostumeFocus] = (0, import_react12.useState)(null);
-  const [requestedSystem, setRequestedSystem] = (0, import_react12.useState)(null);
-  const [settingsOpen, setSettingsOpen] = (0, import_react12.useState)(false);
-  const [installOpen, setInstallOpen] = (0, import_react12.useState)(false);
-  const [adultAsk, setAdultAsk] = (0, import_react12.useState)(null);
-  const [characters, setCharacters] = (0, import_react12.useState)([]);
-  const [models, setModels] = (0, import_react12.useState)([]);
-  const [activeModelId, setActiveModelId] = (0, import_react12.useState)(DEFAULT_MODEL_ID);
-  const [builtinUsed, setBuiltinUsed] = (0, import_react12.useState)({});
-  const [sheetBusy, setSheetBusy] = (0, import_react12.useState)(false);
-  const [sheetError, setSheetError] = (0, import_react12.useState)("");
-  const [selected, setSelected] = (0, import_react12.useState)({});
-  const [extraPrompt, setExtraPrompt] = (0, import_react12.useState)("");
-  const [prompts, setPrompts] = (0, import_react12.useState)([]);
-  const [promptError, setPromptError] = (0, import_react12.useState)("");
-  const [results, setResults] = (0, import_react12.useState)([]);
-  const [running, setRunning] = (0, import_react12.useState)(false);
-  const [progress, setProgress] = (0, import_react12.useState)("");
+  const [catalog, setCatalog] = (0, import_react13.useState)(null);
+  const [catalogError, setCatalogError] = (0, import_react13.useState)("");
+  const [costumeCatalog, setCostumeCatalog] = (0, import_react13.useState)([]);
+  const [costumeCatalogReady, setCostumeCatalogReady] = (0, import_react13.useState)(false);
+  const [costumeCatalogError, setCostumeCatalogError] = (0, import_react13.useState)("");
+  const [loading, setLoading] = (0, import_react13.useState)(true);
+  const [settings, setSettings] = (0, import_react13.useState)(DEFAULT_SETTINGS);
+  const [library, setLibrary] = (0, import_react13.useState)("poses");
+  const [costume, setCostume] = (0, import_react13.useState)(null);
+  const [costumeFocus, setCostumeFocus] = (0, import_react13.useState)(null);
+  const [requestedSystem, setRequestedSystem] = (0, import_react13.useState)(null);
+  const [settingsOpen, setSettingsOpen] = (0, import_react13.useState)(false);
+  const [installOpen, setInstallOpen] = (0, import_react13.useState)(false);
+  const [adultAsk, setAdultAsk] = (0, import_react13.useState)(null);
+  const [characters, setCharacters] = (0, import_react13.useState)([]);
+  const [models, setModels] = (0, import_react13.useState)([]);
+  const [activeModelId, setActiveModelId] = (0, import_react13.useState)(DEFAULT_MODEL_ID);
+  const [builtinUsed, setBuiltinUsed] = (0, import_react13.useState)({});
+  const [sheetBusy, setSheetBusy] = (0, import_react13.useState)(false);
+  const [sheetError, setSheetError] = (0, import_react13.useState)("");
+  const [selected, setSelected] = (0, import_react13.useState)({});
+  const [extraPrompt, setExtraPrompt] = (0, import_react13.useState)("");
+  const [prompts, setPrompts] = (0, import_react13.useState)([]);
+  const [promptError, setPromptError] = (0, import_react13.useState)("");
+  const [results, setResults] = (0, import_react13.useState)([]);
+  const [running, setRunning] = (0, import_react13.useState)(false);
+  const [progress, setProgress] = (0, import_react13.useState)("");
   const waited = useElapsedSeconds(running);
-  const [runError, setRunError] = (0, import_react12.useState)("");
-  const [limitNote, setLimitNote] = (0, import_react12.useState)("");
-  const [serverKey, setServerKey] = (0, import_react12.useState)(false);
-  const [sheetOpen, setSheetOpen] = (0, import_react12.useState)(false);
-  const [customPoses, setCustomPoses] = (0, import_react12.useState)([]);
-  const [customCostumes, setCustomCostumes] = (0, import_react12.useState)([]);
-  const [history, setHistory] = (0, import_react12.useState)([]);
-  const [storageHigh, setStorageHigh] = (0, import_react12.useState)(false);
-  const [syncWarning, setSyncWarning] = (0, import_react12.useState)("");
-  const [reuseNote, setReuseNote] = (0, import_react12.useState)("");
-  const libraryReady = (0, import_react12.useRef)(false);
-  const modelLoadGen = (0, import_react12.useRef)(0);
-  const clearRequestedSystem = (0, import_react12.useCallback)(() => setRequestedSystem(null), []);
-  const clearCostumeFocus = (0, import_react12.useCallback)(() => setCostumeFocus(null), []);
-  const abortRef = (0, import_react12.useRef)(null);
-  const loadCatalog = (0, import_react12.useCallback)(() => {
+  const [runError, setRunError] = (0, import_react13.useState)("");
+  const [limitNote, setLimitNote] = (0, import_react13.useState)("");
+  const [serverKey, setServerKey] = (0, import_react13.useState)(false);
+  const [sheetOpen, setSheetOpen] = (0, import_react13.useState)(false);
+  const [customPoses, setCustomPoses] = (0, import_react13.useState)([]);
+  const [customCostumes, setCustomCostumes] = (0, import_react13.useState)([]);
+  const [history, setHistory] = (0, import_react13.useState)([]);
+  const [storageHigh, setStorageHigh] = (0, import_react13.useState)(false);
+  const [syncWarning, setSyncWarning] = (0, import_react13.useState)("");
+  const [reuseNote, setReuseNote] = (0, import_react13.useState)("");
+  const libraryReady = (0, import_react13.useRef)(false);
+  const modelLoadGen = (0, import_react13.useRef)(0);
+  const clearRequestedSystem = (0, import_react13.useCallback)(() => setRequestedSystem(null), []);
+  const clearCostumeFocus = (0, import_react13.useCallback)(() => setCostumeFocus(null), []);
+  const abortRef = (0, import_react13.useRef)(null);
+  const localRetry = (0, import_react13.useRef)("");
+  const loadCatalog = (0, import_react13.useCallback)(() => {
     setLoading(true);
     setCatalogError("");
     fetch(studioUrl(basePath, "/api/catalog")).then(async (response) => {
@@ -11817,10 +11850,10 @@ function StudioFrame({ embedded }) {
       return response.json();
     }).then(setCatalog).catch((error) => setCatalogError(error instanceof Error ? error.message : "姿势目录没有加载出来")).finally(() => setLoading(false));
   }, [basePath]);
-  (0, import_react12.useEffect)(() => {
+  (0, import_react13.useEffect)(() => {
     loadCatalog();
   }, [loadCatalog]);
-  (0, import_react12.useEffect)(() => {
+  (0, import_react13.useEffect)(() => {
     const controller = new AbortController();
     fetch(studioUrl(basePath, "/api/costumes"), { signal: controller.signal }).then(async (response) => {
       if (!response.ok) throw new Error("服装目录没有加载出来");
@@ -11836,7 +11869,7 @@ function StudioFrame({ embedded }) {
     });
     return () => controller.abort();
   }, [basePath]);
-  (0, import_react12.useEffect)(() => {
+  (0, import_react13.useEffect)(() => {
     const local = loadSettings();
     fetch(studioUrl(basePath, "/api/status")).then((response) => response.json()).then((payload) => {
       setServerKey(Boolean(payload.keyConfigured));
@@ -11855,7 +11888,7 @@ function StudioFrame({ embedded }) {
       setSettings(local);
     }).catch(() => setSettings(local));
   }, [basePath]);
-  (0, import_react12.useEffect)(() => {
+  (0, import_react13.useEffect)(() => {
     const gen = ++modelLoadGen.current;
     Promise.all([readStoredCharacters(), listSavedModels(), readActiveModelId()]).then(([images, saved, activeId]) => {
       if (modelLoadGen.current !== gen) return;
@@ -11876,7 +11909,7 @@ function StudioFrame({ embedded }) {
     }).catch(() => {
     });
   }, []);
-  (0, import_react12.useEffect)(() => {
+  (0, import_react13.useEffect)(() => {
     let cancelled = false;
     Promise.all([listCustomPoses(), listCustomCostumes(), listHistory(), readStoragePressure()]).then(([poses, costumes, entries, pressure]) => {
       if (cancelled) return;
@@ -11892,7 +11925,7 @@ function StudioFrame({ embedded }) {
       cancelled = true;
     };
   }, []);
-  (0, import_react12.useEffect)(() => {
+  (0, import_react13.useEffect)(() => {
     if (!libraryReady.current) return;
     const timer = window.setTimeout(() => {
       syncCustomLibrary(basePath, customPoses, customCostumes).then(() => setSyncWarning("")).catch(() => setSyncWarning("自定义参考还没同步给 Agent。刷新工作室后再试。"));
@@ -12008,7 +12041,7 @@ function StudioFrame({ embedded }) {
   const poseUrls = useBlobUrls(customPoses);
   const costumeUrls = useBlobUrls(customCostumes);
   const historyUrls = useBlobUrls(history);
-  const poseById = (0, import_react12.useMemo)(() => {
+  const poseById = (0, import_react13.useMemo)(() => {
     const map = /* @__PURE__ */ new Map();
     catalog?.poses.forEach((pose) => map.set(pose.id, pose));
     for (const asset of customPoses) {
@@ -12026,7 +12059,7 @@ function StudioFrame({ embedded }) {
     }
     return map;
   }, [catalog, customPoses]);
-  const chosen = (0, import_react12.useMemo)(() => {
+  const chosen = (0, import_react13.useMemo)(() => {
     return Object.entries(selected).flatMap(([poseId, viewId]) => {
       const pose = poseById.get(poseId);
       const view = pose?.views.find((item) => item.id === viewId);
@@ -12035,21 +12068,22 @@ function StudioFrame({ embedded }) {
     });
   }, [selected, poseById, poseUrls]);
   const selectionKey = chosen.map((item) => item.viewId).join("|");
-  (0, import_react12.useEffect)(() => {
-    if (!selectionKey) {
+  (0, import_react13.useEffect)(() => {
+    if (!selectionKey && !(settings.engine === "comfyui" && costume?.id)) {
       setPrompts([]);
       setPromptError("");
       return;
     }
     const controller = new AbortController();
     const timer = window.setTimeout(() => {
-      const viewIds = selectionKey.split("|");
+      const viewIds = selectionKey ? selectionKey.split("|") : [];
       void customReferenceBody(viewIds, costume?.id ?? "", customPoses, customCostumes).then((customReferences) => {
         if (controller.signal.aborted) return;
         return fetch(studioUrl(basePath, "/api/prompt"), {
           method: "POST",
           headers: { "content-type": "application/json" },
           body: JSON.stringify({
+            engine: settings.engine,
             provider: settings.provider,
             mode: settings.mode,
             viewIds,
@@ -12077,7 +12111,7 @@ function StudioFrame({ embedded }) {
       window.clearTimeout(timer);
       controller.abort();
     };
-  }, [basePath, selectionKey, extraPrompt, characters.length, activeModelId, costume?.id, settings.provider, settings.mode, settings.keepOutfit, customPoses, customCostumes]);
+  }, [basePath, selectionKey, extraPrompt, characters.length, activeModelId, costume?.id, settings.engine, settings.provider, settings.mode, settings.keepOutfit, customPoses, customCostumes]);
   function togglePose(pose, view) {
     if (selected[pose.id] === view.id) {
       setLimitNote("");
@@ -12136,14 +12170,14 @@ function StudioFrame({ embedded }) {
     setCostume({ id: pick.costume.id, label: pick.costume.label, keywords: pick.costume.keywords });
   }
   async function generate() {
-    if (!settings.apiKey.trim() && !serverKey) {
+    if (settings.engine !== "comfyui" && !settings.apiKey.trim() && !serverKey) {
       setSettingsOpen(true);
       setRunError("先在设置里填写 API Key。");
       setSheetOpen(true);
       return;
     }
     const viewIds = chosen.map((item) => item.viewId);
-    if (viewIds.length === 0) return;
+    if (viewIds.length === 0 && !(settings.engine === "comfyui" && costume)) return;
     const controller = new AbortController();
     abortRef.current = controller;
     setRunning(true);
@@ -12151,9 +12185,10 @@ function StudioFrame({ embedded }) {
     setResults([]);
     const costumePick = costume ? { id: costume.id, label: costume.label, keywords: costume.keywords } : null;
     const bodyBase = {
+      engine: settings.engine,
       provider: settings.provider,
-      apiKey: settings.apiKey,
-      baseURL: settings.baseURL,
+      apiKey: settings.engine === "comfyui" ? "" : settings.apiKey,
+      baseURL: settings.engine === "comfyui" ? "" : settings.baseURL,
       model: settings.model,
       aspectRatio: settings.aspectRatio,
       keepOutfit: settings.keepOutfit,
@@ -12164,18 +12199,20 @@ function StudioFrame({ embedded }) {
     };
     const snapshotBase = {
       extraPrompt,
-      provider: settings.provider,
-      model: settings.model,
+      provider: settings.engine === "comfyui" ? "comfyui" : settings.provider,
+      model: settings.engine === "comfyui" ? "统一换装与姿势工作流" : settings.model,
       aspectRatio: settings.aspectRatio,
       mode: settings.mode,
       keepOutfit: costume ? false : settings.keepOutfit,
       costume: costumePick
     };
     try {
-      if (settings.mode === "sheet") {
-        setProgress("正在画姿势拼图");
+      if (settings.mode === "sheet" || chosen.length === 0) {
+        setProgress(chosen.length === 0 ? "正在本机换装" : settings.engine === "comfyui" ? "正在逐格生成姿势拼图" : "正在画姿势拼图");
         const customReferences = await customReferenceBody(viewIds, costume?.id ?? "", customPoses, customCostumes);
-        const batch = await requestGenerate(basePath, { ...bodyBase, mode: "sheet", viewIds, customReferences }, controller.signal);
+        const localRunId = localRetry.current || crypto.randomUUID();
+        const batch = await requestGenerate(basePath, { ...bodyBase, mode: settings.mode, viewIds, customReferences, localRunId }, controller.signal);
+        localRetry.current = settings.engine === "comfyui" && batch.some((item) => !item.ok) ? localRunId : "";
         setResults(batch);
         await rememberResults(batch, { ...snapshotBase, selection: chosen });
       } else {
@@ -12217,7 +12254,7 @@ function StudioFrame({ embedded }) {
           mode: snapshot.mode,
           keepOutfit: snapshot.keepOutfit,
           costume: snapshot.costume,
-          selection: snapshot.selection,
+          selection: result.viewId && !result.viewId.includes(",") ? snapshot.selection.filter((item) => item.viewId === result.viewId) : snapshot.selection,
           mediaType: "image/jpeg",
           image
         };
@@ -12270,6 +12307,7 @@ function StudioFrame({ embedded }) {
     setCostume((current) => current?.id === id ? null : current);
   }
   function reuse(entry) {
+    updateSettings({ ...settings, engine: entry.provider === "comfyui" ? "comfyui" : "cloud" });
     const restored = reuseFromHistory(entry);
     const missingPose = entry.selection.some((item) => !poseById.has(item.poseId));
     const missingCostume = Boolean(restored.costume && isCustomCostumeId(restored.costume.id) && !customCostumes.some((item) => item.id === restored.costume?.id));
@@ -12322,13 +12360,14 @@ function StudioFrame({ embedded }) {
       characters,
       extraPrompt,
       onExtraPrompt: setExtraPrompt,
-      providerLabel: settings.provider === "seedream" ? "Seedream" : settings.provider === "openai" ? "OpenAI" : "Gemini",
+      localMode: settings.engine === "comfyui",
+      providerLabel: settings.engine === "comfyui" ? "ComfyUI 本地" : settings.provider === "seedream" ? "Seedream" : settings.provider === "openai" ? "OpenAI" : "Gemini",
       aspectRatio: settings.aspectRatio,
       mode: settings.mode,
       keepOutfit: settings.keepOutfit,
       costume: costume ? { ...costume, thumbSrc: costumeUrls[costume.id] } : null,
       onClearCostume: () => setCostume(null),
-      hasKey: Boolean(settings.apiKey.trim()) || serverKey,
+      hasKey: settings.engine === "comfyui" || Boolean(settings.apiKey.trim()) || serverKey,
       running,
       progress: withElapsed(progress, waited),
       runError,
@@ -12528,8 +12567,8 @@ function GithubMark() {
   ] });
 }
 function useBlobUrls(items) {
-  const [urls, setUrls] = (0, import_react12.useState)({});
-  (0, import_react12.useEffect)(() => {
+  const [urls, setUrls] = (0, import_react13.useState)({});
+  (0, import_react13.useEffect)(() => {
     const created = {};
     for (const item of items) created[item.id] = URL.createObjectURL(item.image);
     setUrls(created);
@@ -12563,6 +12602,7 @@ async function requestGenerate(basePath, body, signal) {
     throw new Error("生图失败");
   }
   return (payload.results ?? []).map((item, index) => ({
+    viewId: item.viewId,
     key: `${item.viewId}-${index}`,
     title: item.title,
     prompt: item.prompt,
@@ -12594,10 +12634,10 @@ function PosePanelIcon({ size = 16 }) {
   ] });
 }
 function PoseStudio() {
-  const hostRef = (0, import_react13.useRef)(null);
-  const [mount, setMount] = (0, import_react13.useState)(null);
-  const [portalContainer, setPortalContainer] = (0, import_react13.useState)(null);
-  (0, import_react13.useEffect)(() => {
+  const hostRef = (0, import_react14.useRef)(null);
+  const [mount, setMount] = (0, import_react14.useState)(null);
+  const [portalContainer, setPortalContainer] = (0, import_react14.useState)(null);
+  (0, import_react14.useEffect)(() => {
     const host = hostRef.current;
     if (!host) return;
     const shadow = host.shadowRoot ?? host.attachShadow({ mode: "open" });
@@ -15162,7 +15202,7 @@ function PoseStudio() {
       --shimmer-text-fill: initial;
     }
   }
-}
+}\r
 `;
       shadow.appendChild(style);
     }
