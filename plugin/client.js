@@ -10143,7 +10143,7 @@ function Composer({
             variant: "outline",
             disabled: running,
             onClick: onRandom,
-            className: "rounded-full border-2 border-primary bg-primary/10 px-3 font-medium text-primary hover:border-primary hover:bg-primary/15 hover:text-primary",
+            className: "rounded-full border-2 border-[oklch(0.68_0.15_32)] bg-[oklch(0.975_0.02_45)] px-3 font-medium text-[oklch(0.46_0.13_32)] hover:border-[oklch(0.62_0.16_30)] hover:bg-[oklch(0.95_0.04_40)] hover:text-[oklch(0.46_0.13_32)]",
             children: [
               /* @__PURE__ */ (0, import_jsx_runtime24.jsx)(Shuffle, {}),
               "随机组合"
@@ -13966,6 +13966,9 @@ function PoseStudio() {
     --tw-border-style: dashed;
     border-style: dashed;
   }
+  .border-\\[oklch\\(0\\.68_0\\.15_32\\)\\] {
+    border-color: oklch(0.68 0.15 32);
+  }
   .border-border {
     border-color: var(--border);
   }
@@ -13995,6 +13998,9 @@ function PoseStudio() {
   }
   .bg-\\[\\#f8fafc\\] {
     background-color: #f8fafc;
+  }
+  .bg-\\[oklch\\(0\\.975_0\\.02_45\\)\\] {
+    background-color: oklch(0.975 0.02 45);
   }
   .bg-amber-50 {
     background-color: var(--color-amber-50);
@@ -14046,12 +14052,6 @@ function PoseStudio() {
   }
   .bg-primary {
     background-color: var(--primary);
-  }
-  .bg-primary\\/10 {
-    background-color: var(--primary);
-    @supports (color: color-mix(in lab, red, red)) {
-      background-color: color-mix(in oklab, var(--primary) 10%, transparent);
-    }
   }
   .bg-secondary {
     background-color: var(--secondary);
@@ -14281,6 +14281,9 @@ function PoseStudio() {
   }
   .text-\\[\\#fecaca\\] {
     color: #fecaca;
+  }
+  .text-\\[oklch\\(0\\.46_0\\.13_32\\)\\] {
+    color: oklch(0.46 0.13 32);
   }
   .text-amber-700 {
     color: var(--color-amber-700);
@@ -14583,8 +14586,8 @@ function PoseStudio() {
     width: calc(var(--spacing) * 0.5);
   }
   @media (hover: hover) {
-    .hover\\:border-primary:hover {
-      border-color: var(--primary);
+    .hover\\:border-\\[oklch\\(0\\.62_0\\.16_30\\)\\]:hover {
+      border-color: oklch(0.62 0.16 30);
     }
     .hover\\:border-primary\\/40:hover {
       border-color: var(--primary);
@@ -14602,6 +14605,9 @@ function PoseStudio() {
         background-color: color-mix(in oklch,var(--secondary),var(--foreground) 5%);
       }
     }
+    .hover\\:bg-\\[oklch\\(0\\.95_0\\.04_40\\)\\]:hover {
+      background-color: oklch(0.95 0.04 40);
+    }
     .hover\\:bg-card:hover {
       background-color: var(--card);
     }
@@ -14615,14 +14621,6 @@ function PoseStudio() {
     }
     .hover\\:bg-muted:hover {
       background-color: var(--muted);
-    }
-    .hover\\:bg-primary\\/15:hover {
-      background-color: var(--primary);
-    }
-    @supports (color: color-mix(in lab, red, red)) {
-      .hover\\:bg-primary\\/15:hover {
-        background-color: color-mix(in oklab, var(--primary) 15%, transparent);
-      }
     }
     .hover\\:bg-primary\\/80:hover {
       background-color: var(--primary);
@@ -14648,14 +14646,14 @@ function PoseStudio() {
         background-color: color-mix(in oklab, var(--color-white) 15%, transparent);
       }
     }
+    .hover\\:text-\\[oklch\\(0\\.46_0\\.13_32\\)\\]:hover {
+      color: oklch(0.46 0.13 32);
+    }
     .hover\\:text-foreground:hover {
       color: var(--foreground);
     }
     .hover\\:text-muted-foreground:hover {
       color: var(--muted-foreground);
-    }
-    .hover\\:text-primary:hover {
-      color: var(--primary);
     }
     .hover\\:text-white:hover {
       color: var(--color-white);
