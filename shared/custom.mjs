@@ -1,4 +1,4 @@
-import { costumeWearPrompt } from "./costume-prompt.mjs"
+import { costumeVisiblePrompt } from "./costume-prompt.mjs"
 
 export function createCustomId(kind, random = () => globalThis.crypto.randomUUID()) {
   const suffix = String(random())
@@ -75,7 +75,7 @@ export function expandReferencePrompt({ kind = "pose", userPrompt = "", adult = 
   const safe = adult ? "" : "保持日常、得体、可公开展示的画面。"
   const optimize = sensitivePromptOptimize === true
   if (kind === "costume") {
-    return costumeWearPrompt({ userPrompt: note, adult: adult === true, sensitivePromptOptimize: optimize })
+    return costumeVisiblePrompt({ userPrompt: note, adult: adult === true, sensitivePromptOptimize: optimize })
   }
   return [
     "白底单人姿势线稿参考图，黑色干净线条，球关节人偶，全身，只表现身体姿态、重心、四肢和镜头角度。",

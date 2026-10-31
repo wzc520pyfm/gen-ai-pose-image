@@ -173,11 +173,27 @@ export function costumeBeautifyRole(sensitivePromptOptimize = false) {
     ? "用含蓄、可公开展示的说法描写已经穿好衣服的成年模特。"
     : "直接写模特穿着这些衣服，头、脸和手正常可见。"
   return [
-    "你在写第一步的文生图提示词。这一步要画成年模特穿着用户描述的衣服。下一步才会把人抠掉，所以提示词里不要要求去掉人物。",
-    `提示词用这一句开头：${WEAR_MARKER}`,
-    "画面是浅灰无缝棚拍，正面全身，脚入镜，地面有柔和阴影。衣服穿在身上，不要摊开平铺。只写用户提到的衣物，不要加丝袜、连裤袜、打底裤，也不要加没写到的鞋、包或外套。帽子戴在头上，帽檐和衣领之间留出头发或额头。",
+    "你在写服装参考图的文生图提示词。画面是一位成年模特穿着用户描述的衣服。",
+    "浅灰无缝棚拍，正面全身，脚入镜，地面有柔和阴影。衣服穿在身上，不要摊开平铺。只写用户提到的衣物，不要加丝袜、连裤袜、打底裤，也不要加没写到的鞋、包或外套。帽子戴在头上，帽檐和衣领之间留出头发或额头。",
     direct,
+    "只写画面，不要写生成步骤。",
   ].join("\n")
+}
+
+/** Shown in the prompt box. The server still wraps this into the wear instruction at generation time. */
+export function costumeVisiblePrompt({ userPrompt = "", adult = false, sensitivePromptOptimize = false } = {}) {
+  const note = stripGhostClauses(userPrompt)
+  const optimize = sensitivePromptOptimize === true
+  const lines = [
+    "浅灰无缝棚拍，正面全身，脚要入镜，地面有柔和阴影。成年模特穿着描述里的衣服，衣服要有立体体积，不要摊开平铺。",
+    "帽子戴在头上，帽檐和衣领之间留出头发或额头。",
+    "只穿描述里写到的衣物。没写到的鞋、包、外套、袜子都不要加，也不要自行加丝袜、连裤袜或打底裤。",
+    optimize ? "用日常、含蓄的说法。" : "头、脸、头发和手正常可见。",
+    adult ? "" : "保持日常、得体、可公开展示的画面。",
+    note ? `服装描述：${note}` : "一件日常上衣和及膝裙。不要自行添加袜子、鞋或包。",
+    "不要文字，不要水印。",
+  ]
+  return lines.filter(Boolean).join("\n").slice(0, 4000)
 }
 
 export function costumeWearPrompt({ userPrompt = "", adult = false, sensitivePromptOptimize = false } = {}) {

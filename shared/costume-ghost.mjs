@@ -20,8 +20,11 @@ export {
   WEAR_MARKER,
 } from "./costume-prompt.mjs"
 
-const LAYER_DONE = "已先生成穿着图，再按图层抠掉人物，只保留衣服。"
-const EDIT_DONE = "已先生成穿着图，再用编辑去掉人物。当前接口不能拆图层。"
+function studioError(error) {
+  const text = brief(error)
+  if (/超时|API Key|密钥|没有填写/.test(text)) return text
+  return "服装参考没有生成。请再试一次。"
+}
 
 export async function prepareCostumeLayerImage(image) {
   const { default: sharp } = await import("sharp")
@@ -162,10 +165,9 @@ export async function generateGhostCostume(input = {}) {
     watermark: false,
     timeoutMs: 110000,
   })
-  if (!worn?.buffer || worn.buffer.byteLength < 32) throw new Error("穿着图没有生成")
+  if (!worn?.buffer || worn.buffer.byteLength < 32) throw new Error("服装参考没有生成。请再试一次。")
 
   const canSplit = supportsCostumeLayerSplit(provider, model)
-  let splitError = null
   if (canSplit) {
     try {
       const source = input.decompose
@@ -180,9 +182,9 @@ export async function generateGhostCostume(input = {}) {
       const selected = selectGhostLayers(split?.layers)
       if (!selected.ok) throw new Error(selected.reason)
       const image = await compositeGhostLayers(split.base.buffer, selected.keep, selected.erase)
-      return { ...image, warning: LAYER_DONE, referencesSent: true, model }
-    } catch (error) {
-      splitError = error
+      return { ...image, referencesSent: true, model }
+    } catch {
+      // The edit below is the fallback when layer split cannot be used.
     }
   }
 
@@ -193,17 +195,13 @@ export async function generateGhostCostume(input = {}) {
       removalPrompt: costumeRemovalPrompt(optimize),
       call,
     })
-    const warning = canSplit
-      ? `图层抠人没有完成（${brief(splitError)}），已改用去人编辑。`
-      : EDIT_DONE
     return {
       mediaType: edited.mediaType || "image/png",
       buffer: edited.buffer,
-      warning,
       referencesSent: true,
       model: edited.model || model,
     }
   } catch (error) {
-    throw new Error(`人物已经按衣服生成，但抠掉人物失败：${brief(error)}。不会把带着人的图存成服装参考。`)
+    throw new Error(studioError(error))
   }
 }

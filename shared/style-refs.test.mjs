@@ -131,19 +131,18 @@ test("gateway timeouts become a readable studio error", () => {
   assert.equal(messageForStatus(400, JSON.stringify({ error: "姿势风格参考没有读到（img/a.png）。" }), "生图失败"), "姿势风格参考没有读到（img/a.png）。")
 })
 
-test("beautify instructions ask for a worn model before the person is removed", () => {
+test("beautify instructions describe a worn outfit without the removal step", () => {
   assert.match(beautifyInstruction({ kind: "pose", userPrompt: "叉腰" }), /严格模仿参考图的线稿风格与人偶质感，只按描述改姿态/)
   const costume = beautifyInstruction({ kind: "costume", userPrompt: "风衣" })
-  assert.match(costume, /这一步先画成年模特穿着衣服/)
-  assert.match(costume, /下一步才会把人抠掉/)
   assert.match(costume, /帽子戴在头上/)
   assert.match(costume, /风衣/)
   assert.match(costume, /头、脸和手正常可见/)
   assert.doesNotMatch(costume, /帽子悬在领口上方/)
+  assert.doesNotMatch(costume, /抠掉|图层|下一步/)
   const softened = beautifyInstruction({ kind: "costume", userPrompt: "风衣", sensitivePromptOptimize: true })
-  assert.match(softened, /这一步先画成年模特穿着衣服/)
   assert.match(softened, /含蓄/)
   assert.doesNotMatch(softened, /头、脸和手正常可见/)
+  assert.doesNotMatch(softened, /抠掉|图层/)
   assert.doesNotMatch(softened, /裸体|裸露|内衣|性暗示|色情|皮肤|露骨/)
   assert.doesNotMatch(beautifyInstruction({ kind: "pose", userPrompt: "叉腰" }), /裸体|裸露|内衣|性暗示|色情|露骨/)
 })

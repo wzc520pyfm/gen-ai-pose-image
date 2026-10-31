@@ -125,7 +125,7 @@ test("ghost composite keeps the garment and leaves the person out", async () => 
       }
     },
   })
-  assert.match(image.warning, /按图层抠掉人物/)
+  assert.equal(image.warning, undefined)
   assert.deepEqual(await pixel(image.buffer, 8, 8), [220, 30, 30])
   assert.deepEqual(await pixel(image.buffer, 8, 34), [180, 180, 180])
 })
@@ -156,7 +156,7 @@ test("a failed layer split falls back to one edit and never returns the worn pho
   assert.equal(prompts.length, 2)
   assert.match(prompts[1], /去掉人物/)
   assert.doesNotMatch(prompts[1], SENSITIVE)
-  assert.match(image.warning, /不能拆图层/)
+  assert.equal(image.warning, undefined)
   assert.equal(image.buffer.equals(edited), true)
   assert.equal(image.buffer.equals(worn), false)
 
@@ -170,7 +170,7 @@ test("a failed layer split falls back to one edit and never returns the worn pho
       if (attempts === 1) return { mediaType: "image/png", buffer: worn, referencesSent: false }
       throw new Error("去人编辑失败")
     },
-  }), /不会把带着人的图存成服装参考/)
+  }), /服装参考没有生成/)
   assert.equal(attempts, 2)
 })
 

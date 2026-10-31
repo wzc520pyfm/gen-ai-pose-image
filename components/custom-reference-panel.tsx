@@ -77,7 +77,7 @@ export function CustomReferencePanel({
   const [previewBlob, setPreviewBlob] = useState<Blob | null>(null)
   const [previewUrl, setPreviewUrl] = useState("")
   const [busy, setBusy] = useState("")
-  const generateBusy = kind === "costume" ? "正在让模特穿上，再抠掉人物" : "正在生成参考图"
+  const generateBusy = "正在生成"
   const waited = useElapsedSeconds(busy === generateBusy || busy === "正在扩写提示词")
   const [error, setError] = useState("")
   const [pendingDelete, setPendingDelete] = useState<string | null>(null)
@@ -204,7 +204,7 @@ export function CustomReferencePanel({
       <p className="mb-3 text-sm leading-6 text-muted-foreground">
         {kind === "pose"
           ? "自定义姿势只存在这台浏览器。上传或生成的图会当作姿势参考，出图顺序仍是角色、服装、姿势。"
-          : "自定义服装只存在这台浏览器。生成时会先画一位穿着这套衣服的模特，再把人抠掉，只留下衣服。"}
+          : "自定义服装只存在这台浏览器。上传或生成的图会当作服装参考。"}
       </p>
       <div className="mb-3 flex flex-wrap gap-2">
         <Button type="button" variant="outline" size="sm" onClick={() => openDialog("upload")}>上传</Button>
@@ -267,7 +267,7 @@ export function CustomReferencePanel({
             <DialogDescription>
               {kind === "pose"
                 ? "姿势参考偏向白底线稿，只表达身体姿态。确认之后才会放进自定义库。"
-                : "先按描述生成一位穿着这套衣服的成年模特，再把人抠掉，只留下衣服。帽子留在头的位置，头空出来。确认之后才会放进自定义库。"}
+                : "按描述生成一套服装参考。确认之后才会放进自定义库。"}
             </DialogDescription>
           </DialogHeader>
           {mode === "upload" ? (
@@ -325,7 +325,7 @@ export function CustomReferencePanel({
             <label className="flex items-center justify-between gap-3 rounded-xl bg-muted px-3 py-3 text-sm">
               <span>
                 <span className="block font-medium">违禁词优化</span>
-                <span className="mt-1 block text-xs leading-5 text-muted-foreground">两种都会先画穿着衣服的模特，再抠掉人物。关闭时，去人直接写去掉头、腿和皮肤。打开后改成委婉说法，避开审核敏感词。切换后会按当前描述重新扩写。</span>
+                <span className="mt-1 block text-xs leading-5 text-muted-foreground">关闭时直接写不要头、不要腿、不要皮肤。打开后改成委婉说法，避开审核敏感词。切换后会按当前描述重新扩写。</span>
               </span>
               <Switch
                 checked={settings.sensitivePromptOptimize}
