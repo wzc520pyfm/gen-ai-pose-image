@@ -40,6 +40,7 @@ export async function POST(request: Request) {
     return NextResponse.json({
       mediaType: image.mediaType,
       imageBase64: image.buffer.toString("base64"),
+      ...(image.warning ? { warning: image.warning } : {}),
     })
   } catch (error) {
     const message = error instanceof Error ? error.message : "参考图没有生成"

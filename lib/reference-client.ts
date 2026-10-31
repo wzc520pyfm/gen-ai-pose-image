@@ -74,12 +74,16 @@ export async function requestReferenceImage(basePath: string, settings: StudioSe
   })
   const text = await response.text()
   if (!response.ok) throw new Error(messageForStatus(response.status, text, "参考图没有生成"))
-  let payload: { mediaType?: string; imageBase64?: string }
+  let payload: { mediaType?: string; imageBase64?: string; warning?: string }
   try {
-    payload = JSON.parse(text) as { mediaType?: string; imageBase64?: string }
+    payload = JSON.parse(text) as { mediaType?: string; imageBase64?: string; warning?: string }
   } catch {
     throw new Error("参考图没有生成")
   }
   if (!payload.imageBase64) throw new Error("参考图没有生成")
-  return { mediaType: payload.mediaType || "image/png", imageBase64: payload.imageBase64 }
+  return {
+    mediaType: payload.mediaType || "image/png",
+    imageBase64: payload.imageBase64,
+    warning: typeof payload.warning === "string" ? payload.warning : "",
+  }
 }

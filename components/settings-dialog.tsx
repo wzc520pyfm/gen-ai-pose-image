@@ -139,7 +139,7 @@ export function SettingsDialog({
           <label className="flex items-center justify-between gap-3 rounded-xl bg-muted px-3 py-3 text-sm">
             <span>
               <span className="block font-medium">违禁词优化</span>
-              <span className="mt-1 block text-xs leading-5 text-muted-foreground">关闭时直接写不要人、不要腿、不要皮肤，并要求帽子悬在领口上方。画质更好，但 Seedream 可能返回 400。打开后改成委婉说法，避开审核敏感词。</span>
+              <span className="mt-1 block text-xs leading-5 text-muted-foreground">自定义服装会先画穿着衣服的模特，再抠掉人物。关闭时，去人直接写去掉头、腿和皮肤。打开后改成委婉说法，避开审核敏感词。</span>
             </span>
             <Switch checked={settings.sensitivePromptOptimize} onCheckedChange={(value) => patch({ sensitivePromptOptimize: value })} aria-label="违禁词优化" />
           </label>

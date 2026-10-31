@@ -139,9 +139,10 @@ export async function generateImage({
   fetchImpl = fetch,
   allowReferenceFallback = true,
   watermark = true,
+  timeoutMs = 240000,
 }) {
   if (!apiKey) throw new Error("还没有填写 API Key")
-  const linked = linkSignal(signal, 240000)
+  const linked = linkSignal(signal, timeoutMs)
   const chosenModel = model || defaultModel(provider)
   try {
     if (provider === "gemini") {
@@ -315,4 +316,103 @@ async function openAIGenerations({ apiKey, root, model, prompt, size, signal, fe
   if (!response.ok) fail(payload, response, apiKey, "文生图失败")
   const extracted = extractOpenAIImage(payload)
   return asBuffer(extracted, apiKey, signal)
+}
+
+function box4(value) {
+  if (!Array.isArray(value) || value.length < 4) return null
+  const nums = value.slice(0, 4).map(Number)
+  if (nums.some((item) => !Number.isFinite(item))) return null
+  return nums
+}
+
+/** Seedream 5.0 pro/flash layer split. Base is z_index 0. Later layers carry name, description, and a box. */
+export function parseSeedreamLayers(payload) {
+  const data = Array.isArray(payload?.data) ? payload.data : []
+  const items = data.filter((item) => item && (item.url || item.b64_json))
+  const indexed = items.filter((item) => item.z_index !== undefined && item.z_index !== null && Number.isFinite(Number(item.z_index)))
+  if (indexed.length < 2) {
+    throw new Error("接口没有返回图层，没法把人和衣服拆开。")
+  }
+  const mapped = indexed.map((item) => ({
+    zIndex: Number(item.z_index),
+    name: typeof item.name === "string" ? item.name : "",
+    description: typeof item.description === "string" ? item.description : "",
+    absolute: box4(item.bounding_box?.absolute),
+    normalized: box4(item.bounding_box?.normalized),
+    url: typeof item.url === "string" ? item.url : "",
+    base64: typeof item.b64_json === "string" ? item.b64_json : "",
+    mediaType: item.output_format === "jpeg" ? "image/jpeg" : "image/png",
+  }))
+  const base = mapped.find((item) => item.zIndex === 0)
+  if (!base) throw new Error("图层拆分没有返回底图。")
+  const layers = mapped.filter((item) => item !== base).sort((a, b) => a.zIndex - b.zIndex)
+  if (layers.length === 0) throw new Error("图层拆分没有返回衣物或人物图层。")
+  return { base, layers }
+}
+
+export async function decomposeSeedreamImage({
+  apiKey,
+  baseURL,
+  model,
+  prompt,
+  image,
+  signal,
+  fetchImpl = fetch,
+  timeoutMs = 150000,
+} = {}) {
+  if (!apiKey) throw new Error("还没有填写 API Key")
+  if (!image?.buffer || image.buffer.byteLength < 32) throw new Error("没有可拆分的穿着图")
+  const linked = linkSignal(signal, timeoutMs)
+  const mediaType = image.mediaType === "image/png" ? "image/png" : "image/jpeg"
+  const root = (baseURL || defaultBaseURL("seedream")).replace(/\/$/, "")
+  const chosenModel = model || defaultModel("seedream")
+  const response = await fetchImpl(`${root}/images/generations`, {
+    method: "POST",
+    headers: {
+      authorization: `Bearer ${apiKey}`,
+      "content-type": "application/json",
+    },
+    body: JSON.stringify({
+      model: chosenModel,
+      prompt,
+      image: `data:${mediaType};base64,${image.buffer.toString("base64")}`,
+      size: "auto",
+      response_format: "url",
+      stream: false,
+      watermark: false,
+      layer_decomposition: true,
+      output_format: "png",
+    }),
+    signal: linked,
+  })
+  const payload = await readPayload(response, apiKey)
+  if (!response.ok) fail(payload, response, apiKey, "图层拆分失败")
+  const parsed = parseSeedreamLayers(payload)
+  const load = async (item) => {
+    if (item.base64) return asBuffer({ mediaType: item.mediaType, base64: item.base64 }, apiKey, linked)
+    if (item.url) return asBuffer({ mediaType: item.mediaType, url: item.url }, apiKey, linked)
+    throw new Error("图层拆分有一张图没有内容")
+  }
+  try {
+    const [baseImage, ...layerImages] = await Promise.all([
+      load(parsed.base),
+      ...parsed.layers.map((item) => load(item)),
+    ])
+    return {
+      base: { buffer: baseImage.buffer, mediaType: baseImage.mediaType || "image/png" },
+      layers: parsed.layers.map((item, index) => ({
+        zIndex: item.zIndex,
+        name: item.name,
+        description: item.description,
+        absolute: item.absolute,
+        normalized: item.normalized,
+        buffer: layerImages[index].buffer,
+        mediaType: layerImages[index].mediaType || "image/png",
+      })),
+    }
+  } catch (error) {
+    const timedOut = timeoutMessage(error)
+    if (timedOut && !signal?.aborted) throw new Error(timedOut)
+    throw error
+  }
 }

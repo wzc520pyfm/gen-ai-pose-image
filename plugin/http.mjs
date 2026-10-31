@@ -158,7 +158,11 @@ export function createPoseHandler(getConfig) {
             sensitivePromptOptimize: body.sensitivePromptOptimize === true,
             signal: req.signal,
           })
-          return json(res, 200, { mediaType: image.mediaType, imageBase64: image.buffer.toString("base64") })
+          return json(res, 200, {
+            mediaType: image.mediaType,
+            imageBase64: image.buffer.toString("base64"),
+            ...(image.warning ? { warning: image.warning } : {}),
+          })
         }
         if (path === "/api/character-sheet") {
           const source = body.image

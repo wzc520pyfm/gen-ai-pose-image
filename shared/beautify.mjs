@@ -1,4 +1,5 @@
-import { POSE_STYLE_LOCK, costumeStyleLock, expandReferencePrompt } from "./custom.mjs"
+import { costumeBeautifyRole } from "./costume-prompt.mjs"
+import { POSE_STYLE_LOCK, expandReferencePrompt } from "./custom.mjs"
 import { defaultBaseURL, redact } from "./generate.mjs"
 
 /** Empty uses the provider default. A filled id is sent as written, even if it looks like an image model. */
@@ -24,7 +25,7 @@ function describedError(payload, status, secret) {
 export function beautifyInstruction({ kind, userPrompt = "", adult = false, sensitivePromptOptimize = false } = {}) {
   const optimize = sensitivePromptOptimize === true
   const role = kind === "costume"
-    ? `你在写服装参考图的文生图提示词。只扩写用户写到的衣物。${costumeStyleLock(optimize)}`
+    ? costumeBeautifyRole(optimize)
     : `你在写姿势参考图的文生图提示词。图应是白底黑色线稿，球关节人偶，只表达成年身体的姿态，不要上色，不要服装设计。${POSE_STYLE_LOCK}`
   const safety = adult
     ? "用户已打开更多描述。按用户描述书写，画面中的角色按成年形象处理。"

@@ -66,51 +66,27 @@ test("pose reference generation hands two style images to generateImage", async 
   assert.match(generated.prompt, /严格模仿参考图的线稿风格与人偶质感，只按描述改姿态/)
 })
 
-test("costume reference generation sends SUM-0174 and AUT-0010 and turns the watermark off", async () => {
-  let generated = null
-  await generateStyledReference({
+test("costume reference generation wears the outfit, then removes the person, without style plates", async () => {
+  let ran = null
+  const image = await generateStyledReference({
     kind: "costume",
     provider: "openai",
     apiKey: "test-key",
     prompt: "米色风衣",
-    fetchCostume: async (path) => {
-      assert.ok(COSTUME_STYLE_PATHS.includes(path))
-      return { mediaType: "image/png", buffer: pngBuffer(), role: "costume" }
-    },
-    generate: async (input) => {
-      generated = input
-      assert.ok(input.images.length >= 1)
-      assert.equal(input.images.length, COSTUME_STYLE_PATHS.length)
-      assert.equal(input.watermark, false)
-      return { mediaType: "image/png", buffer: Buffer.from("ok"), referencesSent: true }
-    },
-  })
-  assert.match(generated.prompt, /严格模仿参考图的构图、取景、机位距离、光线和地面柔和棚拍阴影/)
-  assert.match(generated.prompt, /描述里有鞋才把鞋穿在脚下/)
-  assert.match(generated.prompt, /帽子悬在领口上方，不能贴在衣领上/)
-  assert.match(generated.prompt, /不要人，不要头，不要脸，不要手，不要腿，不要身体，不要皮肤/)
-  assert.match(generated.prompt, /裙子和袜子之间不能露出腿或皮肤，必须用衣物挡住/)
-  assert.match(generated.prompt, /未描述时严禁丝袜、连裤袜、黑丝、打底裤/)
-  assert.match(generated.prompt, /不要平铺/)
-})
-
-test("costume reference generation can append the scrubbed lock", async () => {
-  let generated = null
-  await generateStyledReference({
-    kind: "costume",
-    provider: "seedream",
-    apiKey: "test-key",
-    prompt: "白色衬衫",
     sensitivePromptOptimize: true,
-    fetchCostume: async () => ({ mediaType: "image/png", buffer: pngBuffer(), role: "costume" }),
-    generate: async (input) => {
-      generated = input
-      return { mediaType: "image/png", buffer: Buffer.from("ok"), referencesSent: true }
+    fetchCostume: async () => {
+      throw new Error("should not load ghost style plates")
+    },
+    generateGhostCostume: async (input) => {
+      ran = input
+      return { mediaType: "image/png", buffer: Buffer.from("ok"), warning: "已抠掉", referencesSent: true }
     },
   })
-  assert.match(generated.prompt, /头部、脸部、手部和腿部不出现/)
-  assert.match(generated.prompt, /帽子悬在领口上方/)
-  assert.doesNotMatch(generated.prompt, /不要皮肤|裸体|内衣|性暗示|色情/)
+  assert.equal(ran.prompt, "米色风衣")
+  assert.equal(ran.provider, "openai")
+  assert.equal(ran.sensitivePromptOptimize, true)
+  assert.equal(image.warning, "已抠掉")
+  assert.equal(image.referencesSent, true)
 })
 
 test("a missing style sample errors and does not call text-only generation", async () => {
@@ -155,16 +131,19 @@ test("gateway timeouts become a readable studio error", () => {
   assert.equal(messageForStatus(400, JSON.stringify({ error: "姿势风格参考没有读到（img/a.png）。" }), "生图失败"), "姿势风格参考没有读到（img/a.png）。")
 })
 
-test("beautify instructions tell the model to copy the reference style", () => {
+test("beautify instructions ask for a worn model before the person is removed", () => {
   assert.match(beautifyInstruction({ kind: "pose", userPrompt: "叉腰" }), /严格模仿参考图的线稿风格与人偶质感，只按描述改姿态/)
-  assert.match(beautifyInstruction({ kind: "costume", userPrompt: "风衣" }), /严格模仿参考图的构图、取景、机位距离、光线和地面柔和棚拍阴影/)
-  assert.match(beautifyInstruction({ kind: "costume", userPrompt: "风衣" }), /头部、脸部和手部不出现|不要头，不要脸，不要手/)
-  assert.match(beautifyInstruction({ kind: "costume", userPrompt: "风衣" }), /帽子悬在领口上方，不能贴在衣领上/)
-  assert.match(beautifyInstruction({ kind: "costume", userPrompt: "风衣" }), /不要皮肤/)
+  const costume = beautifyInstruction({ kind: "costume", userPrompt: "风衣" })
+  assert.match(costume, /这一步先画成年模特穿着衣服/)
+  assert.match(costume, /下一步才会把人抠掉/)
+  assert.match(costume, /帽子戴在头上/)
+  assert.match(costume, /风衣/)
+  assert.match(costume, /头、脸和手正常可见/)
+  assert.doesNotMatch(costume, /帽子悬在领口上方/)
   const softened = beautifyInstruction({ kind: "costume", userPrompt: "风衣", sensitivePromptOptimize: true })
-  assert.match(softened, /帽子悬在领口上方，不能贴在衣领上/)
-  assert.match(softened, /头部、脸部、手部和腿部不出现/)
-  assert.match(softened, /裙子和袜子之间用衣物挡住/)
+  assert.match(softened, /这一步先画成年模特穿着衣服/)
+  assert.match(softened, /含蓄/)
+  assert.doesNotMatch(softened, /头、脸和手正常可见/)
   assert.doesNotMatch(softened, /裸体|裸露|内衣|性暗示|色情|皮肤|露骨/)
   assert.doesNotMatch(beautifyInstruction({ kind: "pose", userPrompt: "叉腰" }), /裸体|裸露|内衣|性暗示|色情|露骨/)
 })

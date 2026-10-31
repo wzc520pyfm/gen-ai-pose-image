@@ -31,4 +31,4 @@ export function generateStyledReference(input: {
     aspectRatio?: string
     signal?: AbortSignal
   }) => Promise<{ mediaType: string; buffer: Buffer; referencesSent?: boolean }>
-}): Promise<{ mediaType: string; buffer: Buffer; referencesSent?: boolean }>
+}): Promise<{ mediaType: string; buffer: Buffer; referencesSent?: boolean; warning?: string }>
