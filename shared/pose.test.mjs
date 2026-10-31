@@ -162,6 +162,22 @@ test("pose thumbs load from the public gallery path", async () => {
   await assert.rejects(() => fetchPoseBytes("../.env", async () => new Response(jpeg)), /姿势图路径无效/)
 })
 
+test("pose generate busy copy stays short so Stop stays visible", () => {
+  const client = readFileSync(new URL("../plugin/client.js", import.meta.url), "utf8")
+  const composer = readFileSync(new URL("../components/composer.tsx", import.meta.url), "utf8")
+  assert.match(composer, /compactElapsed\("正在生成", waited\)/)
+  assert.match(readFileSync(new URL("../lib/elapsed.ts", import.meta.url), "utf8"), /\$\{label\} · \$\{waited\}s/)
+  assert.doesNotMatch(composer, /正在画第/)
+  assert.doesNotMatch(composer, /已等待/)
+  assert.match(client, /compactElapsed\("正在生成", waited\)/)
+  assert.match(client, /\$\{label\} · \$\{waited\}s/)
+  assert.doesNotMatch(client, /正在画第/)
+  assert.doesNotMatch(client, /正在逐格生成姿势拼图/)
+  assert.doesNotMatch(client, /正在画姿势拼图/)
+  assert.doesNotMatch(client, /正在本机换装/)
+  assert.match(client, /children:\s*"停止"/)
+})
+
 test("the browser module id matches the npm package name", () => {
   const pkg = JSON.parse(readFileSync(new URL("../package.json", import.meta.url), "utf8"))
   const client = readFileSync(new URL("../plugin/client.js", import.meta.url), "utf8")
