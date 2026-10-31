@@ -17,4 +17,5 @@ export function generateImage(input: {
   signal?: AbortSignal
   fetchImpl?: typeof fetch
   allowReferenceFallback?: boolean
+  watermark?: boolean
 }): Promise<{ mediaType: string; buffer: Buffer; referencesSent: boolean; warning?: string; model: string }>

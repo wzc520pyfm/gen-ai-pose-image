@@ -10,10 +10,9 @@ export const POSE_STYLE_PATHS = Object.freeze([
   "img/full_single_P001_front.png",
 ])
 
-/** Worn ghost-mannequin outfits from the catalog, not flat product plates. */
+/** One worn ghost-mannequin plate. The prompt must copy this presentation. */
 export const COSTUME_STYLE_PATHS = Object.freeze([
   "png/SUM-0174.png",
-  "png/SUM-0001.png",
 ])
 
 export function stylePaths(kind) {
@@ -104,5 +103,6 @@ export async function generateStyledReference(input = {}) {
     aspectRatio: input.aspectRatio,
     signal: input.signal,
     allowReferenceFallback: false,
+    ...(kind === "costume" ? { watermark: false } : {}),
   })
 }

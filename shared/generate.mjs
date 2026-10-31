@@ -138,6 +138,7 @@ export async function generateImage({
   signal,
   fetchImpl = fetch,
   allowReferenceFallback = true,
+  watermark = true,
 }) {
   if (!apiKey) throw new Error("还没有填写 API Key")
   const linked = linkSignal(signal, 240000)
@@ -147,7 +148,7 @@ export async function generateImage({
       return await generateGemini({ apiKey, baseURL, model: chosenModel, prompt, images, aspectRatio, signal: linked, fetchImpl })
     }
     if (provider === "seedream") {
-      return await generateSeedream({ apiKey, baseURL, model: chosenModel, prompt, images, aspectRatio, signal: linked, fetchImpl, allowReferenceFallback })
+      return await generateSeedream({ apiKey, baseURL, model: chosenModel, prompt, images, aspectRatio, signal: linked, fetchImpl, allowReferenceFallback, watermark })
     }
     return await generateOpenAI({ apiKey, baseURL, model: chosenModel, prompt, images, aspectRatio, signal: linked, fetchImpl, allowReferenceFallback })
   } catch (error) {
@@ -157,7 +158,7 @@ export async function generateImage({
   }
 }
 
-async function generateSeedream({ apiKey, baseURL, model, prompt, images, aspectRatio, signal, fetchImpl, allowReferenceFallback = true }) {
+async function generateSeedream({ apiKey, baseURL, model, prompt, images, aspectRatio, signal, fetchImpl, allowReferenceFallback = true, watermark = true }) {
   const root = (baseURL || defaultBaseURL("seedream")).replace(/\/$/, "")
   const send = async (withReferences) => {
     const body = {
@@ -166,7 +167,7 @@ async function generateSeedream({ apiKey, baseURL, model, prompt, images, aspect
       size: seedreamSize(aspectRatio),
       response_format: "url",
       stream: false,
-      watermark: true,
+      watermark: watermark !== false,
     }
     if (withReferences && images.length > 0) {
       body.image = images.map((image) => `data:${image.mediaType};base64,${image.buffer.toString("base64")}`)
