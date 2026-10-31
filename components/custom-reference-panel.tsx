@@ -148,7 +148,9 @@ export function CustomReferencePanel({
       return
     }
     if (!hasKey) {
-      setError("没有密钥，不能生成参考图。提示词可以复制。")
+      setError(settings.engine === "comfyui"
+        ? "没有保存云端密钥，不能生成参考图。先选 Seedream、Gemini 或 OpenAI 填好密钥。提示词仍可复制。"
+        : "没有密钥，不能生成参考图。提示词可以复制。")
       return
     }
     setBusy("正在生成参考图")

@@ -795,7 +795,9 @@ function StudioFrame({ embedded }: { embedded: boolean }) {
           sheetError={sheetError}
           hasKey={Boolean(settings.apiKey.trim()) || serverKey}
           onOpenSettings={() => {
-            setSheetError("先在设置里填写 API Key。")
+            setSheetError(settings.engine === "comfyui"
+              ? "多视角 sheet 要用云端生图。请先选 Seedream、Gemini 或 OpenAI，并填写 API Key。"
+              : "先在设置里填写 API Key。")
             setSettingsOpen(true)
           }}
         />

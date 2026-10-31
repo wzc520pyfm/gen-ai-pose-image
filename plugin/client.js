@@ -10627,7 +10627,7 @@ function CustomReferencePanel({
       return;
     }
     if (!hasKey) {
-      setError("没有密钥，不能生成参考图。提示词可以复制。");
+      setError(settings.engine === "comfyui" ? "没有保存云端密钥，不能生成参考图。先选 Seedream、Gemini 或 OpenAI 填好密钥。提示词仍可复制。" : "没有密钥，不能生成参考图。提示词可以复制。");
       return;
     }
     setBusy("正在生成参考图");
@@ -11466,68 +11466,68 @@ function SettingsDialog({
     const previousBase = baseURLFor(settings.provider);
     const baseIsDefault = settings.baseURL.trim() === "" || settings.baseURL === previousBase;
     patch({
+      engine: "cloud",
       provider,
       model: stock ? modelFor(provider) : settings.model,
       baseURL: baseIsDefault ? baseURLFor(provider) : settings.baseURL
     });
   }
+  const local = settings.engine === "comfyui";
   return /* @__PURE__ */ (0, import_jsx_runtime29.jsx)(Dialog, { open: open3, onOpenChange, children: /* @__PURE__ */ (0, import_jsx_runtime29.jsxs)(DialogContent, { className: "max-h-[min(85dvh,85%)] max-w-[min(32rem,calc(100%-2rem))] overflow-y-auto", children: [
     /* @__PURE__ */ (0, import_jsx_runtime29.jsxs)(DialogHeader, { children: [
       /* @__PURE__ */ (0, import_jsx_runtime29.jsx)(DialogTitle3, { children: "生图设置" }),
       /* @__PURE__ */ (0, import_jsx_runtime29.jsx)(DialogDescription3, { children: "密钥存在这台浏览器的本地存储里，不会写进仓库，也不会出现在提示词里。" })
     ] }),
-    /* @__PURE__ */ (0, import_jsx_runtime29.jsxs)("div", { className: "grid gap-4", children: [
-      /* @__PURE__ */ (0, import_jsx_runtime29.jsxs)("div", { className: "flex gap-2", children: [
-        /* @__PURE__ */ (0, import_jsx_runtime29.jsx)(Button3, { variant: settings.engine === "cloud" ? "default" : "outline", onClick: () => patch({ engine: "cloud" }), children: "云端生成" }),
-        /* @__PURE__ */ (0, import_jsx_runtime29.jsx)(Button3, { variant: settings.engine === "comfyui" ? "default" : "outline", onClick: () => patch({ engine: "comfyui" }), children: "ComfyUI 本地" })
+    /* @__PURE__ */ (0, import_jsx_runtime29.jsxs)("div", { className: "grid gap-3", children: [
+      /* @__PURE__ */ (0, import_jsx_runtime29.jsxs)("div", { className: "flex flex-wrap gap-2", children: [
+        /* @__PURE__ */ (0, import_jsx_runtime29.jsx)(Button3, { variant: !local && settings.provider === "seedream" ? "default" : "outline", onClick: () => chooseProvider("seedream"), children: "Seedream" }),
+        /* @__PURE__ */ (0, import_jsx_runtime29.jsx)(Button3, { variant: !local && settings.provider === "gemini" ? "default" : "outline", onClick: () => chooseProvider("gemini"), children: "Gemini" }),
+        /* @__PURE__ */ (0, import_jsx_runtime29.jsx)(Button3, { variant: !local && settings.provider === "openai" ? "default" : "outline", onClick: () => chooseProvider("openai"), children: "OpenAI" }),
+        /* @__PURE__ */ (0, import_jsx_runtime29.jsx)(Button3, { variant: local ? "default" : "outline", onClick: () => patch({ engine: "comfyui" }), children: "ComfyUI 本地" })
       ] }),
-      settings.engine === "comfyui" ? /* @__PURE__ */ (0, import_jsx_runtime29.jsxs)("div", { className: "grid gap-2 rounded-xl bg-muted p-3 text-sm", children: [
+      local ? /* @__PURE__ */ (0, import_jsx_runtime29.jsxs)("div", { className: "grid gap-2 rounded-xl bg-muted p-3 text-sm", children: [
         /* @__PURE__ */ (0, import_jsx_runtime29.jsx)("p", { children: "统一换装与姿势工作流：选择服装、姿势或两者，网页自动切换分支。拼图逐格生成后排版，无需生图 API Key。" }),
-        /* @__PURE__ */ (0, import_jsx_runtime29.jsx)("p", { className: "text-xs leading-5 text-muted-foreground", children: "请在同一台电脑启动工作室和 ComfyUI。服务需设置 LANPOSE_COMFYUI=1，默认连接 127.0.0.1:8188。人物和参考图会存入本机 ComfyUI 的 input，结果保存在 output。下方云端配置保留给文字润色及其他云端功能。" }),
+        /* @__PURE__ */ (0, import_jsx_runtime29.jsx)("p", { className: "text-xs leading-5 text-muted-foreground", children: "请在同一台电脑启动工作室和 ComfyUI。服务需设置 LANPOSE_COMFYUI=1，默认连接 127.0.0.1:8188。人物和参考图会存入本机 ComfyUI 的 input，结果保存在 output。云端密钥和模型仍留在本机，改选 Seedream、Gemini 或 OpenAI 后会再显示。" }),
         /* @__PURE__ */ (0, import_jsx_runtime29.jsx)(Button3, { variant: "outline", disabled: checking, onClick: () => void checkConnection(), children: checking ? "检查中…" : "测试本机连接" }),
         connection ? /* @__PURE__ */ (0, import_jsx_runtime29.jsx)("p", { role: "status", className: "text-xs leading-5", children: connection }) : null
-      ] }) : null,
-      /* @__PURE__ */ (0, import_jsx_runtime29.jsxs)("div", { className: "flex flex-wrap gap-2", children: [
-        /* @__PURE__ */ (0, import_jsx_runtime29.jsx)(Button3, { variant: settings.provider === "seedream" ? "default" : "outline", onClick: () => chooseProvider("seedream"), children: "Seedream" }),
-        /* @__PURE__ */ (0, import_jsx_runtime29.jsx)(Button3, { variant: settings.provider === "gemini" ? "default" : "outline", onClick: () => chooseProvider("gemini"), children: "Gemini" }),
-        /* @__PURE__ */ (0, import_jsx_runtime29.jsx)(Button3, { variant: settings.provider === "openai" ? "default" : "outline", onClick: () => chooseProvider("openai"), children: "OpenAI" })
-      ] }),
-      /* @__PURE__ */ (0, import_jsx_runtime29.jsx)("p", { className: "text-xs leading-5 text-muted-foreground", children: settings.provider === "seedream" ? "火山方舟 Seedream。会把模特图和姿势线稿一起提交，默认生图模型 doubao-seedream-5-0-flash-260915。" : settings.provider === "gemini" ? "默认生图模型 gemini-2.5-flash-image。官方地址留空即可；中转站把根地址填进下面。" : "会先把模特图和姿势线稿交给 images/edits。接口不支持编辑时，自动改走文生图，并在结果上标明。" }),
-      /* @__PURE__ */ (0, import_jsx_runtime29.jsxs)("div", { className: "grid gap-1.5 text-sm", children: [
-        /* @__PURE__ */ (0, import_jsx_runtime29.jsxs)("div", { className: "flex items-center gap-1", children: [
-          /* @__PURE__ */ (0, import_jsx_runtime29.jsx)("span", { children: "API Key" }),
-          settings.provider === "seedream" ? /* @__PURE__ */ (0, import_jsx_runtime29.jsx)(
-            "a",
-            {
-              href: "https://exp.volcengine.com/ark/gen_image?model=doubao-seedream-5-0-flash-260915",
-              target: "_blank",
-              rel: "noopener noreferrer",
-              "aria-label": "去申请 API Key",
-              title: "去申请 API Key",
-              className: "inline-flex size-5 items-center justify-center rounded-md text-muted-foreground hover:bg-muted hover:text-foreground",
-              children: /* @__PURE__ */ (0, import_jsx_runtime29.jsx)(ExternalLink, { className: "size-3.5" })
-            }
-          ) : null
+      ] }) : /* @__PURE__ */ (0, import_jsx_runtime29.jsxs)(import_jsx_runtime29.Fragment, { children: [
+        /* @__PURE__ */ (0, import_jsx_runtime29.jsx)("p", { className: "text-xs leading-5 text-muted-foreground", children: settings.provider === "seedream" ? "火山方舟 Seedream。会把模特图和姿势线稿一起提交，默认生图模型 doubao-seedream-5-0-flash-260915。" : settings.provider === "gemini" ? "默认生图模型 gemini-2.5-flash-image。官方地址留空即可；中转站把根地址填进下面。" : "会先把模特图和姿势线稿交给 images/edits。接口不支持编辑时，自动改走文生图，并在结果上标明。" }),
+        /* @__PURE__ */ (0, import_jsx_runtime29.jsxs)("div", { className: "grid gap-1.5 text-sm", children: [
+          /* @__PURE__ */ (0, import_jsx_runtime29.jsxs)("div", { className: "flex items-center gap-1", children: [
+            /* @__PURE__ */ (0, import_jsx_runtime29.jsx)("span", { children: "API Key" }),
+            settings.provider === "seedream" ? /* @__PURE__ */ (0, import_jsx_runtime29.jsx)(
+              "a",
+              {
+                href: "https://exp.volcengine.com/ark/gen_image?model=doubao-seedream-5-0-flash-260915",
+                target: "_blank",
+                rel: "noopener noreferrer",
+                "aria-label": "去申请 API Key",
+                title: "去申请 API Key",
+                className: "inline-flex size-5 items-center justify-center rounded-md text-muted-foreground hover:bg-muted hover:text-foreground",
+                children: /* @__PURE__ */ (0, import_jsx_runtime29.jsx)(ExternalLink, { className: "size-3.5" })
+              }
+            ) : null
+          ] }),
+          /* @__PURE__ */ (0, import_jsx_runtime29.jsx)(Input3, { type: "password", autoComplete: "off", value: settings.apiKey, onChange: (event) => patch({ apiKey: event.target.value }), placeholder: settings.provider === "seedream" ? "填入火山方舟 API Key" : "填入 API Key" })
         ] }),
-        /* @__PURE__ */ (0, import_jsx_runtime29.jsx)(Input3, { type: "password", autoComplete: "off", value: settings.apiKey, onChange: (event) => patch({ apiKey: event.target.value }), placeholder: settings.provider === "seedream" ? "填入火山方舟 API Key" : "填入 API Key" })
+        /* @__PURE__ */ (0, import_jsx_runtime29.jsx)(Field, { label: "接口根地址", children: /* @__PURE__ */ (0, import_jsx_runtime29.jsx)(
+          Input3,
+          {
+            value: settings.baseURL,
+            onChange: (event) => patch({ baseURL: event.target.value }),
+            placeholder: settings.provider === "seedream" ? "https://ark.cn-beijing.volces.com/api/v3" : settings.provider === "gemini" ? "https://generativelanguage.googleapis.com/v1beta" : "https://api.openai.com/v1"
+          }
+        ) }),
+        /* @__PURE__ */ (0, import_jsx_runtime29.jsx)(Field, { label: "生图模型", children: /* @__PURE__ */ (0, import_jsx_runtime29.jsx)(Input3, { value: settings.model, onChange: (event) => patch({ model: event.target.value }), placeholder: modelFor(settings.provider) }) }),
+        /* @__PURE__ */ (0, import_jsx_runtime29.jsx)(Field, { label: "文本模型（可选）", hint: "只用于「扩写提示词」。留空则使用当前接口的默认文本模型。", children: /* @__PURE__ */ (0, import_jsx_runtime29.jsx)(
+          Input3,
+          {
+            value: settings.textModel,
+            onChange: (event) => patch({ textModel: event.target.value }),
+            placeholder: textModelFor(settings.provider, "")
+          }
+        ) })
       ] }),
-      /* @__PURE__ */ (0, import_jsx_runtime29.jsx)(Field, { label: "接口根地址", children: /* @__PURE__ */ (0, import_jsx_runtime29.jsx)(
-        Input3,
-        {
-          value: settings.baseURL,
-          onChange: (event) => patch({ baseURL: event.target.value }),
-          placeholder: settings.provider === "seedream" ? "https://ark.cn-beijing.volces.com/api/v3" : settings.provider === "gemini" ? "https://generativelanguage.googleapis.com/v1beta" : "https://api.openai.com/v1"
-        }
-      ) }),
-      /* @__PURE__ */ (0, import_jsx_runtime29.jsx)(Field, { label: "生图模型", children: /* @__PURE__ */ (0, import_jsx_runtime29.jsx)(Input3, { value: settings.model, onChange: (event) => patch({ model: event.target.value }), placeholder: modelFor(settings.provider) }) }),
-      /* @__PURE__ */ (0, import_jsx_runtime29.jsx)(Field, { label: "文本模型（可选）", hint: "只用于「扩写提示词」。留空则使用当前接口的默认文本模型。", children: /* @__PURE__ */ (0, import_jsx_runtime29.jsx)(
-        Input3,
-        {
-          value: settings.textModel,
-          onChange: (event) => patch({ textModel: event.target.value }),
-          placeholder: textModelFor(settings.provider, "")
-        }
-      ) }),
       /* @__PURE__ */ (0, import_jsx_runtime29.jsxs)("div", { className: "grid gap-2", children: [
         /* @__PURE__ */ (0, import_jsx_runtime29.jsx)(Label, { children: "比例" }),
         /* @__PURE__ */ (0, import_jsx_runtime29.jsx)("div", { className: "flex flex-wrap gap-1.5", children: ASPECT_RATIOS.map((ratio) => /* @__PURE__ */ (0, import_jsx_runtime29.jsx)(Button3, { size: "sm", variant: settings.aspectRatio === ratio ? "default" : "outline", onClick: () => patch({ aspectRatio: ratio }), children: ASPECT_LABEL[ratio] }, ratio)) })
@@ -12473,7 +12473,7 @@ function StudioFrame({ embedded }) {
           sheetError,
           hasKey: Boolean(settings.apiKey.trim()) || serverKey,
           onOpenSettings: () => {
-            setSheetError("先在设置里填写 API Key。");
+            setSheetError(settings.engine === "comfyui" ? "多视角 sheet 要用云端生图。请先选 Seedream、Gemini 或 OpenAI，并填写 API Key。" : "先在设置里填写 API Key。");
             setSettingsOpen(true);
           }
         }
@@ -15202,7 +15202,7 @@ function PoseStudio() {
       --shimmer-text-fill: initial;
     }
   }
-}\r
+}
 `;
       shadow.appendChild(style);
     }

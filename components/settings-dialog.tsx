@@ -46,11 +46,14 @@ export function SettingsDialog({
     const previousBase = baseURLFor(settings.provider)
     const baseIsDefault = settings.baseURL.trim() === "" || settings.baseURL === previousBase
     patch({
+      engine: "cloud",
       provider,
       model: stock ? modelFor(provider) : settings.model,
       baseURL: baseIsDefault ? baseURLFor(provider) : settings.baseURL,
     })
   }
+
+  const local = settings.engine === "comfyui"
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -59,24 +62,22 @@ export function SettingsDialog({
           <DialogTitle>生图设置</DialogTitle>
           <DialogDescription>密钥存在这台浏览器的本地存储里，不会写进仓库，也不会出现在提示词里。</DialogDescription>
         </DialogHeader>
-        <div className="grid gap-4">
-          <div className="flex gap-2">
-            <Button variant={settings.engine === "cloud" ? "default" : "outline"} onClick={() => patch({ engine: "cloud" })}>云端生成</Button>
-            <Button variant={settings.engine === "comfyui" ? "default" : "outline"} onClick={() => patch({ engine: "comfyui" })}>ComfyUI 本地</Button>
+        <div className="grid gap-3">
+          <div className="flex flex-wrap gap-2">
+            <Button variant={!local && settings.provider === "seedream" ? "default" : "outline"} onClick={() => chooseProvider("seedream")}>Seedream</Button>
+            <Button variant={!local && settings.provider === "gemini" ? "default" : "outline"} onClick={() => chooseProvider("gemini")}>Gemini</Button>
+            <Button variant={!local && settings.provider === "openai" ? "default" : "outline"} onClick={() => chooseProvider("openai")}>OpenAI</Button>
+            <Button variant={local ? "default" : "outline"} onClick={() => patch({ engine: "comfyui" })}>ComfyUI 本地</Button>
           </div>
-          {settings.engine === "comfyui" ? (
+          {local ? (
             <div className="grid gap-2 rounded-xl bg-muted p-3 text-sm">
               <p>统一换装与姿势工作流：选择服装、姿势或两者，网页自动切换分支。拼图逐格生成后排版，无需生图 API Key。</p>
-              <p className="text-xs leading-5 text-muted-foreground">请在同一台电脑启动工作室和 ComfyUI。服务需设置 LANPOSE_COMFYUI=1，默认连接 127.0.0.1:8188。人物和参考图会存入本机 ComfyUI 的 input，结果保存在 output。下方云端配置保留给文字润色及其他云端功能。</p>
+              <p className="text-xs leading-5 text-muted-foreground">请在同一台电脑启动工作室和 ComfyUI。服务需设置 LANPOSE_COMFYUI=1，默认连接 127.0.0.1:8188。人物和参考图会存入本机 ComfyUI 的 input，结果保存在 output。云端密钥和模型仍留在本机，改选 Seedream、Gemini 或 OpenAI 后会再显示。</p>
               <Button variant="outline" disabled={checking} onClick={() => void checkConnection()}>{checking ? "检查中…" : "测试本机连接"}</Button>
               {connection ? <p role="status" className="text-xs leading-5">{connection}</p> : null}
             </div>
-          ) : null}
-          <div className="flex flex-wrap gap-2">
-            <Button variant={settings.provider === "seedream" ? "default" : "outline"} onClick={() => chooseProvider("seedream")}>Seedream</Button>
-            <Button variant={settings.provider === "gemini" ? "default" : "outline"} onClick={() => chooseProvider("gemini")}>Gemini</Button>
-            <Button variant={settings.provider === "openai" ? "default" : "outline"} onClick={() => chooseProvider("openai")}>OpenAI</Button>
-          </div>
+          ) : (
+            <>
           <p className="text-xs leading-5 text-muted-foreground">
             {settings.provider === "seedream"
               ? "火山方舟 Seedream。会把模特图和姿势线稿一起提交，默认生图模型 doubao-seedream-5-0-flash-260915。"
@@ -119,6 +120,8 @@ export function SettingsDialog({
               placeholder={textModelFor(settings.provider, "")}
             />
           </Field>
+            </>
+          )}
           <div className="grid gap-2">
             <Label>比例</Label>
             <div className="flex flex-wrap gap-1.5">
