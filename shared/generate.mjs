@@ -122,10 +122,15 @@ function linkSignal(signal, ms) {
   return signal
 }
 
-/** Face references make Seedream synthesize identity instead of editing a character sheet, so the provider call runs longer. An explicit timeoutMs still wins. The result download uses its own budget. */
-export const FACE_GENERATION_TIMEOUT_MS = 480_000
+/**
+ * Hobby rejects maxDuration above 300s. The provider timer and the result-download timer run one after the other inside that function, so their sum stays under 300s.
+ * A face call gets 270s for Seedream and 20s to save the image (290s). Other calls stay at 240s plus the same 20s download (260s).
+ * An explicit timeoutMs still wins. Reference fetches that hit their own cap abort before the provider call, so those caps are not added on top.
+ */
+export const HOST_MAX_DURATION_MS = 300_000
+export const FACE_GENERATION_TIMEOUT_MS = 270_000
 export const DEFAULT_GENERATION_TIMEOUT_MS = 240_000
-export const RESULT_DOWNLOAD_TIMEOUT_MS = 60_000
+export const RESULT_DOWNLOAD_TIMEOUT_MS = 20_000
 
 export function generationTimeoutMs(images, timeoutMs) {
   if (Number.isFinite(timeoutMs)) return timeoutMs

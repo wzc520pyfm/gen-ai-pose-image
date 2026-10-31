@@ -3,7 +3,7 @@ import { NextResponse } from "next/server"
 import { statusForStudioError } from "@/shared/http-status.mjs"
 import { runGeneration } from "@/shared/jobs.mjs"
 
-export const maxDuration = 600
+export const maxDuration = 300
 
 export async function POST(request: Request) {
   let body: Record<string, unknown>

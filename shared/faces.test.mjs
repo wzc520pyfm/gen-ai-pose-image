@@ -4,7 +4,7 @@ import { test } from "node:test"
 import { buildLocalGraph, localPrompts } from "./comfyui.mjs"
 import { DEFAULT_CHARACTER } from "./character.mjs"
 import { fetchFaceBytes, getFace, getFaceCatalog, isSafeFacePath, searchFaces } from "./faces.mjs"
-import { generateImage, generationTimeoutMs, FACE_GENERATION_TIMEOUT_MS, DEFAULT_GENERATION_TIMEOUT_MS } from "./generate.mjs"
+import { generateImage, generationTimeoutMs, FACE_GENERATION_TIMEOUT_MS, DEFAULT_GENERATION_TIMEOUT_MS, RESULT_DOWNLOAD_TIMEOUT_MS, HOST_MAX_DURATION_MS } from "./generate.mjs"
 import { compressFaceReference, planRequest, referenceImages, runGeneration } from "./jobs.mjs"
 import { NO_MODEL_ID } from "./models.mjs"
 import { licenseNotices } from "./license.mjs"
@@ -200,6 +200,10 @@ test("a face without a character sheet is enough to generate", async () => {
 test("a face reference is sent as a smaller jpeg and gets a longer provider budget", async () => {
   assert.equal(generationTimeoutMs([{ role: "pose" }]), DEFAULT_GENERATION_TIMEOUT_MS)
   assert.equal(generationTimeoutMs([{ role: "face" }]), FACE_GENERATION_TIMEOUT_MS)
+  assert.equal(FACE_GENERATION_TIMEOUT_MS, 270_000)
+  assert.equal(DEFAULT_GENERATION_TIMEOUT_MS, 240_000)
+  assert.ok(FACE_GENERATION_TIMEOUT_MS + RESULT_DOWNLOAD_TIMEOUT_MS <= HOST_MAX_DURATION_MS)
+  assert.ok(DEFAULT_GENERATION_TIMEOUT_MS + RESULT_DOWNLOAD_TIMEOUT_MS <= HOST_MAX_DURATION_MS)
   assert.equal(generationTimeoutMs([{ role: "face" }], 110000), 110000)
   const large = await sharp({ create: { width: 1800, height: 2000, channels: 3, background: "red" } }).png().toBuffer()
   const face = await compressFaceReference({ mediaType: "image/png", buffer: large, role: "face" })
