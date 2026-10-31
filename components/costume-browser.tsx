@@ -106,7 +106,7 @@ export function CostumeBrowser({
 
   return (
     <section>
-      <div className="sticky top-0 z-10 border-b bg-white/95 px-4 py-3 backdrop-blur @min-[768px]/studio:px-6">
+      <div className="px-4 pt-3 pb-2 @min-[768px]/studio:px-6">
         <p className="mb-2 text-sm text-muted-foreground">这些图里没有人物。选一套之后，大肥鱼会换上这身衣服，脸、头发、鲸耳和鲸尾保持不变。</p>
         <div className="mb-2 flex flex-wrap gap-2">
           <button
