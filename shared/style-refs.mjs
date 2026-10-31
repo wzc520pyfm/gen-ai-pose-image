@@ -10,9 +10,10 @@ export const POSE_STYLE_PATHS = Object.freeze([
   "img/full_single_P001_front.png",
 ])
 
-/** One worn ghost-mannequin plate. The prompt must copy this presentation. */
+/** Worn ghost-mannequin plates. SUM-0174 is the studio framing; SPR-0062 shows the empty neck gap and bare legs. */
 export const COSTUME_STYLE_PATHS = Object.freeze([
   "png/SUM-0174.png",
+  "png/SPR-0062.png",
 ])
 
 export function stylePaths(kind) {

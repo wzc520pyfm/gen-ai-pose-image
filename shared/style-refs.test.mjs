@@ -34,6 +34,7 @@ test("style samples are a fixed pair of catalog files", () => {
   ])
   assert.deepEqual(COSTUME_STYLE_PATHS, [
     "png/SUM-0174.png",
+    "png/SPR-0062.png",
   ])
 })
 
@@ -65,7 +66,7 @@ test("pose reference generation hands two style images to generateImage", async 
   assert.match(generated.prompt, /严格模仿参考图的线稿风格与人偶质感，只按描述改姿态/)
 })
 
-test("costume reference generation sends only SUM-0174 and turns the watermark off", async () => {
+test("costume reference generation sends SUM-0174 and SPR-0062 and turns the watermark off", async () => {
   let generated = null
   await generateStyledReference({
     kind: "costume",
@@ -86,8 +87,9 @@ test("costume reference generation sends only SUM-0174 and turns the watermark o
   })
   assert.match(generated.prompt, /严格模仿参考图的构图、取景、机位距离、光线和地面柔和棚拍阴影/)
   assert.match(generated.prompt, /描述里有鞋才把鞋穿在脚下/)
-  assert.match(generated.prompt, /帽子要留出头部空间，不要占满头的位置/)
-  assert.match(generated.prompt, /没有提到的袜子、丝袜、连裤袜、包、鞋、外套都不要添加/)
+  assert.match(generated.prompt, /帽子与领口之间必须留出头部空间（可见空隙），帽子不能贴在衣领上/)
+  assert.match(generated.prompt, /未描述时严禁丝袜、连裤袜、黑丝、打底裤/)
+  assert.match(generated.prompt, /只画用户写到的衣物/)
   assert.match(generated.prompt, /不要平铺/)
 })
 
@@ -137,8 +139,8 @@ test("beautify instructions tell the model to copy the reference style", () => {
   assert.match(beautifyInstruction({ kind: "pose", userPrompt: "叉腰" }), /严格模仿参考图的线稿风格与人偶质感，只按描述改姿态/)
   assert.match(beautifyInstruction({ kind: "costume", userPrompt: "风衣" }), /严格模仿参考图的构图、取景、机位距离、光线和地面柔和棚拍阴影/)
   assert.match(beautifyInstruction({ kind: "costume", userPrompt: "风衣" }), /头部、脸部和手部不出现/)
-  assert.match(beautifyInstruction({ kind: "costume", userPrompt: "风衣" }), /帽子要留出头部空间，不要占满头的位置/)
-  assert.match(beautifyInstruction({ kind: "costume", userPrompt: "风衣" }), /不要添加没写到的袜子、丝袜、连裤袜、包、鞋或外套/)
+  assert.match(beautifyInstruction({ kind: "costume", userPrompt: "风衣" }), /帽子与领口之间必须留出头部空间（可见空隙），帽子不能贴在衣领上/)
+  assert.match(beautifyInstruction({ kind: "costume", userPrompt: "风衣" }), /未描述时严禁丝袜、连裤袜、黑丝、打底裤/)
   assert.doesNotMatch(beautifyInstruction({ kind: "costume", userPrompt: "风衣" }), /裸体|裸露|内衣|性暗示|色情|皮肤|露骨/)
   assert.doesNotMatch(beautifyInstruction({ kind: "pose", userPrompt: "叉腰" }), /裸体|裸露|内衣|性暗示|色情|露骨/)
 })
