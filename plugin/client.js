@@ -558,8 +558,23 @@ var __iconData10 = {
 __iconData10.node;
 var Settings = createLucideIcon(__iconData10);
 
-// node_modules/lucide-react/dist/esm/icons/sparkles.mjs
+// node_modules/lucide-react/dist/esm/icons/shuffle.mjs
 var __iconData11 = {
+  name: "shuffle",
+  size: 24,
+  node: [
+    ["path", { d: "m18 14 4 4-4 4", key: "10pe0f" }],
+    ["path", { d: "m18 2 4 4-4 4", key: "pucp1d" }],
+    ["path", { d: "M2 18h1.973a4 4 0 0 0 3.3-1.7l5.454-8.6a4 4 0 0 1 3.3-1.7H22", key: "1ailkh" }],
+    ["path", { d: "M2 6h1.972a4 4 0 0 1 3.6 2.2", key: "km57vx" }],
+    ["path", { d: "M22 18h-6.041a4 4 0 0 1-3.3-1.8l-.359-.45", key: "os18l9" }]
+  ]
+};
+__iconData11.node;
+var Shuffle = createLucideIcon(__iconData11);
+
+// node_modules/lucide-react/dist/esm/icons/sparkles.mjs
+var __iconData12 = {
   name: "sparkles",
   size: 24,
   node: [
@@ -576,11 +591,11 @@ var __iconData11 = {
   ],
   aliases: ["stars"]
 };
-__iconData11.node;
-var Sparkles = createLucideIcon(__iconData11);
+__iconData12.node;
+var Sparkles = createLucideIcon(__iconData12);
 
 // node_modules/lucide-react/dist/esm/icons/x.mjs
-var __iconData12 = {
+var __iconData13 = {
   name: "x",
   size: 24,
   node: [
@@ -588,8 +603,8 @@ var __iconData12 = {
     ["path", { d: "m6 6 12 12", key: "d8bk6v" }]
   ]
 };
-__iconData12.node;
-var X = createLucideIcon(__iconData12);
+__iconData13.node;
+var X = createLucideIcon(__iconData13);
 
 // components/character-dock.tsx
 var import_react7 = require("react");
@@ -10120,7 +10135,21 @@ function Composer({
           selected.length,
           " 个姿势"
         ] }),
-        /* @__PURE__ */ (0, import_jsx_runtime24.jsx)(Button3, { type: "button", size: "sm", variant: "outline", disabled: running, onClick: onRandom, children: "随机组合" })
+        /* @__PURE__ */ (0, import_jsx_runtime24.jsxs)(
+          Button3,
+          {
+            type: "button",
+            size: "sm",
+            variant: "outline",
+            disabled: running,
+            onClick: onRandom,
+            className: "rounded-full border-2 border-primary bg-primary/10 px-3 font-medium text-primary hover:border-primary hover:bg-primary/15 hover:text-primary",
+            children: [
+              /* @__PURE__ */ (0, import_jsx_runtime24.jsx)(Shuffle, {}),
+              "随机组合"
+            ]
+          }
+        )
       ] }),
       selected.length > 0 ? /* @__PURE__ */ (0, import_jsx_runtime24.jsx)("button", { type: "button", className: "text-xs text-muted-foreground underline-offset-2 hover:underline", onClick: onClear, children: "清空" }) : null
     ] }),
@@ -13917,6 +13946,10 @@ function PoseStudio() {
     border-style: var(--tw-border-style);
     border-width: 1px;
   }
+  .border-2 {
+    border-style: var(--tw-border-style);
+    border-width: 2px;
+  }
   .border-t {
     border-top-style: var(--tw-border-style);
     border-top-width: 1px;
@@ -14013,6 +14046,12 @@ function PoseStudio() {
   }
   .bg-primary {
     background-color: var(--primary);
+  }
+  .bg-primary\\/10 {
+    background-color: var(--primary);
+    @supports (color: color-mix(in lab, red, red)) {
+      background-color: color-mix(in oklab, var(--primary) 10%, transparent);
+    }
   }
   .bg-secondary {
     background-color: var(--secondary);
@@ -14544,6 +14583,9 @@ function PoseStudio() {
     width: calc(var(--spacing) * 0.5);
   }
   @media (hover: hover) {
+    .hover\\:border-primary:hover {
+      border-color: var(--primary);
+    }
     .hover\\:border-primary\\/40:hover {
       border-color: var(--primary);
     }
@@ -14574,6 +14616,14 @@ function PoseStudio() {
     .hover\\:bg-muted:hover {
       background-color: var(--muted);
     }
+    .hover\\:bg-primary\\/15:hover {
+      background-color: var(--primary);
+    }
+    @supports (color: color-mix(in lab, red, red)) {
+      .hover\\:bg-primary\\/15:hover {
+        background-color: color-mix(in oklab, var(--primary) 15%, transparent);
+      }
+    }
     .hover\\:bg-primary\\/80:hover {
       background-color: var(--primary);
     }
@@ -14603,6 +14653,9 @@ function PoseStudio() {
     }
     .hover\\:text-muted-foreground:hover {
       color: var(--muted-foreground);
+    }
+    .hover\\:text-primary:hover {
+      color: var(--primary);
     }
     .hover\\:text-white:hover {
       color: var(--color-white);

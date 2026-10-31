@@ -2,7 +2,7 @@
 
 /* eslint-disable @next/next/no-img-element -- results are data URLs and pose thumbs are proxied */
 
-import { Download, Loader2, Sparkles } from "lucide-react"
+import { Download, Loader2, Shuffle, Sparkles } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { HistoryPanel, type HistoryView } from "@/components/history-panel"
 import { Textarea } from "@/components/ui/textarea"
@@ -108,7 +108,17 @@ export function Composer({
       <div className="flex flex-wrap items-center justify-between gap-2">
         <div className="flex min-w-0 flex-wrap items-center gap-2">
           <h2 className="text-lg font-semibold">已选 {selected.length} 个姿势</h2>
-          <Button type="button" size="sm" variant="outline" disabled={running} onClick={onRandom}>随机组合</Button>
+          <Button
+            type="button"
+            size="sm"
+            variant="outline"
+            disabled={running}
+            onClick={onRandom}
+            className="rounded-full border-2 border-primary bg-primary/10 px-3 font-medium text-primary hover:border-primary hover:bg-primary/15 hover:text-primary"
+          >
+            <Shuffle />
+            随机组合
+          </Button>
         </div>
         {selected.length > 0 ? (
           <button type="button" className="text-xs text-muted-foreground underline-offset-2 hover:underline" onClick={onClear}>清空</button>
