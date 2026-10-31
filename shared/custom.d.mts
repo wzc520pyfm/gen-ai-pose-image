@@ -9,9 +9,11 @@ export function expandReferencePrompt(input?: { kind?: "pose" | "costume"; userP
 export function reuseFromHistory(entry: {
   extraPrompt?: string
   costume?: { id?: string; label?: string; keywords?: string } | null
+  face?: { id?: string; section?: string; hair?: string; label?: string; keywords?: string } | null
   selection?: Array<{ poseId?: string; viewId?: string; title?: string; angle?: string }>
 }): {
   selected: Record<string, string>
   extraPrompt: string
   costume: { id: string; label: string; keywords: string } | null
+  face: { id: string; section: string; hair: string; label: string; keywords: string } | null
 }
