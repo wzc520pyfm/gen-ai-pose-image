@@ -17,6 +17,7 @@ export function generateStyledReference(input: {
   model?: string
   prompt: string
   aspectRatio?: string
+  sensitivePromptOptimize?: boolean
   signal?: AbortSignal
   fetchPose?: (relativePath: string) => Promise<{ mediaType: string; buffer: Buffer; role?: string }>
   fetchCostume?: (relativePath: string) => Promise<{ mediaType: string; buffer: Buffer; role?: string }>

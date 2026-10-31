@@ -5,7 +5,8 @@ export function fitEdge(width: number, height: number, maxEdge?: number): { widt
 export function isStorageHigh(usage: number, quota: number, threshold?: number): boolean
 export function missingCustomPoseMessage(id: string): string
 export function missingCustomCostumeMessage(id: string): string
-export function expandReferencePrompt(input?: { kind?: "pose" | "costume"; userPrompt?: string; adult?: boolean }): string
+export function costumeStyleLock(sensitivePromptOptimize?: boolean): string
+export function expandReferencePrompt(input?: { kind?: "pose" | "costume"; userPrompt?: string; adult?: boolean; sensitivePromptOptimize?: boolean }): string
 export function reuseFromHistory(entry: {
   extraPrompt?: string
   costume?: { id?: string; label?: string; keywords?: string } | null
