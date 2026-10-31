@@ -27,8 +27,9 @@ test("credentials only reach explicit endpoint routes, never redirects or cookie
   assert.throws(() => createComfyClient({ url: "https://comfy.example", token: "bad\r\ntoken" }), /令牌格式/)
   const rejected = createComfyClient({ url: "https://comfy.example", fetchImpl: async () => new Response("denied", { status: 401 }) })
   await assert.rejects(rejected.request("/prompt"), /401.*令牌/)
-  const error = createComfyClient({ url: "https://comfy.example", token: "private-token", fetchImpl: async () => new Response("failed private-token", { status: 500 }) })
+  const error = createComfyClient({ url: "https://comfy.example", token: " private-token ", fetchImpl: async () => new Response("x".repeat(1195) + "private-token", { status: 500 }) })
   await assert.rejects(error.request("/prompt"), (e) => !e.message.includes("private-token"))
+  await assert.rejects(error.request("/prompt"), (e) => !e.message.includes("priva"))
 })
 
 test("connection checks validate service info and propagate timeout/abort", async () => {

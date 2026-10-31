@@ -1282,10 +1282,11 @@ function connectionURL(value = DEFAULT_COMFYUI_URL) {
 function createComfyClient({ url, token = "", signal, fetchImpl = fetch }) {
   const root = connectionURL(url);
   if (/[\r\n]/.test(token)) throw new Error("访问令牌格式无效。");
+  const accessToken = token.trim();
   const request = async (path, init = {}) => {
     if (!/^\/(system_stats|object_info|upload\/image|prompt|history\/[\w-]+|view(?:\?.*)?|queue)$/.test(path)) throw new Error("不支持的 ComfyUI 接口。");
     const headers = new Headers(init.headers);
-    if (token.trim()) headers.set("Authorization", `Bearer ${token.trim()}`);
+    if (accessToken) headers.set("Authorization", `Bearer ${accessToken}`);
     let response;
     try {
       response = await fetchImpl(root + path, { ...init, headers, signal: init.signal || signal, redirect: "error", credentials: "omit", cache: "no-store", referrerPolicy: "no-referrer" });
@@ -1295,8 +1296,9 @@ function createComfyClient({ url, token = "", signal, fetchImpl = fetch }) {
     }
     if (!response.ok) {
       if (response.status === 401 || response.status === 403) throw new Error(`ComfyUI 拒绝访问（${response.status}），请检查访问令牌和入口权限。`);
-      const message = (await response.text()).slice(0, 1200);
-      throw new Error(`ComfyUI 请求失败（${response.status}）：${token ? message.replaceAll(token, "[已隐藏]") : message}`);
+      const text = await response.text();
+      const message = (accessToken ? text.replaceAll(accessToken, "[已隐藏]") : text).slice(0, 1200);
+      throw new Error(`ComfyUI 请求失败（${response.status}）：${message}`);
     }
     return response;
   };
