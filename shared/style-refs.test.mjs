@@ -19,8 +19,8 @@ test("style samples are a fixed pair of catalog files", () => {
     "img/full_single_P001_front.png",
   ])
   assert.deepEqual(COSTUME_STYLE_PATHS, [
-    "png/SPR-0004.png",
-    "png/WIN-0001.png",
+    "png/SUM-0174.png",
+    "png/SUM-0001.png",
   ])
 })
 
@@ -69,7 +69,8 @@ test("costume reference generation hands the flat-lay samples and never an empty
       return { mediaType: "image/png", buffer: Buffer.from("ok"), referencesSent: true }
     },
   })
-  assert.match(generated.prompt, /严格模仿参考图的成套平铺：上衣、下装、鞋和配饰按穿着顺序摆好，只留窄缝，不要拆开散放，只按描述改这套衣服/)
+  assert.match(generated.prompt, /严格模仿参考图的隐形穿着效果/)
+  assert.match(generated.prompt, /不要平铺/)
 })
 
 test("a missing style sample errors and does not call text-only generation", async () => {
@@ -116,6 +117,6 @@ test("gateway timeouts become a readable studio error", () => {
 
 test("beautify instructions tell the model to copy the reference style", () => {
   assert.match(beautifyInstruction({ kind: "pose", userPrompt: "叉腰" }), /严格模仿参考图的线稿风格与人偶质感，只按描述改姿态/)
-  assert.match(beautifyInstruction({ kind: "costume", userPrompt: "风衣" }), /严格模仿参考图的成套平铺：上衣、下装、鞋和配饰按穿着顺序摆好，只留窄缝，不要拆开散放，只按描述改这套衣服/)
+  assert.match(beautifyInstruction({ kind: "costume", userPrompt: "风衣" }), /严格模仿参考图的隐形穿着效果/)
   assert.match(beautifyInstruction({ kind: "costume", userPrompt: "风衣" }), /不要裸体/)
 })

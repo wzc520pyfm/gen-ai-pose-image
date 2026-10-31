@@ -67,18 +67,18 @@ export function customCostumeRecord(asset) {
 }
 
 export const POSE_STYLE_LOCK = "严格模仿参考图的线稿风格与人偶质感，只按描述改姿态。"
-export const COSTUME_STYLE_LOCK = "严格模仿参考图的成套平铺：上衣、下装、鞋和配饰按穿着顺序摆好，只留窄缝，不要拆开散放，只按描述改这套衣服。"
+export const COSTUME_STYLE_LOCK = "严格模仿参考图的隐形穿着效果：衣服像穿在看不见的人身上，保持立体体积和柔和棚拍阴影，成套完整，只按描述改这套衣服。不要平铺，不要把单件散开放。"
 
 export function expandReferencePrompt({ kind = "pose", userPrompt = "", adult = false } = {}) {
   const note = String(userPrompt ?? "").trim().slice(0, 2000)
   const safe = adult ? "" : "画面保持非露骨：不要裸体，不要内衣，不要性暗示。"
   if (kind === "costume") {
     return [
-      "服装参考图是成套平铺。一套搭配好的衣服按穿着顺序摆在一起，上衣、下装、鞋和配饰只留窄缝，不要把单件散开铺在空白白底上。",
-      "只有衣服，没有人物，没有人台，没有假人，没有身体，没有皮肤，不要裸体。",
+      "服装参考图是隐形穿着的成套造型，不是平铺商品图。",
+      "上衣、下装、鞋和配饰保持穿上身后的立体体积，鞋在脚下，包在身侧，有柔和棚拍阴影。不要把头、脸、手、皮肤、人台或假人画出来，不要裸体。看不见的穿着者只用来撑起衣服。",
       COSTUME_STYLE_LOCK,
       safe,
-      note ? `服装描述：${note}` : "一套完整的日常外衣，包含上衣、下装、鞋和配饰。",
+      note ? `服装描述：${note}` : "一套完整的日常外衣，像已经穿好。",
       "不要文字，不要水印，不要人脸。",
     ].filter(Boolean).join("\n")
   }
