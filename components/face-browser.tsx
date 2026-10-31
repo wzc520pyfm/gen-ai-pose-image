@@ -106,7 +106,7 @@ export function FaceBrowser({
     <section>
       <div className="sticky top-0 z-10 border-b bg-white/95 px-4 py-3 backdrop-blur @min-[768px]/studio:px-6">
         <p className="mb-2 text-sm leading-6 text-muted-foreground">
-          选一张脸部参考。生图会把这张图的五官、表情、脸型和发型用到角色上，姿势和服装仍按各自的参考。鲸耳和鲸尾保留。
+          选一张脸部参考。生图会把这张图的五官、表情、脸型和发型用上，姿势和服装仍按各自的参考。选了模特时，鲸耳和鲸尾按该角色保留；没选模特时，身份以这张脸为准，不另加鲸耳或鲸尾。
         </p>
         <div className="mb-2 flex flex-wrap gap-2">
           <FilterChip active={section === ""} onClick={() => setSection("")} label="全部" count={catalog?.total} />

@@ -15,6 +15,8 @@ export type SavedModel = {
 }
 
 export const DEFAULT_MODEL_ID: string
+export const NO_MODEL_ID: string
+export const IDENTITY_REQUIRED: string
 
 export function createModelId(random?: () => string): string
 export function defaultModelLabel(existingCustomCount?: number): string

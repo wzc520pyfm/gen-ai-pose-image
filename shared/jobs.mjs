@@ -7,6 +7,7 @@ import { dirname, join } from "node:path"
 import { fileURLToPath } from "node:url"
 import { getBuiltinModel } from "./builtin-models.mjs"
 import { characterForBuiltin, characterFromUploads } from "./character.mjs"
+import { IDENTITY_REQUIRED, NO_MODEL_ID } from "./models.mjs"
 import { resolveView } from "./catalog.mjs"
 import { isCustomCostumeId, isCustomPoseId, missingCustomCostumeMessage, missingCustomPoseMessage } from "./custom.mjs"
 import { costumeFile, fetchCostumeBytes, getCostume } from "./costumes.mjs"
@@ -211,20 +212,34 @@ export function planRequest(input = {}) {
   const declaredCount = Number(input.characterCount) || 0
   const characterCount = uploads.length || declaredCount
   if (characterCount > 4) throw new Error("模特参考图最多 4 张")
-  const requestedBuiltin = typeof input.builtinModelId === "string" ? input.builtinModelId.trim() : ""
-  const builtinModelId = characterCount > 0 ? "" : (getBuiltinModel(requestedBuiltin)?.id || "dafeiyu")
-  const character = characterCount > 0 ? characterFromUploads(characterCount) : characterForBuiltin(builtinModelId)
   const costumeId = typeof input.costumeId === "string" ? input.costumeId.trim() : ""
   const costume = planCostume(costumeId, input)
   const faceId = typeof input.faceId === "string" ? input.faceId.trim() : ""
   const face = planFace(faceId)
+  const requestedBuiltin = typeof input.builtinModelId === "string" ? input.builtinModelId.trim() : ""
+  const omitModel = requestedBuiltin === NO_MODEL_ID
+  let builtinModelId = ""
+  let character = null
+  let identityCount = 1
+  if (uploads.length > 0 || (declaredCount > 0 && !omitModel)) {
+    identityCount = uploads.length || declaredCount
+    character = characterFromUploads(identityCount)
+  } else if (omitModel) {
+    if (!face) throw new Error(IDENTITY_REQUIRED)
+    identityCount = 0
+    character = null
+  } else {
+    builtinModelId = getBuiltinModel(requestedBuiltin)?.id || "dafeiyu"
+    character = characterForBuiltin(builtinModelId)
+    identityCount = 1
+  }
   if (input.engine === "comfyui" && items.length === 0) items.push({ viewId: "outfit", title: "仅换装", pose: null })
   const keepOutfit = costume ? false : input.keepOutfit !== false
   const extraPrompt = typeof input.extraPrompt === "string" ? input.extraPrompt.replace(/[^\S\n]+/g, " ").trim().slice(0, 2000) : ""
   const aspectRatio = ASPECTS.has(input.aspectRatio) ? input.aspectRatio : "3:4"
   const costumePrompt = costume ? { id: costume.id, keywords: costume.keywords } : null
   const facePrompt = face ? { id: face.id, section: face.section, hair: face.hair, label: face.label, keywords: face.keywords } : null
-  const promptInput = { character, extraPrompt, keepOutfit, costume: costumePrompt, face: facePrompt, characterCount: characterCount || 1 }
+  const promptInput = { character, extraPrompt, keepOutfit, costume: costumePrompt, face: facePrompt, characterCount: identityCount }
   let sheetPrompt = composePrompt({ ...promptInput, poses: items.map((item) => item.pose).filter(Boolean), mode: "sheet" })
   for (const item of items) {
     item.prompt = mode === "sheet"
@@ -233,7 +248,7 @@ export function planRequest(input = {}) {
   }
   if (input.engine === "comfyui") {
     for (const item of items) {
-      const p = localPrompts({ pose: item.pose, costume, face: facePrompt, extraPrompt, characterCount: characterCount || 1, keepOutfit })
+      const p = localPrompts({ pose: item.pose, costume, face: facePrompt, extraPrompt, characterCount: identityCount, keepOutfit })
       item.prompt = item.pose ? p.scaffold + "\n\n" + p.final : p.outfit
     }
     sheetPrompt = items.map((item, index) => `${index + 1}. ${item.prompt}`).join("\n\n")
@@ -272,6 +287,7 @@ export function promptCards(plan) {
 }
 
 export async function resolveCharacterImages(plan) {
+  if (!plan.character) return []
   if (plan.uploads.length === 0) return [await loadDefaultCharacterImage(plan.builtinModelId)]
   return plan.uploads.map(decodeCharacterImage)
 }

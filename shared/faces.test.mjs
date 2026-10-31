@@ -5,6 +5,7 @@ import { buildLocalGraph, localPrompts } from "./comfyui.mjs"
 import { DEFAULT_CHARACTER } from "./character.mjs"
 import { fetchFaceBytes, getFace, getFaceCatalog, isSafeFacePath, searchFaces } from "./faces.mjs"
 import { planRequest, referenceImages, runGeneration } from "./jobs.mjs"
+import { NO_MODEL_ID } from "./models.mjs"
 import { licenseNotices } from "./license.mjs"
 import { composePrompt } from "./prompt.mjs"
 
@@ -126,6 +127,73 @@ test("local workflow attaches the face original after the character slots", asyn
   })
   assert.equal(graph["510"].inputs.image, "face.png")
   assert.equal(graph["207"].inputs["images.image_5"][0], "510")
+})
+
+test("a face without a character sheet is enough to generate", async () => {
+  const poses = [{ name: "站立", category: "站姿", system: "全身单人・标准系", angle: "正面", people: 1 }]
+  const face = { id: FACE_ID, section: "脸部特写", hair: "短发", label: "内收短发" }
+  const text = composePrompt({ character: null, poses, face, characterCount: 0, costume: { id: "SPR-0001", keywords: "ivory frill knit" } })
+  assert.match(text, /第 1 张是脸部参考，只取五官、表情、脸型和发型，第 2 张是没有人物的服装图，从第 3 张起是姿势结构线稿/)
+  assert.match(text, /没有角色设定图/)
+  assert.match(text, /不要换成大肥鱼/)
+  assert.match(text, /不要添加鲸耳或鲸尾/)
+  assert.doesNotMatch(text, /鲸耳要长在这张脸上|鲸尾仍按角色参考/)
+  const bare = composePrompt({ character: null, poses, face, characterCount: 0 })
+  assert.match(bare, /第 1 张是脸部参考/)
+  assert.match(bare, /从第 2 张起是姿势结构线稿/)
+  assert.throws(() => composePrompt({ character: null, poses, characterCount: 0 }), /先选择一位模特，或选一张脸部参考/)
+
+  const plan = planRequest({ provider: "seedream", viewIds: ["full_single_P001"], faceId: FACE_ID, builtinModelId: NO_MODEL_ID, costumeId: "SPR-0001" })
+  assert.equal(plan.character, null)
+  assert.equal(plan.builtinModelId, "")
+  assert.match(plan.items[0].prompt, /脸部参考编号/)
+  assert.match(plan.items[0].prompt, /不要添加鲸耳或鲸尾/)
+  assert.doesNotMatch(plan.items[0].prompt, /鲸尾仍按角色参考/)
+  assert.throws(() => planRequest({ provider: "gemini", viewIds: ["full_single_P001"], builtinModelId: NO_MODEL_ID }), /先选择一位模特，或选一张脸部参考/)
+  const kept = planRequest({ provider: "gemini", viewIds: ["full_single_P001"], faceId: FACE_ID })
+  assert.equal(kept.character.id, "dafeiyu")
+  assert.match(kept.items[0].prompt, /鲸耳要长在这张脸上/)
+
+  const png = await sharp({ create: { width: 8, height: 8, channels: 3, background: "red" } }).png().toBuffer()
+  const webp = await sharp({ create: { width: 8, height: 8, channels: 3, background: "blue" } }).webp().toBuffer()
+  const seen = []
+  await runGeneration({
+    provider: "gemini",
+    apiKey: "test-key",
+    viewIds: ["full_single_P001"],
+    faceId: FACE_ID,
+    builtinModelId: NO_MODEL_ID,
+    costumeId: "SPR-0001",
+  }, {
+    fetchPose: async () => ({ mediaType: "image/png", buffer: png, role: "pose" }),
+    fetchCostume: async () => ({ mediaType: "image/webp", buffer: webp, role: "costume" }),
+    fetchFace: async () => ({ mediaType: "image/png", buffer: png, role: "face" }),
+    generate: async ({ images }) => {
+      seen.push(images.map((image) => image.role))
+      return { mediaType: "image/png", buffer: png, referencesSent: true }
+    },
+  })
+  assert.deepEqual(seen[0], ["face", "costume", "pose"])
+
+  const pose = { name: "双手抬起", angle: "正面", category: "站姿", people: 1 }
+  const local = localPrompts({ pose, costume: { id: "SPR-0001" }, face, characterCount: 0 })
+  assert.match(local.final, /no character sheet/i)
+  assert.match(local.final, /Do not add whale ears/)
+  assert.doesNotMatch(`${local.outfit} ${local.scaffold} ${local.final}`, /when the character has them/)
+  const { graph } = await buildLocalGraph({
+    files: { characters: [], garment: "clothes.png", pose: "pose.png", face: "face.png" },
+    costume: { id: "SPR-0001" },
+    pose,
+    face,
+    aspectRatio: "3:4",
+  })
+  assert.equal(graph["510"], undefined)
+  const loaded = Object.values(graph).filter((node) => node.class_type === "LoadImage").map((node) => node.inputs.image)
+  assert.deepEqual(loaded.filter((name) => name === "face.png"), ["face.png"])
+  await assert.rejects(
+    buildLocalGraph({ files: { characters: [] }, costume: false, pose, aspectRatio: "3:4" }),
+    /先选择一位模特，或选一张脸部参考/,
+  )
 })
 
 test("face bytes stay remote and license credits ギア under CC0", async () => {
