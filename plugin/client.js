@@ -507,8 +507,20 @@ var __iconData6 = {
 __iconData6.node;
 var LoaderCircle = createLucideIcon(__iconData6);
 
-// node_modules/lucide-react/dist/esm/icons/search.mjs
+// node_modules/lucide-react/dist/esm/icons/rotate-ccw.mjs
 var __iconData7 = {
+  name: "rotate-ccw",
+  size: 24,
+  node: [
+    ["path", { d: "M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8", key: "1357e3" }],
+    ["path", { d: "M3 3v5h5", key: "1xhq8a" }]
+  ]
+};
+__iconData7.node;
+var RotateCcw = createLucideIcon(__iconData7);
+
+// node_modules/lucide-react/dist/esm/icons/search.mjs
+var __iconData8 = {
   name: "search",
   size: 24,
   node: [
@@ -516,11 +528,11 @@ var __iconData7 = {
     ["circle", { cx: "11", cy: "11", r: "8", key: "4ej97u" }]
   ]
 };
-__iconData7.node;
-var Search = createLucideIcon(__iconData7);
+__iconData8.node;
+var Search = createLucideIcon(__iconData8);
 
 // node_modules/lucide-react/dist/esm/icons/settings.mjs
-var __iconData8 = {
+var __iconData9 = {
   name: "settings",
   size: 24,
   node: [
@@ -534,11 +546,11 @@ var __iconData8 = {
     ["circle", { cx: "12", cy: "12", r: "3", key: "1v7zrd" }]
   ]
 };
-__iconData8.node;
-var Settings = createLucideIcon(__iconData8);
+__iconData9.node;
+var Settings = createLucideIcon(__iconData9);
 
 // node_modules/lucide-react/dist/esm/icons/sparkles.mjs
-var __iconData9 = {
+var __iconData10 = {
   name: "sparkles",
   size: 24,
   node: [
@@ -555,11 +567,11 @@ var __iconData9 = {
   ],
   aliases: ["stars"]
 };
-__iconData9.node;
-var Sparkles = createLucideIcon(__iconData9);
+__iconData10.node;
+var Sparkles = createLucideIcon(__iconData10);
 
 // node_modules/lucide-react/dist/esm/icons/x.mjs
-var __iconData10 = {
+var __iconData11 = {
   name: "x",
   size: 24,
   node: [
@@ -567,8 +579,8 @@ var __iconData10 = {
     ["path", { d: "m6 6 12 12", key: "d8bk6v" }]
   ]
 };
-__iconData10.node;
-var X = createLucideIcon(__iconData10);
+__iconData11.node;
+var X = createLucideIcon(__iconData11);
 
 // components/character-dock.tsx
 var import_react7 = require("react");
@@ -11002,75 +11014,36 @@ function CostumeBrowser({
 
 // components/pose-browser.tsx
 var import_react11 = require("react");
-
-// node_modules/@base-ui/react/use-render/useRender.mjs
-function useRender(params) {
-  return useRenderElement(params.defaultTagName ?? "div", params, params);
-}
-
-// components/ui/badge.tsx
-var badgeVariants = cva(
-  "group/badge inline-flex h-5 w-fit shrink-0 items-center justify-center gap-1 overflow-hidden rounded-4xl border border-transparent px-2 py-0.5 text-xs font-medium whitespace-nowrap transition-all focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50 has-data-[icon=inline-end]:pr-1.5 has-data-[icon=inline-start]:pl-1.5 aria-invalid:border-destructive aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 [&>svg]:pointer-events-none [&>svg]:size-3!",
-  {
-    variants: {
-      variant: {
-        default: "bg-primary text-primary-foreground [a]:hover:bg-primary/80",
-        secondary: "bg-secondary text-secondary-foreground [a]:hover:bg-secondary/80",
-        destructive: "bg-destructive/10 text-destructive focus-visible:ring-destructive/20 dark:bg-destructive/20 dark:focus-visible:ring-destructive/40 [a]:hover:bg-destructive/20",
-        outline: "border-border text-foreground [a]:hover:bg-muted [a]:hover:text-muted-foreground",
-        ghost: "hover:bg-muted hover:text-muted-foreground dark:hover:bg-muted/50",
-        link: "text-primary underline-offset-4 hover:underline"
-      }
-    },
-    defaultVariants: {
-      variant: "default"
-    }
-  }
-);
-function Badge({
-  className,
-  variant = "default",
-  render,
-  ...props
-}) {
-  return useRender({
-    defaultTagName: "span",
-    props: mergeProps(
-      {
-        className: cn(badgeVariants({ variant }), className)
-      },
-      props
-    ),
-    render,
-    state: {
-      slot: "badge",
-      variant
-    }
+var import_jsx_runtime27 = require("react/jsx-runtime");
+var ANGLES = ["正面", "俯视", "仰视", "侧面", "斜侧"];
+var THUMB_COLS = ["", "grid-cols-1", "grid-cols-2", "grid-cols-3", "grid-cols-4", "grid-cols-5"];
+function orderedViews(pose) {
+  return [...pose.views].sort((a, b) => {
+    const ai = ANGLES.indexOf(a.angle);
+    const bi = ANGLES.indexOf(b.angle);
+    return (ai === -1 ? ANGLES.length : ai) - (bi === -1 ? ANGLES.length : bi);
   });
 }
-
-// components/pose-browser.tsx
-var import_jsx_runtime27 = require("react/jsx-runtime");
-var ANGLES = ["正面", "斜侧", "侧面", "俯视", "仰视"];
-var SHORT_SYSTEM = {
-  full: "标准全身",
-  sexy: "性感全身",
-  bust: "上半身",
-  pair: "双人"
-};
-function displayView(pose, selectedViewId, angle) {
+function shownView(pose, selectedViewId, cardViewId, angle) {
   if (selectedViewId) {
     const chosen = pose.views.find((view) => view.id === selectedViewId);
     if (chosen) return chosen;
   }
-  if (angle) return pose.views.find((view) => view.angle === angle);
+  if (cardViewId) {
+    const chosen = pose.views.find((view) => view.id === cardViewId);
+    if (chosen) return chosen;
+  }
+  if (angle) {
+    const chosen = pose.views.find((view) => view.angle === angle);
+    if (chosen) return chosen;
+  }
   return pose.views.find((view) => view.angle === "正面") ?? pose.views[0];
 }
-function PoseFigure({ view, alt, size = "thumb" }) {
+function PoseFigure({ view, alt, size = "thumb", compact = false }) {
   const { basePath } = useStudioEnv();
   const [failed, setFailed] = (0, import_react11.useState)(false);
   if (failed) {
-    return /* @__PURE__ */ (0, import_jsx_runtime27.jsx)("div", { className: "grid h-full place-items-center px-3 text-center text-xs text-muted-foreground", children: "线稿暂时加载不到" });
+    return /* @__PURE__ */ (0, import_jsx_runtime27.jsx)("div", { className: `grid h-full place-items-center text-center text-muted-foreground ${compact ? "px-0.5 text-[10px] leading-3" : "px-3 text-xs"}`, children: compact ? "无图" : "线稿暂时加载不到" });
   }
   return /* @__PURE__ */ (0, import_jsx_runtime27.jsx)(
     "img",
@@ -11103,15 +11076,17 @@ function PoseBrowser({
 }) {
   const [systemId, setSystemId] = (0, import_react11.useState)("full");
   const customSection = systemId === "custom";
+  const allSeries = systemId === "all";
   const [category, setCategory] = (0, import_react11.useState)("全部");
   const [angle, setAngle] = (0, import_react11.useState)("");
   const [query, setQuery] = (0, import_react11.useState)("");
+  const [cardViews, setCardViews] = (0, import_react11.useState)({});
   const [preview, setPreview] = (0, import_react11.useState)(null);
   const searchRef = (0, import_react11.useRef)(null);
   (0, import_react11.useEffect)(() => {
     const onKey = (event) => {
       const target = event.target;
-      const typing = target instanceof HTMLElement && (target.tagName === "INPUT" || target.tagName === "TEXTAREA");
+      const typing = target instanceof HTMLElement && (target.tagName === "INPUT" || target.tagName === "TEXTAREA" || target.tagName === "SELECT");
       if (event.key === "/" && !typing) {
         event.preventDefault();
         searchRef.current?.focus();
@@ -11120,19 +11095,23 @@ function PoseBrowser({
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
   }, []);
-  const system = customSection ? void 0 : catalog?.systems.find((item) => item.id === systemId) ?? catalog?.systems[0];
+  const system = !customSection && !allSeries ? catalog?.systems.find((item) => item.id === systemId) ?? catalog?.systems[0] : void 0;
   const visibleCustom = customPoses.filter((item) => showAdult || !item.adult);
   const hiddenCustomAdult = customPoses.length - visibleCustom.length;
+  const visiblePoseCount = (0, import_react11.useMemo)(() => {
+    if (!catalog) return 0;
+    return catalog.poses.filter((pose) => showAdult || !pose.adult).length;
+  }, [catalog, showAdult]);
   const categories = (0, import_react11.useMemo)(() => {
-    if (!catalog || !system) return ["全部"];
+    if (!catalog || !allSeries && !system) return ["全部"];
     const names = /* @__PURE__ */ new Set();
     for (const pose of catalog.poses) {
-      if (pose.systemId !== system.id) continue;
+      if (!allSeries && pose.systemId !== system?.id) continue;
       if (!showAdult && pose.adult) continue;
       names.add(pose.category);
     }
     return ["全部", ...names];
-  }, [catalog, system, showAdult]);
+  }, [catalog, system, allSeries, showAdult]);
   (0, import_react11.useEffect)(() => {
     if (!categories.includes(category)) setCategory("全部");
   }, [categories, category]);
@@ -11149,10 +11128,10 @@ function PoseBrowser({
     onRequestedSystemApplied();
   }, [requestedSystem, showAdult, catalog, onRequestedSystemApplied]);
   const poses = (0, import_react11.useMemo)(() => {
-    if (!catalog || !system) return [];
+    if (!catalog || !allSeries && !system) return [];
     const parts = query.trim().toLowerCase().split(/\s+/).filter(Boolean);
     return catalog.poses.filter((pose) => {
-      if (pose.systemId !== system.id) return false;
+      if (!allSeries && pose.systemId !== system?.id) return false;
       if (!showAdult && pose.adult) return false;
       if (category !== "全部" && pose.category !== category) return false;
       if (angle && !pose.views.some((view) => view.angle === angle)) return false;
@@ -11160,17 +11139,46 @@ function PoseBrowser({
       const hay = `${pose.name} ${pose.code} ${pose.category} ${pose.system} ${pose.id}`.toLowerCase();
       return parts.every((part) => hay.includes(part));
     });
-  }, [catalog, system, query, category, angle, showAdult]);
-  const hiddenAdult = catalog && system ? catalog.poses.filter((pose) => pose.systemId === system.id && pose.adult).length : 0;
-  return /* @__PURE__ */ (0, import_jsx_runtime27.jsxs)("section", { className: "flex min-h-0 flex-col", children: [
-    /* @__PURE__ */ (0, import_jsx_runtime27.jsxs)("div", { className: "sticky top-0 z-10 border-b bg-white/95 px-4 py-3 backdrop-blur @min-[768px]/studio:px-6", children: [
-      /* @__PURE__ */ (0, import_jsx_runtime27.jsxs)("div", { className: "flex flex-wrap gap-2", children: [
+  }, [catalog, system, allSeries, query, category, angle, showAdult]);
+  const hiddenAdult = catalog ? catalog.poses.filter((pose) => (allSeries || pose.systemId === system?.id) && pose.adult).length : 0;
+  function setPerspective(next) {
+    setAngle(next);
+    setCardViews({});
+  }
+  function resetFilters() {
+    setQuery("");
+    setCategory("全部");
+    setAngle("");
+    setCardViews({});
+  }
+  function chooseView(pose, view) {
+    setCardViews((current) => ({ ...current, [pose.id]: view.id }));
+    if (selected[pose.id] && selected[pose.id] !== view.id) onToggle(pose, view);
+  }
+  function activatePose(pose, view) {
+    if (selected[pose.id]) {
+      const current = pose.views.find((item) => item.id === selected[pose.id]) ?? view;
+      setCardViews((prev) => ({ ...prev, [pose.id]: current.id }));
+      onToggle(pose, current);
+      return;
+    }
+    onToggle(pose, view);
+  }
+  return /* @__PURE__ */ (0, import_jsx_runtime27.jsxs)("section", { className: "@container/poses flex min-h-0 flex-col", children: [
+    /* @__PURE__ */ (0, import_jsx_runtime27.jsxs)("div", { className: "px-4 pt-3 pb-2 @min-[768px]/studio:px-6", children: [
+      /* @__PURE__ */ (0, import_jsx_runtime27.jsxs)("div", { className: "flex gap-1.5 overflow-x-auto pb-1", children: [
+        /* @__PURE__ */ (0, import_jsx_runtime27.jsx)(SeriesPill, { active: allSeries, count: visiblePoseCount, onClick: () => {
+          setSystemId("all");
+          setCategory("全部");
+        }, children: "全部" }),
         catalog?.systems.map((item) => {
-          const active = !customSection && item.id === system?.id;
-          return /* @__PURE__ */ (0, import_jsx_runtime27.jsxs)(
-            "button",
+          const active = !customSection && !allSeries && item.id === system?.id;
+          return /* @__PURE__ */ (0, import_jsx_runtime27.jsx)(
+            SeriesPill,
             {
-              type: "button",
+              active,
+              count: item.poseCount,
+              adult: item.adult,
               title: item.name,
               onClick: () => {
                 if (item.adult && !showAdult) {
@@ -11180,66 +11188,60 @@ function PoseBrowser({
                 setSystemId(item.id);
                 setCategory("全部");
               },
-              className: `inline-flex items-center gap-1.5 whitespace-nowrap rounded-full px-3 py-1.5 text-sm leading-5 ${active ? "bg-primary text-primary-foreground" : "bg-white text-foreground ring-1 ring-border"}`,
-              children: [
-                /* @__PURE__ */ (0, import_jsx_runtime27.jsx)("span", { children: SHORT_SYSTEM[item.id] ?? item.name }),
-                /* @__PURE__ */ (0, import_jsx_runtime27.jsx)("span", { className: `text-xs ${active ? "text-primary-foreground/80" : "text-muted-foreground"}`, children: item.poseCount }),
-                item.adult ? /* @__PURE__ */ (0, import_jsx_runtime27.jsx)("span", { className: `text-[10px] ${active ? "text-primary-foreground/80" : "text-amber-700"}`, children: "成人向" }) : null
-              ]
+              children: item.name
             },
             item.id
           );
         }),
-        /* @__PURE__ */ (0, import_jsx_runtime27.jsxs)(
-          "button",
-          {
-            type: "button",
-            onClick: () => setSystemId("custom"),
-            className: `inline-flex items-center gap-1.5 whitespace-nowrap rounded-full px-3 py-1.5 text-sm leading-5 ${customSection ? "bg-primary text-primary-foreground" : "bg-white text-foreground ring-1 ring-border"}`,
-            children: [
-              /* @__PURE__ */ (0, import_jsx_runtime27.jsx)("span", { children: "自定义" }),
-              /* @__PURE__ */ (0, import_jsx_runtime27.jsx)("span", { className: `text-xs ${customSection ? "text-primary-foreground/80" : "text-muted-foreground"}`, children: visibleCustom.length })
-            ]
-          }
-        )
+        /* @__PURE__ */ (0, import_jsx_runtime27.jsx)(SeriesPill, { active: customSection, count: visibleCustom.length, onClick: () => setSystemId("custom"), children: "自定义" })
       ] }),
-      customSection ? null : /* @__PURE__ */ (0, import_jsx_runtime27.jsxs)(import_jsx_runtime27.Fragment, { children: [
-        /* @__PURE__ */ (0, import_jsx_runtime27.jsxs)("div", { className: "relative", children: [
-          /* @__PURE__ */ (0, import_jsx_runtime27.jsx)(Search, { className: "pointer-events-none absolute top-1/2 left-2.5 size-4 -translate-y-1/2 text-muted-foreground" }),
+      customSection ? null : /* @__PURE__ */ (0, import_jsx_runtime27.jsxs)("div", { className: "mt-2 flex flex-wrap items-center gap-2", children: [
+        /* @__PURE__ */ (0, import_jsx_runtime27.jsxs)("div", { className: "relative min-w-[8.5rem] flex-1", children: [
+          /* @__PURE__ */ (0, import_jsx_runtime27.jsx)(Search, { className: "pointer-events-none absolute top-1/2 left-2.5 size-3.5 -translate-y-1/2 text-muted-foreground" }),
           /* @__PURE__ */ (0, import_jsx_runtime27.jsx)(
             Input3,
             {
               ref: searchRef,
               value: query,
               onChange: (event) => setQuery(event.target.value),
-              placeholder: "搜索姿势名、编号或分类",
+              placeholder: "搜索姿势名称、编号（如 P001）",
               "aria-label": "搜索姿势",
-              className: "h-10 bg-card pr-9 pl-8"
+              className: "h-8 bg-card pr-8 pl-8 text-sm"
             }
           ),
-          query ? /* @__PURE__ */ (0, import_jsx_runtime27.jsx)("button", { type: "button", className: "absolute top-1/2 right-2 -translate-y-1/2 text-muted-foreground", onClick: () => setQuery(""), "aria-label": "清空搜索", children: /* @__PURE__ */ (0, import_jsx_runtime27.jsx)(X, { className: "size-4" }) }) : null
+          query ? /* @__PURE__ */ (0, import_jsx_runtime27.jsx)("button", { type: "button", className: "absolute top-1/2 right-2 -translate-y-1/2 text-muted-foreground", onClick: () => setQuery(""), "aria-label": "清空搜索", children: /* @__PURE__ */ (0, import_jsx_runtime27.jsx)(X, { className: "size-3.5" }) }) : null
         ] }),
-        /* @__PURE__ */ (0, import_jsx_runtime27.jsxs)("div", { className: "mt-2 flex flex-wrap gap-1.5", children: [
-          /* @__PURE__ */ (0, import_jsx_runtime27.jsx)(FilterChip, { active: angle === "", onClick: () => setAngle(""), children: "全部视角" }),
-          ANGLES.map((item) => /* @__PURE__ */ (0, import_jsx_runtime27.jsx)(FilterChip, { active: angle === item, onClick: () => setAngle(item), children: item }, item))
-        ] }),
-        /* @__PURE__ */ (0, import_jsx_runtime27.jsxs)("label", { className: "mt-2 block text-xs text-muted-foreground @min-[768px]/studio:hidden", children: [
-          "分类",
-          /* @__PURE__ */ (0, import_jsx_runtime27.jsx)(
-            "select",
+        /* @__PURE__ */ (0, import_jsx_runtime27.jsx)(
+          "select",
+          {
+            className: "h-8 max-w-full shrink-0 rounded-lg border border-input bg-card px-2 text-sm text-foreground",
+            value: category,
+            "aria-label": "动作分类",
+            onChange: (event) => setCategory(event.target.value),
+            children: categories.map((item) => /* @__PURE__ */ (0, import_jsx_runtime27.jsx)("option", { value: item, children: item === "全部" ? "全部动作分类" : item }, item))
+          }
+        ),
+        /* @__PURE__ */ (0, import_jsx_runtime27.jsxs)("div", { className: "flex max-w-full items-center gap-1.5 @min-[640px]/poses:ml-auto", children: [
+          /* @__PURE__ */ (0, import_jsx_runtime27.jsxs)("div", { role: "radiogroup", "aria-label": "视角", className: "inline-flex h-8 min-w-0 items-center overflow-x-auto rounded-full bg-secondary p-0.5", children: [
+            /* @__PURE__ */ (0, import_jsx_runtime27.jsx)(AngleSegment, { active: angle === "", onClick: () => setPerspective(""), children: "全部视角" }),
+            ANGLES.map((item) => /* @__PURE__ */ (0, import_jsx_runtime27.jsx)(AngleSegment, { active: angle === item, onClick: () => setPerspective(item), children: item }, item))
+          ] }),
+          /* @__PURE__ */ (0, import_jsx_runtime27.jsxs)(
+            "button",
             {
-              className: "mt-1 h-10 w-full rounded-lg border bg-card px-2 text-sm text-foreground",
-              value: category,
-              "aria-label": "姿势分类",
-              onChange: (event) => setCategory(event.target.value),
-              children: categories.map((item) => /* @__PURE__ */ (0, import_jsx_runtime27.jsx)("option", { value: item, children: item }, item))
+              type: "button",
+              onClick: resetFilters,
+              className: "inline-flex h-8 shrink-0 items-center gap-1 rounded-full px-2.5 text-xs text-muted-foreground ring-1 ring-border hover:bg-card hover:text-foreground",
+              children: [
+                /* @__PURE__ */ (0, import_jsx_runtime27.jsx)(RotateCcw, { className: "size-3.5" }),
+                "重置"
+              ]
             }
           )
-        ] }),
-        /* @__PURE__ */ (0, import_jsx_runtime27.jsx)("div", { className: "mt-2 hidden flex-wrap gap-1.5 @min-[768px]/studio:flex", children: categories.map((item) => /* @__PURE__ */ (0, import_jsx_runtime27.jsx)(FilterChip, { active: category === item, onClick: () => setCategory(item), children: item }, item)) })
+        ] })
       ] })
     ] }),
-    /* @__PURE__ */ (0, import_jsx_runtime27.jsxs)("div", { className: "px-4 py-4 @min-[768px]/studio:px-6", children: [
+    /* @__PURE__ */ (0, import_jsx_runtime27.jsxs)("div", { className: "px-4 py-3 @min-[768px]/studio:px-6", children: [
       customSection ? /* @__PURE__ */ (0, import_jsx_runtime27.jsx)(
         CustomReferencePanel,
         {
@@ -11282,30 +11284,21 @@ function PoseBrowser({
         /* @__PURE__ */ (0, import_jsx_runtime27.jsx)("p", { className: "mt-1 text-sm text-muted-foreground", children: hiddenAdult > 0 && !showAdult ? `这一体系里有 ${hiddenAdult} 个成人向姿势被收着。` : "换个词，或把分类、视角清掉。" }),
         hiddenAdult > 0 && !showAdult ? /* @__PURE__ */ (0, import_jsx_runtime27.jsx)(Button3, { className: "mt-3", variant: "outline", onClick: () => onRequestAdult(system?.id ?? "sexy"), children: "显示成人向姿势" }) : null
       ] }) : null,
-      customSection ? null : /* @__PURE__ */ (0, import_jsx_runtime27.jsx)("div", { className: "grid grid-cols-2 gap-3 @min-[640px]/studio:grid-cols-3 @min-[1280px]/studio:grid-cols-4 @min-[1536px]/studio:grid-cols-5", children: poses.map((pose) => {
-        const view = displayView(pose, selected[pose.id], angle);
+      customSection ? null : /* @__PURE__ */ (0, import_jsx_runtime27.jsx)("div", { className: "grid grid-cols-1 gap-3 @min-[480px]/poses:grid-cols-2 @min-[920px]/poses:grid-cols-3", children: poses.map((pose) => {
+        const view = shownView(pose, selected[pose.id], cardViews[pose.id], angle);
         if (!view) return null;
-        return /* @__PURE__ */ (0, import_jsx_runtime27.jsxs)("article", { className: `overflow-hidden rounded-xl border bg-card shadow-sm transition ${selected[pose.id] ? "border-primary ring-2 ring-primary/25" : "border-border hover:border-primary/40"}`, children: [
-          /* @__PURE__ */ (0, import_jsx_runtime27.jsxs)("button", { type: "button", className: "block w-full text-left", onClick: () => onToggle(pose, view), "aria-pressed": Boolean(selected[pose.id]), children: [
-            /* @__PURE__ */ (0, import_jsx_runtime27.jsxs)("div", { className: "relative aspect-[3/4] bg-white", children: [
-              /* @__PURE__ */ (0, import_jsx_runtime27.jsx)(PoseFigure, { view, alt: `${pose.name}，${view.angle}` }),
-              selected[pose.id] ? /* @__PURE__ */ (0, import_jsx_runtime27.jsx)("span", { className: "absolute top-2 left-2 rounded-full bg-primary px-2 py-0.5 text-[11px] text-primary-foreground", children: "已选" }) : null,
-              /* @__PURE__ */ (0, import_jsx_runtime27.jsx)("span", { className: "absolute right-2 bottom-2 rounded-full bg-black/60 px-2 py-0.5 text-[11px] text-white", children: view.angle })
-            ] }),
-            /* @__PURE__ */ (0, import_jsx_runtime27.jsxs)("div", { className: "space-y-1 px-2.5 py-2 @min-[640px]/studio:px-3 @min-[640px]/studio:py-2.5", children: [
-              /* @__PURE__ */ (0, import_jsx_runtime27.jsx)("h3", { className: "line-clamp-2 text-sm leading-5 font-medium", children: pose.name }),
-              /* @__PURE__ */ (0, import_jsx_runtime27.jsxs)("p", { className: "truncate text-xs text-muted-foreground", children: [
-                pose.code,
-                " · ",
-                pose.category
-              ] })
-            ] })
-          ] }),
-          /* @__PURE__ */ (0, import_jsx_runtime27.jsxs)("div", { className: "flex items-center justify-between gap-2 px-2.5 pb-2.5 @min-[640px]/studio:px-3 @min-[640px]/studio:pb-3", children: [
-            /* @__PURE__ */ (0, import_jsx_runtime27.jsx)("button", { type: "button", className: "shrink-0 text-xs text-primary underline-offset-2 hover:underline", onClick: () => setPreview({ pose, view }), children: "看线稿" }),
-            selected[pose.id] ? /* @__PURE__ */ (0, import_jsx_runtime27.jsx)(Badge, { variant: "secondary", children: pose.people === 2 ? "双人" : "单人" }) : /* @__PURE__ */ (0, import_jsx_runtime27.jsx)("span", { className: "truncate text-[11px] text-muted-foreground", children: "点卡片加入" })
-          ] })
-        ] }, pose.id);
+        return /* @__PURE__ */ (0, import_jsx_runtime27.jsx)(
+          PoseCard,
+          {
+            pose,
+            view,
+            selected: Boolean(selected[pose.id]),
+            onActivate: () => activatePose(pose, view),
+            onChoose: (next) => chooseView(pose, next),
+            onPreview: () => setPreview({ pose, view })
+          },
+          pose.id
+        );
       }) }),
       catalog && !customSection ? /* @__PURE__ */ (0, import_jsx_runtime27.jsxs)("p", { className: "mt-6 max-w-3xl text-xs leading-5 text-muted-foreground", children: [
         catalog.attribution,
@@ -11322,6 +11315,8 @@ function PoseBrowser({
       /* @__PURE__ */ (0, import_jsx_runtime27.jsxs)(DialogHeader, { children: [
         /* @__PURE__ */ (0, import_jsx_runtime27.jsx)(DialogTitle3, { children: preview.pose.name }),
         /* @__PURE__ */ (0, import_jsx_runtime27.jsxs)(DialogDescription3, { children: [
+          preview.pose.code,
+          " · ",
           preview.pose.system,
           " · ",
           preview.pose.category,
@@ -11330,27 +11325,100 @@ function PoseBrowser({
         ] })
       ] }),
       /* @__PURE__ */ (0, import_jsx_runtime27.jsx)("div", { className: "mx-auto aspect-[3/4] w-full max-w-sm bg-white", children: /* @__PURE__ */ (0, import_jsx_runtime27.jsx)(PoseFigure, { view: preview.view, alt: preview.pose.name, size: "full" }) }),
-      /* @__PURE__ */ (0, import_jsx_runtime27.jsx)("div", { className: "flex flex-wrap gap-1.5", children: preview.pose.views.map((view) => /* @__PURE__ */ (0, import_jsx_runtime27.jsx)(Button3, { size: "sm", variant: view.id === preview.view.id ? "default" : "outline", onClick: () => setPreview({ pose: preview.pose, view }), children: view.angle }, view.id)) }),
+      /* @__PURE__ */ (0, import_jsx_runtime27.jsx)("div", { className: "flex flex-wrap gap-1.5", children: orderedViews(preview.pose).map((view) => /* @__PURE__ */ (0, import_jsx_runtime27.jsx)(Button3, { size: "sm", variant: view.id === preview.view.id ? "default" : "outline", onClick: () => setPreview({ pose: preview.pose, view }), children: view.angle }, view.id)) }),
       /* @__PURE__ */ (0, import_jsx_runtime27.jsx)(Button3, { onClick: () => {
+        setCardViews((current) => ({ ...current, [preview.pose.id]: preview.view.id }));
         onToggle(preview.pose, preview.view);
         setPreview(null);
       }, children: selected[preview.pose.id] === preview.view.id ? "从选择里去掉" : "用这个角度生图" })
     ] }) : null }) })
   ] });
 }
-function FilterChip({ active, onClick, children }) {
+function SeriesPill({
+  active,
+  count,
+  adult = false,
+  title,
+  onClick,
+  children
+}) {
+  return /* @__PURE__ */ (0, import_jsx_runtime27.jsxs)(
+    "button",
+    {
+      type: "button",
+      title,
+      onClick,
+      className: `inline-flex h-8 shrink-0 items-center gap-1.5 rounded-full px-3 text-sm whitespace-nowrap ${active ? "bg-primary text-primary-foreground" : "bg-card text-foreground ring-1 ring-border"}`,
+      children: [
+        /* @__PURE__ */ (0, import_jsx_runtime27.jsx)("span", { children }),
+        /* @__PURE__ */ (0, import_jsx_runtime27.jsx)("span", { className: `text-xs ${active ? "text-primary-foreground/80" : "text-muted-foreground"}`, children: count }),
+        adult ? /* @__PURE__ */ (0, import_jsx_runtime27.jsx)("span", { className: `text-[10px] ${active ? "text-primary-foreground/80" : "text-amber-700"}`, children: "成人向" }) : null
+      ]
+    }
+  );
+}
+function AngleSegment({ active, onClick, children }) {
   return /* @__PURE__ */ (0, import_jsx_runtime27.jsx)(
     "button",
     {
       type: "button",
+      role: "radio",
+      "aria-checked": active,
       onClick,
-      className: `inline-flex items-center whitespace-nowrap rounded-full px-2.5 py-1 text-xs leading-5 ${active ? "bg-foreground text-background" : "bg-white text-muted-foreground ring-1 ring-border"}`,
+      className: `inline-flex h-7 shrink-0 items-center rounded-full px-2.5 text-xs whitespace-nowrap ${active ? "bg-foreground text-background" : "text-muted-foreground hover:text-foreground"}`,
       children
     }
   );
 }
+function PoseCard({
+  pose,
+  view,
+  selected,
+  onActivate,
+  onChoose,
+  onPreview
+}) {
+  const views = orderedViews(pose);
+  const columns = THUMB_COLS[Math.min(views.length, 5)] ?? "grid-cols-5";
+  return /* @__PURE__ */ (0, import_jsx_runtime27.jsxs)("article", { className: `min-w-0 rounded-xl border bg-card shadow-sm transition ${selected ? "border-primary ring-2 ring-primary/25" : "border-border hover:border-primary/40"}`, children: [
+    /* @__PURE__ */ (0, import_jsx_runtime27.jsxs)("div", { className: "relative aspect-[3/4] overflow-hidden rounded-t-xl bg-white", children: [
+      /* @__PURE__ */ (0, import_jsx_runtime27.jsx)("button", { type: "button", className: "block h-full w-full", onClick: onActivate, "aria-pressed": selected, children: /* @__PURE__ */ (0, import_jsx_runtime27.jsx)(PoseFigure, { view, alt: `${pose.name}，${view.angle}` }, view.id) }),
+      selected ? /* @__PURE__ */ (0, import_jsx_runtime27.jsx)("span", { className: "pointer-events-none absolute top-2 left-2 rounded-full bg-primary px-2 py-0.5 text-[11px] text-primary-foreground", children: "已选" }) : null,
+      /* @__PURE__ */ (0, import_jsx_runtime27.jsx)(
+        "button",
+        {
+          type: "button",
+          className: "absolute right-2 bottom-2 rounded-full bg-black/60 px-2 py-0.5 text-[11px] text-white",
+          onClick: onPreview,
+          children: "看线稿"
+        }
+      )
+    ] }),
+    /* @__PURE__ */ (0, import_jsx_runtime27.jsxs)("div", { className: "flex items-start justify-between gap-2 px-2.5 py-2", children: [
+      /* @__PURE__ */ (0, import_jsx_runtime27.jsx)("h3", { className: "line-clamp-2 min-w-0 flex-1 text-sm leading-5 font-medium", children: pose.name }),
+      /* @__PURE__ */ (0, import_jsx_runtime27.jsx)("span", { className: "max-w-[46%] shrink-0 truncate pt-0.5 text-right text-xs text-muted-foreground", title: pose.category, children: pose.category })
+    ] }),
+    /* @__PURE__ */ (0, import_jsx_runtime27.jsx)("div", { role: "group", "aria-label": `${pose.name}的视角`, className: `grid gap-1 px-2 pb-2.5 ${columns}`, children: views.map((item) => {
+      const active = item.id === view.id;
+      return /* @__PURE__ */ (0, import_jsx_runtime27.jsxs)(
+        "button",
+        {
+          type: "button",
+          "aria-pressed": active,
+          onClick: () => onChoose(item),
+          className: `flex min-w-0 flex-col items-center gap-0.5 rounded-md px-0.5 pt-0.5 pb-1 ${active ? "ring-2 ring-foreground" : "ring-1 ring-border hover:bg-muted"}`,
+          children: [
+            /* @__PURE__ */ (0, import_jsx_runtime27.jsx)("span", { className: "block aspect-[3/4] w-full overflow-hidden rounded-sm bg-white", children: /* @__PURE__ */ (0, import_jsx_runtime27.jsx)(PoseFigure, { view: item, alt: "", size: "thumb", compact: true }) }),
+            /* @__PURE__ */ (0, import_jsx_runtime27.jsx)("span", { className: `max-w-full truncate text-[10px] leading-4 ${active ? "font-medium text-foreground" : "text-muted-foreground"}`, children: item.angle })
+          ]
+        },
+        item.id
+      );
+    }) })
+  ] });
+}
 function PoseSkeleton() {
-  return /* @__PURE__ */ (0, import_jsx_runtime27.jsx)("div", { className: "mb-4 grid grid-cols-2 gap-3 @min-[640px]/studio:grid-cols-3 @min-[1280px]/studio:grid-cols-4", children: Array.from({ length: 8 }, (_, index) => /* @__PURE__ */ (0, import_jsx_runtime27.jsx)("div", { className: "aspect-[3/4] animate-pulse rounded-2xl bg-muted" }, index)) });
+  return /* @__PURE__ */ (0, import_jsx_runtime27.jsx)("div", { className: "mb-4 grid grid-cols-1 gap-3 @min-[480px]/poses:grid-cols-2 @min-[920px]/poses:grid-cols-3", children: Array.from({ length: 8 }, (_, index) => /* @__PURE__ */ (0, import_jsx_runtime27.jsx)("div", { className: "aspect-[3/4] animate-pulse rounded-2xl bg-muted" }, index)) });
 }
 
 // components/settings-dialog.tsx
@@ -12834,6 +12902,10 @@ function PoseStudio() {
   }
 }
 @layer utilities {
+  .\\@container\\/poses {
+    container-type: inline-size;
+    container-name: poses;
+  }
   .\\@container\\/studio {
     container-type: inline-size;
     container-name: studio;
@@ -13164,6 +13236,9 @@ function PoseStudio() {
   .max-w-3xl {
     max-width: var(--container-3xl);
   }
+  .max-w-\\[46\\%\\] {
+    max-width: 46%;
+  }
   .max-w-\\[min\\(24rem\\,calc\\(100\\%-2rem\\)\\)\\] {
     max-width: min(24rem, calc(100% - 2rem));
   }
@@ -13176,11 +13251,17 @@ function PoseStudio() {
   .max-w-\\[min\\(36rem\\,calc\\(100\\%-2rem\\)\\)\\] {
     max-width: min(36rem, calc(100% - 2rem));
   }
+  .max-w-full {
+    max-width: 100%;
+  }
   .max-w-sm {
     max-width: var(--container-sm);
   }
   .min-w-0 {
     min-width: 0px;
+  }
+  .min-w-\\[8\\.5rem\\] {
+    min-width: 8.5rem;
   }
   .flex-1 {
     flex: 1;
@@ -13211,11 +13292,20 @@ function PoseStudio() {
   .touch-none {
     touch-action: none;
   }
+  .grid-cols-1 {
+    grid-template-columns: repeat(1, minmax(0, 1fr));
+  }
   .grid-cols-2 {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
   .grid-cols-3 {
     grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+  .grid-cols-4 {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+  .grid-cols-5 {
+    grid-template-columns: repeat(5, minmax(0, 1fr));
   }
   .grid-cols-\\[1fr_auto_1fr\\] {
     grid-template-columns: 1fr auto 1fr;
@@ -13295,6 +13385,9 @@ function PoseStudio() {
   .overflow-hidden {
     overflow: hidden;
   }
+  .overflow-x-auto {
+    overflow-x: auto;
+  }
   .overflow-y-auto {
     overflow-y: auto;
   }
@@ -13325,12 +13418,19 @@ function PoseStudio() {
   .rounded-md {
     border-radius: calc(var(--radius) * 0.8);
   }
+  .rounded-sm {
+    border-radius: calc(var(--radius) * 0.6);
+  }
   .rounded-xl {
     border-radius: calc(var(--radius) * 1.4);
   }
   .rounded-t-3xl {
     border-top-left-radius: calc(var(--radius) * 2.2);
     border-top-right-radius: calc(var(--radius) * 2.2);
+  }
+  .rounded-t-xl {
+    border-top-left-radius: calc(var(--radius) * 1.4);
+    border-top-right-radius: calc(var(--radius) * 1.4);
   }
   .rounded-b-xl {
     border-bottom-right-radius: calc(var(--radius) * 1.4);
@@ -13473,6 +13573,9 @@ function PoseStudio() {
   .object-top {
     object-position: top;
   }
+  .p-0\\.5 {
+    padding: calc(var(--spacing) * 0.5);
+  }
   .p-1 {
     padding: var(--spacing);
   }
@@ -13487,6 +13590,9 @@ function PoseStudio() {
   }
   .p-px {
     padding: 1px;
+  }
+  .px-0\\.5 {
+    padding-inline: calc(var(--spacing) * 0.5);
   }
   .px-1 {
     padding-inline: var(--spacing);
@@ -13536,8 +13642,23 @@ function PoseStudio() {
   .py-12 {
     padding-block: calc(var(--spacing) * 12);
   }
+  .pt-0\\.5 {
+    padding-top: calc(var(--spacing) * 0.5);
+  }
+  .pt-3 {
+    padding-top: calc(var(--spacing) * 3);
+  }
+  .pr-8 {
+    padding-right: calc(var(--spacing) * 8);
+  }
   .pr-9 {
     padding-right: calc(var(--spacing) * 9);
+  }
+  .pb-1 {
+    padding-bottom: var(--spacing);
+  }
+  .pb-2 {
+    padding-bottom: calc(var(--spacing) * 2);
   }
   .pb-2\\.5 {
     padding-bottom: calc(var(--spacing) * 2.5);
@@ -13559,6 +13680,9 @@ function PoseStudio() {
   }
   .text-left {
     text-align: left;
+  }
+  .text-right {
+    text-align: right;
   }
   .text-base {
     font-size: var(--text-base);
@@ -13584,6 +13708,10 @@ function PoseStudio() {
   }
   .text-\\[11px\\] {
     font-size: 11px;
+  }
+  .leading-3 {
+    --tw-leading: calc(var(--spacing) * 3);
+    line-height: calc(var(--spacing) * 3);
   }
   .leading-4 {
     --tw-leading: calc(var(--spacing) * 4);
@@ -13724,6 +13852,9 @@ function PoseStudio() {
   }
   .ring-border {
     --tw-ring-color: var(--border);
+  }
+  .ring-foreground {
+    --tw-ring-color: var(--foreground);
   }
   .ring-foreground\\/10 {
     --tw-ring-color: var(--foreground);
@@ -13944,6 +14075,9 @@ function PoseStudio() {
       .hover\\:bg-\\[color-mix\\(in_oklch\\,var\\(--secondary\\)\\,var\\(--foreground\\)_5\\%\\)\\]:hover {
         background-color: color-mix(in oklch,var(--secondary),var(--foreground) 5%);
       }
+    }
+    .hover\\:bg-card:hover {
+      background-color: var(--card);
     }
     .hover\\:bg-destructive\\/20:hover {
       background-color: var(--destructive);
@@ -14246,6 +14380,16 @@ function PoseStudio() {
       display: none;
     }
   }
+  @container poses (width >= 480px) {
+    .\\@min-\\[480px\\]\\/poses\\:grid-cols-2 {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+  }
+  @container poses (width >= 640px) {
+    .\\@min-\\[640px\\]\\/poses\\:ml-auto {
+      margin-left: auto;
+    }
+  }
   @container studio (width >= 640px) {
     .\\@min-\\[640px\\]\\/studio\\:line-clamp-2 {
       overflow: hidden;
@@ -14268,31 +14412,21 @@ function PoseStudio() {
     .\\@min-\\[640px\\]\\/studio\\:grid-cols-3 {
       grid-template-columns: repeat(3, minmax(0, 1fr));
     }
-    .\\@min-\\[640px\\]\\/studio\\:px-3 {
-      padding-inline: calc(var(--spacing) * 3);
-    }
     .\\@min-\\[640px\\]\\/studio\\:px-4 {
       padding-inline: calc(var(--spacing) * 4);
     }
-    .\\@min-\\[640px\\]\\/studio\\:py-2\\.5 {
-      padding-block: calc(var(--spacing) * 2.5);
-    }
-    .\\@min-\\[640px\\]\\/studio\\:pb-3 {
-      padding-bottom: calc(var(--spacing) * 3);
-    }
   }
   @container studio (width >= 768px) {
-    .\\@min-\\[768px\\]\\/studio\\:flex {
-      display: flex;
-    }
-    .\\@min-\\[768px\\]\\/studio\\:hidden {
-      display: none;
-    }
     .\\@min-\\[768px\\]\\/studio\\:px-5 {
       padding-inline: calc(var(--spacing) * 5);
     }
     .\\@min-\\[768px\\]\\/studio\\:px-6 {
       padding-inline: calc(var(--spacing) * 6);
+    }
+  }
+  @container poses (width >= 920px) {
+    .\\@min-\\[920px\\]\\/poses\\:grid-cols-3 {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
     }
   }
   @container studio (width >= 1024px) {

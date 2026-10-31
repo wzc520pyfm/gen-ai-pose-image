@@ -20,7 +20,7 @@ export async function fetchPoseBytes(relativePath, fetchImpl = fetch) {
   if (buffer.byteLength < 32 || buffer.byteLength > 8_000_000) throw new Error("姿势图大小异常")
   const mediaType = relativePath.endsWith(".png") ? "image/png" : "image/jpeg"
   const value = { mediaType, buffer, role: "pose" }
-  if (poseCache.size > 80) poseCache.delete(poseCache.keys().next().value)
+  if (poseCache.size > 512) poseCache.delete(poseCache.keys().next().value)
   poseCache.set(relativePath, value)
   return value
 }
