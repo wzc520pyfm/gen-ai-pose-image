@@ -1,4 +1,4 @@
-import { COSTUME_STYLE_LOCK, POSE_STYLE_LOCK, expandReferencePrompt } from "./custom.mjs"
+import { POSE_STYLE_LOCK, costumeStyleLock, expandReferencePrompt } from "./custom.mjs"
 import { defaultBaseURL, redact } from "./generate.mjs"
 
 /** Empty uses the provider default. A filled id is sent as written, even if it looks like an image model. */
@@ -21,9 +21,10 @@ function describedError(payload, status, secret) {
   return redact([code, message].filter(Boolean).join("：") || `文本接口失败（${status}）`, secret)
 }
 
-export function beautifyInstruction({ kind, userPrompt = "", adult = false }) {
+export function beautifyInstruction({ kind, userPrompt = "", adult = false, sensitivePromptOptimize = false } = {}) {
+  const optimize = sensitivePromptOptimize === true
   const role = kind === "costume"
-    ? `你在写服装参考图的文生图提示词。只扩写用户写到的衣物。未描述时严禁丝袜、连裤袜、黑丝、打底裤；用户只写了短袜时，只写那双短袜，不要再加一层盖住小腿的袜子。若有帽子，帽子与领口之间必须留出头部空间（可见空隙），帽子不能贴在衣领上。描述到的衣服要有穿上身后的立体体积，穿着者不可见，头部、脸部和手部不出现。${COSTUME_STYLE_LOCK}`
+    ? `你在写服装参考图的文生图提示词。只扩写用户写到的衣物。${costumeStyleLock(optimize)}`
     : `你在写姿势参考图的文生图提示词。图应是白底黑色线稿，球关节人偶，只表达成年身体的姿态，不要上色，不要服装设计。${POSE_STYLE_LOCK}`
   const safety = adult
     ? "用户已打开更多描述。按用户描述书写，画面中的角色按成年形象处理。"
@@ -130,6 +131,7 @@ export async function beautifyPrompt({
   kind = "pose",
   userPrompt = "",
   adult = false,
+  sensitivePromptOptimize = false,
   fetchImpl = fetch,
   signal,
 } = {}) {
@@ -137,6 +139,7 @@ export async function beautifyPrompt({
     kind: kind === "costume" ? "costume" : "pose",
     userPrompt,
     adult: adult === true,
+    sensitivePromptOptimize: sensitivePromptOptimize === true,
   }
   const key = String(apiKey || "").trim()
   if (!key) return templateResult(input)

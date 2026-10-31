@@ -11,6 +11,7 @@ export type StudioSettings = {
   keepOutfit: boolean
   mode: GenerateMode
   showAdult: boolean
+  sensitivePromptOptimize: boolean
 }
 
 export const DEFAULT_SETTINGS: StudioSettings = {
@@ -24,6 +25,7 @@ export const DEFAULT_SETTINGS: StudioSettings = {
   keepOutfit: true,
   mode: "each",
   showAdult: false,
+  sensitivePromptOptimize: false,
 }
 
 const KEY = "lanpose-settings-v1"
@@ -48,6 +50,7 @@ export function loadSettings(): StudioSettings {
       keepOutfit: parsed.keepOutfit !== false,
       mode: parsed.mode === "sheet" ? "sheet" : "each",
       showAdult: parsed.showAdult === true,
+      sensitivePromptOptimize: parsed.sensitivePromptOptimize === true,
     }
   } catch {
     return DEFAULT_SETTINGS

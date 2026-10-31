@@ -138,6 +138,13 @@ export function SettingsDialog({
           </div>
           <label className="flex items-center justify-between gap-3 rounded-xl bg-muted px-3 py-3 text-sm">
             <span>
+              <span className="block font-medium">违禁词优化</span>
+              <span className="mt-1 block text-xs leading-5 text-muted-foreground">关闭时直接写不要人、不要腿、不要皮肤，并要求帽子悬在领口上方。画质更好，但 Seedream 可能返回 400。打开后改成委婉说法，避开审核敏感词。</span>
+            </span>
+            <Switch checked={settings.sensitivePromptOptimize} onCheckedChange={(value) => patch({ sensitivePromptOptimize: value })} aria-label="违禁词优化" />
+          </label>
+          <label className="flex items-center justify-between gap-3 rounded-xl bg-muted px-3 py-3 text-sm">
+            <span>
               <span className="block font-medium">显示成人向姿势</span>
               <span className="mt-1 block text-xs leading-5 text-muted-foreground">性感系、双人缠绵，以及上半身里的大胆分类。参考图仍是结构线稿，默认继续保持服装。</span>
             </span>

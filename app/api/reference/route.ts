@@ -34,6 +34,7 @@ export async function POST(request: Request) {
       model: (typeof filled.model === "string" && filled.model.trim()) || defaultModel(provider),
       prompt,
       aspectRatio,
+      sensitivePromptOptimize: body.sensitivePromptOptimize === true,
       signal: request.signal,
     })
     return NextResponse.json({

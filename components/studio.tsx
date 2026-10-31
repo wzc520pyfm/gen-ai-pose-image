@@ -835,6 +835,7 @@ function StudioFrame({ embedded }: { embedded: boolean }) {
               settings={settings}
               hasKey={Boolean(settings.apiKey.trim()) || serverKey}
               syncWarning={syncWarning}
+              onChangeSettings={updateSettings}
             />
           )}
         </main>

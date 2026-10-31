@@ -67,18 +67,27 @@ export function customCostumeRecord(asset) {
 }
 
 export const POSE_STYLE_LOCK = "严格模仿参考图的线稿风格与人偶质感，只按描述改姿态。"
-export const COSTUME_STYLE_LOCK = "严格模仿参考图的构图、取景、机位距离、光线和地面柔和棚拍阴影。只画用户写到的衣物，不要照抄参考图里多出来的单件。未描述时严禁丝袜、连裤袜、黑丝、打底裤；用户只写了短袜时，只画那双短袜，小腿不要再盖一层。没有提到的包、鞋、外套也不要添加。描述到的衣服要有隐形人穿着的立体体积，不要飘着的散件，不要平铺。描述里有鞋才把鞋穿在脚下，有包或配饰才佩戴或拿着。若有帽子，帽子与领口之间必须留出头部空间（可见空隙），帽子不能贴在衣领上。画面只保留这些衣服的体积，头部、脸部和手部不出现。"
 
-export function expandReferencePrompt({ kind = "pose", userPrompt = "", adult = false } = {}) {
+const COSTUME_STYLE_SHARED = "严格模仿参考图的构图、取景、机位距离、光线和地面柔和棚拍阴影。只画用户写到的衣物，不要照抄参考图里多出来的单件。未描述时严禁丝袜、连裤袜、黑丝、打底裤。没有提到的包、鞋、外套都不要添加。描述到的衣服要有穿上身后的立体体积，不要飘着的散件，不要平铺。描述里有鞋才把鞋穿在脚下，有包或配饰才佩戴或拿着。若有帽子，帽子与领口之间必须留出明显的空白，帽子悬在领口上方，不能贴在衣领上。"
+
+/** Blunt lock is the default. Optimize=true swaps in the scrubbed lock. */
+export function costumeStyleLock(sensitivePromptOptimize = false) {
+  if (sensitivePromptOptimize === true) {
+    return `${COSTUME_STYLE_SHARED}画面里只有衣服，头部、脸部、手部和腿部不出现。裙子和袜子之间用衣物挡住，不要露出肢体。`
+  }
+  return `${COSTUME_STYLE_SHARED}不要人，不要头，不要脸，不要手，不要腿，不要身体，不要皮肤。裙子和袜子之间不能露出腿或皮肤，必须用衣物挡住。`
+}
+
+export const COSTUME_STYLE_LOCK = costumeStyleLock(false)
+
+export function expandReferencePrompt({ kind = "pose", userPrompt = "", adult = false, sensitivePromptOptimize = false } = {}) {
   const note = String(userPrompt ?? "").trim().slice(0, 2000)
   const safe = adult ? "" : "保持日常、得体、可公开展示的画面。"
+  const optimize = sensitivePromptOptimize === true
   if (kind === "costume") {
     return [
       "服装参考图是隐形人穿着的造型。照着参考图的构图、取景、机位距离、光线和地面柔和棚拍阴影，只画用户写到的衣物。",
-      "描述里有的单件要有穿上身后的立体体积，不要飘着的散件，不要平铺。未描述时严禁丝袜、连裤袜、黑丝、打底裤。用户只写了短袜时，只画那双短袜，小腿不要再盖一层。",
-      "若有帽子，帽子与领口之间必须留出头部空间（可见空隙），帽子不能贴在衣领上。",
-      "穿着者不可见，只用来撑起已描述的衣服。头部、脸部和手部不出现。",
-      COSTUME_STYLE_LOCK,
+      costumeStyleLock(optimize),
       safe,
       note ? `服装描述：${note}` : "只画一件日常上衣，像已经穿好。不要自行添加袜子、鞋或包。",
       "不要文字，不要水印。",

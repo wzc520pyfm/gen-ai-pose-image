@@ -1,4 +1,4 @@
-import { COSTUME_STYLE_LOCK, POSE_STYLE_LOCK } from "./custom.mjs"
+import { POSE_STYLE_LOCK, costumeStyleLock } from "./custom.mjs"
 import { fetchCostumeBytes } from "./costumes.mjs"
 import { generateImage } from "./generate.mjs"
 import { modelImage } from "./jobs.mjs"
@@ -10,10 +10,10 @@ export const POSE_STYLE_PATHS = Object.freeze([
   "img/full_single_P001_front.png",
 ])
 
-/** Worn ghost-mannequin plates. SUM-0174 is the studio framing; SPR-0062 shows the empty neck gap and bare legs. */
+/** Worn ghost-mannequin plates. SUM-0174 is the studio framing. AUT-0010 floats a beret above the collar and covers the legs. */
 export const COSTUME_STYLE_PATHS = Object.freeze([
   "png/SUM-0174.png",
-  "png/SPR-0062.png",
+  "png/AUT-0010.png",
 ])
 
 export function stylePaths(kind) {
@@ -92,7 +92,7 @@ export async function generateStyledReference(input = {}) {
   const kind = input.kind === "pose" || input.kind === "costume" ? input.kind : ""
   if (!kind) throw new Error("需要说明是姿势还是服装")
   const images = await loadStyleRefs(kind, input)
-  const lock = kind === "pose" ? POSE_STYLE_LOCK : COSTUME_STYLE_LOCK
+  const lock = kind === "pose" ? POSE_STYLE_LOCK : costumeStyleLock(input.sensitivePromptOptimize === true)
   const generate = input.generate ?? generateImage
   return generate({
     provider: input.provider,
