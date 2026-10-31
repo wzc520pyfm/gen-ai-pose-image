@@ -11289,30 +11289,50 @@ function FaceBrowser({
     onSelect(face);
   }
   return /* @__PURE__ */ (0, import_jsx_runtime27.jsxs)("section", { children: [
-    /* @__PURE__ */ (0, import_jsx_runtime27.jsxs)("div", { className: "sticky top-0 z-10 border-b bg-white/95 px-4 py-3 backdrop-blur @min-[768px]/studio:px-6", children: [
-      /* @__PURE__ */ (0, import_jsx_runtime27.jsx)("p", { className: "mb-2 text-sm leading-6 text-muted-foreground", children: "选一张脸部参考。生图会把这张图的五官、表情、脸型和发型用到角色上，姿势和服装仍按各自的参考。鲸耳和鲸尾保留。" }),
-      /* @__PURE__ */ (0, import_jsx_runtime27.jsxs)("div", { className: "mb-2 flex flex-wrap gap-2", children: [
-        /* @__PURE__ */ (0, import_jsx_runtime27.jsx)(FilterChip, { active: section === "", onClick: () => setSection(""), label: "全部", count: catalog?.total }),
-        catalog?.sections.map((item) => /* @__PURE__ */ (0, import_jsx_runtime27.jsx)(FilterChip, { active: section === item.id, onClick: () => setSection(item.id), label: item.label, count: item.count }, item.id))
+    /* @__PURE__ */ (0, import_jsx_runtime27.jsxs)("div", { className: "px-4 pt-3 pb-2 @min-[768px]/studio:px-6", children: [
+      /* @__PURE__ */ (0, import_jsx_runtime27.jsx)("p", { className: "mb-2 text-sm leading-5 text-muted-foreground", children: "选一张脸部参考。生图会把这张图的五官、表情、脸型和发型用到角色上，姿势和服装仍按各自的参考。鲸耳和鲸尾保留。" }),
+      /* @__PURE__ */ (0, import_jsx_runtime27.jsxs)("div", { className: "flex gap-1.5 overflow-x-auto pb-1", children: [
+        /* @__PURE__ */ (0, import_jsx_runtime27.jsx)(SectionPill, { active: section === "", count: catalog?.total, onClick: () => setSection(""), children: "全部" }),
+        catalog?.sections.map((item) => /* @__PURE__ */ (0, import_jsx_runtime27.jsx)(SectionPill, { active: section === item.id, count: item.count, onClick: () => setSection(item.id), children: item.label }, item.id))
       ] }),
-      /* @__PURE__ */ (0, import_jsx_runtime27.jsxs)("div", { className: "mb-2 flex flex-wrap items-center gap-2", children: [
-        /* @__PURE__ */ (0, import_jsx_runtime27.jsx)(FilterChip, { active: hair === "", onClick: () => setHair(""), label: "全部发长" }),
-        catalog?.hairs.map((item) => /* @__PURE__ */ (0, import_jsx_runtime27.jsx)(FilterChip, { active: hair === item.id, onClick: () => setHair(item.id), label: item.label, count: hairCounts.get(item.id) ?? 0 }, item.id)),
-        /* @__PURE__ */ (0, import_jsx_runtime27.jsx)("button", { type: "button", className: "rounded-full bg-white px-3 py-1.5 text-sm ring-1 ring-border", onClick: randomFace, disabled: faces.length === 0, children: "随机一张" })
-      ] }),
-      /* @__PURE__ */ (0, import_jsx_runtime27.jsxs)("div", { className: "relative", children: [
-        /* @__PURE__ */ (0, import_jsx_runtime27.jsx)(Search, { className: "pointer-events-none absolute top-1/2 left-2.5 size-4 -translate-y-1/2 text-muted-foreground" }),
+      /* @__PURE__ */ (0, import_jsx_runtime27.jsxs)("div", { className: "mt-2 flex flex-wrap items-center gap-2", children: [
+        /* @__PURE__ */ (0, import_jsx_runtime27.jsxs)("div", { className: "relative min-w-[8.5rem] flex-1", children: [
+          /* @__PURE__ */ (0, import_jsx_runtime27.jsx)(Search, { className: "pointer-events-none absolute top-1/2 left-2.5 size-3.5 -translate-y-1/2 text-muted-foreground" }),
+          /* @__PURE__ */ (0, import_jsx_runtime27.jsx)(
+            Input3,
+            {
+              value: query,
+              onChange: (event) => setQuery(event.target.value),
+              placeholder: "搜索编号、发长或造型",
+              "aria-label": "搜索脸部参考",
+              className: "h-8 bg-card pr-8 pl-8 text-sm"
+            }
+          ),
+          query ? /* @__PURE__ */ (0, import_jsx_runtime27.jsx)("button", { type: "button", className: "absolute top-1/2 right-2 -translate-y-1/2 text-muted-foreground", onClick: () => setQuery(""), "aria-label": "清空脸部搜索", children: /* @__PURE__ */ (0, import_jsx_runtime27.jsx)(X, { className: "size-3.5" }) }) : null
+        ] }),
+        /* @__PURE__ */ (0, import_jsx_runtime27.jsxs)("div", { role: "radiogroup", "aria-label": "发长", className: "inline-flex h-8 min-w-0 items-center overflow-x-auto rounded-full bg-secondary p-0.5", children: [
+          /* @__PURE__ */ (0, import_jsx_runtime27.jsx)(HairSegment, { active: hair === "", onClick: () => setHair(""), children: "全部发长" }),
+          catalog?.hairs.map((item) => /* @__PURE__ */ (0, import_jsx_runtime27.jsx)(
+            HairSegment,
+            {
+              active: hair === item.id,
+              count: hairCounts.get(item.id) ?? 0,
+              onClick: () => setHair(item.id),
+              children: item.label
+            },
+            item.id
+          ))
+        ] }),
         /* @__PURE__ */ (0, import_jsx_runtime27.jsx)(
-          Input3,
+          "button",
           {
-            value: query,
-            onChange: (event) => setQuery(event.target.value),
-            placeholder: "搜索编号、发长或造型",
-            "aria-label": "搜索脸部参考",
-            className: "h-10 bg-card pr-9 pl-8"
+            type: "button",
+            onClick: randomFace,
+            disabled: faces.length === 0,
+            className: "inline-flex h-8 shrink-0 items-center rounded-full px-2.5 text-xs text-muted-foreground ring-1 ring-border hover:bg-card hover:text-foreground disabled:opacity-40",
+            children: "随机一张"
           }
-        ),
-        query ? /* @__PURE__ */ (0, import_jsx_runtime27.jsx)("button", { type: "button", className: "absolute top-1/2 right-2 -translate-y-1/2 text-muted-foreground", onClick: () => setQuery(""), "aria-label": "清空脸部搜索", children: /* @__PURE__ */ (0, import_jsx_runtime27.jsx)(X, { className: "size-4" }) }) : null
+        )
       ] })
     ] }),
     /* @__PURE__ */ (0, import_jsx_runtime27.jsxs)("div", { className: "px-4 py-4 @min-[768px]/studio:px-6", children: [
@@ -11363,21 +11383,42 @@ function FaceBrowser({
     ] })
   ] });
 }
-function FilterChip({
+function SectionPill({
   active,
+  count,
   onClick,
-  label,
-  count
+  children
 }) {
   return /* @__PURE__ */ (0, import_jsx_runtime27.jsxs)(
     "button",
     {
       type: "button",
       onClick,
-      className: `inline-flex items-center whitespace-nowrap rounded-full px-3 py-1.5 text-sm ${active ? "bg-primary text-primary-foreground" : "bg-white ring-1 ring-border"}`,
+      className: `inline-flex h-8 shrink-0 items-center gap-1.5 rounded-full px-3 text-sm whitespace-nowrap ${active ? "bg-primary text-primary-foreground" : "bg-card text-foreground ring-1 ring-border"}`,
       children: [
-        label,
-        count !== void 0 ? /* @__PURE__ */ (0, import_jsx_runtime27.jsx)("span", { className: `ml-1.5 text-xs ${active ? "text-primary-foreground/80" : "text-muted-foreground"}`, children: count }) : null
+        /* @__PURE__ */ (0, import_jsx_runtime27.jsx)("span", { children }),
+        count !== void 0 ? /* @__PURE__ */ (0, import_jsx_runtime27.jsx)("span", { className: `text-xs ${active ? "text-primary-foreground/80" : "text-muted-foreground"}`, children: count }) : null
+      ]
+    }
+  );
+}
+function HairSegment({
+  active,
+  count,
+  onClick,
+  children
+}) {
+  return /* @__PURE__ */ (0, import_jsx_runtime27.jsxs)(
+    "button",
+    {
+      type: "button",
+      role: "radio",
+      "aria-checked": active,
+      onClick,
+      className: `inline-flex h-7 shrink-0 items-center gap-1 rounded-full px-2.5 text-xs whitespace-nowrap ${active ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:text-foreground"}`,
+      children: [
+        /* @__PURE__ */ (0, import_jsx_runtime27.jsx)("span", { children }),
+        count !== void 0 ? /* @__PURE__ */ (0, import_jsx_runtime27.jsx)("span", { className: active ? "text-primary-foreground/80" : "text-muted-foreground", children: count }) : null
       ]
     }
   );
@@ -11524,7 +11565,7 @@ function PoseBrowser({
     setCardViews({});
   }
   function chooseView(pose, view) {
-    setCardViews((current) => ({ ...current, [pose.id]: view.id }));
+    setCardViews((current) => current[pose.id] === view.id ? current : { ...current, [pose.id]: view.id });
     if (selected[pose.id] && selected[pose.id] !== view.id) onToggle(pose, view);
   }
   function activatePose(pose, view) {
@@ -11780,6 +11821,8 @@ function PoseCard({
         {
           type: "button",
           "aria-pressed": active,
+          onMouseEnter: () => onChoose(item),
+          onFocus: () => onChoose(item),
           onClick: () => onChoose(item),
           className: `flex min-w-0 flex-col items-center gap-0.5 rounded-md px-0.5 pt-0.5 pb-1 ${active ? "ring-2 ring-foreground" : "ring-1 ring-border hover:bg-muted"}`,
           children: [
@@ -13404,14 +13447,8 @@ function PoseStudio() {
   .relative {
     position: relative;
   }
-  .sticky {
-    position: sticky;
-  }
   .inset-0 {
     inset: 0px;
-  }
-  .top-0 {
-    top: 0px;
   }
   .top-1 {
     top: var(--spacing);
@@ -14029,12 +14066,6 @@ function PoseStudio() {
       background-color: color-mix(in oklab, var(--color-white) 10%, transparent);
     }
   }
-  .bg-white\\/95 {
-    background-color: color-mix(in srgb, #fff 95%, transparent);
-    @supports (color: color-mix(in lab, red, red)) {
-      background-color: color-mix(in oklab, var(--color-white) 95%, transparent);
-    }
-  }
   .bg-clip-padding {
     background-clip: padding-box;
   }
@@ -14359,11 +14390,6 @@ function PoseStudio() {
   .filter {
     filter: var(--tw-blur,) var(--tw-brightness,) var(--tw-contrast,) var(--tw-grayscale,) var(--tw-hue-rotate,) var(--tw-invert,) var(--tw-saturate,) var(--tw-sepia,) var(--tw-drop-shadow,);
   }
-  .backdrop-blur {
-    --tw-backdrop-blur: blur(8px);
-    -webkit-backdrop-filter: var(--tw-backdrop-blur,) var(--tw-backdrop-brightness,) var(--tw-backdrop-contrast,) var(--tw-backdrop-grayscale,) var(--tw-backdrop-hue-rotate,) var(--tw-backdrop-invert,) var(--tw-backdrop-opacity,) var(--tw-backdrop-saturate,) var(--tw-backdrop-sepia,);
-    backdrop-filter: var(--tw-backdrop-blur,) var(--tw-backdrop-brightness,) var(--tw-backdrop-contrast,) var(--tw-backdrop-grayscale,) var(--tw-backdrop-hue-rotate,) var(--tw-backdrop-invert,) var(--tw-backdrop-opacity,) var(--tw-backdrop-saturate,) var(--tw-backdrop-sepia,);
-  }
   .transition {
     transition-property: color, background-color, border-color, outline-color, text-decoration-color, fill, stroke, --tw-gradient-from, --tw-gradient-via, --tw-gradient-to, opacity, box-shadow, transform, translate, scale, rotate, filter, -webkit-backdrop-filter, backdrop-filter, display, content-visibility, overlay, pointer-events;
     transition-timing-function: var(--tw-ease, var(--default-transition-timing-function));
@@ -14665,6 +14691,9 @@ function PoseStudio() {
   }
   .disabled\\:opacity-30:disabled {
     opacity: 30%;
+  }
+  .disabled\\:opacity-40:disabled {
+    opacity: 40%;
   }
   .disabled\\:opacity-50:disabled {
     opacity: 50%;
@@ -15670,6 +15699,19 @@ function PoseStudio() {
   syntax: "*";
   inherits: false;
 }
+@property --tw-duration {
+  syntax: "*";
+  inherits: false;
+}
+@property --tw-ease {
+  syntax: "*";
+  inherits: false;
+}
+@property --tw-content {
+  syntax: "*";
+  initial-value: "";
+  inherits: false;
+}
 @property --tw-backdrop-blur {
   syntax: "*";
   inherits: false;
@@ -15704,19 +15746,6 @@ function PoseStudio() {
 }
 @property --tw-backdrop-sepia {
   syntax: "*";
-  inherits: false;
-}
-@property --tw-duration {
-  syntax: "*";
-  inherits: false;
-}
-@property --tw-ease {
-  syntax: "*";
-  inherits: false;
-}
-@property --tw-content {
-  syntax: "*";
-  initial-value: "";
   inherits: false;
 }
 @keyframes spin {
@@ -15784,6 +15813,9 @@ function PoseStudio() {
       --tw-drop-shadow-color: initial;
       --tw-drop-shadow-alpha: 100%;
       --tw-drop-shadow-size: initial;
+      --tw-duration: initial;
+      --tw-ease: initial;
+      --tw-content: "";
       --tw-backdrop-blur: initial;
       --tw-backdrop-brightness: initial;
       --tw-backdrop-contrast: initial;
@@ -15793,9 +15825,6 @@ function PoseStudio() {
       --tw-backdrop-opacity: initial;
       --tw-backdrop-saturate: initial;
       --tw-backdrop-sepia: initial;
-      --tw-duration: initial;
-      --tw-ease: initial;
-      --tw-content: "";
       --tw-animation-delay: 0s;
       --tw-animation-direction: normal;
       --tw-animation-duration: initial;
