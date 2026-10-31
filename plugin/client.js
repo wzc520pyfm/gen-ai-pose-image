@@ -10254,16 +10254,17 @@ function isStorageHigh(usage, quota, threshold = 0.8) {
   return used / cap >= threshold;
 }
 var POSE_STYLE_LOCK = "严格模仿参考图的线稿风格与人偶质感，只按描述改姿态。";
-var COSTUME_STYLE_LOCK = "严格模仿参考图的平铺商品图风格，只按描述改衣服。";
+var COSTUME_STYLE_LOCK = "严格模仿参考图的成套平铺：上衣、下装、鞋和配饰按穿着顺序摆好，只留窄缝，不要拆开散放，只按描述改这套衣服。";
 function expandReferencePrompt({ kind = "pose", userPrompt = "", adult = false } = {}) {
   const note = String(userPrompt ?? "").trim().slice(0, 2e3);
   const safe = adult ? "" : "画面保持非露骨：不要裸体，不要内衣，不要性暗示。";
   if (kind === "costume") {
     return [
-      "白底服装平铺参考图，只有衣服，没有人物，没有人台，没有假人，没有身体，商品摄影，光线均匀。",
+      "服装参考图是成套平铺。一套搭配好的衣服按穿着顺序摆在一起，上衣、下装、鞋和配饰只留窄缝，不要把单件散开铺在空白白底上。",
+      "只有衣服，没有人物，没有人台，没有假人，没有身体，没有皮肤，不要裸体。",
       COSTUME_STYLE_LOCK,
       safe,
-      note ? `服装描述：${note}` : "一套完整的日常外衣，包含上衣和下装，剪裁清楚。",
+      note ? `服装描述：${note}` : "一套完整的日常外衣，包含上衣、下装、鞋和配饰。",
       "不要文字，不要水印，不要人脸。"
     ].filter(Boolean).join("\n");
   }
@@ -10670,7 +10671,7 @@ function CustomReferencePanel({
     }
   }
   return /* @__PURE__ */ (0, import_jsx_runtime25.jsxs)("div", { children: [
-    /* @__PURE__ */ (0, import_jsx_runtime25.jsx)("p", { className: "mb-3 text-sm leading-6 text-muted-foreground", children: kind === "pose" ? "自定义姿势只存在这台浏览器。上传或生成的图会当作姿势参考，出图顺序仍是角色、服装、姿势。" : "自定义服装只存在这台浏览器。生成时会偏向没有人物的平铺衣服。" }),
+    /* @__PURE__ */ (0, import_jsx_runtime25.jsx)("p", { className: "mb-3 text-sm leading-6 text-muted-foreground", children: kind === "pose" ? "自定义姿势只存在这台浏览器。上传或生成的图会当作姿势参考，出图顺序仍是角色、服装、姿势。" : "自定义服装只存在这台浏览器。生成时会按成套平铺摆好衣服，没有人物。" }),
     /* @__PURE__ */ (0, import_jsx_runtime25.jsxs)("div", { className: "mb-3 flex flex-wrap gap-2", children: [
       /* @__PURE__ */ (0, import_jsx_runtime25.jsx)(Button3, { type: "button", variant: "outline", size: "sm", onClick: () => openDialog("upload"), children: "上传" }),
       /* @__PURE__ */ (0, import_jsx_runtime25.jsx)(Button3, { type: "button", variant: "outline", size: "sm", onClick: () => openDialog("freeform"), children: "自由生成" }),
@@ -10731,7 +10732,7 @@ function CustomReferencePanel({
     /* @__PURE__ */ (0, import_jsx_runtime25.jsx)(Dialog, { open: open3, onOpenChange: setOpen, children: /* @__PURE__ */ (0, import_jsx_runtime25.jsxs)(DialogContent, { className: "max-h-[min(85dvh,85%)] max-w-[min(32rem,calc(100%-2rem))] overflow-y-auto", children: [
       /* @__PURE__ */ (0, import_jsx_runtime25.jsxs)(DialogHeader, { children: [
         /* @__PURE__ */ (0, import_jsx_runtime25.jsx)(DialogTitle3, { children: mode === "upload" ? `上传自定义${noun}` : mode === "freeform" ? `自由生成${noun}参考` : `按描述生成${noun}参考` }),
-        /* @__PURE__ */ (0, import_jsx_runtime25.jsx)(DialogDescription3, { children: kind === "pose" ? "姿势参考偏向白底线稿，只表达身体姿态。确认之后才会放进自定义库。" : "服装参考偏向没有人物的平铺衣服。确认之后才会放进自定义库。" })
+        /* @__PURE__ */ (0, import_jsx_runtime25.jsx)(DialogDescription3, { children: kind === "pose" ? "姿势参考偏向白底线稿，只表达身体姿态。确认之后才会放进自定义库。" : "服装参考偏向成套平铺，只有衣服，没有人物。确认之后才会放进自定义库。" })
       ] }),
       mode === "upload" ? /* @__PURE__ */ (0, import_jsx_runtime25.jsxs)("div", { className: "grid gap-2", children: [
         /* @__PURE__ */ (0, import_jsx_runtime25.jsx)(

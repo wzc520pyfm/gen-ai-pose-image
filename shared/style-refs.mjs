@@ -10,10 +10,10 @@ export const POSE_STYLE_PATHS = Object.freeze([
   "img/full_single_P001_front.png",
 ])
 
-/** Fixed clothing-only flat lays from the costume gallery. */
+/** Clothing-only coordinated flat lays: one matched outfit, not scattered garments. */
 export const COSTUME_STYLE_PATHS = Object.freeze([
-  "png/SPR-0001.png",
-  "png/SUM-0001.png",
+  "png/SPR-0004.png",
+  "png/WIN-0001.png",
 ])
 
 export function stylePaths(kind) {

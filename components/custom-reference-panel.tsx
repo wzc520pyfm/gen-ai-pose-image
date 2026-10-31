@@ -199,7 +199,7 @@ export function CustomReferencePanel({
       <p className="mb-3 text-sm leading-6 text-muted-foreground">
         {kind === "pose"
           ? "自定义姿势只存在这台浏览器。上传或生成的图会当作姿势参考，出图顺序仍是角色、服装、姿势。"
-          : "自定义服装只存在这台浏览器。生成时会偏向没有人物的平铺衣服。"}
+          : "自定义服装只存在这台浏览器。生成时会按成套平铺摆好衣服，没有人物。"}
       </p>
       <div className="mb-3 flex flex-wrap gap-2">
         <Button type="button" variant="outline" size="sm" onClick={() => openDialog("upload")}>上传</Button>
@@ -262,7 +262,7 @@ export function CustomReferencePanel({
             <DialogDescription>
               {kind === "pose"
                 ? "姿势参考偏向白底线稿，只表达身体姿态。确认之后才会放进自定义库。"
-                : "服装参考偏向没有人物的平铺衣服。确认之后才会放进自定义库。"}
+                : "服装参考偏向成套平铺，只有衣服，没有人物。确认之后才会放进自定义库。"}
             </DialogDescription>
           </DialogHeader>
           {mode === "upload" ? (
