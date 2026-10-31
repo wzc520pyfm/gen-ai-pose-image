@@ -438,26 +438,35 @@ function createLucideIcon(iconDataOrName, iconNode = [], aliases = []) {
   return Component;
 }
 
-// node_modules/lucide-react/dist/esm/icons/chevron-right.mjs
+// node_modules/lucide-react/dist/esm/icons/chevron-down.mjs
 var __iconData = {
+  name: "chevron-down",
+  size: 24,
+  node: [["path", { d: "m6 9 6 6 6-6", key: "qrunsl" }]]
+};
+__iconData.node;
+var ChevronDown = createLucideIcon(__iconData);
+
+// node_modules/lucide-react/dist/esm/icons/chevron-right.mjs
+var __iconData2 = {
   name: "chevron-right",
   size: 24,
   node: [["path", { d: "m9 18 6-6-6-6", key: "mthhwq" }]]
 };
-__iconData.node;
-var ChevronRight = createLucideIcon(__iconData);
+__iconData2.node;
+var ChevronRight = createLucideIcon(__iconData2);
 
 // node_modules/lucide-react/dist/esm/icons/chevron-left.mjs
-var __iconData2 = {
+var __iconData3 = {
   name: "chevron-left",
   size: 24,
   node: [["path", { d: "m15 18-6-6 6-6", key: "1wnfg3" }]]
 };
-__iconData2.node;
-var ChevronLeft = createLucideIcon(__iconData2);
+__iconData3.node;
+var ChevronLeft = createLucideIcon(__iconData3);
 
 // node_modules/lucide-react/dist/esm/icons/download.mjs
-var __iconData3 = {
+var __iconData4 = {
   name: "download",
   size: 24,
   node: [
@@ -466,11 +475,11 @@ var __iconData3 = {
     ["path", { d: "m7 10 5 5 5-5", key: "brsn70" }]
   ]
 };
-__iconData3.node;
-var Download = createLucideIcon(__iconData3);
+__iconData4.node;
+var Download = createLucideIcon(__iconData4);
 
 // node_modules/lucide-react/dist/esm/icons/external-link.mjs
-var __iconData4 = {
+var __iconData5 = {
   name: "external-link",
   size: 24,
   node: [
@@ -479,11 +488,11 @@ var __iconData4 = {
     ["path", { d: "M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6", key: "a6xqqp" }]
   ]
 };
-__iconData4.node;
-var ExternalLink = createLucideIcon(__iconData4);
+__iconData5.node;
+var ExternalLink = createLucideIcon(__iconData5);
 
 // node_modules/lucide-react/dist/esm/icons/image-plus.mjs
-var __iconData5 = {
+var __iconData6 = {
   name: "image-plus",
   size: 24,
   node: [
@@ -494,21 +503,21 @@ var __iconData5 = {
     ["circle", { cx: "9", cy: "9", r: "2", key: "af1f0g" }]
   ]
 };
-__iconData5.node;
-var ImagePlus = createLucideIcon(__iconData5);
+__iconData6.node;
+var ImagePlus = createLucideIcon(__iconData6);
 
 // node_modules/lucide-react/dist/esm/icons/loader-circle.mjs
-var __iconData6 = {
+var __iconData7 = {
   name: "loader-circle",
   size: 24,
   node: [["path", { d: "M21 12a9 9 0 1 1-6.219-8.56", key: "13zald" }]],
   aliases: ["loader-2"]
 };
-__iconData6.node;
-var LoaderCircle = createLucideIcon(__iconData6);
+__iconData7.node;
+var LoaderCircle = createLucideIcon(__iconData7);
 
 // node_modules/lucide-react/dist/esm/icons/rotate-ccw.mjs
-var __iconData7 = {
+var __iconData8 = {
   name: "rotate-ccw",
   size: 24,
   node: [
@@ -516,11 +525,11 @@ var __iconData7 = {
     ["path", { d: "M3 3v5h5", key: "1xhq8a" }]
   ]
 };
-__iconData7.node;
-var RotateCcw = createLucideIcon(__iconData7);
+__iconData8.node;
+var RotateCcw = createLucideIcon(__iconData8);
 
 // node_modules/lucide-react/dist/esm/icons/search.mjs
-var __iconData8 = {
+var __iconData9 = {
   name: "search",
   size: 24,
   node: [
@@ -528,11 +537,11 @@ var __iconData8 = {
     ["circle", { cx: "11", cy: "11", r: "8", key: "4ej97u" }]
   ]
 };
-__iconData8.node;
-var Search = createLucideIcon(__iconData8);
+__iconData9.node;
+var Search = createLucideIcon(__iconData9);
 
 // node_modules/lucide-react/dist/esm/icons/settings.mjs
-var __iconData9 = {
+var __iconData10 = {
   name: "settings",
   size: 24,
   node: [
@@ -546,11 +555,11 @@ var __iconData9 = {
     ["circle", { cx: "12", cy: "12", r: "3", key: "1v7zrd" }]
   ]
 };
-__iconData9.node;
-var Settings = createLucideIcon(__iconData9);
+__iconData10.node;
+var Settings = createLucideIcon(__iconData10);
 
 // node_modules/lucide-react/dist/esm/icons/sparkles.mjs
-var __iconData10 = {
+var __iconData11 = {
   name: "sparkles",
   size: 24,
   node: [
@@ -567,11 +576,11 @@ var __iconData10 = {
   ],
   aliases: ["stars"]
 };
-__iconData10.node;
-var Sparkles = createLucideIcon(__iconData10);
+__iconData11.node;
+var Sparkles = createLucideIcon(__iconData11);
 
 // node_modules/lucide-react/dist/esm/icons/x.mjs
-var __iconData11 = {
+var __iconData12 = {
   name: "x",
   size: 24,
   node: [
@@ -579,8 +588,8 @@ var __iconData11 = {
     ["path", { d: "m6 6 12 12", key: "d8bk6v" }]
   ]
 };
-__iconData11.node;
-var X = createLucideIcon(__iconData11);
+__iconData12.node;
+var X = createLucideIcon(__iconData12);
 
 // components/character-dock.tsx
 var import_react7 = require("react");
@@ -10886,7 +10895,7 @@ function CostumeBrowser({
     });
   }, [catalog, category, query, showAdult]);
   return /* @__PURE__ */ (0, import_jsx_runtime26.jsxs)("section", { children: [
-    /* @__PURE__ */ (0, import_jsx_runtime26.jsxs)("div", { className: "sticky top-0 z-10 border-b bg-white/95 px-4 py-3 backdrop-blur @min-[768px]/studio:px-6", children: [
+    /* @__PURE__ */ (0, import_jsx_runtime26.jsxs)("div", { className: "px-4 pt-3 pb-2 @min-[768px]/studio:px-6", children: [
       /* @__PURE__ */ (0, import_jsx_runtime26.jsx)("p", { className: "mb-2 text-sm text-muted-foreground", children: "这些图里没有人物。选一套之后，大肥鱼会换上这身衣服，脸、头发、鲸耳和鲸尾保持不变。" }),
       /* @__PURE__ */ (0, import_jsx_runtime26.jsxs)("div", { className: "mb-2 flex flex-wrap gap-2", children: [
         /* @__PURE__ */ (0, import_jsx_runtime26.jsxs)(
@@ -11017,6 +11026,7 @@ var import_react11 = require("react");
 var import_jsx_runtime27 = require("react/jsx-runtime");
 var ANGLES = ["正面", "俯视", "仰视", "侧面", "斜侧"];
 var THUMB_COLS = ["", "grid-cols-1", "grid-cols-2", "grid-cols-3", "grid-cols-4", "grid-cols-5"];
+var POSE_GRID = "grid grid-cols-2 gap-3 @min-[640px]/poses:grid-cols-3 @min-[780px]/poses:grid-cols-4";
 function orderedViews(pose) {
   return [...pose.views].sort((a, b) => {
     const ai = ANGLES.indexOf(a.angle);
@@ -11211,16 +11221,19 @@ function PoseBrowser({
           ),
           query ? /* @__PURE__ */ (0, import_jsx_runtime27.jsx)("button", { type: "button", className: "absolute top-1/2 right-2 -translate-y-1/2 text-muted-foreground", onClick: () => setQuery(""), "aria-label": "清空搜索", children: /* @__PURE__ */ (0, import_jsx_runtime27.jsx)(X, { className: "size-3.5" }) }) : null
         ] }),
-        /* @__PURE__ */ (0, import_jsx_runtime27.jsx)(
-          "select",
-          {
-            className: "h-8 max-w-full shrink-0 rounded-lg border border-input bg-card px-2 text-sm text-foreground",
-            value: category,
-            "aria-label": "动作分类",
-            onChange: (event) => setCategory(event.target.value),
-            children: categories.map((item) => /* @__PURE__ */ (0, import_jsx_runtime27.jsx)("option", { value: item, children: item === "全部" ? "全部动作分类" : item }, item))
-          }
-        ),
+        /* @__PURE__ */ (0, import_jsx_runtime27.jsxs)("div", { className: "relative shrink-0", children: [
+          /* @__PURE__ */ (0, import_jsx_runtime27.jsx)(
+            "select",
+            {
+              className: "h-8 appearance-none rounded-lg border border-input bg-card py-0 pr-8 pl-2.5 text-sm leading-8 text-foreground outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50",
+              value: category,
+              "aria-label": "动作分类",
+              onChange: (event) => setCategory(event.target.value),
+              children: categories.map((item) => /* @__PURE__ */ (0, import_jsx_runtime27.jsx)("option", { value: item, children: item === "全部" ? "全部动作分类" : item }, item))
+            }
+          ),
+          /* @__PURE__ */ (0, import_jsx_runtime27.jsx)(ChevronDown, { className: "pointer-events-none absolute top-1/2 right-2.5 size-3.5 -translate-y-1/2 text-muted-foreground" })
+        ] }),
         /* @__PURE__ */ (0, import_jsx_runtime27.jsxs)("div", { className: "flex max-w-full items-center gap-1.5 @min-[640px]/poses:ml-auto", children: [
           /* @__PURE__ */ (0, import_jsx_runtime27.jsxs)("div", { role: "radiogroup", "aria-label": "视角", className: "inline-flex h-8 min-w-0 items-center overflow-x-auto rounded-full bg-secondary p-0.5", children: [
             /* @__PURE__ */ (0, import_jsx_runtime27.jsx)(AngleSegment, { active: angle === "", onClick: () => setPerspective(""), children: "全部视角" }),
@@ -11284,7 +11297,7 @@ function PoseBrowser({
         /* @__PURE__ */ (0, import_jsx_runtime27.jsx)("p", { className: "mt-1 text-sm text-muted-foreground", children: hiddenAdult > 0 && !showAdult ? `这一体系里有 ${hiddenAdult} 个成人向姿势被收着。` : "换个词，或把分类、视角清掉。" }),
         hiddenAdult > 0 && !showAdult ? /* @__PURE__ */ (0, import_jsx_runtime27.jsx)(Button3, { className: "mt-3", variant: "outline", onClick: () => onRequestAdult(system?.id ?? "sexy"), children: "显示成人向姿势" }) : null
       ] }) : null,
-      customSection ? null : /* @__PURE__ */ (0, import_jsx_runtime27.jsx)("div", { className: "grid grid-cols-1 gap-3 @min-[480px]/poses:grid-cols-2 @min-[920px]/poses:grid-cols-3", children: poses.map((pose) => {
+      customSection ? null : /* @__PURE__ */ (0, import_jsx_runtime27.jsx)("div", { className: POSE_GRID, children: poses.map((pose) => {
         const view = shownView(pose, selected[pose.id], cardViews[pose.id], angle);
         if (!view) return null;
         return /* @__PURE__ */ (0, import_jsx_runtime27.jsx)(
@@ -11365,7 +11378,7 @@ function AngleSegment({ active, onClick, children }) {
       role: "radio",
       "aria-checked": active,
       onClick,
-      className: `inline-flex h-7 shrink-0 items-center rounded-full px-2.5 text-xs whitespace-nowrap ${active ? "bg-foreground text-background" : "text-muted-foreground hover:text-foreground"}`,
+      className: `inline-flex h-7 shrink-0 items-center rounded-full px-2.5 text-xs whitespace-nowrap ${active ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:text-foreground"}`,
       children
     }
   );
@@ -11418,7 +11431,7 @@ function PoseCard({
   ] });
 }
 function PoseSkeleton() {
-  return /* @__PURE__ */ (0, import_jsx_runtime27.jsx)("div", { className: "mb-4 grid grid-cols-1 gap-3 @min-[480px]/poses:grid-cols-2 @min-[920px]/poses:grid-cols-3", children: Array.from({ length: 8 }, (_, index) => /* @__PURE__ */ (0, import_jsx_runtime27.jsx)("div", { className: "aspect-[3/4] animate-pulse rounded-2xl bg-muted" }, index)) });
+  return /* @__PURE__ */ (0, import_jsx_runtime27.jsx)("div", { className: `mb-4 ${POSE_GRID}`, children: Array.from({ length: 8 }, (_, index) => /* @__PURE__ */ (0, import_jsx_runtime27.jsx)("div", { className: "aspect-[3/4] animate-pulse rounded-2xl bg-muted" }, index)) });
 }
 
 // components/settings-dialog.tsx
@@ -12942,14 +12955,8 @@ function PoseStudio() {
   .relative {
     position: relative;
   }
-  .sticky {
-    position: sticky;
-  }
   .inset-0 {
     inset: 0px;
-  }
-  .top-0 {
-    top: 0px;
   }
   .top-1 {
     top: var(--spacing);
@@ -12968,6 +12975,9 @@ function PoseStudio() {
   }
   .right-2 {
     right: calc(var(--spacing) * 2);
+  }
+  .right-2\\.5 {
+    right: calc(var(--spacing) * 2.5);
   }
   .right-3 {
     right: calc(var(--spacing) * 3);
@@ -13292,6 +13302,9 @@ function PoseStudio() {
   .touch-none {
     touch-action: none;
   }
+  .appearance-none {
+    appearance: none;
+  }
   .grid-cols-1 {
     grid-template-columns: repeat(1, minmax(0, 1fr));
   }
@@ -13516,9 +13529,6 @@ function PoseStudio() {
       background-color: color-mix(in oklab, var(--destructive) 10%, transparent);
     }
   }
-  .bg-foreground {
-    background-color: var(--foreground);
-  }
   .bg-muted {
     background-color: var(--muted);
   }
@@ -13553,12 +13563,6 @@ function PoseStudio() {
     background-color: color-mix(in srgb, #fff 10%, transparent);
     @supports (color: color-mix(in lab, red, red)) {
       background-color: color-mix(in oklab, var(--color-white) 10%, transparent);
-    }
-  }
-  .bg-white\\/95 {
-    background-color: color-mix(in srgb, #fff 95%, transparent);
-    @supports (color: color-mix(in lab, red, red)) {
-      background-color: color-mix(in oklab, var(--color-white) 95%, transparent);
     }
   }
   .bg-clip-padding {
@@ -13611,6 +13615,9 @@ function PoseStudio() {
   }
   .px-4 {
     padding-inline: calc(var(--spacing) * 4);
+  }
+  .py-0 {
+    padding-block: 0px;
   }
   .py-0\\.5 {
     padding-block: calc(var(--spacing) * 0.5);
@@ -13672,6 +13679,9 @@ function PoseStudio() {
   .pb-\\[max\\(0\\.75rem\\,env\\(safe-area-inset-bottom\\)\\)\\] {
     padding-bottom: max(0.75rem, env(safe-area-inset-bottom));
   }
+  .pl-2\\.5 {
+    padding-left: calc(var(--spacing) * 2.5);
+  }
   .pl-8 {
     padding-left: calc(var(--spacing) * 8);
   }
@@ -13725,6 +13735,10 @@ function PoseStudio() {
     --tw-leading: calc(var(--spacing) * 6);
     line-height: calc(var(--spacing) * 6);
   }
+  .leading-8 {
+    --tw-leading: calc(var(--spacing) * 8);
+    line-height: calc(var(--spacing) * 8);
+  }
   .leading-none {
     --tw-leading: 1;
     line-height: 1;
@@ -13764,9 +13778,6 @@ function PoseStudio() {
   }
   .text-amber-950 {
     color: var(--color-amber-950);
-  }
-  .text-background {
-    color: var(--background);
   }
   .text-destructive {
     color: var(--destructive);
@@ -13874,11 +13885,6 @@ function PoseStudio() {
   }
   .filter {
     filter: var(--tw-blur,) var(--tw-brightness,) var(--tw-contrast,) var(--tw-grayscale,) var(--tw-hue-rotate,) var(--tw-invert,) var(--tw-saturate,) var(--tw-sepia,) var(--tw-drop-shadow,);
-  }
-  .backdrop-blur {
-    --tw-backdrop-blur: blur(8px);
-    -webkit-backdrop-filter: var(--tw-backdrop-blur,) var(--tw-backdrop-brightness,) var(--tw-backdrop-contrast,) var(--tw-backdrop-grayscale,) var(--tw-backdrop-hue-rotate,) var(--tw-backdrop-invert,) var(--tw-backdrop-opacity,) var(--tw-backdrop-saturate,) var(--tw-backdrop-sepia,);
-    backdrop-filter: var(--tw-backdrop-blur,) var(--tw-backdrop-brightness,) var(--tw-backdrop-contrast,) var(--tw-backdrop-grayscale,) var(--tw-backdrop-hue-rotate,) var(--tw-backdrop-invert,) var(--tw-backdrop-opacity,) var(--tw-backdrop-saturate,) var(--tw-backdrop-sepia,);
   }
   .transition {
     transition-property: color, background-color, border-color, outline-color, text-decoration-color, fill, stroke, --tw-gradient-from, --tw-gradient-via, --tw-gradient-to, opacity, box-shadow, transform, translate, scale, rotate, filter, -webkit-backdrop-filter, backdrop-filter, display, content-visibility, overlay, pointer-events;
@@ -14380,11 +14386,6 @@ function PoseStudio() {
       display: none;
     }
   }
-  @container poses (width >= 480px) {
-    .\\@min-\\[480px\\]\\/poses\\:grid-cols-2 {
-      grid-template-columns: repeat(2, minmax(0, 1fr));
-    }
-  }
   @container poses (width >= 640px) {
     .\\@min-\\[640px\\]\\/poses\\:ml-auto {
       margin-left: auto;
@@ -14409,6 +14410,13 @@ function PoseStudio() {
     .\\@min-\\[640px\\]\\/studio\\:aspect-\\[2\\/3\\] {
       aspect-ratio: 2/3;
     }
+  }
+  @container poses (width >= 640px) {
+    .\\@min-\\[640px\\]\\/poses\\:grid-cols-3 {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+  }
+  @container studio (width >= 640px) {
     .\\@min-\\[640px\\]\\/studio\\:grid-cols-3 {
       grid-template-columns: repeat(3, minmax(0, 1fr));
     }
@@ -14424,9 +14432,9 @@ function PoseStudio() {
       padding-inline: calc(var(--spacing) * 6);
     }
   }
-  @container poses (width >= 920px) {
-    .\\@min-\\[920px\\]\\/poses\\:grid-cols-3 {
-      grid-template-columns: repeat(3, minmax(0, 1fr));
+  @container poses (width >= 780px) {
+    .\\@min-\\[780px\\]\\/poses\\:grid-cols-4 {
+      grid-template-columns: repeat(4, minmax(0, 1fr));
     }
   }
   @container studio (width >= 1024px) {
@@ -15184,6 +15192,19 @@ function PoseStudio() {
   syntax: "*";
   inherits: false;
 }
+@property --tw-duration {
+  syntax: "*";
+  inherits: false;
+}
+@property --tw-ease {
+  syntax: "*";
+  inherits: false;
+}
+@property --tw-content {
+  syntax: "*";
+  initial-value: "";
+  inherits: false;
+}
 @property --tw-backdrop-blur {
   syntax: "*";
   inherits: false;
@@ -15218,19 +15239,6 @@ function PoseStudio() {
 }
 @property --tw-backdrop-sepia {
   syntax: "*";
-  inherits: false;
-}
-@property --tw-duration {
-  syntax: "*";
-  inherits: false;
-}
-@property --tw-ease {
-  syntax: "*";
-  inherits: false;
-}
-@property --tw-content {
-  syntax: "*";
-  initial-value: "";
   inherits: false;
 }
 @keyframes spin {
@@ -15298,6 +15306,9 @@ function PoseStudio() {
       --tw-drop-shadow-color: initial;
       --tw-drop-shadow-alpha: 100%;
       --tw-drop-shadow-size: initial;
+      --tw-duration: initial;
+      --tw-ease: initial;
+      --tw-content: "";
       --tw-backdrop-blur: initial;
       --tw-backdrop-brightness: initial;
       --tw-backdrop-contrast: initial;
@@ -15307,9 +15318,6 @@ function PoseStudio() {
       --tw-backdrop-opacity: initial;
       --tw-backdrop-saturate: initial;
       --tw-backdrop-sepia: initial;
-      --tw-duration: initial;
-      --tw-ease: initial;
-      --tw-content: "";
       --tw-animation-delay: 0s;
       --tw-animation-direction: normal;
       --tw-animation-duration: initial;

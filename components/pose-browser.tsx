@@ -3,7 +3,7 @@
 /* eslint-disable @next/next/no-img-element -- pose sketches are proxied bytes with an onError fallback */
 
 import { useEffect, useMemo, useRef, useState, type ReactNode } from "react"
-import { RotateCcw, Search, X } from "lucide-react"
+import { ChevronDown, RotateCcw, Search, X } from "lucide-react"
 import { CustomReferencePanel, type CustomCard, type CustomDraft } from "@/components/custom-reference-panel"
 import { Button } from "@/components/ui/button"
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog"
@@ -15,6 +15,7 @@ import { studioUrl, useStudioEnv } from "@/lib/studio-env"
 const ANGLES = ["正面", "俯视", "仰视", "侧面", "斜侧"]
 
 const THUMB_COLS = ["", "grid-cols-1", "grid-cols-2", "grid-cols-3", "grid-cols-4", "grid-cols-5"]
+const POSE_GRID = "grid grid-cols-2 gap-3 @min-[640px]/poses:grid-cols-3 @min-[780px]/poses:grid-cols-4"
 
 function orderedViews(pose: Pose) {
   return [...pose.views].sort((a, b) => {
@@ -252,16 +253,19 @@ export function PoseBrowser({
                 </button>
               ) : null}
             </div>
-            <select
-              className="h-8 max-w-full shrink-0 rounded-lg border border-input bg-card px-2 text-sm text-foreground"
-              value={category}
-              aria-label="动作分类"
-              onChange={(event) => setCategory(event.target.value)}
-            >
-              {categories.map((item) => (
-                <option key={item} value={item}>{item === "全部" ? "全部动作分类" : item}</option>
-              ))}
-            </select>
+            <div className="relative shrink-0">
+              <select
+                className="h-8 appearance-none rounded-lg border border-input bg-card py-0 pr-8 pl-2.5 text-sm leading-8 text-foreground outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50"
+                value={category}
+                aria-label="动作分类"
+                onChange={(event) => setCategory(event.target.value)}
+              >
+                {categories.map((item) => (
+                  <option key={item} value={item}>{item === "全部" ? "全部动作分类" : item}</option>
+                ))}
+              </select>
+              <ChevronDown className="pointer-events-none absolute top-1/2 right-2.5 size-3.5 -translate-y-1/2 text-muted-foreground" />
+            </div>
             <div className="flex max-w-full items-center gap-1.5 @min-[640px]/poses:ml-auto">
               <div role="radiogroup" aria-label="视角" className="inline-flex h-8 min-w-0 items-center overflow-x-auto rounded-full bg-secondary p-0.5">
                 <AngleSegment active={angle === ""} onClick={() => setPerspective("")}>全部视角</AngleSegment>
@@ -332,7 +336,7 @@ export function PoseBrowser({
             ) : null}
           </div>
         ) : null}
-        {customSection ? null : <div className="grid grid-cols-1 gap-3 @min-[480px]/poses:grid-cols-2 @min-[920px]/poses:grid-cols-3">
+        {customSection ? null : <div className={POSE_GRID}>
           {poses.map((pose) => {
             const view = shownView(pose, selected[pose.id], cardViews[pose.id], angle)
             if (!view) return null
@@ -425,7 +429,7 @@ function AngleSegment({ active, onClick, children }: { active: boolean; onClick:
       role="radio"
       aria-checked={active}
       onClick={onClick}
-      className={`inline-flex h-7 shrink-0 items-center rounded-full px-2.5 text-xs whitespace-nowrap ${active ? "bg-foreground text-background" : "text-muted-foreground hover:text-foreground"}`}
+      className={`inline-flex h-7 shrink-0 items-center rounded-full px-2.5 text-xs whitespace-nowrap ${active ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:text-foreground"}`}
     >
       {children}
     </button>
@@ -495,7 +499,7 @@ function PoseCard({
 
 function PoseSkeleton() {
   return (
-    <div className="mb-4 grid grid-cols-1 gap-3 @min-[480px]/poses:grid-cols-2 @min-[920px]/poses:grid-cols-3">
+    <div className={`mb-4 ${POSE_GRID}`}>
       {Array.from({ length: 8 }, (_, index) => (
         <div key={index} className="aspect-[3/4] animate-pulse rounded-2xl bg-muted" />
       ))}
