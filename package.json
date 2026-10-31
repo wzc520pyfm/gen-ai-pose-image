@@ -49,7 +49,7 @@
     "lint": "eslint",
     "typecheck": "tsc --noEmit",
     "build:client": "node scripts/build-client.mjs",
-    "test": "npm run build:client && node --test shared/pose.test.mjs shared/custom.test.mjs shared/style-refs.test.mjs shared/models.test.mjs shared/random-combo.test.mjs shared/comfyui.test.mjs"
+    "test": "npm run build:client && node --test shared/pose.test.mjs shared/custom.test.mjs shared/style-refs.test.mjs shared/models.test.mjs shared/random-combo.test.mjs shared/comfyui.test.mjs shared/comfyui-client.test.mjs"
   },
   "dependencies": {
     "@base-ui/react": "^1.9.0",

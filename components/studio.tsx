@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react"
 import { useElapsedSeconds, withElapsed } from "@/lib/elapsed"
 import { Settings } from "lucide-react"
+import { comfyPromptCards, requestComfyGenerate, type ComfyItem } from "@/lib/comfyui-client"
 import { CharacterDock } from "@/components/character-dock"
 import { Composer, type ResultCard } from "@/components/composer"
 import { CostumeBrowser } from "@/components/costume-browser"
@@ -45,7 +46,7 @@ import { createCustomId, isCustomCostumeId, reuseFromHistory } from "@/shared/cu
 import { messageForStatus } from "@/shared/http-status.mjs"
 import { isBuiltinModelId } from "@/shared/builtin-models.mjs"
 import { DEFAULT_MODEL_ID, activateModel, adoptCurrent, deleteFromLibrary, identityImage, renameModel, switcherEntries, syncLibrary, withGeneratedSheet } from "@/shared/models.mjs"
-import type { Catalog, Pose, PoseView, PromptCard } from "@/lib/types"
+import type { Catalog, GeneratedResult, Pose, PoseView, PromptCard } from "@/lib/types"
 
 type Selection = Record<string, string>
 type Library = "poses" | "costumes"
@@ -78,6 +79,7 @@ function StudioFrame({ embedded }: { embedded: boolean }) {
   const [costumeCatalogError, setCostumeCatalogError] = useState("")
   const [loading, setLoading] = useState(true)
   const [settings, setSettings] = useState<StudioSettings>(DEFAULT_SETTINGS)
+  const [settingsReady, setSettingsReady] = useState(false)
   const [library, setLibrary] = useState<Library>("poses")
   const [costume, setCostume] = useState<CostumePick | null>(null)
   const [costumeFocus, setCostumeFocus] = useState<string | null>(null)
@@ -151,6 +153,8 @@ function StudioFrame({ embedded }: { embedded: boolean }) {
   }, [basePath])
   useEffect(() => {
     const local = loadSettings()
+    setSettings(local)
+    setSettingsReady(true)
     fetch(studioUrl(basePath, "/api/status"))
       .then((response) => response.json())
       .then((payload: { keyConfigured?: boolean; provider?: string; model?: string; baseURL?: string }) => {
@@ -212,14 +216,18 @@ function StudioFrame({ embedded }: { embedded: boolean }) {
     }
   }, [])
   useEffect(() => {
-    if (!libraryReady.current) return
+    if (!libraryReady.current || !settingsReady || settings.engine === "comfyui") {
+      setSyncWarning("")
+      return
+    }
+    const controller = new AbortController()
     const timer = window.setTimeout(() => {
-      syncCustomLibrary(basePath, customPoses, customCostumes)
+      syncCustomLibrary(basePath, customPoses, customCostumes, controller.signal)
         .then(() => setSyncWarning(""))
         .catch(() => setSyncWarning("自定义参考还没同步给 Agent。刷新工作室后再试。"))
     }, 250)
-    return () => window.clearTimeout(timer)
-  }, [basePath, customPoses, customCostumes])
+    return () => { window.clearTimeout(timer); controller.abort() }
+  }, [basePath, customPoses, customCostumes, settingsReady, settings.engine])
 
   function updateSettings(next: StudioSettings) {
     setSettings(next)
@@ -367,12 +375,30 @@ function StudioFrame({ embedded }: { embedded: boolean }) {
     })
   }, [selected, poseById, poseUrls])
 
+  const comfyItems = useCallback((viewIds: string[]): ComfyItem[] => {
+    if (!viewIds.length && costume) return [{ viewId: "outfit", title: "仅换装", pose: null }]
+    return viewIds.map((id) => {
+      for (const pose of poseById.values()) {
+        const view = pose.views.find((v) => v.id === id)
+        if (view) return { viewId: id, title: `${pose.name} · ${view.angle}`, pose: { ...pose, angle: view.angle } }
+      }
+      throw new Error(`找不到姿势 ${id}`)
+    })
+  }, [poseById, costume])
+
   const selectionKey = chosen.map((item) => item.viewId).join("|")
 
   useEffect(() => {
     if (!selectionKey && !(settings.engine === "comfyui" && costume?.id)) {
       setPrompts([])
       setPromptError("")
+      return
+    }
+    if (settings.engine === "comfyui") {
+      try {
+        setPrompts(comfyPromptCards({ items: comfyItems(selectionKey ? selectionKey.split("|") : []), costume, extraPrompt, characterCount: characters.length || 1, keepOutfit: costume ? false : settings.keepOutfit, mode: settings.mode }))
+        setPromptError("")
+      } catch (error) { setPromptError(error instanceof Error ? error.message : "提示词没有生成") }
       return
     }
     const controller = new AbortController()
@@ -413,7 +439,7 @@ function StudioFrame({ embedded }: { embedded: boolean }) {
       window.clearTimeout(timer)
       controller.abort()
     }
-  }, [basePath, selectionKey, extraPrompt, characters.length, activeModelId, costume?.id, settings.engine, settings.provider, settings.mode, settings.keepOutfit, customPoses, customCostumes])
+  }, [basePath, selectionKey, extraPrompt, characters.length, activeModelId, costume?.id, settings.engine, settings.provider, settings.mode, settings.keepOutfit, customPoses, customCostumes, comfyItems, costume])
 
   function togglePose(pose: Pose, view: PoseView) {
     if (selected[pose.id] === view.id) {
@@ -502,6 +528,13 @@ function StudioFrame({ embedded }: { embedded: boolean }) {
       characterImages: characters.map((image) => ({ mediaType: image.mediaType, dataBase64: image.dataBase64 })),
       builtinModelId: characters.length ? "" : activeModelId,
     }
+    const generateRequest = async (ids: string[], mode: StudioSettings["mode"], localRunId?: string) => {
+      const customReferences = await customReferenceBody(ids, costume?.id ?? "", customPoses, customCostumes)
+      if (settings.engine === "comfyui") {
+        return resultCards(await requestComfyGenerate(basePath, settings, { ...bodyBase, mode, items: comfyItems(ids), costume, customReferences, localRunId }, controller.signal))
+      }
+      return requestGenerate(basePath, { ...bodyBase, mode, viewIds: ids, customReferences }, controller.signal)
+    }
     const snapshotBase = {
       extraPrompt,
       provider: settings.engine === "comfyui" ? "comfyui" : settings.provider,
@@ -513,10 +546,9 @@ function StudioFrame({ embedded }: { embedded: boolean }) {
     }
     try {
       if (settings.mode === "sheet" || chosen.length === 0) {
-        setProgress(chosen.length === 0 ? "正在本机换装" : settings.engine === "comfyui" ? "正在逐格生成姿势拼图" : "正在画姿势拼图")
-        const customReferences = await customReferenceBody(viewIds, costume?.id ?? "", customPoses, customCostumes)
+        setProgress(chosen.length === 0 ? "正在通过 ComfyUI 换装" : settings.engine === "comfyui" ? "正在逐格生成姿势拼图" : "正在画姿势拼图")
         const localRunId = localRetry.current || crypto.randomUUID()
-        const batch = await requestGenerate(basePath, { ...bodyBase, mode: settings.mode, viewIds, customReferences, localRunId }, controller.signal)
+        const batch = await generateRequest(viewIds, settings.mode, localRunId)
         localRetry.current = settings.engine === "comfyui" && batch.some((item) => !item.ok) ? localRunId : ""
         setResults(batch)
         await rememberResults(batch, { ...snapshotBase, selection: chosen })
@@ -525,8 +557,7 @@ function StudioFrame({ embedded }: { embedded: boolean }) {
         for (let index = 0; index < chosen.length; index += 1) {
           const item = chosen[index]
           setProgress(`正在画第 ${index + 1} 张，共 ${chosen.length} 张`)
-          const customReferences = await customReferenceBody([item.viewId], costume?.id ?? "", customPoses, customCostumes)
-          const batch = await requestGenerate(basePath, { ...bodyBase, mode: "each", viewIds: [item.viewId], customReferences }, controller.signal)
+          const batch = await generateRequest([item.viewId], "each")
           const stamped = batch.map((result, resultIndex) => ({ ...result, key: `${item.viewId}-${resultIndex}` }))
           collected.push(...stamped)
           setResults([...collected])
@@ -683,7 +714,7 @@ function StudioFrame({ embedded }: { embedded: boolean }) {
       extraPrompt={extraPrompt}
       onExtraPrompt={setExtraPrompt}
       localMode={settings.engine === "comfyui"}
-      providerLabel={settings.engine === "comfyui" ? "ComfyUI 本地" : settings.provider === "seedream" ? "Seedream" : settings.provider === "openai" ? "OpenAI" : "Gemini"}
+      providerLabel={settings.engine === "comfyui" ? "ComfyUI" : settings.provider === "seedream" ? "Seedream" : settings.provider === "openai" ? "OpenAI" : "Gemini"}
       aspectRatio={settings.aspectRatio}
       mode={settings.mode}
       keepOutfit={settings.keepOutfit}
@@ -943,7 +974,11 @@ async function requestGenerate(basePath: string, body: unknown, signal: AbortSig
   } catch {
     throw new Error("生图失败")
   }
-  return (payload.results ?? []).map((item, index) => ({
+  return resultCards(payload.results ?? [])
+}
+
+function resultCards(results: GeneratedResult[]): ResultCard[] {
+  return results.map((item, index) => ({
     viewId: item.viewId,
     key: `${item.viewId}-${index}`,
     title: item.title,

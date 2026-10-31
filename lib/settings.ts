@@ -1,7 +1,10 @@
+import { DEFAULT_COMFYUI_URL } from "../shared/comfyui-client.mjs"
 import type { AspectRatio, GenerateMode, ProviderId } from "@/lib/types"
 
 export type StudioSettings = {
   engine: "cloud" | "comfyui"
+  comfyuiURL: string
+  comfyuiToken: string
   provider: ProviderId
   apiKey: string
   baseURL: string
@@ -15,6 +18,8 @@ export type StudioSettings = {
 
 export const DEFAULT_SETTINGS: StudioSettings = {
   engine: "cloud",
+  comfyuiURL: DEFAULT_COMFYUI_URL,
+  comfyuiToken: "",
   provider: "gemini",
   apiKey: "",
   baseURL: "",
@@ -39,6 +44,8 @@ export function loadSettings(): StudioSettings {
     const aspectRatio = aspect === "1:1" || aspect === "3:4" || aspect === "4:3" || aspect === "9:16" || aspect === "16:9" ? aspect : "3:4"
     return {
       engine: parsed.engine === "comfyui" ? "comfyui" : "cloud",
+      comfyuiURL: typeof parsed.comfyuiURL === "string" && parsed.comfyuiURL.trim() ? parsed.comfyuiURL : DEFAULT_COMFYUI_URL,
+      comfyuiToken: "",
       provider,
       apiKey: typeof parsed.apiKey === "string" ? parsed.apiKey : "",
       baseURL: typeof parsed.baseURL === "string" ? parsed.baseURL : "",
@@ -55,7 +62,8 @@ export function loadSettings(): StudioSettings {
 }
 
 export function saveSettings(settings: StudioSettings) {
-  window.localStorage.setItem(KEY, JSON.stringify(settings))
+  const stored = { ...settings, comfyuiToken: undefined }
+  window.localStorage.setItem(KEY, JSON.stringify(stored))
 }
 
 export function modelFor(provider: ProviderId) {

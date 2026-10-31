@@ -1,6 +1,4 @@
-import { composeLocalSheet, generateLocal, localPrompts, comfyURL } from "./comfyui.mjs"
 import { spawn } from "node:child_process"
-import { createHash } from "node:crypto"
 import { mkdtemp, readFile, rm, writeFile } from "node:fs/promises"
 import { tmpdir } from "node:os"
 import { dirname, join } from "node:path"
@@ -181,13 +179,14 @@ async function costumeReferences(plan, fetchCostume) {
 }
 
 export function planRequest(input = {}) {
+  if (input.engine === "comfyui") throw new Error("不再支持服务端执行 ComfyUI，请使用新版网页直接连接。")
   const provider = input.provider === "openai" || input.provider === "gemini" || input.provider === "seedream" ? input.provider : null
   if (!provider) throw new Error("不支持的生图接口")
   const mode = input.mode === "sheet" ? "sheet" : "each"
   const rawIds = Array.isArray(input.viewIds) ? input.viewIds : []
   const viewIds = [...new Set(rawIds.filter((id) => typeof id === "string" && id.trim()))]
   const max = mode === "sheet" ? 4 : 8
-  if (viewIds.length === 0 && !(input.engine === "comfyui" && input.costumeId)) throw new Error("先选择至少一个姿势或在本地模式选择服装")
+  if (viewIds.length === 0) throw new Error("先选择至少一个姿势")
   if (viewIds.length > max) throw new Error(mode === "sheet" ? "拼图一次最多 4 个姿势" : "一次最多 8 个姿势")
   const items = viewIds.map((id) => planPose(id, input))
   const uploads = Array.isArray(input.characterImages) ? input.characterImages : []
@@ -199,29 +198,19 @@ export function planRequest(input = {}) {
   const character = characterCount > 0 ? characterFromUploads(characterCount) : characterForBuiltin(builtinModelId)
   const costumeId = typeof input.costumeId === "string" ? input.costumeId.trim() : ""
   const costume = planCostume(costumeId, input)
-  if (input.engine === "comfyui" && items.length === 0) items.push({ viewId: "outfit", title: "仅换装", pose: null })
   const keepOutfit = costume ? false : input.keepOutfit !== false
   const extraPrompt = typeof input.extraPrompt === "string" ? input.extraPrompt.replace(/[^\S\n]+/g, " ").trim().slice(0, 2000) : ""
   const aspectRatio = ASPECTS.has(input.aspectRatio) ? input.aspectRatio : "3:4"
   const costumePrompt = costume ? { id: costume.id, keywords: costume.keywords } : null
-  let sheetPrompt = composePrompt({ character, poses: items.map((item) => item.pose).filter(Boolean), extraPrompt, keepOutfit, mode: "sheet", costume: costumePrompt })
+  const sheetPrompt = composePrompt({ character, poses: items.map((item) => item.pose), extraPrompt, keepOutfit, mode: "sheet", costume: costumePrompt })
   for (const item of items) {
     item.prompt = mode === "sheet"
       ? sheetPrompt
-      : composePrompt({ character, poses: [item.pose].filter(Boolean), extraPrompt, keepOutfit, mode: "each", costume: costumePrompt })
-  }
-  if (input.engine === "comfyui") {
-    for (const item of items) {
-      const p = localPrompts({ pose: item.pose, costume, extraPrompt, characterCount: characterCount || 1, keepOutfit })
-      item.prompt = item.pose ? p.scaffold + "\n\n" + p.final : p.outfit
-    }
-    sheetPrompt = items.map((item, index) => `${index + 1}. ${item.prompt}`).join("\n\n")
+      : composePrompt({ character, poses: [item.pose], extraPrompt, keepOutfit, mode: "each", costume: costumePrompt })
   }
   const modelText = typeof input.model === "string" ? input.model.trim() : ""
   if (modelText.length > 120) throw new Error("模型名过长")
   return {
-    engine: input.engine === "comfyui" ? "comfyui" : "cloud",
-    localRunId: typeof input.localRunId === "string" && /^[\w-]{1,64}$/.test(input.localRunId) ? input.localRunId : "",
     provider,
     apiKey: typeof input.apiKey === "string" ? input.apiKey.trim() : "",
     baseURL: assertBaseURL(input.baseURL),
@@ -233,7 +222,6 @@ export function planRequest(input = {}) {
     costume,
     items,
     uploads,
-    extraPrompt,
     sheetPrompt,
   }
 }
@@ -256,7 +244,6 @@ export async function resolveCharacterImages(plan) {
 
 export async function runGeneration(input, deps = {}) {
   const plan = planRequest(input)
-  if (plan.engine === "comfyui") return runLocalGeneration(plan, deps)
   if (!plan.apiKey) throw new Error("还没有填写 API Key。可以先在右侧看提示词，或到设置里填入 Seedream、Gemini 或 OpenAI 兼容接口的密钥。")
   const fetchPose = deps.fetchPose ?? fetchPoseBytes
   const generate = deps.generate ?? generateImage
@@ -324,45 +311,6 @@ export async function runGeneration(input, deps = {}) {
         error: error instanceof Error ? error.message : "生图失败",
       })
     }
-  }
-  return { results }
-}
-
-
-const sheetCache = new Map()
-
-async function runLocalGeneration(plan, deps) {
-  comfyURL()
-  // Short-lived, bounded, in-memory cells let a failed sheet retry only missing poses.
-  const key = plan.mode === "sheet" && plan.localRunId ? createHash("sha256").update(JSON.stringify(plan)).digest("hex") : ""
-  for (const [id, entry] of sheetCache) if (Date.now() - entry.created > 600000) sheetCache.delete(id)
-  if (key && !sheetCache.has(key)) {
-    if (sheetCache.size >= 4) sheetCache.delete(sheetCache.keys().next().value)
-    sheetCache.set(key, { created: Date.now(), cells: new Map() })
-  }
-  const cached = sheetCache.get(key)?.cells
-  const characters = await resolveCharacterImages(plan)
-  const garments = await costumeReferences(plan, deps.fetchCostume ?? fetchCostumeBytes)
-  const generate = deps.generateLocal ?? generateLocal
-  const results = []
-  const images = []
-  for (const item of plan.items) {
-    deps.signal?.throwIfAborted()
-    try {
-      const poseImage = item.pose ? await poseReference(item, deps.fetchPose ?? fetchPoseBytes) : undefined
-      const image = cached?.get(item.viewId) ?? await generate({ characters, garment: garments[0], poseImage, pose: item.pose, costume: plan.costume, aspectRatio: plan.aspectRatio, extraPrompt: plan.extraPrompt, keepOutfit: plan.keepOutfit, signal: deps.signal })
-      cached?.set(item.viewId, image)
-      images.push(image)
-      results.push({ viewId: item.viewId, title: item.title, prompt: item.prompt, ok: true, mediaType: image.mediaType, imageBase64: image.buffer.toString("base64"), referencesSent: true })
-    } catch (error) {
-      deps.signal?.throwIfAborted()
-      results.push({ viewId: item.viewId, title: item.title, prompt: item.prompt, ok: false, error: error instanceof Error ? error.message : "本地生图失败" })
-    }
-  }
-  if (plan.mode === "sheet" && results.every((r) => r.ok)) {
-    const sheet = await composeLocalSheet(images, plan.aspectRatio)
-    sheetCache.delete(key)
-    return { results: [{ viewId: plan.items.map((i) => i.viewId).join(","), title: "姿势拼图", prompt: plan.sheetPrompt, ok: true, mediaType: sheet.mediaType, imageBase64: sheet.buffer.toString("base64"), referencesSent: true }] }
   }
   return { results }
 }

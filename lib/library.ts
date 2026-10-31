@@ -200,9 +200,10 @@ export async function assetToWire(asset: CustomAsset): Promise<CustomWire> {
   }
 }
 
-async function sendLibrary(basePath: string, method: "PUT" | "POST", body: string) {
+async function sendLibrary(basePath: string, method: "PUT" | "POST", body: string, signal?: AbortSignal) {
   const response = await fetch(studioPath(basePath, "/api/custom-library"), {
     method,
+    signal,
     headers: { "content-type": "application/json" },
     body,
   })
@@ -212,19 +213,19 @@ async function sendLibrary(basePath: string, method: "PUT" | "POST", body: strin
   }
 }
 
-export async function syncCustomLibrary(basePath: string, poses: CustomAsset[], costumes: CustomAsset[]) {
+export async function syncCustomLibrary(basePath: string, poses: CustomAsset[], costumes: CustomAsset[], signal?: AbortSignal) {
   const wirePoses = await Promise.all(poses.map((item) => assetToWire(item)))
   const wireCostumes = await Promise.all(costumes.map((item) => assetToWire(item)))
   const payload = JSON.stringify({ poses: wirePoses, costumes: wireCostumes })
   if (payload.length < 10_000_000) {
-    await sendLibrary(basePath, "PUT", payload)
+    await sendLibrary(basePath, "PUT", payload, signal)
     return
   }
-  await sendLibrary(basePath, "PUT", JSON.stringify({ poses: [], costumes: [] }))
+  await sendLibrary(basePath, "PUT", JSON.stringify({ poses: [], costumes: [] }), signal)
   for (const item of wirePoses) {
-    await sendLibrary(basePath, "POST", JSON.stringify({ kind: "pose", item }))
+    await sendLibrary(basePath, "POST", JSON.stringify({ kind: "pose", item }), signal)
   }
   for (const item of wireCostumes) {
-    await sendLibrary(basePath, "POST", JSON.stringify({ kind: "costume", item }))
+    await sendLibrary(basePath, "POST", JSON.stringify({ kind: "costume", item }), signal)
   }
 }
