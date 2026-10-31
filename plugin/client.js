@@ -12808,6 +12808,7 @@ function StudioFrame({ embedded }) {
   const clearCostumeFocus = (0, import_react13.useCallback)(() => setCostumeFocus(null), []);
   const abortRef = (0, import_react13.useRef)(null);
   const localRetry = (0, import_react13.useRef)("");
+  const settingsRevision = (0, import_react13.useRef)(0);
   const loadCatalog = (0, import_react13.useCallback)(() => {
     setLoading(true);
     setCatalogError("");
@@ -12839,10 +12840,11 @@ function StudioFrame({ embedded }) {
     const local = loadSettings();
     setSettings(local);
     setSettingsReady(true);
+    const revision = settingsRevision.current;
     fetch(studioUrl(basePath, "/api/status")).then((response) => response.json()).then((payload) => {
       setServerKey(Boolean(payload.keyConfigured));
       const untouched = local.provider === "gemini" && local.apiKey.trim() === "" && (local.model === modelFor("gemini") || local.model.trim() === "");
-      if (untouched && payload.provider === "seedream") {
+      if (untouched && payload.provider === "seedream" && settingsRevision.current === revision) {
         const next = {
           ...local,
           provider: "seedream",
@@ -12853,8 +12855,8 @@ function StudioFrame({ embedded }) {
         saveSettings(next);
         return;
       }
-      setSettings(local);
-    }).catch(() => setSettings(local));
+    }).catch(() => {
+    });
   }, [basePath]);
   (0, import_react13.useEffect)(() => {
     const gen = ++modelLoadGen.current;
@@ -12908,6 +12910,7 @@ function StudioFrame({ embedded }) {
     };
   }, [basePath, customPoses, customCostumes, settingsReady, settings.engine]);
   function updateSettings(next) {
+    settingsRevision.current += 1;
     setSettings(next);
     saveSettings(next);
   }

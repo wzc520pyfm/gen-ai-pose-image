@@ -117,6 +117,7 @@ function StudioFrame({ embedded }: { embedded: boolean }) {
   const clearCostumeFocus = useCallback(() => setCostumeFocus(null), [])
   const abortRef = useRef<AbortController | null>(null)
   const localRetry = useRef("")
+  const settingsRevision = useRef(0)
 
   const loadCatalog = useCallback(() => {
     setLoading(true)
@@ -155,12 +156,13 @@ function StudioFrame({ embedded }: { embedded: boolean }) {
     const local = loadSettings()
     setSettings(local)
     setSettingsReady(true)
+    const revision = settingsRevision.current
     fetch(studioUrl(basePath, "/api/status"))
       .then((response) => response.json())
       .then((payload: { keyConfigured?: boolean; provider?: string; model?: string; baseURL?: string }) => {
         setServerKey(Boolean(payload.keyConfigured))
         const untouched = local.provider === "gemini" && local.apiKey.trim() === "" && (local.model === modelFor("gemini") || local.model.trim() === "")
-        if (untouched && payload.provider === "seedream") {
+        if (untouched && payload.provider === "seedream" && settingsRevision.current === revision) {
           const next = {
             ...local,
             provider: "seedream" as const,
@@ -171,9 +173,8 @@ function StudioFrame({ embedded }: { embedded: boolean }) {
           saveSettings(next)
           return
         }
-        setSettings(local)
       })
-      .catch(() => setSettings(local))
+      .catch(() => {})
   }, [basePath])
   useEffect(() => {
     const gen = ++modelLoadGen.current
@@ -230,6 +231,7 @@ function StudioFrame({ embedded }: { embedded: boolean }) {
   }, [basePath, customPoses, customCostumes, settingsReady, settings.engine])
 
   function updateSettings(next: StudioSettings) {
+    settingsRevision.current += 1
     setSettings(next)
     saveSettings(next)
   }
