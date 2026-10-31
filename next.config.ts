@@ -12,7 +12,6 @@ const nextConfig: NextConfig = {
     "/api/prompt": ["./data/catalog.json", "./data/costumes.json", "./data/faces.json"],
     "/api/character-sheet": ["./public/muse/dafeiyu-sheet.png"],
     "/api/generate": [
-      "./shared/workflows/local-tryon.api.json",
       "./data/catalog.json",
       "./data/costumes.json",
       "./data/faces.json",

@@ -48,7 +48,7 @@ var require_use_sync_external_store_shim_production = __commonJS({
     }
     var objectIs = "function" === typeof Object.is ? Object.is : is;
     var useState22 = React67.useState;
-    var useEffect17 = React67.useEffect;
+    var useEffect18 = React67.useEffect;
     var useLayoutEffect2 = React67.useLayoutEffect;
     var useDebugValue2 = React67.useDebugValue;
     function useSyncExternalStore$2(subscribe, getSnapshot) {
@@ -61,7 +61,7 @@ var require_use_sync_external_store_shim_production = __commonJS({
         },
         [subscribe, value, getSnapshot]
       );
-      useEffect17(
+      useEffect18(
         function() {
           checkIfSnapshotChanged(inst) && forceUpdate({ inst });
           return subscribe(function() {
@@ -114,12 +114,12 @@ var require_with_selector_production = __commonJS({
     }
     var objectIs = "function" === typeof Object.is ? Object.is : is;
     var useSyncExternalStore3 = shim.useSyncExternalStore;
-    var useRef28 = React67.useRef;
-    var useEffect17 = React67.useEffect;
+    var useRef29 = React67.useRef;
+    var useEffect18 = React67.useEffect;
     var useMemo18 = React67.useMemo;
     var useDebugValue2 = React67.useDebugValue;
     exports.useSyncExternalStoreWithSelector = function(subscribe, getSnapshot, getServerSnapshot, selector, isEqual) {
-      var instRef = useRef28(null);
+      var instRef = useRef29(null);
       if (null === instRef.current) {
         var inst = { hasValue: false, value: null };
         instRef.current = inst;
@@ -159,7 +159,7 @@ var require_with_selector_production = __commonJS({
         [getSnapshot, getServerSnapshot, selector, isEqual]
       );
       var value = useSyncExternalStore3(subscribe, instRef[0], instRef[1]);
-      useEffect17(
+      useEffect18(
         function() {
           inst.hasValue = true;
           inst.value = value;
@@ -590,6 +590,1445 @@ var __iconData12 = {
 };
 __iconData12.node;
 var X = createLucideIcon(__iconData12);
+
+// shared/workflows/local-tryon.api.json
+var local_tryon_api_default = {
+  graph: {
+    "1": {
+      class_type: "UNETLoader",
+      inputs: {
+        unet_name: "qwen_image_2.1_turbo_int8_convrot.safetensors",
+        weight_dtype: "default"
+      }
+    },
+    "2": {
+      class_type: "QwenImage21Cache",
+      inputs: {
+        model: [
+          "1",
+          0
+        ],
+        device: "auto",
+        dtype: "default"
+      }
+    },
+    "3": {
+      class_type: "CLIPLoader",
+      inputs: {
+        clip_name: "qwen3vl_8b_w4a8.safetensors",
+        type: "qwen_image",
+        device: "default"
+      }
+    },
+    "4": {
+      class_type: "VAELoader",
+      inputs: {
+        vae_name: "qwen_image_2.1_vae_bf16.safetensors"
+      }
+    },
+    "5": {
+      class_type: "LoadImage",
+      inputs: {
+        image: "example.png"
+      }
+    },
+    "6": {
+      class_type: "LoadImage",
+      inputs: {
+        image: "example.png"
+      }
+    },
+    "7": {
+      class_type: "TextEncodeQwenImage21",
+      inputs: {
+        clip: [
+          "3",
+          0
+        ],
+        vae: [
+          "4",
+          0
+        ],
+        prompt: "Replace the outfit in image1 with image2. Preserve identity and pose.",
+        negative_prompt: "",
+        resolution: 768,
+        "images.image_1": [
+          "5",
+          0
+        ],
+        "images.image_2": [
+          "6",
+          0
+        ]
+      }
+    },
+    "8": {
+      class_type: "CFGGuider",
+      inputs: {
+        model: [
+          "2",
+          0
+        ],
+        positive: [
+          "7",
+          0
+        ],
+        negative: [
+          "7",
+          1
+        ],
+        cfg: 1
+      }
+    },
+    "9": {
+      class_type: "ManualSigmas",
+      inputs: {
+        sigmas: "1.0, 0.978453, 0.95418, 0.926626, 0.89508, 0.845148, 0.704534, 0.414568, 0"
+      }
+    },
+    "10": {
+      class_type: "KSamplerSelect",
+      inputs: {
+        sampler_name: "euler"
+      }
+    },
+    "11": {
+      class_type: "RandomNoise",
+      inputs: {
+        noise_seed: 42
+      }
+    },
+    "12": {
+      class_type: "SamplerCustomAdvanced",
+      inputs: {
+        noise: [
+          "11",
+          0
+        ],
+        guider: [
+          "8",
+          0
+        ],
+        sampler: [
+          "10",
+          0
+        ],
+        sigmas: [
+          "9",
+          0
+        ],
+        latent_image: [
+          "7",
+          2
+        ]
+      }
+    },
+    "13": {
+      class_type: "VAEDecode",
+      inputs: {
+        samples: [
+          "12",
+          0
+        ],
+        vae: [
+          "4",
+          0
+        ]
+      }
+    },
+    "101": {
+      class_type: "UNETLoader",
+      inputs: {
+        unet_name: "moss_image_sft_int8_convrot.safetensors",
+        weight_dtype: "default"
+      }
+    },
+    "102": {
+      class_type: "LoraLoaderModelOnly",
+      inputs: {
+        model: [
+          "101",
+          0
+        ],
+        lora_name: "moss_image_color_depth_control.safetensors",
+        strength_model: 1
+      }
+    },
+    "103": {
+      class_type: "TemporalScoreRescaling",
+      inputs: {
+        model: [
+          "102",
+          0
+        ],
+        tsr_k: 0.95,
+        tsr_sigma: 1
+      }
+    },
+    "104": {
+      class_type: "ModelSamplingAuraFlow",
+      inputs: {
+        model: [
+          "103",
+          0
+        ],
+        shift: 5,
+        sampling: "flow"
+      }
+    },
+    "105": {
+      class_type: "SkipLayerGuidanceDiTSimple",
+      inputs: {
+        model: [
+          "104",
+          0
+        ],
+        double_layers: "",
+        single_layers: "24",
+        start_percent: 0,
+        end_percent: 1
+      }
+    },
+    "106": {
+      class_type: "CLIPLoader",
+      inputs: {
+        clip_name: "qwen3.5_9b_w4a8_gptq.safetensors",
+        type: "moss_image",
+        device: "default"
+      }
+    },
+    "107": {
+      class_type: "VAELoader",
+      inputs: {
+        vae_name: "flux2-vae_small.safetensors"
+      }
+    },
+    "108": {
+      class_type: "CLIPTextEncode",
+      inputs: {
+        clip: [
+          "106",
+          0
+        ],
+        text: "A fully clothed adult model following the pose depth map."
+      }
+    },
+    "109": {
+      class_type: "CLIPTextEncode",
+      inputs: {
+        clip: [
+          "106",
+          0
+        ],
+        text: "low quality, wrong anatomy, extra limbs, cropped body, watermark, text"
+      }
+    },
+    "110": {
+      class_type: "LoadImage",
+      inputs: {
+        image: "example.png"
+      }
+    },
+    "111": {
+      class_type: "DepthAnythingV2Preprocessor",
+      inputs: {
+        image: [
+          "110",
+          0
+        ],
+        ckpt_name: "depth_anything_v2_vits.pth",
+        resolution: 512
+      }
+    },
+    "112": {
+      class_type: "ImageScale",
+      inputs: {
+        image: [
+          "111",
+          0
+        ],
+        upscale_method: "bicubic",
+        width: 672,
+        height: 896,
+        crop: "disabled"
+      }
+    },
+    "113": {
+      class_type: "MOSSImageControl",
+      inputs: {
+        positive: [
+          "108",
+          0
+        ],
+        negative: [
+          "109",
+          0
+        ],
+        vae: [
+          "107",
+          0
+        ],
+        depth_map: [
+          "112",
+          0
+        ],
+        strength: 1,
+        start_percent: 0,
+        end_percent: 0.6
+      }
+    },
+    "114": {
+      class_type: "EmptyLatentImage",
+      inputs: {
+        width: 672,
+        height: 896,
+        batch_size: 1
+      }
+    },
+    "115": {
+      class_type: "SamplerER_SDE",
+      inputs: {
+        solver_type: "ER-SDE",
+        max_stage: 3,
+        eta: 1,
+        s_noise: 1.05
+      }
+    },
+    "116": {
+      class_type: "BasicScheduler",
+      inputs: {
+        model: [
+          "105",
+          0
+        ],
+        scheduler: "simple",
+        steps: 25,
+        denoise: 1
+      }
+    },
+    "117": {
+      class_type: "SamplerCustom",
+      inputs: {
+        model: [
+          "105",
+          0
+        ],
+        positive: [
+          "113",
+          0
+        ],
+        negative: [
+          "113",
+          1
+        ],
+        sampler: [
+          "115",
+          0
+        ],
+        sigmas: [
+          "116",
+          0
+        ],
+        latent_image: [
+          "114",
+          0
+        ],
+        cfg: 3,
+        add_noise: true,
+        noise_seed: 42
+      }
+    },
+    "118": {
+      class_type: "VAEDecode",
+      inputs: {
+        samples: [
+          "117",
+          0
+        ],
+        vae: [
+          "107",
+          0
+        ]
+      }
+    },
+    "207": {
+      class_type: "TextEncodeQwenImage21",
+      inputs: {
+        clip: [
+          "3",
+          0
+        ],
+        vae: [
+          "4",
+          0
+        ],
+        prompt: "Use image1 for pose, image2 for outfit and identity, image3 for clothing, image4 for original identity. One image.",
+        negative_prompt: "",
+        resolution: 768,
+        "images.image_1": [
+          "118",
+          0
+        ],
+        "images.image_2": [
+          "300",
+          0
+        ],
+        "images.image_3": [
+          "301",
+          0
+        ],
+        "images.image_4": [
+          "5",
+          0
+        ]
+      }
+    },
+    "208": {
+      class_type: "CFGGuider",
+      inputs: {
+        model: [
+          "2",
+          0
+        ],
+        positive: [
+          "207",
+          0
+        ],
+        negative: [
+          "207",
+          1
+        ],
+        cfg: 1
+      }
+    },
+    "212": {
+      class_type: "SamplerCustomAdvanced",
+      inputs: {
+        noise: [
+          "11",
+          0
+        ],
+        guider: [
+          "208",
+          0
+        ],
+        sampler: [
+          "10",
+          0
+        ],
+        sigmas: [
+          "9",
+          0
+        ],
+        latent_image: [
+          "207",
+          2
+        ]
+      }
+    },
+    "213": {
+      class_type: "VAEDecode",
+      inputs: {
+        samples: [
+          "212",
+          0
+        ],
+        vae: [
+          "4",
+          0
+        ]
+      }
+    },
+    "214": {
+      class_type: "SaveImage",
+      inputs: {
+        images: [
+          "302",
+          0
+        ],
+        filename_prefix: "tryon/lanpose"
+      }
+    },
+    "300": {
+      class_type: "ComfySwitchNode",
+      inputs: {
+        switch: [
+          "304",
+          0
+        ],
+        on_true: [
+          "13",
+          0
+        ],
+        on_false: [
+          "5",
+          0
+        ]
+      }
+    },
+    "301": {
+      class_type: "ComfySwitchNode",
+      inputs: {
+        switch: [
+          "304",
+          0
+        ],
+        on_true: [
+          "6",
+          0
+        ],
+        on_false: [
+          "5",
+          0
+        ]
+      }
+    },
+    "302": {
+      class_type: "ComfySwitchNode",
+      inputs: {
+        switch: [
+          "305",
+          0
+        ],
+        on_true: [
+          "213",
+          0
+        ],
+        on_false: [
+          "13",
+          0
+        ]
+      }
+    },
+    "304": {
+      class_type: "PrimitiveBoolean",
+      inputs: {
+        value: true
+      },
+      _meta: {
+        title: "启用换装"
+      }
+    },
+    "305": {
+      class_type: "PrimitiveBoolean",
+      inputs: {
+        value: true
+      },
+      _meta: {
+        title: "启用姿势"
+      }
+    }
+  },
+  mapping: {
+    person: [
+      "5",
+      "image"
+    ],
+    garment: [
+      "6",
+      "image"
+    ],
+    pose: [
+      "110",
+      "image"
+    ],
+    outfitSwitches: [
+      [
+        "304",
+        "value"
+      ]
+    ],
+    poseSwitch: [
+      "305",
+      "value"
+    ],
+    outfitPrompt: [
+      "7",
+      "prompt"
+    ],
+    posePrompt: [
+      "108",
+      "text"
+    ],
+    finalPrompt: [
+      "207",
+      "prompt"
+    ],
+    seeds: [
+      [
+        "11",
+        "noise_seed"
+      ],
+      [
+        "117",
+        "noise_seed"
+      ]
+    ],
+    prefix: [
+      "214",
+      "filename_prefix"
+    ],
+    widths: [
+      [
+        "112",
+        "width"
+      ],
+      [
+        "114",
+        "width"
+      ]
+    ],
+    heights: [
+      [
+        "112",
+        "height"
+      ],
+      [
+        "114",
+        "height"
+      ]
+    ],
+    output: "214",
+    poseReference: [
+      "118",
+      0
+    ]
+  }
+};
+
+// shared/comfyui.mjs
+function dimensions(aspect = "3:4") {
+  const sizes = { "1:1": [768, 768], "3:4": [672, 896], "4:3": [896, 672], "9:16": [576, 1024], "16:9": [1024, 576] };
+  return sizes[aspect] || sizes["3:4"];
+}
+function faceSlot(characterCount, costume) {
+  return Math.max(1, Number(characterCount) || 1) + (costume ? 4 : 3);
+}
+function applyFacePrompt(text, face, index) {
+  const label = [face.section, face.hair, face.label].filter(Boolean).join(", ");
+  const line = `Use <image${index}> as the only face, expression, bone structure and hairstyle reference${face.id ? ` (${face.id}${label ? `, ${label}` : ""})` : ""}. Keep non-face identity markers from the character references, including whale ears and a whale tail when the character has them. Do not copy clothes, body, or background from <image${index}>.`;
+  return `${text} ${line}`;
+}
+function localPrompts({ pose, costume, face = null, extraPrompt = "", characterCount = 1, keepOutfit = true }) {
+  const people = pose?.people > 1 ? "exactly two adult people, matching their positions and interaction in the pose reference; the main person matches the identity references, the other person is fully clothed" : "exactly one adult person, a single subject, no duplicate people";
+  const action = pose ? `${pose.name}; ${pose.angle}; ${pose.category}` : "keep the original pose and framing";
+  const half = pose?.system?.includes("半身");
+  const framing = half ? "an upper-body portrait from head to waist, with head and both arms visible" : "a full-body portrait with head and feet visible";
+  const identity = characterCount > 1 ? "All additional identity images show the same main person from different views. Preserve that person's identity, face, hair, body type and visual style." : "Preserve the main person's identity, face, hair, body type and visual style.";
+  const prompts = {
+    outfit: `Edit <image1>: replace the main person's outfit with the complete outfit in <image2>. Match its colors, fabric, patterns, silhouette and accessories. Keep the original pose, face, hair, framing and background. ${identity} One image, no collage. ${extraPrompt}`,
+    scaffold: `A studio image of ${people}, ${framing}, wearing a loose opaque long-sleeved neutral gray shirt and full-length opaque trousers, fully dressed. Pose and camera: ${action}. Follow the depth map for body positions and composition, natural anatomy, simple neutral background. ${extraPrompt}`,
+    final: costume ? `Create one image of ${people}, ${framing}. Use <image1> only for pose and framing: ${action}. The main person's face and identity must precisely match the original in <image4>. Use <image2> for the person wearing the outfit. Dress the main person in the complete outfit from <image3>, accurately matching its colors, fabric, patterns, sleeves, neckline and silhouette. ${identity} Do not copy the scaffold's face or clothing. No collage, no text. ${extraPrompt}` : half ? `Create an upper-body portrait of ${people}, the exact same person in <image1>. Her face, facial features, hair, skin tone and visible clothes must precisely match <image1> and <image3>. Change her pose to match <image2>: ${action}. Keep her original clothing, including its colors, neckline, fabric and sleeves; do not copy the face or clothes from <image2>. Frame from head to waist with both hands visible, fully clothed, natural anatomy. ${identity} No collage, no text. ${extraPrompt}` : `Create a full-body portrait of ${people}. Use <image1> only for body pose and framing: ${action}. The face, identity, skin tone and hairstyle must match <image2>, not <image1>. Replace clothing on <image1> with the same outfit worn by the person in <image3>, matching the clothing, colors, fabric, sleeves and neckline. Do not copy clothes from <image1>. If the lower body is not visible in <image3>, add opaque full-length trousers or a long skirt appropriate to the outfit. Fully clothed. ${identity} Entire body and feet visible, natural anatomy. No collage, no text. ${extraPrompt}`
+  };
+  if (!costume && !keepOutfit) prompts.final = `Create one image of ${people}, ${framing}. Use ${half ? "<image2>" : "<image1>"} only for the body pose: ${action}. Preserve the face, hair and identity from ${half ? "<image1>" : "<image2>"}. You may change the clothes according to the following description, keeping every person fully clothed in opaque clothing. ${identity} No collage, no text. ${extraPrompt}`;
+  if (face) {
+    const index = faceSlot(characterCount, costume);
+    if (costume) {
+      prompts.final = prompts.final.replace(
+        "The main person's face and identity must precisely match the original in <image4>.",
+        "Keep identity markers such as ears, horns, or a tail from the character references."
+      );
+    } else if (!keepOutfit) {
+      prompts.final = prompts.final.replace(
+        `Preserve the face, hair and identity from ${half ? "<image1>" : "<image2>"}.`,
+        "Preserve non-face identity markers from the character references."
+      );
+    } else if (half) {
+      prompts.final = prompts.final.replace(
+        "Her face, facial features, hair, skin tone and visible clothes must precisely match <image1> and <image3>.",
+        "Skin tone and visible clothes must match the character references."
+      );
+    } else {
+      prompts.final = prompts.final.replace(
+        "The face, identity, skin tone and hairstyle must match <image2>, not <image1>.",
+        "Skin tone and non-face identity markers must match the character references, not <image1>."
+      );
+    }
+    prompts.outfit = `${prompts.outfit} Keep the original face for this clothing edit; the face reference is applied in the final image.`;
+    prompts.final = applyFacePrompt(prompts.final, face, index);
+  }
+  return prompts;
+}
+function activeGraph(source, output) {
+  const graph = structuredClone(source);
+  const resolve = (link, seen = /* @__PURE__ */ new Set()) => {
+    if (!Array.isArray(link)) return link;
+    const [id] = link;
+    if (seen.has(String(id))) throw new Error("工作流存在循环连接。");
+    const node = graph[id];
+    if (!node) throw new Error(`工作流连接的节点不存在：${id}`);
+    if (node.class_type !== "ComfySwitchNode") return link;
+    const { switch: control, on_true, on_false } = node.inputs;
+    const enabled = Array.isArray(control) && graph[control[0]]?.class_type === "PrimitiveBoolean" ? graph[control[0]].inputs.value : control;
+    if (typeof enabled !== "boolean") throw new Error("工作流开关必须是布尔值。");
+    return resolve(enabled ? on_true : on_false, /* @__PURE__ */ new Set([...seen, String(id)]));
+  };
+  const result = {};
+  const visiting = /* @__PURE__ */ new Set();
+  function visit(id) {
+    if (visiting.has(id)) throw new Error("工作流存在循环连接。");
+    if (result[id]) return;
+    const node = graph[id];
+    if (!node) throw new Error(`工作流节点不存在：${id}`);
+    visiting.add(id);
+    for (const [key, value] of Object.entries(node.inputs)) {
+      node.inputs[key] = resolve(value);
+      if (Array.isArray(node.inputs[key])) visit(String(node.inputs[key][0]));
+    }
+    visiting.delete(id);
+    result[id] = node;
+  }
+  visit(String(output));
+  return result;
+}
+async function buildLocalGraph({ files, pose, costume, face = null, aspectRatio, seed = 42, extraPrompt = "", keepOutfit = true, prefix = "tryon/lanpose" }) {
+  if (!pose && !costume) throw new Error("至少启用换装或姿势。");
+  const { graph, mapping: m } = structuredClone(local_tryon_api_default);
+  const set = (slot, value) => {
+    const [id, key] = slot;
+    graph[id].inputs[key] = value;
+  };
+  set(m.person, files.characters[0]);
+  set(m.garment, files.garment || files.characters[0]);
+  set(m.pose, files.pose || files.characters[0]);
+  for (const slot of m.outfitSwitches) set(slot, Boolean(costume));
+  set(m.poseSwitch, Boolean(pose));
+  const prompts = localPrompts({ pose, costume, face, extraPrompt, characterCount: files.characters.length, keepOutfit });
+  set(m.outfitPrompt, prompts.outfit);
+  set(m.posePrompt, prompts.scaffold);
+  set(m.finalPrompt, prompts.final);
+  if (!costume) {
+    const finalInputs = graph[m.finalPrompt[0]].inputs;
+    delete finalInputs["images.image_4"];
+    if (pose?.system?.includes("半身")) {
+      finalInputs["images.image_1"] = [m.person[0], 0];
+      finalInputs["images.image_2"] = m.poseReference;
+    }
+  }
+  for (const slot of m.seeds) set(slot, seed);
+  set(m.prefix, prefix);
+  const [width, height] = dimensions(aspectRatio);
+  for (const slot of m.widths) set(slot, width);
+  for (const slot of m.heights) set(slot, height);
+  for (let i = 1; i < files.characters.length; i++) {
+    const id = String(500 + i);
+    graph[id] = { class_type: "LoadImage", inputs: { image: files.characters[i] } };
+    graph[m.outfitPrompt[0]].inputs[`images.image_${i + 2}`] = [id, 0];
+    graph[m.finalPrompt[0]].inputs[`images.image_${i + (costume ? 4 : 3)}`] = [id, 0];
+  }
+  if (files.face) {
+    const slot = faceSlot(files.characters.length, costume);
+    graph["510"] = { class_type: "LoadImage", inputs: { image: files.face } };
+    graph[m.finalPrompt[0]].inputs[`images.image_${slot}`] = ["510", 0];
+  }
+  return { graph: activeGraph(graph, m.output), output: String(m.output), prompts };
+}
+
+// shared/comfyui-client.mjs
+var DEFAULT_COMFYUI_URL = "http://127.0.0.1:8188";
+function connectionURL(value = DEFAULT_COMFYUI_URL) {
+  let url;
+  try {
+    url = new URL(value.trim());
+  } catch {
+    throw new Error("请输入完整的 ComfyUI 地址。");
+  }
+  const loopback = ["127.0.0.1", "localhost", "[::1]"].includes(url.hostname);
+  if (url.protocol !== "https:" && !(loopback && url.protocol === "http:") || url.username || url.password || url.search || url.hash) {
+    throw new Error("请使用 HTTPS 地址或本机 HTTP 回环地址，不能包含账号密码、查询参数或片段。");
+  }
+  return url.href.replace(/\/+$/, "");
+}
+function createComfyClient({ url, token = "", signal, fetchImpl = fetch }) {
+  const root = connectionURL(url);
+  if (/[\r\n]/.test(token)) throw new Error("访问令牌格式无效。");
+  const accessToken = token.trim();
+  const request = async (path, init = {}) => {
+    if (!/^\/(system_stats|object_info|upload\/image|prompt|history\/[\w-]+|view(?:\?.*)?|queue)$/.test(path)) throw new Error("不支持的 ComfyUI 接口。");
+    const headers = new Headers(init.headers);
+    if (accessToken) headers.set("Authorization", `Bearer ${accessToken}`);
+    let response;
+    try {
+      response = await fetchImpl(root + path, { ...init, headers, signal: init.signal || signal, redirect: "error", credentials: "omit", cache: "no-store", referrerPolicy: "no-referrer" });
+    } catch (error) {
+      if (signal?.aborted || init.signal?.aborted) throw error;
+      throw new Error("无法连接 ComfyUI。请检查地址、服务是否运行、HTTPS、CORS 和浏览器本地网络权限。");
+    }
+    if (!response.ok) {
+      if (response.status === 401 || response.status === 403) throw new Error(`ComfyUI 拒绝访问（${response.status}），请检查访问令牌和入口权限。`);
+      const text = await response.text();
+      const message = (accessToken ? text.replaceAll(accessToken, "[已隐藏]") : text).slice(0, 1200);
+      throw new Error(`ComfyUI 请求失败（${response.status}）：${message}`);
+    }
+    return response;
+  };
+  return { request };
+}
+async function checkComfyConnection(options) {
+  const signal = AbortSignal.any([options.signal || new AbortController().signal, AbortSignal.timeout(1e4)]);
+  const client = createComfyClient({ ...options, signal });
+  const stats = await (await client.request("/system_stats")).json();
+  if (!stats?.system || !Array.isArray(stats.devices)) throw new Error("该地址没有返回有效的 ComfyUI 服务信息。");
+  return { available: true, workflow: "统一换装与姿势工作流" };
+}
+function pause(signal) {
+  return new Promise((resolve, reject) => {
+    const done = () => {
+      clearTimeout(timer);
+      signal.removeEventListener("abort", abort);
+      resolve();
+    };
+    const abort = () => {
+      clearTimeout(timer);
+      signal.removeEventListener("abort", abort);
+      reject(signal.reason);
+    };
+    const timer = setTimeout(done, 1e3);
+    signal.addEventListener("abort", abort, { once: true });
+    if (signal.aborted) abort();
+  });
+}
+async function generateComfyTask({ url, token, characters, garment, poseImage, faceImage, face = null, pose, costume, aspectRatio, extraPrompt, keepOutfit = true, seed = 42, signal, fetchImpl = fetch }) {
+  if (!characters?.length || characters.length > 4) throw new Error("模特参考图需要 1 到 4 张。");
+  const linked = AbortSignal.any([signal || new AbortController().signal, AbortSignal.timeout(6e5)]);
+  const client = createComfyClient({ url, token, signal: linked, fetchImpl });
+  const id = crypto.randomUUID();
+  const upload = async (image, role, index = 0) => {
+    const data = new FormData();
+    data.set("image", image, `lanpose-${id}-${role}-${index}.png`);
+    data.set("type", "input");
+    const body = await (await client.request("/upload/image", { method: "POST", body: data })).json();
+    if (typeof body.name !== "string" || !body.name || /[\\/]/.test(body.name) || body.name === ".." || body.subfolder && !/^[\w/-]+$/.test(body.subfolder) || body.subfolder?.split("/").includes("..")) throw new Error("ComfyUI 返回的图片路径无效。");
+    return body.subfolder ? `${body.subfolder}/${body.name}` : body.name;
+  };
+  const graphInput = { files: { characters: characters.map(() => "person.png"), garment: garment ? "garment.png" : void 0, pose: poseImage ? "pose.png" : void 0, face: faceImage ? "face.png" : void 0 }, pose, costume, face, aspectRatio, extraPrompt, keepOutfit, seed, prefix: `tryon/lanpose-${id}` };
+  const planned = await buildLocalGraph(graphInput);
+  const info = await (await client.request("/object_info")).json();
+  for (const node of Object.values(planned.graph)) {
+    if (!info[node.class_type]) throw new Error(`缺少 ComfyUI 节点：${node.class_type}`);
+    for (const [key, value] of Object.entries(node.inputs)) {
+      const spec = info[node.class_type].input?.required?.[key] || info[node.class_type].input?.optional?.[key];
+      if (key !== "image" && Array.isArray(spec?.[0]) && !spec[0].includes(value)) throw new Error(`ComfyUI 模型或选项未安装：${node.class_type}.${key} = ${value}`);
+    }
+  }
+  const files = { characters: [] };
+  for (const [i, image] of characters.entries()) files.characters.push(await upload(image, "person", i));
+  if (garment) files.garment = await upload(garment, "garment");
+  if (poseImage) files.pose = await upload(poseImage, "pose");
+  if (faceImage) files.face = await upload(faceImage, "face");
+  const { graph, output } = await buildLocalGraph({ ...graphInput, files });
+  let promptId;
+  try {
+    const submitted = await (await client.request("/prompt", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ prompt: graph, client_id: id }) })).json();
+    promptId = submitted.prompt_id;
+    if (typeof promptId !== "string" || !/^[\w-]+$/.test(promptId)) {
+      promptId = void 0;
+      throw new Error("ComfyUI 未返回有效的任务编号。");
+    }
+    while (true) {
+      linked.throwIfAborted();
+      const history = await (await client.request(`/history/${promptId}`)).json();
+      const entry = history[promptId];
+      if (entry) {
+        if (entry.status?.status_str === "error") throw new Error("ComfyUI 执行失败，请查看 ComfyUI 的节点报错。");
+        const image = entry.outputs?.[output]?.images?.[0];
+        if (!image || image.type !== "output" || typeof image.filename !== "string") throw new Error("工作流已结束，但指定输出节点没有有效图片。");
+        const params = new URLSearchParams({ filename: image.filename, subfolder: image.subfolder || "", type: "output" });
+        return (await client.request(`/view?${params}`)).blob();
+      }
+      await pause(linked);
+    }
+  } finally {
+    if (linked.aborted && promptId) {
+      await client.request("/queue", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ delete: [promptId] }), signal: AbortSignal.timeout(5e3) }).catch(() => {
+      });
+    }
+  }
+}
+
+// shared/builtin-models.mjs
+var BUILTIN_MODELS = Object.freeze([
+  Object.freeze({
+    id: "dafeiyu",
+    name: "大肥鱼",
+    portrait: "/muse/dafeiyu-portrait.jpg",
+    sheet: "/muse/dafeiyu-sheet.png",
+    blurb: "社区鲸鱼娘的成年形象。"
+  }),
+  Object.freeze({
+    id: "claude",
+    name: "Claude 娘",
+    portrait: "/muse/claude-portrait.jpg",
+    sheet: "/muse/claude-sheet.png",
+    blurb: "长橙发，白橙礼裙，手里捧着一本书。"
+  }),
+  Object.freeze({
+    id: "gemini",
+    name: "Gemini 娘",
+    portrait: "/muse/gemini-portrait.jpg",
+    sheet: "/muse/gemini-sheet.png",
+    blurb: "蓝紫长发，猫耳，星星配饰。"
+  }),
+  Object.freeze({
+    id: "glm",
+    name: "GLM 娘",
+    portrait: "/muse/glm-portrait.jpg",
+    sheet: "/muse/glm-sheet.png",
+    blurb: "黑发狐耳，黑白长裙。"
+  }),
+  Object.freeze({
+    id: "gpt",
+    name: "GPT 娘",
+    portrait: "/muse/gpt-portrait.jpg",
+    sheet: "/muse/gpt-sheet.png",
+    blurb: "白发龙角，白裙与龙尾。"
+  }),
+  Object.freeze({
+    id: "grok",
+    name: "Grok 娘",
+    portrait: "/muse/grok-portrait.jpg",
+    sheet: "/muse/grok-sheet.png",
+    blurb: "金发双马尾，黑金礼裙。"
+  }),
+  Object.freeze({
+    id: "kimi",
+    name: "Kimi 娘",
+    portrait: "/muse/kimi-portrait.jpg",
+    sheet: "/muse/kimi-sheet.png",
+    blurb: "银白长发，星空披风与音符。"
+  }),
+  Object.freeze({
+    id: "llama",
+    name: "llama 娘",
+    portrait: "/muse/llama-portrait.jpg",
+    sheet: "/muse/llama-sheet.png",
+    blurb: "白发羊耳，宽松白裙。"
+  }),
+  Object.freeze({
+    id: "minimax",
+    name: "Minimax 娘",
+    portrait: "/muse/minimax-portrait.jpg",
+    sheet: "/muse/minimax-sheet.png",
+    blurb: "橙发白帽，粉色外套。"
+  }),
+  Object.freeze({
+    id: "qwen",
+    name: "Qwen 娘",
+    portrait: "/muse/qwen-portrait.jpg",
+    sheet: "/muse/qwen-sheet.png",
+    blurb: "蓝发侧辫，折扇与蓝白长裙。"
+  })
+]);
+function isBuiltinModelId(id) {
+  return BUILTIN_MODELS.some((model) => model.id === id);
+}
+function getBuiltinModel(id) {
+  return BUILTIN_MODELS.find((model) => model.id === id) || null;
+}
+
+// shared/costume-prompt.mjs
+var GARMENT_SOURCE = [
+  "berets?",
+  "trench(?:\\s*coats?)?",
+  "jackets?",
+  "blouses?",
+  "dresses?",
+  "trousers?",
+  "sneakers?",
+  "shorts?",
+  "gloves?",
+  "scarves?",
+  "scarfs?",
+  "shirts?",
+  "skirts?",
+  "coats?",
+  "pants?",
+  "boots?",
+  "shoes?",
+  "socks?",
+  "belts?",
+  "bags?",
+  "hats?",
+  "贝雷帽",
+  "鸭舌帽",
+  "渔夫帽",
+  "小腿袜",
+  "过膝袜",
+  "及膝袜",
+  "船袜",
+  "连裤袜",
+  "中筒袜",
+  "长筒袜",
+  "短袜",
+  "帽子",
+  "头盔",
+  "风衣",
+  "大衣",
+  "外套",
+  "衬衫",
+  "衬衣",
+  "上衣",
+  "T恤",
+  "卫衣",
+  "毛衣",
+  "针织",
+  "马甲",
+  "背心",
+  "连衣裙",
+  "半身裙",
+  "百褶裙",
+  "短裙",
+  "长裙",
+  "裙子",
+  "牛仔裤",
+  "短裤",
+  "长裤",
+  "裤子",
+  "袜子",
+  "丝袜",
+  "运动鞋",
+  "球鞋",
+  "凉鞋",
+  "靴子",
+  "皮鞋",
+  "鞋子",
+  "手套",
+  "围巾",
+  "腰带",
+  "皮带",
+  "手提包",
+  "背包",
+  "项链",
+  "耳环",
+  "眼镜",
+  "领结",
+  "领带",
+  "配饰",
+  "贝雷",
+  "帽",
+  "裙",
+  "裤",
+  "袜",
+  "鞋",
+  "包",
+  "衣"
+].join("|");
+var PERSON_SOURCE = [
+  "heads?",
+  "faces?",
+  "hairs?",
+  "necks?",
+  "hands?",
+  "arms?",
+  "legs?",
+  "skins?",
+  "bodies",
+  "body",
+  "persons?",
+  "people",
+  "models?",
+  "头部",
+  "脑袋",
+  "脸部",
+  "面部",
+  "五官",
+  "头发",
+  "发型",
+  "刘海",
+  "脖子",
+  "颈部",
+  "手部",
+  "双手",
+  "手指",
+  "手掌",
+  "手臂",
+  "胳膊",
+  "腿部",
+  "双腿",
+  "大腿",
+  "小腿",
+  "皮肤",
+  "身体",
+  "躯干",
+  "模特",
+  "人物",
+  "人体",
+  "真人",
+  "人像"
+].join("|");
+function stripGhostClauses(userPrompt) {
+  const ghostClause = /不要人|不要头|不要脸|不要手|不要腿|不要身体|不要皮肤|不要露出(?:腿|皮肤)|裙子和袜子之间[^，。；\n]{0,24}|帽子悬在领口上方[^，。；\n]{0,24}|帽子与领口之间[^，。；\n]{0,24}|不能贴在衣领上|隐形人|画面里只有衣服|头部、脸部、手部和腿部不出现|头部、脸部和手部不出现/g;
+  return String(userPrompt || "").replace(ghostClause, " ").replace(/[，,]{2,}/g, "，").replace(/\s+/g, " ").replace(/^[\s，,。；;、.]+/, "").replace(/[\s，,。；;、.]+$/, "").trim().slice(0, 1200);
+}
+var COSTUME_POSE_LINE = "站姿要有时装目录的松弛感：重心放在一条腿上，另一只脚微微错开，肩膀放松，一只手臂自然弯曲，手落在身侧。衣服跟着这个姿势垂落，外套和下摆有一点摆动，不要站成双脚并拢、双臂贴身的笔直样子。";
+function costumeVisiblePrompt({ userPrompt = "", adult = false, sensitivePromptOptimize = false } = {}) {
+  const note = stripGhostClauses(userPrompt);
+  const optimize = sensitivePromptOptimize === true;
+  const lines = [
+    "浅灰无缝棚拍，正面全身，脚要入镜，地面有柔和阴影。成年模特穿着描述里的衣服，衣服要有立体体积，不要摊开平铺。",
+    COSTUME_POSE_LINE,
+    "帽子戴在头上，帽檐和衣领之间留出头发或额头。",
+    "只穿描述里写到的衣物。没写到的鞋、包、外套、袜子都不要加，也不要自行加丝袜、连裤袜或打底裤。",
+    optimize ? "用日常、含蓄的说法。" : "头、脸、头发和手正常可见。",
+    adult ? "" : "保持日常、得体、可公开展示的画面。",
+    note ? `服装描述：${note}` : "一件日常上衣和及膝裙。不要自行添加袜子、鞋或包。",
+    "不要文字，不要水印。"
+  ];
+  return lines.filter(Boolean).join("\n").slice(0, 4e3);
+}
+
+// shared/custom.mjs
+function createCustomId(kind, random = () => globalThis.crypto.randomUUID()) {
+  const suffix = String(random());
+  return kind === "costume" ? `custom-costume-${suffix}` : `custom-pose-${suffix}`;
+}
+function isCustomCostumeId(id) {
+  return typeof id === "string" && /^custom-costume-.+/.test(id);
+}
+function fitEdge(width, height, maxEdge = 2048) {
+  const w = Number(width);
+  const h = Number(height);
+  const max = Number(maxEdge) || 2048;
+  if (!Number.isFinite(w) || !Number.isFinite(h) || w <= 0 || h <= 0) throw new Error("图片尺寸无效");
+  const scale = Math.min(1, max / Math.max(w, h));
+  return {
+    width: Math.max(1, Math.round(w * scale)),
+    height: Math.max(1, Math.round(h * scale))
+  };
+}
+function isStorageHigh(usage, quota, threshold = 0.8) {
+  const used = Number(usage) || 0;
+  const cap = Number(quota) || 0;
+  if (cap <= 0) return false;
+  return used / cap >= threshold;
+}
+var POSE_STYLE_LOCK = "严格模仿参考图的线稿风格与人偶质感，只按描述改姿态。";
+function expandReferencePrompt({ kind = "pose", userPrompt = "", adult = false, sensitivePromptOptimize = false } = {}) {
+  const note = String(userPrompt ?? "").trim().slice(0, 2e3);
+  const safe = adult ? "" : "保持日常、得体、可公开展示的画面。";
+  const optimize = sensitivePromptOptimize === true;
+  if (kind === "costume") {
+    return costumeVisiblePrompt({ userPrompt: note, adult: adult === true, sensitivePromptOptimize: optimize });
+  }
+  return [
+    "白底单人姿势线稿参考图，黑色干净线条，球关节人偶，全身，只表现身体姿态、重心、四肢和镜头角度。",
+    POSE_STYLE_LOCK,
+    "不要上色，不要服装设计，不要五官细节，不要背景场景。",
+    safe,
+    note ? `姿势描述：${note}` : "一个清楚的站立或动态姿势，关节可读。",
+    "不要文字，不要水印。"
+  ].filter(Boolean).join("\n");
+}
+function reuseFromHistory(entry) {
+  const selected = {};
+  const selection = Array.isArray(entry?.selection) ? entry.selection : [];
+  for (const item of selection) {
+    if (!item?.poseId || !item?.viewId) continue;
+    selected[item.poseId] = item.viewId;
+  }
+  const costume = entry?.costume?.id ? {
+    id: String(entry.costume.id),
+    label: String(entry.costume.label || ""),
+    keywords: String(entry.costume.keywords || "")
+  } : null;
+  const face = entry?.face?.id ? {
+    id: String(entry.face.id),
+    section: String(entry.face.section || ""),
+    hair: String(entry.face.hair || ""),
+    label: String(entry.face.label || ""),
+    keywords: String(entry.face.keywords || "")
+  } : null;
+  return {
+    selected,
+    extraPrompt: typeof entry?.extraPrompt === "string" ? entry.extraPrompt : "",
+    costume,
+    face
+  };
+}
+
+// lib/idb.ts
+var DB_NAME = "lanpose";
+var DB_VERSION = 3;
+function openLanpose() {
+  return new Promise((resolve, reject) => {
+    const request = indexedDB.open(DB_NAME, DB_VERSION);
+    request.onupgradeneeded = () => {
+      const db = request.result;
+      if (!db.objectStoreNames.contains("characters")) db.createObjectStore("characters");
+      if (!db.objectStoreNames.contains("history")) db.createObjectStore("history", { keyPath: "id" });
+      if (!db.objectStoreNames.contains("customPoses")) db.createObjectStore("customPoses", { keyPath: "id" });
+      if (!db.objectStoreNames.contains("customCostumes")) db.createObjectStore("customCostumes", { keyPath: "id" });
+      if (!db.objectStoreNames.contains("models")) db.createObjectStore("models", { keyPath: "id" });
+    };
+    request.onsuccess = () => resolve(request.result);
+    request.onerror = () => reject(request.error);
+  });
+}
+
+// lib/library.ts
+function studioPath(basePath, path) {
+  const base = basePath.endsWith("/") ? basePath.slice(0, -1) : basePath;
+  return `${base}${path}`;
+}
+function asError(error) {
+  if (error instanceof DOMException && error.name === "QuotaExceededError") {
+    return new Error("浏览器存储已满。请先删除历史或自定义参考图。");
+  }
+  return error instanceof Error ? error : new Error("保存失败");
+}
+function requestToPromise(request) {
+  return new Promise((resolve, reject) => {
+    request.onsuccess = () => resolve(request.result);
+    request.onerror = () => reject(request.error);
+  });
+}
+function transactionDone(tx) {
+  return new Promise((resolve, reject) => {
+    tx.oncomplete = () => resolve();
+    tx.onerror = () => reject(tx.error);
+    tx.onabort = () => reject(tx.error);
+  });
+}
+async function withStore(store, mode, run) {
+  const db = await openLanpose();
+  try {
+    const tx = db.transaction(store, mode);
+    const done = transactionDone(tx);
+    const result = await run(tx.objectStore(store));
+    await done;
+    return result;
+  } catch (error) {
+    throw asError(error);
+  } finally {
+    db.close();
+  }
+}
+async function listStore(store) {
+  const rows = await withStore(store, "readonly", (objectStore) => requestToPromise(objectStore.getAll()));
+  return rows.sort((a, b) => b.createdAt - a.createdAt);
+}
+function listCustomPoses() {
+  return listStore("customPoses");
+}
+function listCustomCostumes() {
+  return listStore("customCostumes");
+}
+function listHistory() {
+  return listStore("history");
+}
+function putCustomPose(asset) {
+  return withStore("customPoses", "readwrite", (objectStore) => objectStore.put(asset));
+}
+function putCustomCostume(asset) {
+  return withStore("customCostumes", "readwrite", (objectStore) => objectStore.put(asset));
+}
+function putHistory(entry) {
+  return withStore("history", "readwrite", (objectStore) => objectStore.put(entry));
+}
+function deleteCustomPose(id) {
+  return withStore("customPoses", "readwrite", (objectStore) => objectStore.delete(id));
+}
+function deleteCustomCostume(id) {
+  return withStore("customCostumes", "readwrite", (objectStore) => objectStore.delete(id));
+}
+function deleteHistory(id) {
+  return withStore("history", "readwrite", (objectStore) => objectStore.delete(id));
+}
+function clearHistory() {
+  return withStore("history", "readwrite", (objectStore) => objectStore.clear());
+}
+async function readStoragePressure() {
+  if (typeof navigator === "undefined" || !navigator.storage?.estimate) {
+    return { high: false, usage: 0, quota: 0 };
+  }
+  const estimate = await navigator.storage.estimate();
+  const usage = estimate.usage ?? 0;
+  const quota = estimate.quota ?? 0;
+  return { high: isStorageHigh(usage, quota), usage, quota };
+}
+async function fileToJpegBlob(file) {
+  const bitmap = await createImageBitmap(file);
+  try {
+    const fitted = fitEdge(bitmap.width, bitmap.height, 2048);
+    const canvas = document.createElement("canvas");
+    canvas.width = fitted.width;
+    canvas.height = fitted.height;
+    const context = canvas.getContext("2d");
+    if (!context) throw new Error("无法读取这张图片");
+    context.drawImage(bitmap, 0, 0, fitted.width, fitted.height);
+    const blob = await new Promise((resolve) => canvas.toBlob(resolve, "image/jpeg", 0.86));
+    if (!blob) throw new Error("无法压缩这张图片");
+    return blob;
+  } finally {
+    bitmap.close();
+  }
+}
+async function blobToBase64(blob) {
+  const bytes = new Uint8Array(await blob.arrayBuffer());
+  let binary = "";
+  const chunk = 32768;
+  for (let index = 0; index < bytes.length; index += chunk) {
+    binary += String.fromCharCode(...bytes.subarray(index, index + chunk));
+  }
+  return btoa(binary);
+}
+function base64ToBlob(data, mediaType) {
+  const binary = atob(data);
+  const bytes = new Uint8Array(binary.length);
+  for (let index = 0; index < binary.length; index += 1) bytes[index] = binary.charCodeAt(index);
+  return new Blob([bytes], { type: mediaType });
+}
+async function assetToWire(asset) {
+  return {
+    id: asset.id,
+    label: asset.label,
+    keywords: asset.keywords,
+    adult: asset.adult,
+    source: asset.source,
+    userPrompt: asset.userPrompt,
+    beautifiedPrompt: asset.beautifiedPrompt,
+    mediaType: asset.mediaType,
+    dataBase64: await blobToBase64(asset.image),
+    createdAt: asset.createdAt
+  };
+}
+async function sendLibrary(basePath, method, body, signal) {
+  const response = await fetch(studioPath(basePath, "/api/custom-library"), {
+    method,
+    signal,
+    headers: { "content-type": "application/json" },
+    body
+  });
+  if (!response.ok) {
+    const payload = await response.json().catch(() => ({}));
+    throw new Error(payload.error || "自定义参考没有同步给 Agent");
+  }
+}
+async function syncCustomLibrary(basePath, poses, costumes, signal) {
+  const wirePoses = await Promise.all(poses.map((item) => assetToWire(item)));
+  const wireCostumes = await Promise.all(costumes.map((item) => assetToWire(item)));
+  const payload = JSON.stringify({ poses: wirePoses, costumes: wireCostumes });
+  if (payload.length < 1e7) {
+    await sendLibrary(basePath, "PUT", payload, signal);
+    return;
+  }
+  await sendLibrary(basePath, "PUT", JSON.stringify({ poses: [], costumes: [] }), signal);
+  for (const item of wirePoses) {
+    await sendLibrary(basePath, "POST", JSON.stringify({ kind: "pose", item }), signal);
+  }
+  for (const item of wireCostumes) {
+    await sendLibrary(basePath, "POST", JSON.stringify({ kind: "costume", item }), signal);
+  }
+}
+
+// lib/comfyui-client.ts
+function comfyPromptCards(input) {
+  const cards = input.items.map((item) => {
+    const prompts = localPrompts({ ...input, pose: item.pose });
+    return { viewId: item.viewId, title: item.title, prompt: item.pose ? `${prompts.scaffold}
+
+${prompts.final}` : prompts.outfit };
+  });
+  return input.mode === "sheet" ? [{ viewId: cards.map((c) => c.viewId).join(","), title: "姿势拼图", prompt: cards.map((c, i) => `${i + 1}. ${c.prompt}`).join("\n\n") }] : cards;
+}
+async function imageFromBlob(blob) {
+  const image = await createImageBitmap(blob);
+  if (image.width * image.height > 4e7) {
+    image.close();
+    throw new Error("图片尺寸过大，请缩小后重试。");
+  }
+  return image;
+}
+function png(canvas) {
+  return new Promise((resolve, reject) => canvas.toBlob((blob) => blob ? resolve(blob) : reject(new Error("浏览器图片处理失败。")), "image/png"));
+}
+function canvasFor(width, height) {
+  const canvas = document.createElement("canvas");
+  canvas.width = width;
+  canvas.height = height;
+  const context = canvas.getContext("2d");
+  if (!context) throw new Error("浏览器无法创建图片画布。");
+  return { canvas, context };
+}
+async function prepareComfyImage(blob, aspectRatio) {
+  const image = await imageFromBlob(blob);
+  try {
+    const [width, height] = aspectRatio ? dimensions(aspectRatio) : [image.width, image.height];
+    const { canvas, context } = canvasFor(width, height);
+    context.fillStyle = aspectRatio ? "#eeeeee" : "white";
+    context.fillRect(0, 0, width, height);
+    const scale = Math.min(width / image.width, height / image.height);
+    const w = image.width * scale, h = image.height * scale;
+    context.drawImage(image, (width - w) / 2, (height - h) / 2, w, h);
+    return await png(canvas);
+  } finally {
+    image.close();
+  }
+}
+async function composeComfySheet(images, aspectRatio) {
+  if (!images.length || images.length > 4) throw new Error("拼图需要 1 到 4 张图片。");
+  if (images.length === 1) return images[0];
+  const [baseWidth, baseHeight] = dimensions(aspectRatio);
+  const width = baseWidth * 2, height = baseHeight * 2, gap = 16;
+  const { canvas, context } = canvasFor(width, height);
+  context.fillStyle = "white";
+  context.fillRect(0, 0, width, height);
+  const rows = images.length <= 2 ? 1 : 2;
+  const cellWidth = Math.floor((width - gap * 3) / 2), cellHeight = Math.floor((height - gap * (rows + 1)) / rows);
+  for (const [i, blob] of images.entries()) {
+    const image = await imageFromBlob(blob);
+    try {
+      const scale = Math.min(cellWidth / image.width, cellHeight / image.height);
+      const w = image.width * scale, h = image.height * scale;
+      context.drawImage(image, gap + i % 2 * (cellWidth + gap) + (cellWidth - w) / 2, gap + Math.floor(i / 2) * (cellHeight + gap) + (cellHeight - h) / 2, w, h);
+    } finally {
+      image.close();
+    }
+  }
+  return png(canvas);
+}
+async function requestComfyGenerate(basePath, settings, input, signal) {
+  const url = connectionURL(settings.comfyuiURL);
+  if (!input.items.length || input.items.length > (input.mode === "sheet" ? 4 : 8)) throw new Error("请选择有效数量的姿势或服装。");
+  if (input.characterImages.length > 4) throw new Error("模特参考图最多 4 张。");
+  const publicImage = async (path) => {
+    const response = await fetch(`${basePath.replace(/\/$/, "")}${path}`, { signal });
+    if (!response.ok) throw new Error("公共参考图加载失败，请重试。");
+    return response.blob();
+  };
+  const wireImage = (image) => {
+    if (!image.dataBase64) throw new Error("参考图为空，请重新导入。");
+    return base64ToBlob(image.dataBase64, image.mediaType);
+  };
+  signal.throwIfAborted();
+  const sources = input.characterImages.length ? input.characterImages.map(wireImage) : [await publicImage(getBuiltinModel(input.builtinModelId)?.sheet || "/muse/dafeiyu-sheet.png")];
+  const characters = await Promise.all(sources.map((blob) => prepareComfyImage(blob, input.aspectRatio)));
+  const customGarment = input.customReferences.costumes.find((c) => c.id === input.costume?.id);
+  const garment = input.costume ? await prepareComfyImage(customGarment ? wireImage(customGarment) : await publicImage(`/api/costume-image?id=${encodeURIComponent(input.costume.id)}&size=preview`)) : void 0;
+  const faceImage = input.face ? await prepareComfyImage(await publicImage(`/api/face-image?id=${encodeURIComponent(input.face.id)}&size=full`)) : void 0;
+  const cards = comfyPromptCards({ ...input, mode: "each", characterCount: characters.length });
+  const results = [];
+  const images = [];
+  for (const [index, item] of input.items.entries()) {
+    signal.throwIfAborted();
+    const card = cards[index];
+    try {
+      const customPose = input.customReferences.poses.find((p) => p.id === item.viewId);
+      const poseImage = item.pose ? await prepareComfyImage(customPose ? wireImage(customPose) : await publicImage(`/api/pose-image?id=${encodeURIComponent(item.viewId)}&size=full`)) : void 0;
+      const image = await prepareComfyImage(await generateComfyTask({ url, token: settings.comfyuiToken, characters, garment, poseImage, faceImage, face: input.face, pose: item.pose, costume: input.costume, aspectRatio: input.aspectRatio, extraPrompt: input.extraPrompt, keepOutfit: input.keepOutfit, signal }));
+      images.push(image);
+      results.push({ ...card, ok: true, mediaType: "image/png", imageBase64: await blobToBase64(image), referencesSent: true });
+    } catch (error) {
+      signal.throwIfAborted();
+      results.push({ ...card, ok: false, error: error instanceof Error ? error.message : "ComfyUI 生图失败" });
+    }
+  }
+  if (input.mode === "sheet" && results.every((r2) => r2.ok)) {
+    const sheet = await composeComfySheet(images, input.aspectRatio);
+    return [{ ...comfyPromptCards({ ...input, characterCount: characters.length })[0], ok: true, mediaType: "image/png", imageBase64: await blobToBase64(sheet), referencesSent: true }];
+  }
+  return results;
+}
 
 // components/character-dock.tsx
 var import_react7 = require("react");
@@ -5451,25 +6890,6 @@ function Switch({
   );
 }
 
-// lib/idb.ts
-var DB_NAME = "lanpose";
-var DB_VERSION = 3;
-function openLanpose() {
-  return new Promise((resolve, reject) => {
-    const request = indexedDB.open(DB_NAME, DB_VERSION);
-    request.onupgradeneeded = () => {
-      const db = request.result;
-      if (!db.objectStoreNames.contains("characters")) db.createObjectStore("characters");
-      if (!db.objectStoreNames.contains("history")) db.createObjectStore("history", { keyPath: "id" });
-      if (!db.objectStoreNames.contains("customPoses")) db.createObjectStore("customPoses", { keyPath: "id" });
-      if (!db.objectStoreNames.contains("customCostumes")) db.createObjectStore("customCostumes", { keyPath: "id" });
-      if (!db.objectStoreNames.contains("models")) db.createObjectStore("models", { keyPath: "id" });
-    };
-    request.onsuccess = () => resolve(request.result);
-    request.onerror = () => reject(request.error);
-  });
-}
-
 // lib/characters.ts
 var STORE = "characters";
 function openDb() {
@@ -5553,86 +6973,6 @@ function studioUrl(basePath, path) {
   if (!path.startsWith("/")) return path;
   const base = basePath.endsWith("/") ? basePath.slice(0, -1) : basePath;
   return `${base}${path}`;
-}
-
-// shared/builtin-models.mjs
-var BUILTIN_MODELS = Object.freeze([
-  Object.freeze({
-    id: "dafeiyu",
-    name: "大肥鱼",
-    portrait: "/muse/dafeiyu-portrait.jpg",
-    sheet: "/muse/dafeiyu-sheet.png",
-    blurb: "社区鲸鱼娘的成年形象。"
-  }),
-  Object.freeze({
-    id: "claude",
-    name: "Claude 娘",
-    portrait: "/muse/claude-portrait.jpg",
-    sheet: "/muse/claude-sheet.png",
-    blurb: "长橙发，白橙礼裙，手里捧着一本书。"
-  }),
-  Object.freeze({
-    id: "gemini",
-    name: "Gemini 娘",
-    portrait: "/muse/gemini-portrait.jpg",
-    sheet: "/muse/gemini-sheet.png",
-    blurb: "蓝紫长发，猫耳，星星配饰。"
-  }),
-  Object.freeze({
-    id: "glm",
-    name: "GLM 娘",
-    portrait: "/muse/glm-portrait.jpg",
-    sheet: "/muse/glm-sheet.png",
-    blurb: "黑发狐耳，黑白长裙。"
-  }),
-  Object.freeze({
-    id: "gpt",
-    name: "GPT 娘",
-    portrait: "/muse/gpt-portrait.jpg",
-    sheet: "/muse/gpt-sheet.png",
-    blurb: "白发龙角，白裙与龙尾。"
-  }),
-  Object.freeze({
-    id: "grok",
-    name: "Grok 娘",
-    portrait: "/muse/grok-portrait.jpg",
-    sheet: "/muse/grok-sheet.png",
-    blurb: "金发双马尾，黑金礼裙。"
-  }),
-  Object.freeze({
-    id: "kimi",
-    name: "Kimi 娘",
-    portrait: "/muse/kimi-portrait.jpg",
-    sheet: "/muse/kimi-sheet.png",
-    blurb: "银白长发，星空披风与音符。"
-  }),
-  Object.freeze({
-    id: "llama",
-    name: "llama 娘",
-    portrait: "/muse/llama-portrait.jpg",
-    sheet: "/muse/llama-sheet.png",
-    blurb: "白发羊耳，宽松白裙。"
-  }),
-  Object.freeze({
-    id: "minimax",
-    name: "Minimax 娘",
-    portrait: "/muse/minimax-portrait.jpg",
-    sheet: "/muse/minimax-sheet.png",
-    blurb: "橙发白帽，粉色外套。"
-  }),
-  Object.freeze({
-    id: "qwen",
-    name: "Qwen 娘",
-    portrait: "/muse/qwen-portrait.jpg",
-    sheet: "/muse/qwen-sheet.png",
-    blurb: "蓝发侧辫，折扇与蓝白长裙。"
-  })
-]);
-function isBuiltinModelId(id) {
-  return BUILTIN_MODELS.some((model) => model.id === id);
-}
-function getBuiltinModel(id) {
-  return BUILTIN_MODELS.find((model) => model.id === id) || null;
 }
 
 // shared/models.mjs
@@ -10275,381 +11615,6 @@ var import_react10 = require("react");
 // components/custom-reference-panel.tsx
 var import_react9 = require("react");
 
-// shared/costume-prompt.mjs
-var GARMENT_SOURCE = [
-  "berets?",
-  "trench(?:\\s*coats?)?",
-  "jackets?",
-  "blouses?",
-  "dresses?",
-  "trousers?",
-  "sneakers?",
-  "shorts?",
-  "gloves?",
-  "scarves?",
-  "scarfs?",
-  "shirts?",
-  "skirts?",
-  "coats?",
-  "pants?",
-  "boots?",
-  "shoes?",
-  "socks?",
-  "belts?",
-  "bags?",
-  "hats?",
-  "贝雷帽",
-  "鸭舌帽",
-  "渔夫帽",
-  "小腿袜",
-  "过膝袜",
-  "及膝袜",
-  "船袜",
-  "连裤袜",
-  "中筒袜",
-  "长筒袜",
-  "短袜",
-  "帽子",
-  "头盔",
-  "风衣",
-  "大衣",
-  "外套",
-  "衬衫",
-  "衬衣",
-  "上衣",
-  "T恤",
-  "卫衣",
-  "毛衣",
-  "针织",
-  "马甲",
-  "背心",
-  "连衣裙",
-  "半身裙",
-  "百褶裙",
-  "短裙",
-  "长裙",
-  "裙子",
-  "牛仔裤",
-  "短裤",
-  "长裤",
-  "裤子",
-  "袜子",
-  "丝袜",
-  "运动鞋",
-  "球鞋",
-  "凉鞋",
-  "靴子",
-  "皮鞋",
-  "鞋子",
-  "手套",
-  "围巾",
-  "腰带",
-  "皮带",
-  "手提包",
-  "背包",
-  "项链",
-  "耳环",
-  "眼镜",
-  "领结",
-  "领带",
-  "配饰",
-  "贝雷",
-  "帽",
-  "裙",
-  "裤",
-  "袜",
-  "鞋",
-  "包",
-  "衣"
-].join("|");
-var PERSON_SOURCE = [
-  "heads?",
-  "faces?",
-  "hairs?",
-  "necks?",
-  "hands?",
-  "arms?",
-  "legs?",
-  "skins?",
-  "bodies",
-  "body",
-  "persons?",
-  "people",
-  "models?",
-  "头部",
-  "脑袋",
-  "脸部",
-  "面部",
-  "五官",
-  "头发",
-  "发型",
-  "刘海",
-  "脖子",
-  "颈部",
-  "手部",
-  "双手",
-  "手指",
-  "手掌",
-  "手臂",
-  "胳膊",
-  "腿部",
-  "双腿",
-  "大腿",
-  "小腿",
-  "皮肤",
-  "身体",
-  "躯干",
-  "模特",
-  "人物",
-  "人体",
-  "真人",
-  "人像"
-].join("|");
-function stripGhostClauses(userPrompt) {
-  const ghostClause = /不要人|不要头|不要脸|不要手|不要腿|不要身体|不要皮肤|不要露出(?:腿|皮肤)|裙子和袜子之间[^，。；\n]{0,24}|帽子悬在领口上方[^，。；\n]{0,24}|帽子与领口之间[^，。；\n]{0,24}|不能贴在衣领上|隐形人|画面里只有衣服|头部、脸部、手部和腿部不出现|头部、脸部和手部不出现/g;
-  return String(userPrompt || "").replace(ghostClause, " ").replace(/[，,]{2,}/g, "，").replace(/\s+/g, " ").replace(/^[\s，,。；;、.]+/, "").replace(/[\s，,。；;、.]+$/, "").trim().slice(0, 1200);
-}
-var COSTUME_POSE_LINE = "站姿要有时装目录的松弛感：重心放在一条腿上，另一只脚微微错开，肩膀放松，一只手臂自然弯曲，手落在身侧。衣服跟着这个姿势垂落，外套和下摆有一点摆动，不要站成双脚并拢、双臂贴身的笔直样子。";
-function costumeVisiblePrompt({ userPrompt = "", adult = false, sensitivePromptOptimize = false } = {}) {
-  const note = stripGhostClauses(userPrompt);
-  const optimize = sensitivePromptOptimize === true;
-  const lines = [
-    "浅灰无缝棚拍，正面全身，脚要入镜，地面有柔和阴影。成年模特穿着描述里的衣服，衣服要有立体体积，不要摊开平铺。",
-    COSTUME_POSE_LINE,
-    "帽子戴在头上，帽檐和衣领之间留出头发或额头。",
-    "只穿描述里写到的衣物。没写到的鞋、包、外套、袜子都不要加，也不要自行加丝袜、连裤袜或打底裤。",
-    optimize ? "用日常、含蓄的说法。" : "头、脸、头发和手正常可见。",
-    adult ? "" : "保持日常、得体、可公开展示的画面。",
-    note ? `服装描述：${note}` : "一件日常上衣和及膝裙。不要自行添加袜子、鞋或包。",
-    "不要文字，不要水印。"
-  ];
-  return lines.filter(Boolean).join("\n").slice(0, 4e3);
-}
-
-// shared/custom.mjs
-function createCustomId(kind, random = () => globalThis.crypto.randomUUID()) {
-  const suffix = String(random());
-  return kind === "costume" ? `custom-costume-${suffix}` : `custom-pose-${suffix}`;
-}
-function isCustomCostumeId(id) {
-  return typeof id === "string" && /^custom-costume-.+/.test(id);
-}
-function fitEdge(width, height, maxEdge = 2048) {
-  const w = Number(width);
-  const h = Number(height);
-  const max = Number(maxEdge) || 2048;
-  if (!Number.isFinite(w) || !Number.isFinite(h) || w <= 0 || h <= 0) throw new Error("图片尺寸无效");
-  const scale = Math.min(1, max / Math.max(w, h));
-  return {
-    width: Math.max(1, Math.round(w * scale)),
-    height: Math.max(1, Math.round(h * scale))
-  };
-}
-function isStorageHigh(usage, quota, threshold = 0.8) {
-  const used = Number(usage) || 0;
-  const cap = Number(quota) || 0;
-  if (cap <= 0) return false;
-  return used / cap >= threshold;
-}
-var POSE_STYLE_LOCK = "严格模仿参考图的线稿风格与人偶质感，只按描述改姿态。";
-function expandReferencePrompt({ kind = "pose", userPrompt = "", adult = false, sensitivePromptOptimize = false } = {}) {
-  const note = String(userPrompt ?? "").trim().slice(0, 2e3);
-  const safe = adult ? "" : "保持日常、得体、可公开展示的画面。";
-  const optimize = sensitivePromptOptimize === true;
-  if (kind === "costume") {
-    return costumeVisiblePrompt({ userPrompt: note, adult: adult === true, sensitivePromptOptimize: optimize });
-  }
-  return [
-    "白底单人姿势线稿参考图，黑色干净线条，球关节人偶，全身，只表现身体姿态、重心、四肢和镜头角度。",
-    POSE_STYLE_LOCK,
-    "不要上色，不要服装设计，不要五官细节，不要背景场景。",
-    safe,
-    note ? `姿势描述：${note}` : "一个清楚的站立或动态姿势，关节可读。",
-    "不要文字，不要水印。"
-  ].filter(Boolean).join("\n");
-}
-function reuseFromHistory(entry) {
-  const selected = {};
-  const selection = Array.isArray(entry?.selection) ? entry.selection : [];
-  for (const item of selection) {
-    if (!item?.poseId || !item?.viewId) continue;
-    selected[item.poseId] = item.viewId;
-  }
-  const costume = entry?.costume?.id ? {
-    id: String(entry.costume.id),
-    label: String(entry.costume.label || ""),
-    keywords: String(entry.costume.keywords || "")
-  } : null;
-  const face = entry?.face?.id ? {
-    id: String(entry.face.id),
-    section: String(entry.face.section || ""),
-    hair: String(entry.face.hair || ""),
-    label: String(entry.face.label || ""),
-    keywords: String(entry.face.keywords || "")
-  } : null;
-  return {
-    selected,
-    extraPrompt: typeof entry?.extraPrompt === "string" ? entry.extraPrompt : "",
-    costume,
-    face
-  };
-}
-
-// lib/library.ts
-function studioPath(basePath, path) {
-  const base = basePath.endsWith("/") ? basePath.slice(0, -1) : basePath;
-  return `${base}${path}`;
-}
-function asError(error) {
-  if (error instanceof DOMException && error.name === "QuotaExceededError") {
-    return new Error("浏览器存储已满。请先删除历史或自定义参考图。");
-  }
-  return error instanceof Error ? error : new Error("保存失败");
-}
-function requestToPromise(request) {
-  return new Promise((resolve, reject) => {
-    request.onsuccess = () => resolve(request.result);
-    request.onerror = () => reject(request.error);
-  });
-}
-function transactionDone(tx) {
-  return new Promise((resolve, reject) => {
-    tx.oncomplete = () => resolve();
-    tx.onerror = () => reject(tx.error);
-    tx.onabort = () => reject(tx.error);
-  });
-}
-async function withStore(store, mode, run) {
-  const db = await openLanpose();
-  try {
-    const tx = db.transaction(store, mode);
-    const done = transactionDone(tx);
-    const result = await run(tx.objectStore(store));
-    await done;
-    return result;
-  } catch (error) {
-    throw asError(error);
-  } finally {
-    db.close();
-  }
-}
-async function listStore(store) {
-  const rows = await withStore(store, "readonly", (objectStore) => requestToPromise(objectStore.getAll()));
-  return rows.sort((a, b) => b.createdAt - a.createdAt);
-}
-function listCustomPoses() {
-  return listStore("customPoses");
-}
-function listCustomCostumes() {
-  return listStore("customCostumes");
-}
-function listHistory() {
-  return listStore("history");
-}
-function putCustomPose(asset) {
-  return withStore("customPoses", "readwrite", (objectStore) => objectStore.put(asset));
-}
-function putCustomCostume(asset) {
-  return withStore("customCostumes", "readwrite", (objectStore) => objectStore.put(asset));
-}
-function putHistory(entry) {
-  return withStore("history", "readwrite", (objectStore) => objectStore.put(entry));
-}
-function deleteCustomPose(id) {
-  return withStore("customPoses", "readwrite", (objectStore) => objectStore.delete(id));
-}
-function deleteCustomCostume(id) {
-  return withStore("customCostumes", "readwrite", (objectStore) => objectStore.delete(id));
-}
-function deleteHistory(id) {
-  return withStore("history", "readwrite", (objectStore) => objectStore.delete(id));
-}
-function clearHistory() {
-  return withStore("history", "readwrite", (objectStore) => objectStore.clear());
-}
-async function readStoragePressure() {
-  if (typeof navigator === "undefined" || !navigator.storage?.estimate) {
-    return { high: false, usage: 0, quota: 0 };
-  }
-  const estimate = await navigator.storage.estimate();
-  const usage = estimate.usage ?? 0;
-  const quota = estimate.quota ?? 0;
-  return { high: isStorageHigh(usage, quota), usage, quota };
-}
-async function fileToJpegBlob(file) {
-  const bitmap = await createImageBitmap(file);
-  try {
-    const fitted = fitEdge(bitmap.width, bitmap.height, 2048);
-    const canvas = document.createElement("canvas");
-    canvas.width = fitted.width;
-    canvas.height = fitted.height;
-    const context = canvas.getContext("2d");
-    if (!context) throw new Error("无法读取这张图片");
-    context.drawImage(bitmap, 0, 0, fitted.width, fitted.height);
-    const blob = await new Promise((resolve) => canvas.toBlob(resolve, "image/jpeg", 0.86));
-    if (!blob) throw new Error("无法压缩这张图片");
-    return blob;
-  } finally {
-    bitmap.close();
-  }
-}
-async function blobToBase64(blob) {
-  const bytes = new Uint8Array(await blob.arrayBuffer());
-  let binary = "";
-  const chunk = 32768;
-  for (let index = 0; index < bytes.length; index += chunk) {
-    binary += String.fromCharCode(...bytes.subarray(index, index + chunk));
-  }
-  return btoa(binary);
-}
-function base64ToBlob(data, mediaType) {
-  const binary = atob(data);
-  const bytes = new Uint8Array(binary.length);
-  for (let index = 0; index < binary.length; index += 1) bytes[index] = binary.charCodeAt(index);
-  return new Blob([bytes], { type: mediaType });
-}
-async function assetToWire(asset) {
-  return {
-    id: asset.id,
-    label: asset.label,
-    keywords: asset.keywords,
-    adult: asset.adult,
-    source: asset.source,
-    userPrompt: asset.userPrompt,
-    beautifiedPrompt: asset.beautifiedPrompt,
-    mediaType: asset.mediaType,
-    dataBase64: await blobToBase64(asset.image),
-    createdAt: asset.createdAt
-  };
-}
-async function sendLibrary(basePath, method, body) {
-  const response = await fetch(studioPath(basePath, "/api/custom-library"), {
-    method,
-    headers: { "content-type": "application/json" },
-    body
-  });
-  if (!response.ok) {
-    const payload = await response.json().catch(() => ({}));
-    throw new Error(payload.error || "自定义参考没有同步给 Agent");
-  }
-}
-async function syncCustomLibrary(basePath, poses, costumes) {
-  const wirePoses = await Promise.all(poses.map((item) => assetToWire(item)));
-  const wireCostumes = await Promise.all(costumes.map((item) => assetToWire(item)));
-  const payload = JSON.stringify({ poses: wirePoses, costumes: wireCostumes });
-  if (payload.length < 1e7) {
-    await sendLibrary(basePath, "PUT", payload);
-    return;
-  }
-  await sendLibrary(basePath, "PUT", JSON.stringify({ poses: [], costumes: [] }));
-  for (const item of wirePoses) {
-    await sendLibrary(basePath, "POST", JSON.stringify({ kind: "pose", item }));
-  }
-  for (const item of wireCostumes) {
-    await sendLibrary(basePath, "POST", JSON.stringify({ kind: "costume", item }));
-  }
-}
-
 // shared/http-status.mjs
 function messageForStatus(status, bodyText, fallback2) {
   const text = String(bodyText || "").trim();
@@ -11827,6 +12792,8 @@ function textModelFor(provider, textModel) {
 // lib/settings.ts
 var DEFAULT_SETTINGS = {
   engine: "cloud",
+  comfyuiURL: DEFAULT_COMFYUI_URL,
+  comfyuiToken: "",
   provider: "gemini",
   apiKey: "",
   baseURL: "",
@@ -11850,6 +12817,8 @@ function loadSettings() {
     const aspectRatio = aspect === "1:1" || aspect === "3:4" || aspect === "4:3" || aspect === "9:16" || aspect === "16:9" ? aspect : "3:4";
     return {
       engine: parsed.engine === "comfyui" ? "comfyui" : "cloud",
+      comfyuiURL: typeof parsed.comfyuiURL === "string" && parsed.comfyuiURL.trim() ? parsed.comfyuiURL : DEFAULT_COMFYUI_URL,
+      comfyuiToken: "",
       provider,
       apiKey: typeof parsed.apiKey === "string" ? parsed.apiKey : "",
       baseURL: typeof parsed.baseURL === "string" ? parsed.baseURL : "",
@@ -11866,7 +12835,8 @@ function loadSettings() {
   }
 }
 function saveSettings(settings) {
-  window.localStorage.setItem(KEY, JSON.stringify(settings));
+  const stored = { ...settings, comfyuiToken: void 0 };
+  window.localStorage.setItem(KEY, JSON.stringify(stored));
 }
 function modelFor(provider) {
   if (provider === "gemini") return "gemini-2.5-flash-image";
@@ -11887,20 +12857,28 @@ function SettingsDialog({
   settings,
   onChange
 }) {
-  const { basePath } = useStudioEnv();
   const [connection, setConnection] = (0, import_react13.useState)("");
   const [checking, setChecking] = (0, import_react13.useState)(false);
+  const checkRef = (0, import_react13.useRef)(null);
+  (0, import_react13.useEffect)(() => {
+    setConnection("");
+    setChecking(false);
+    checkRef.current?.abort();
+    return () => checkRef.current?.abort();
+  }, [settings.comfyuiURL, settings.comfyuiToken, settings.engine, open3]);
   async function checkConnection() {
+    checkRef.current?.abort();
+    const controller = new AbortController();
+    checkRef.current = controller;
     setChecking(true);
     setConnection("");
     try {
-      const response = await fetch(studioUrl(basePath, "/api/comfyui"));
-      const body = await response.json();
-      setConnection(response.ok ? `已连接：${body.workflow}。节点和模型将在生成前检查。` : body.error || "连接失败");
-    } catch {
-      setConnection("无法连接，请确认本机工作室和 ComfyUI 已启动。");
+      const body = await checkComfyConnection({ url: settings.comfyuiURL, token: settings.comfyuiToken, signal: controller.signal });
+      if (!controller.signal.aborted) setConnection(`已连接：${body.workflow}。节点和模型将在生成前检查。`);
+    } catch (error) {
+      if (!controller.signal.aborted) setConnection(error instanceof Error ? error.message : "连接失败");
     } finally {
-      setChecking(false);
+      if (!controller.signal.aborted) setChecking(false);
     }
   }
   function patch(partial) {
@@ -11921,19 +12899,25 @@ function SettingsDialog({
   return /* @__PURE__ */ (0, import_jsx_runtime30.jsx)(Dialog, { open: open3, onOpenChange, children: /* @__PURE__ */ (0, import_jsx_runtime30.jsxs)(DialogContent, { className: "max-h-[min(85dvh,85%)] max-w-[min(32rem,calc(100%-2rem))] overflow-y-auto", children: [
     /* @__PURE__ */ (0, import_jsx_runtime30.jsxs)(DialogHeader, { children: [
       /* @__PURE__ */ (0, import_jsx_runtime30.jsx)(DialogTitle3, { children: "生图设置" }),
-      /* @__PURE__ */ (0, import_jsx_runtime30.jsx)(DialogDescription3, { children: "密钥存在这台浏览器的本地存储里，不会写进仓库，也不会出现在提示词里。" })
+      /* @__PURE__ */ (0, import_jsx_runtime30.jsx)(DialogDescription3, { children: "云端密钥存在当前浏览器；ComfyUI 令牌仅保留在当前页面，不会写入历史或提示词。" })
     ] }),
     /* @__PURE__ */ (0, import_jsx_runtime30.jsxs)("div", { className: "grid gap-3", children: [
       /* @__PURE__ */ (0, import_jsx_runtime30.jsxs)("div", { className: "flex flex-wrap gap-2", children: [
         /* @__PURE__ */ (0, import_jsx_runtime30.jsx)(Button3, { variant: !local && settings.provider === "seedream" ? "default" : "outline", onClick: () => chooseProvider("seedream"), children: "Seedream" }),
         /* @__PURE__ */ (0, import_jsx_runtime30.jsx)(Button3, { variant: !local && settings.provider === "gemini" ? "default" : "outline", onClick: () => chooseProvider("gemini"), children: "Gemini" }),
         /* @__PURE__ */ (0, import_jsx_runtime30.jsx)(Button3, { variant: !local && settings.provider === "openai" ? "default" : "outline", onClick: () => chooseProvider("openai"), children: "OpenAI" }),
-        /* @__PURE__ */ (0, import_jsx_runtime30.jsx)(Button3, { variant: local ? "default" : "outline", onClick: () => patch({ engine: "comfyui" }), children: "ComfyUI 本地" })
+        /* @__PURE__ */ (0, import_jsx_runtime30.jsx)(Button3, { variant: local ? "default" : "outline", onClick: () => patch({ engine: "comfyui" }), children: "ComfyUI" })
       ] }),
       local ? /* @__PURE__ */ (0, import_jsx_runtime30.jsxs)("div", { className: "grid gap-2 rounded-xl bg-muted p-3 text-sm", children: [
         /* @__PURE__ */ (0, import_jsx_runtime30.jsx)("p", { children: "统一换装与姿势工作流：选择服装、姿势或两者，网页自动切换分支。拼图逐格生成后排版，无需生图 API Key。" }),
-        /* @__PURE__ */ (0, import_jsx_runtime30.jsx)("p", { className: "text-xs leading-5 text-muted-foreground", children: "请在同一台电脑启动工作室和 ComfyUI。服务需设置 LANPOSE_COMFYUI=1，默认连接 127.0.0.1:8188。人物和参考图会存入本机 ComfyUI 的 input，结果保存在 output。云端密钥和模型仍留在本机，改选 Seedream、Gemini 或 OpenAI 后会再显示。" }),
-        /* @__PURE__ */ (0, import_jsx_runtime30.jsx)(Button3, { variant: "outline", disabled: checking, onClick: () => void checkConnection(), children: checking ? "检查中…" : "测试本机连接" }),
+        /* @__PURE__ */ (0, import_jsx_runtime30.jsx)(Field, { label: "ComfyUI 地址", children: /* @__PURE__ */ (0, import_jsx_runtime30.jsx)(Input3, { value: settings.comfyuiURL, onChange: (event) => patch({ comfyuiURL: event.target.value }), placeholder: "http://127.0.0.1:8188 或 https://comfy.example.com", autoComplete: "off" }) }),
+        /* @__PURE__ */ (0, import_jsx_runtime30.jsx)(Field, { label: "访问令牌（可选）", hint: "仅保留在当前页面，刷新后重新填写。远程入口必须实际校验此 Bearer 令牌。", children: /* @__PURE__ */ (0, import_jsx_runtime30.jsx)(Input3, { type: "password", value: settings.comfyuiToken, onChange: (event) => patch({ comfyuiToken: event.target.value }), autoComplete: "off" }) }),
+        /* @__PURE__ */ (0, import_jsx_runtime30.jsx)("p", { className: "text-xs leading-5 text-muted-foreground", children: "浏览器直接连接 ComfyUI，无需在电脑启动网站。同机使用回环地址；手机或其他电脑请填远程 HTTPS 地址。需允许当前网站跨域访问，并在浏览器询问时允许本地网络权限。图片会存入你的 ComfyUI input/output。" }),
+        /* @__PURE__ */ (0, import_jsx_runtime30.jsxs)("p", { className: "text-xs leading-5 text-muted-foreground", children: [
+          "已有本地模式现已改为浏览器直连，请重新测试连接。",
+          /* @__PURE__ */ (0, import_jsx_runtime30.jsx)("a", { className: "underline", href: "https://github.com/wzc520pyfm/gen-ai-pose-image/blob/main/docs/comfyui-local.md", target: "_blank", rel: "noreferrer", children: "连接配置说明" })
+        ] }),
+        /* @__PURE__ */ (0, import_jsx_runtime30.jsx)(Button3, { variant: "outline", disabled: checking, onClick: () => void checkConnection(), children: checking ? "检查中…" : "测试连接" }),
         connection ? /* @__PURE__ */ (0, import_jsx_runtime30.jsx)("p", { role: "status", className: "text-xs leading-5", children: connection }) : null
       ] }) : /* @__PURE__ */ (0, import_jsx_runtime30.jsxs)(import_jsx_runtime30.Fragment, { children: [
         /* @__PURE__ */ (0, import_jsx_runtime30.jsx)("p", { className: "text-xs leading-5 text-muted-foreground", children: settings.provider === "seedream" ? "火山方舟 Seedream。会把模特图和姿势线稿一起提交，默认生图模型 doubao-seedream-5-0-flash-260915。" : settings.provider === "gemini" ? "默认生图模型 gemini-2.5-flash-image。官方地址留空即可；中转站把根地址填进下面。" : "会先把模特图和姿势线稿交给 images/edits。接口不支持编辑时，自动改走文生图，并在结果上标明。" }),
@@ -12269,6 +13253,7 @@ function StudioFrame({ embedded }) {
   const [faceCatalogError, setFaceCatalogError] = (0, import_react14.useState)("");
   const [loading, setLoading] = (0, import_react14.useState)(true);
   const [settings, setSettings] = (0, import_react14.useState)(DEFAULT_SETTINGS);
+  const [settingsReady, setSettingsReady] = (0, import_react14.useState)(false);
   const [library, setLibrary] = (0, import_react14.useState)("poses");
   const [costume, setCostume] = (0, import_react14.useState)(null);
   const [face, setFace] = (0, import_react14.useState)(null);
@@ -12306,7 +13291,7 @@ function StudioFrame({ embedded }) {
   const clearRequestedSystem = (0, import_react14.useCallback)(() => setRequestedSystem(null), []);
   const clearCostumeFocus = (0, import_react14.useCallback)(() => setCostumeFocus(null), []);
   const abortRef = (0, import_react14.useRef)(null);
-  const localRetry = (0, import_react14.useRef)("");
+  const settingsRevision = (0, import_react14.useRef)(0);
   const loadCatalog = (0, import_react14.useCallback)(() => {
     setLoading(true);
     setCatalogError("");
@@ -12352,10 +13337,13 @@ function StudioFrame({ embedded }) {
   }, [basePath]);
   (0, import_react14.useEffect)(() => {
     const local = loadSettings();
+    setSettings(local);
+    setSettingsReady(true);
+    const revision = settingsRevision.current;
     fetch(studioUrl(basePath, "/api/status")).then((response) => response.json()).then((payload) => {
       setServerKey(Boolean(payload.keyConfigured));
       const untouched = local.provider === "gemini" && local.apiKey.trim() === "" && (local.model === modelFor("gemini") || local.model.trim() === "");
-      if (untouched && payload.provider === "seedream") {
+      if (untouched && payload.provider === "seedream" && settingsRevision.current === revision) {
         const next = {
           ...local,
           provider: "seedream",
@@ -12366,8 +13354,8 @@ function StudioFrame({ embedded }) {
         saveSettings(next);
         return;
       }
-      setSettings(local);
-    }).catch(() => setSettings(local));
+    }).catch(() => {
+    });
   }, [basePath]);
   (0, import_react14.useEffect)(() => {
     const gen = ++modelLoadGen.current;
@@ -12407,13 +13395,21 @@ function StudioFrame({ embedded }) {
     };
   }, []);
   (0, import_react14.useEffect)(() => {
-    if (!libraryReady.current) return;
+    if (!libraryReady.current || !settingsReady || settings.engine === "comfyui") {
+      setSyncWarning("");
+      return;
+    }
+    const controller = new AbortController();
     const timer = window.setTimeout(() => {
-      syncCustomLibrary(basePath, customPoses, customCostumes).then(() => setSyncWarning("")).catch(() => setSyncWarning("自定义参考还没同步给 Agent。刷新工作室后再试。"));
+      syncCustomLibrary(basePath, customPoses, customCostumes, controller.signal).then(() => setSyncWarning("")).catch(() => setSyncWarning("自定义参考还没同步给 Agent。刷新工作室后再试。"));
     }, 250);
-    return () => window.clearTimeout(timer);
-  }, [basePath, customPoses, customCostumes]);
+    return () => {
+      window.clearTimeout(timer);
+      controller.abort();
+    };
+  }, [basePath, customPoses, customCostumes, settingsReady, settings.engine]);
   function updateSettings(next) {
+    settingsRevision.current += 1;
     setSettings(next);
     saveSettings(next);
   }
@@ -12548,11 +13544,30 @@ function StudioFrame({ embedded }) {
       return [{ poseId, viewId, title: pose.name, angle: view.angle, thumbSrc: poseUrls[poseId] }];
     });
   }, [selected, poseById, poseUrls]);
+  const comfyItems = (0, import_react14.useCallback)((viewIds) => {
+    if (!viewIds.length && costume) return [{ viewId: "outfit", title: "仅换装", pose: null }];
+    return viewIds.map((id) => {
+      for (const pose of poseById.values()) {
+        const view = pose.views.find((v) => v.id === id);
+        if (view) return { viewId: id, title: `${pose.name} · ${view.angle}`, pose: { ...pose, angle: view.angle } };
+      }
+      throw new Error(`找不到姿势 ${id}`);
+    });
+  }, [poseById, costume]);
   const selectionKey = chosen.map((item) => item.viewId).join("|");
   (0, import_react14.useEffect)(() => {
     if (!selectionKey && !(settings.engine === "comfyui" && costume?.id)) {
       setPrompts([]);
       setPromptError("");
+      return;
+    }
+    if (settings.engine === "comfyui") {
+      try {
+        setPrompts(comfyPromptCards({ items: comfyItems(selectionKey ? selectionKey.split("|") : []), costume, face, extraPrompt, characterCount: characters.length || 1, keepOutfit: costume ? false : settings.keepOutfit, mode: settings.mode }));
+        setPromptError("");
+      } catch (error) {
+        setPromptError(error instanceof Error ? error.message : "提示词没有生成");
+      }
       return;
     }
     const controller = new AbortController();
@@ -12593,7 +13608,7 @@ function StudioFrame({ embedded }) {
       window.clearTimeout(timer);
       controller.abort();
     };
-  }, [basePath, selectionKey, extraPrompt, characters.length, activeModelId, costume?.id, face?.id, settings.engine, settings.provider, settings.mode, settings.keepOutfit, customPoses, customCostumes]);
+  }, [basePath, selectionKey, extraPrompt, characters.length, activeModelId, costume?.id, face, settings.engine, settings.provider, settings.mode, settings.keepOutfit, customPoses, customCostumes, comfyItems, costume]);
   function togglePose(pose, view) {
     if (selected[pose.id] === view.id) {
       setLimitNote("");
@@ -12695,6 +13710,13 @@ function StudioFrame({ embedded }) {
       characterImages: characters.map((image) => ({ mediaType: image.mediaType, dataBase64: image.dataBase64 })),
       builtinModelId: characters.length ? "" : activeModelId
     };
+    const generateRequest = async (ids, mode) => {
+      const customReferences = await customReferenceBody(ids, costume?.id ?? "", customPoses, customCostumes);
+      if (settings.engine === "comfyui") {
+        return resultCards(await requestComfyGenerate(basePath, settings, { ...bodyBase, mode, items: comfyItems(ids), costume, face, customReferences }, controller.signal));
+      }
+      return requestGenerate(basePath, { ...bodyBase, mode, viewIds: ids, customReferences }, controller.signal);
+    };
     const snapshotBase = {
       extraPrompt,
       provider: settings.engine === "comfyui" ? "comfyui" : settings.provider,
@@ -12707,11 +13729,8 @@ function StudioFrame({ embedded }) {
     };
     try {
       if (settings.mode === "sheet" || chosen.length === 0) {
-        setProgress(chosen.length === 0 ? "正在本机换装" : settings.engine === "comfyui" ? "正在逐格生成姿势拼图" : "正在画姿势拼图");
-        const customReferences = await customReferenceBody(viewIds, costume?.id ?? "", customPoses, customCostumes);
-        const localRunId = localRetry.current || crypto.randomUUID();
-        const batch = await requestGenerate(basePath, { ...bodyBase, mode: settings.mode, viewIds, customReferences, localRunId }, controller.signal);
-        localRetry.current = settings.engine === "comfyui" && batch.some((item) => !item.ok) ? localRunId : "";
+        setProgress(chosen.length === 0 ? "正在通过 ComfyUI 换装" : settings.engine === "comfyui" ? "正在逐格生成姿势拼图" : "正在画姿势拼图");
+        const batch = await generateRequest(viewIds, settings.mode);
         setResults(batch);
         await rememberResults(batch, { ...snapshotBase, selection: chosen });
       } else {
@@ -12719,8 +13738,7 @@ function StudioFrame({ embedded }) {
         for (let index = 0; index < chosen.length; index += 1) {
           const item = chosen[index];
           setProgress(`正在画第 ${index + 1} 张，共 ${chosen.length} 张`);
-          const customReferences = await customReferenceBody([item.viewId], costume?.id ?? "", customPoses, customCostumes);
-          const batch = await requestGenerate(basePath, { ...bodyBase, mode: "each", viewIds: [item.viewId], customReferences }, controller.signal);
+          const batch = await generateRequest([item.viewId], "each");
           const stamped = batch.map((result, resultIndex) => ({ ...result, key: `${item.viewId}-${resultIndex}` }));
           collected.push(...stamped);
           setResults([...collected]);
@@ -12728,7 +13746,7 @@ function StudioFrame({ embedded }) {
         }
       }
     } catch (error) {
-      if (error instanceof DOMException && error.name === "AbortError") setRunError("已停止。已经画完的图还留在下面。");
+      if (error instanceof DOMException && error.name === "AbortError") setRunError("已停止。");
       else setRunError(error instanceof Error ? error.message : "生图失败");
     } finally {
       setRunning(false);
@@ -12863,7 +13881,7 @@ function StudioFrame({ embedded }) {
       extraPrompt,
       onExtraPrompt: setExtraPrompt,
       localMode: settings.engine === "comfyui",
-      providerLabel: settings.engine === "comfyui" ? "ComfyUI 本地" : settings.provider === "seedream" ? "Seedream" : settings.provider === "openai" ? "OpenAI" : "Gemini",
+      providerLabel: settings.engine === "comfyui" ? "ComfyUI" : settings.provider === "seedream" ? "Seedream" : settings.provider === "openai" ? "OpenAI" : "Gemini",
       aspectRatio: settings.aspectRatio,
       mode: settings.mode,
       keepOutfit: settings.keepOutfit,
@@ -13131,7 +14149,10 @@ async function requestGenerate(basePath, body, signal) {
   } catch {
     throw new Error("生图失败");
   }
-  return (payload.results ?? []).map((item, index) => ({
+  return resultCards(payload.results ?? []);
+}
+function resultCards(results) {
+  return results.map((item, index) => ({
     viewId: item.viewId,
     key: `${item.viewId}-${index}`,
     title: item.title,
@@ -15822,7 +16843,7 @@ function PoseStudio() {
       --shimmer-text-fill: initial;
     }
   }
-}
+}\r
 `;
       shadow.appendChild(style);
     }

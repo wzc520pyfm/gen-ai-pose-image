@@ -1,4 +1,3 @@
-import { assertLocalRequest } from "@/shared/comfyui.mjs"
 import { NextResponse } from "next/server"
 import { statusForStudioError } from "@/shared/http-status.mjs"
 import { runGeneration } from "@/shared/jobs.mjs"
@@ -13,8 +12,7 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "请求不是 JSON" }, { status: 400 })
   }
   if (body.engine === "comfyui") {
-    try { assertLocalRequest(`${new URL(request.url).protocol}//${request.headers.get("host")}`, request.headers.get("origin")) }
-    catch (error) { return NextResponse.json({ error: error instanceof Error ? error.message : "本地访问被拒绝" }, { status: 403 }) }
+    return NextResponse.json({ error: "不再支持服务端执行 ComfyUI，请使用新版网页直接连接。" }, { status: 400 })
   }
   if (typeof body.apiKey !== "string" || body.apiKey.trim() === "") {
     body = { ...body, apiKey: process.env.POSE_MUSE_API_KEY ?? "" }

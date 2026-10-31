@@ -1,26 +1,4 @@
-import { randomUUID } from "node:crypto"
-import { readFile } from "node:fs/promises"
-import { dirname, join } from "node:path"
-import { fileURLToPath } from "node:url"
-
-const WORKFLOW = join(dirname(fileURLToPath(import.meta.url)), "workflows", "local-tryon.api.json")
-
-export function comfyURL(env = process.env) {
-  if (env.LANPOSE_COMFYUI !== "1") throw new Error("本地生图尚未启用。请在同一电脑启动工作室，并设置 LANPOSE_COMFYUI=1。")
-  const url = new URL(env.LANPOSE_COMFYUI_URL || "http://127.0.0.1:8188")
-  if (!["127.0.0.1", "localhost", "[::1]"].includes(url.hostname) || !["http:", "https:"].includes(url.protocol) || url.username || url.password || url.search || url.hash || url.pathname !== "/") {
-    throw new Error("ComfyUI 地址必须是本机回环地址，且不能带路径、凭据或查询参数。")
-  }
-  return url.origin
-}
-
-export function assertLocalRequest(url, origin) {
-  const local = new URL(url)
-  if (!["127.0.0.1", "localhost", "[::1]"].includes(local.hostname) || (origin && origin !== local.origin)) {
-    throw new Error("本地生图仅接受本机工作室的同源请求。")
-  }
-  comfyURL()
-}
+import workflow from "./workflows/local-tryon.api.json" with { type: "json" }
 
 export function dimensions(aspect = "3:4") {
   const sizes = { "1:1": [768, 768], "3:4": [672, 896], "4:3": [896, 672], "9:16": [576, 1024], "16:9": [1024, 576] }
@@ -118,7 +96,7 @@ export function activeGraph(source, output) {
 
 export async function buildLocalGraph({ files, pose, costume, face = null, aspectRatio, seed = 42, extraPrompt = "", keepOutfit = true, prefix = "tryon/lanpose" }) {
   if (!pose && !costume) throw new Error("至少启用换装或姿势。")
-  const { graph, mapping: m } = JSON.parse(await readFile(WORKFLOW, "utf8"))
+  const { graph, mapping: m } = structuredClone(workflow)
   const set = (slot, value) => { const [id, key] = slot; graph[id].inputs[key] = value }
   set(m.person, files.characters[0])
   set(m.garment, files.garment || files.characters[0])
@@ -155,100 +133,4 @@ export async function buildLocalGraph({ files, pose, costume, face = null, aspec
     graph[m.finalPrompt[0]].inputs[`images.image_${slot}`] = ["510", 0]
   }
   return { graph: activeGraph(graph, m.output), output: String(m.output), prompts }
-}
-
-export async function checkComfy({ fetchImpl = fetch, signal } = {}) {
-  const root = comfyURL()
-  const response = await fetchImpl(`${root}/system_stats`, { redirect: "error", signal: AbortSignal.any([signal || new AbortController().signal, AbortSignal.timeout(10000)]) })
-  if (!response.ok) throw new Error("无法连接 ComfyUI，请先启动本机 ComfyUI。")
-  await response.json()
-  return { available: true, workflow: "统一换装与姿势工作流" }
-}
-
-export async function generateLocal({ characters, garment, poseImage, faceImage, pose, costume, face = null, aspectRatio, extraPrompt, keepOutfit = true, seed = 42, signal, fetchImpl = fetch }) {
-  const root = comfyURL()
-  const linked = AbortSignal.any([signal || new AbortController().signal, AbortSignal.timeout(600000)])
-  const id = randomUUID()
-  const request = async (path, init = {}) => {
-    const response = await fetchImpl(root + path, { ...init, signal: linked, redirect: "error" })
-    if (!response.ok) {
-      const message = await response.text()
-      throw new Error(`ComfyUI 请求失败（${response.status}）：${message.slice(0, 1200)}`)
-    }
-    return response
-  }
-  const { default: sharp } = await import("sharp")
-  const upload = async (image, role, index = 0) => {
-    const [width, height] = dimensions(aspectRatio)
-    const buffer = role === "person"
-      ? await sharp(image.buffer, { limitInputPixels: 40000000 }).resize(width, height, { fit: "contain", background: "#eeeeee" }).png().toBuffer()
-      : await sharp(image.buffer, { limitInputPixels: 40000000 }).png().toBuffer()
-    const data = new FormData()
-    data.set("image", new Blob([buffer], { type: "image/png" }), `lanpose-${id}-${role}-${index}.png`)
-    data.set("type", "input")
-    const body = await (await request("/upload/image", { method: "POST", body: data })).json()
-    if (typeof body.name !== "string" || /[\\/]/.test(body.name) || (body.subfolder && !/^[\w/-]+$/.test(body.subfolder)) || body.subfolder?.split("/").includes("..")) throw new Error("ComfyUI 返回的图片路径无效。")
-    return body.subfolder ? `${body.subfolder}/${body.name}` : body.name
-  }
-  const files = { characters: [] }
-  for (const [i, image] of characters.entries()) files.characters.push(await upload(image, "person", i))
-  if (garment) files.garment = await upload(garment, "garment")
-  if (poseImage) files.pose = await upload(poseImage, "pose")
-  if (faceImage) files.face = await upload(faceImage, "face")
-  const { graph, output } = await buildLocalGraph({ files, pose, costume, face, aspectRatio, extraPrompt, keepOutfit, seed, prefix: `tryon/lanpose-${id}` })
-  const info = await (await request("/object_info")).json()
-  for (const node of Object.values(graph)) {
-    if (!info[node.class_type]) throw new Error(`缺少 ComfyUI 节点：${node.class_type}`)
-    for (const [key, value] of Object.entries(node.inputs)) {
-      const spec = info[node.class_type].input?.required?.[key] || info[node.class_type].input?.optional?.[key]
-      if (key !== "image" && Array.isArray(spec?.[0]) && !spec[0].includes(value)) throw new Error(`ComfyUI 模型或选项未安装：${node.class_type}.${key} = ${value}`)
-    }
-  }
-  let promptId
-  try {
-    const submitted = await (await request("/prompt", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ prompt: graph, client_id: id }) })).json()
-    promptId = submitted.prompt_id
-    if (typeof promptId !== "string" || !/^[\w-]+$/.test(promptId)) throw new Error("ComfyUI 未返回任务编号。")
-    while (true) {
-      linked.throwIfAborted()
-      const history = await (await request(`/history/${promptId}`)).json()
-      const entry = history[promptId]
-      if (entry) {
-        if (entry.status?.status_str === "error") throw new Error("ComfyUI 执行失败，请查看 ComfyUI 的节点报错。")
-        const image = entry.outputs?.[output]?.images?.[0]
-        if (!image) throw new Error("工作流已结束，但指定输出节点没有图片。")
-        if (image.type !== "output") throw new Error("ComfyUI 输出类型无效。")
-        const params = new URLSearchParams({ filename: image.filename, subfolder: image.subfolder || "", type: image.type })
-        const response = await request(`/view?${params}`)
-        const buffer = Buffer.from(await response.arrayBuffer())
-        const png = await sharp(buffer, { limitInputPixels: 40000000 }).png().toBuffer()
-        return { buffer: png, mediaType: "image/png", referencesSent: true }
-      }
-      await new Promise((resolve, reject) => {
-        const done = () => { clearTimeout(timer); linked.removeEventListener("abort", abort); resolve() }
-        const abort = () => { clearTimeout(timer); linked.removeEventListener("abort", abort); reject(linked.reason) }
-        const timer = setTimeout(done, 1000)
-        linked.addEventListener("abort", abort, { once: true })
-        if (linked.aborted) abort()
-      })
-    }
-  } finally {
-    if (linked.aborted && promptId) {
-      // Only delete our own pending task. /interrupt would stop somebody else's running task.
-      await fetchImpl(root + "/queue", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ delete: [promptId] }), signal: AbortSignal.timeout(5000) }).catch(() => {})
-    }
-  }
-}
-
-export async function composeLocalSheet(images, aspectRatio) {
-  if (!images.length || images.length > 4) throw new Error("拼图需要 1 到 4 张图片。")
-  if (images.length === 1) return images[0]
-  const { default: sharp } = await import("sharp")
-  const [width, height] = dimensions(aspectRatio).map((n) => n * 2)
-  const columns = 2, rows = images.length <= 2 ? 1 : 2, gap = 16
-  const cellWidth = Math.floor((width - gap * (columns + 1)) / columns)
-  const cellHeight = Math.floor((height - gap * (rows + 1)) / rows)
-  const layers = []
-  for (const [i, image] of images.entries()) layers.push({ input: await sharp(image.buffer).resize(cellWidth, cellHeight, { fit: "contain", background: "white" }).png().toBuffer(), left: gap + (i % columns) * (cellWidth + gap), top: gap + Math.floor(i / columns) * (cellHeight + gap) })
-  return { buffer: await sharp({ create: { width, height, channels: 3, background: "white" } }).composite(layers).png().toBuffer(), mediaType: "image/png", referencesSent: true }
 }

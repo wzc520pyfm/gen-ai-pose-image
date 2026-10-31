@@ -1,4 +1,3 @@
-import { assertLocalRequest, checkComfy } from "../shared/comfyui.mjs"
 import { readFile } from "node:fs/promises"
 import { dirname, join } from "node:path"
 import { fileURLToPath } from "node:url"
@@ -52,10 +51,6 @@ export function createPoseHandler(getConfig) {
       const url = new URL(req.url ?? "/", `http://${req.headers.host ?? "localhost"}`)
       let path = url.pathname
       if (path.startsWith("/dsh-pose-muse")) path = path.slice("/dsh-pose-muse".length) || "/"
-      if (req.method === "GET" && path === "/api/comfyui") {
-        assertLocalRequest(url.href, req.headers.origin)
-        return json(res, 200, await checkComfy())
-      }
       if (req.method === "GET" && path === "/api/catalog") return json(res, 200, getCatalog())
       if (req.method === "GET" && path === "/api/costumes") return json(res, 200, getCostumeCatalog())
       if (req.method === "GET" && path === "/api/faces") return json(res, 200, getFaceCatalog())
@@ -126,7 +121,7 @@ export function createPoseHandler(getConfig) {
       if (req.method === "POST" && (path === "/api/prompt" || path === "/api/generate" || path === "/api/beautify" || path === "/api/reference" || path === "/api/character-sheet")) {
         const body = await readBody(req)
         const config = getConfig()
-        if (body.engine === "comfyui") assertLocalRequest(url.href, req.headers.origin)
+        if (body.engine === "comfyui") return json(res, 400, { error: "不再支持服务端执行 ComfyUI，请使用新版网页直接连接。" })
         if (typeof body.apiKey !== "string" || body.apiKey.trim() === "") {
           body.apiKey = process.env.POSE_MUSE_API_KEY || config.apiKey || ""
         }
