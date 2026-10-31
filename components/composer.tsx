@@ -41,7 +41,6 @@ export function Composer({
   onClearFace,
   hasKey,
   running,
-  progress,
   runError,
   prompts,
   promptError,
@@ -76,7 +75,6 @@ export function Composer({
   onClearFace: () => void
   hasKey: boolean
   running: boolean
-  progress: string
   runError: string
   prompts: PromptCard[]
   promptError: string
@@ -224,12 +222,12 @@ export function Composer({
       {limitNote ? <p className="text-sm text-amber-800">{limitNote}</p> : null}
       {selected.length > limit ? <p className="text-sm text-amber-800">当前方式一次最多 {limit} 个姿势。</p> : null}
 
-      <div className="flex gap-2">
-        <Button className="h-11 flex-1" disabled={running || (selected.length === 0 && !(localMode && costume)) || selected.length > limit} onClick={onGenerate}>
+      <div className="flex min-w-0 gap-2">
+        <Button className="h-11 min-w-0 flex-1 shrink overflow-hidden px-3" disabled={running || (selected.length === 0 && !(localMode && costume)) || selected.length > limit} onClick={onGenerate}>
           {running ? <Loader2 className="animate-spin" /> : <Sparkles />}
-          {running ? progress || "正在生图" : hasKey ? (localMode && selected.length === 0 ? "仅换装生图" : "按所选姿势生图") : "填写密钥后生图"}
+          <span className="min-w-0 truncate">{running ? "正在生成" : hasKey ? (localMode && selected.length === 0 ? "仅换装生图" : "按所选姿势生图") : "填写密钥后生图"}</span>
         </Button>
-        {running ? <Button variant="outline" className="h-11" onClick={onStop}>停止</Button> : null}
+        {running ? <Button variant="outline" className="h-11 shrink-0 px-3" onClick={onStop}>停止</Button> : null}
       </div>
       {!hasKey ? <p className="text-xs leading-5 text-muted-foreground">密钥只留在这台浏览器里。没有密钥时，下面的提示词仍然可以复制到 dsh-image-gen 里用。</p> : null}
       {reuseNote ? <p className="text-sm text-primary">{reuseNote}</p> : null}

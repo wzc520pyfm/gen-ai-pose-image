@@ -198,29 +198,8 @@ var import_react_dom = require("react-dom");
 // components/studio.tsx
 var import_react14 = require("react");
 
-// lib/elapsed.ts
-var import_react = require("react");
-function useElapsedSeconds(active) {
-  const [waited, setWaited] = (0, import_react.useState)(0);
-  (0, import_react.useEffect)(() => {
-    if (!active) {
-      setWaited(0);
-      return;
-    }
-    const started = Date.now();
-    const timer = window.setInterval(() => {
-      setWaited(Math.max(1, Math.round((Date.now() - started) / 1e3)));
-    }, 1e3);
-    return () => window.clearInterval(timer);
-  }, [active]);
-  return waited;
-}
-function withElapsed(label, waited) {
-  return waited > 0 ? `${label}（已等待 ${waited} 秒）` : label;
-}
-
 // node_modules/lucide-react/dist/esm/createLucideIcon.mjs
-var import_react4 = require("react");
+var import_react3 = require("react");
 
 // node_modules/lucide-react/dist/esm/shared/src/utils/toKebabCase.mjs
 var toKebabCase = (string) => string?.replace(/([a-z0-9])([A-Z])/g, "$1-$2").toLowerCase();
@@ -264,7 +243,7 @@ var toPascalCase = (string) => {
 };
 
 // node_modules/lucide-react/dist/esm/Icon.mjs
-var import_react3 = require("react");
+var import_react2 = require("react");
 
 // node_modules/lucide-react/dist/esm/shared/src/utils/mergeClasses.mjs
 var mergeClasses = (...classes) => classes.filter((className, index, array) => {
@@ -363,12 +342,12 @@ var hasA11yProp = (props) => {
 };
 
 // node_modules/lucide-react/dist/esm/context.mjs
-var import_react2 = require("react");
-var LucideContext = (0, import_react2.createContext)({});
-var useLucideContext = () => (0, import_react2.useContext)(LucideContext);
+var import_react = require("react");
+var LucideContext = (0, import_react.createContext)({});
+var useLucideContext = () => (0, import_react.useContext)(LucideContext);
 
 // node_modules/lucide-react/dist/esm/Icon.mjs
-var Icon = (0, import_react3.forwardRef)(
+var Icon = (0, import_react2.forwardRef)(
   ({
     color,
     size,
@@ -407,14 +386,14 @@ var Icon = (0, import_react3.forwardRef)(
       hasA11yProp: hasAccessibleProp,
       attributes: rest
     });
-    return (0, import_react3.createElement)(
+    return (0, import_react2.createElement)(
       name2,
       {
         ref,
         ...svgAttributes
       },
       [
-        ...builtIconNode.map(([tag, attrs]) => (0, import_react3.createElement)(tag, attrs)),
+        ...builtIconNode.map(([tag, attrs]) => (0, import_react2.createElement)(tag, attrs)),
         ...Array.isArray(children) ? children : [children]
       ]
     );
@@ -424,8 +403,8 @@ var Icon = (0, import_react3.forwardRef)(
 // node_modules/lucide-react/dist/esm/createLucideIcon.mjs
 function createLucideIcon(iconDataOrName, iconNode = [], aliases = []) {
   const iconData = typeof iconDataOrName === "string" ? toLucideIconData(iconDataOrName, iconNode, aliases) : iconDataOrName;
-  const Component = (0, import_react4.forwardRef)(
-    ({ className, ...props }, ref) => (0, import_react4.createElement)(Icon, {
+  const Component = (0, import_react3.forwardRef)(
+    ({ className, ...props }, ref) => (0, import_react3.createElement)(Icon, {
       ref,
       icon: iconData,
       className,
@@ -593,6 +572,27 @@ var X = createLucideIcon(__iconData12);
 
 // components/character-dock.tsx
 var import_react7 = require("react");
+
+// lib/elapsed.ts
+var import_react4 = require("react");
+function useElapsedSeconds(active) {
+  const [waited, setWaited] = (0, import_react4.useState)(0);
+  (0, import_react4.useEffect)(() => {
+    if (!active) {
+      setWaited(0);
+      return;
+    }
+    const started = Date.now();
+    const timer = window.setInterval(() => {
+      setWaited(Math.max(1, Math.round((Date.now() - started) / 1e3)));
+    }, 1e3);
+    return () => window.clearInterval(timer);
+  }, [active]);
+  return waited;
+}
+function withElapsed(label, waited) {
+  return waited > 0 ? `${label}（已等待 ${waited} 秒）` : label;
+}
 
 // node_modules/@base-ui/react/button/Button.mjs
 var React10 = __toESM(require("react"), 1);
@@ -10088,7 +10088,6 @@ function Composer({
   onClearFace,
   hasKey,
   running,
-  progress,
   runError,
   prompts,
   promptError,
@@ -10234,12 +10233,12 @@ ${item.prompt}`).join("\n\n")),
       limit,
       " 个姿势。"
     ] }) : null,
-    /* @__PURE__ */ (0, import_jsx_runtime24.jsxs)("div", { className: "flex gap-2", children: [
-      /* @__PURE__ */ (0, import_jsx_runtime24.jsxs)(Button3, { className: "h-11 flex-1", disabled: running || selected.length === 0 && !(localMode && costume) || selected.length > limit, onClick: onGenerate, children: [
+    /* @__PURE__ */ (0, import_jsx_runtime24.jsxs)("div", { className: "flex min-w-0 gap-2", children: [
+      /* @__PURE__ */ (0, import_jsx_runtime24.jsxs)(Button3, { className: "h-11 min-w-0 flex-1 shrink overflow-hidden px-3", disabled: running || selected.length === 0 && !(localMode && costume) || selected.length > limit, onClick: onGenerate, children: [
         running ? /* @__PURE__ */ (0, import_jsx_runtime24.jsx)(LoaderCircle, { className: "animate-spin" }) : /* @__PURE__ */ (0, import_jsx_runtime24.jsx)(Sparkles, {}),
-        running ? progress || "正在生图" : hasKey ? localMode && selected.length === 0 ? "仅换装生图" : "按所选姿势生图" : "填写密钥后生图"
+        /* @__PURE__ */ (0, import_jsx_runtime24.jsx)("span", { className: "min-w-0 truncate", children: running ? "正在生成" : hasKey ? localMode && selected.length === 0 ? "仅换装生图" : "按所选姿势生图" : "填写密钥后生图" })
       ] }),
-      running ? /* @__PURE__ */ (0, import_jsx_runtime24.jsx)(Button3, { variant: "outline", className: "h-11", onClick: onStop, children: "停止" }) : null
+      running ? /* @__PURE__ */ (0, import_jsx_runtime24.jsx)(Button3, { variant: "outline", className: "h-11 shrink-0 px-3", onClick: onStop, children: "停止" }) : null
     ] }),
     !hasKey ? /* @__PURE__ */ (0, import_jsx_runtime24.jsx)("p", { className: "text-xs leading-5 text-muted-foreground", children: "密钥只留在这台浏览器里。没有密钥时，下面的提示词仍然可以复制到 dsh-image-gen 里用。" }) : null,
     reuseNote ? /* @__PURE__ */ (0, import_jsx_runtime24.jsx)("p", { className: "text-sm text-primary", children: reuseNote }) : null,
@@ -12289,8 +12288,6 @@ function StudioFrame({ embedded }) {
   const [promptError, setPromptError] = (0, import_react14.useState)("");
   const [results, setResults] = (0, import_react14.useState)([]);
   const [running, setRunning] = (0, import_react14.useState)(false);
-  const [progress, setProgress] = (0, import_react14.useState)("");
-  const waited = useElapsedSeconds(running);
   const [runError, setRunError] = (0, import_react14.useState)("");
   const [limitNote, setLimitNote] = (0, import_react14.useState)("");
   const [serverKey, setServerKey] = (0, import_react14.useState)(false);
@@ -12707,7 +12704,6 @@ function StudioFrame({ embedded }) {
     };
     try {
       if (settings.mode === "sheet" || chosen.length === 0) {
-        setProgress(chosen.length === 0 ? "正在本机换装" : settings.engine === "comfyui" ? "正在逐格生成姿势拼图" : "正在画姿势拼图");
         const customReferences = await customReferenceBody(viewIds, costume?.id ?? "", customPoses, customCostumes);
         const localRunId = localRetry.current || crypto.randomUUID();
         const batch = await requestGenerate(basePath, { ...bodyBase, mode: settings.mode, viewIds, customReferences, localRunId }, controller.signal);
@@ -12716,9 +12712,7 @@ function StudioFrame({ embedded }) {
         await rememberResults(batch, { ...snapshotBase, selection: chosen });
       } else {
         const collected = [];
-        for (let index = 0; index < chosen.length; index += 1) {
-          const item = chosen[index];
-          setProgress(`正在画第 ${index + 1} 张，共 ${chosen.length} 张`);
+        for (const item of chosen) {
           const customReferences = await customReferenceBody([item.viewId], costume?.id ?? "", customPoses, customCostumes);
           const batch = await requestGenerate(basePath, { ...bodyBase, mode: "each", viewIds: [item.viewId], customReferences }, controller.signal);
           const stamped = batch.map((result, resultIndex) => ({ ...result, key: `${item.viewId}-${resultIndex}` }));
@@ -12732,7 +12726,6 @@ function StudioFrame({ embedded }) {
       else setRunError(error instanceof Error ? error.message : "生图失败");
     } finally {
       setRunning(false);
-      setProgress("");
       abortRef.current = null;
     }
   }
@@ -12873,7 +12866,6 @@ function StudioFrame({ embedded }) {
       onClearFace: () => setFace(null),
       hasKey: settings.engine === "comfyui" || Boolean(settings.apiKey.trim()) || serverKey,
       running,
-      progress: withElapsed(progress, waited),
       runError,
       prompts,
       promptError,

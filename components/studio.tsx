@@ -1,7 +1,6 @@
 "use client"
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react"
-import { useElapsedSeconds, withElapsed } from "@/lib/elapsed"
 import { Settings } from "lucide-react"
 import { CharacterDock } from "@/components/character-dock"
 import { Composer, type ResultCard } from "@/components/composer"
@@ -103,8 +102,6 @@ function StudioFrame({ embedded }: { embedded: boolean }) {
   const [promptError, setPromptError] = useState("")
   const [results, setResults] = useState<ResultCard[]>([])
   const [running, setRunning] = useState(false)
-  const [progress, setProgress] = useState("")
-  const waited = useElapsedSeconds(running)
   const [runError, setRunError] = useState("")
   const [limitNote, setLimitNote] = useState("")
   const [serverKey, setServerKey] = useState(false)
@@ -556,7 +553,6 @@ function StudioFrame({ embedded }: { embedded: boolean }) {
     }
     try {
       if (settings.mode === "sheet" || chosen.length === 0) {
-        setProgress(chosen.length === 0 ? "正在本机换装" : settings.engine === "comfyui" ? "正在逐格生成姿势拼图" : "正在画姿势拼图")
         const customReferences = await customReferenceBody(viewIds, costume?.id ?? "", customPoses, customCostumes)
         const localRunId = localRetry.current || crypto.randomUUID()
         const batch = await requestGenerate(basePath, { ...bodyBase, mode: settings.mode, viewIds, customReferences, localRunId }, controller.signal)
@@ -565,9 +561,7 @@ function StudioFrame({ embedded }: { embedded: boolean }) {
         await rememberResults(batch, { ...snapshotBase, selection: chosen })
       } else {
         const collected: ResultCard[] = []
-        for (let index = 0; index < chosen.length; index += 1) {
-          const item = chosen[index]
-          setProgress(`正在画第 ${index + 1} 张，共 ${chosen.length} 张`)
+        for (const item of chosen) {
           const customReferences = await customReferenceBody([item.viewId], costume?.id ?? "", customPoses, customCostumes)
           const batch = await requestGenerate(basePath, { ...bodyBase, mode: "each", viewIds: [item.viewId], customReferences }, controller.signal)
           const stamped = batch.map((result, resultIndex) => ({ ...result, key: `${item.viewId}-${resultIndex}` }))
@@ -581,7 +575,6 @@ function StudioFrame({ embedded }: { embedded: boolean }) {
       else setRunError(error instanceof Error ? error.message : "生图失败")
     } finally {
       setRunning(false)
-      setProgress("")
       abortRef.current = null
     }
   }
@@ -740,7 +733,6 @@ function StudioFrame({ embedded }: { embedded: boolean }) {
       onClearFace={() => setFace(null)}
       hasKey={settings.engine === "comfyui" || Boolean(settings.apiKey.trim()) || serverKey}
       running={running}
-      progress={withElapsed(progress, waited)}
       runError={runError}
       prompts={prompts}
       promptError={promptError}
