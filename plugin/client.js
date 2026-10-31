@@ -10143,7 +10143,7 @@ function Composer({
             variant: "outline",
             disabled: running,
             onClick: onRandom,
-            className: "rounded-full border-2 border-[oklch(0.68_0.15_32)] bg-[oklch(0.975_0.02_45)] px-3 font-medium text-[oklch(0.46_0.13_32)] hover:border-[oklch(0.62_0.16_30)] hover:bg-[oklch(0.95_0.04_40)] hover:text-[oklch(0.46_0.13_32)]",
+            className: "rounded-full border border-[oklch(0.68_0.15_32)] bg-[oklch(0.975_0.02_45)] px-3 font-medium text-[oklch(0.46_0.13_32)] hover:border-[oklch(0.62_0.16_30)] hover:bg-[oklch(0.95_0.04_40)] hover:text-[oklch(0.46_0.13_32)]",
             children: [
               /* @__PURE__ */ (0, import_jsx_runtime24.jsx)(Shuffle, {}),
               "随机组合"
@@ -13945,10 +13945,6 @@ function PoseStudio() {
   .border {
     border-style: var(--tw-border-style);
     border-width: 1px;
-  }
-  .border-2 {
-    border-style: var(--tw-border-style);
-    border-width: 2px;
   }
   .border-t {
     border-top-style: var(--tw-border-style);
