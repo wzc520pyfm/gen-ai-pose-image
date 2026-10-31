@@ -593,6 +593,9 @@ function useElapsedSeconds(active) {
 function withElapsed(label, waited) {
   return waited > 0 ? `${label}（已等待 ${waited} 秒）` : label;
 }
+function compactElapsed(label, waited) {
+  return waited > 0 ? `${label} · ${waited}s` : label;
+}
 
 // node_modules/@base-ui/react/button/Button.mjs
 var React10 = __toESM(require("react"), 1);
@@ -10105,6 +10108,7 @@ function Composer({
   builtinSheet
 }) {
   const { basePath } = useStudioEnv();
+  const waited = useElapsedSeconds(running);
   const characterSrc = characters[0] ? `data:${characters[0].mediaType};base64,${characters[0].dataBase64}` : studioUrl(basePath, builtinSheet);
   const limit = mode === "sheet" ? 4 : 8;
   const poseThumb = (viewId, thumbSrc) => thumbSrc || studioUrl(basePath, `/api/pose-image?id=${encodeURIComponent(viewId)}&size=thumb`);
@@ -10236,7 +10240,7 @@ ${item.prompt}`).join("\n\n")),
     /* @__PURE__ */ (0, import_jsx_runtime24.jsxs)("div", { className: "flex min-w-0 gap-2", children: [
       /* @__PURE__ */ (0, import_jsx_runtime24.jsxs)(Button3, { className: "h-11 min-w-0 flex-1 shrink overflow-hidden px-3", disabled: running || selected.length === 0 && !(localMode && costume) || selected.length > limit, onClick: onGenerate, children: [
         running ? /* @__PURE__ */ (0, import_jsx_runtime24.jsx)(LoaderCircle, { className: "animate-spin" }) : /* @__PURE__ */ (0, import_jsx_runtime24.jsx)(Sparkles, {}),
-        /* @__PURE__ */ (0, import_jsx_runtime24.jsx)("span", { className: "min-w-0 truncate", children: running ? "正在生成" : hasKey ? localMode && selected.length === 0 ? "仅换装生图" : "按所选姿势生图" : "填写密钥后生图" })
+        /* @__PURE__ */ (0, import_jsx_runtime24.jsx)("span", { className: "min-w-0 truncate", children: running ? compactElapsed("正在生成", waited) : hasKey ? localMode && selected.length === 0 ? "仅换装生图" : "按所选姿势生图" : "填写密钥后生图" })
       ] }),
       running ? /* @__PURE__ */ (0, import_jsx_runtime24.jsx)(Button3, { variant: "outline", className: "h-11 shrink-0 px-3", onClick: onStop, children: "停止" }) : null
     ] }),

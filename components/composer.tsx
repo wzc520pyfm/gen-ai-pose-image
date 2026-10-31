@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button"
 import { HistoryPanel, type HistoryView } from "@/components/history-panel"
 import { Textarea } from "@/components/ui/textarea"
 import type { StoredCharacter } from "@/lib/characters"
+import { compactElapsed, useElapsedSeconds } from "@/lib/elapsed"
 import type { AspectRatio, GenerateMode, PromptCard } from "@/lib/types"
 import { ASPECT_LABEL } from "@/lib/types"
 import { studioUrl, useStudioEnv } from "@/lib/studio-env"
@@ -92,6 +93,7 @@ export function Composer({
   builtinSheet: string
 }) {
   const { basePath } = useStudioEnv()
+  const waited = useElapsedSeconds(running)
   const characterSrc = characters[0]
     ? `data:${characters[0].mediaType};base64,${characters[0].dataBase64}`
     : studioUrl(basePath, builtinSheet)
@@ -225,7 +227,7 @@ export function Composer({
       <div className="flex min-w-0 gap-2">
         <Button className="h-11 min-w-0 flex-1 shrink overflow-hidden px-3" disabled={running || (selected.length === 0 && !(localMode && costume)) || selected.length > limit} onClick={onGenerate}>
           {running ? <Loader2 className="animate-spin" /> : <Sparkles />}
-          <span className="min-w-0 truncate">{running ? "正在生成" : hasKey ? (localMode && selected.length === 0 ? "仅换装生图" : "按所选姿势生图") : "填写密钥后生图"}</span>
+          <span className="min-w-0 truncate">{running ? compactElapsed("正在生成", waited) : hasKey ? (localMode && selected.length === 0 ? "仅换装生图" : "按所选姿势生图") : "填写密钥后生图"}</span>
         </Button>
         {running ? <Button variant="outline" className="h-11 shrink-0 px-3" onClick={onStop}>停止</Button> : null}
       </div>

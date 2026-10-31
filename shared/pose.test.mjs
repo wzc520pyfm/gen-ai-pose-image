@@ -165,9 +165,12 @@ test("pose thumbs load from the public gallery path", async () => {
 test("pose generate busy copy stays short so Stop stays visible", () => {
   const client = readFileSync(new URL("../plugin/client.js", import.meta.url), "utf8")
   const composer = readFileSync(new URL("../components/composer.tsx", import.meta.url), "utf8")
-  assert.match(composer, /正在生成/)
+  assert.match(composer, /compactElapsed\("正在生成", waited\)/)
+  assert.match(readFileSync(new URL("../lib/elapsed.ts", import.meta.url), "utf8"), /\$\{label\} · \$\{waited\}s/)
   assert.doesNotMatch(composer, /正在画第/)
   assert.doesNotMatch(composer, /已等待/)
+  assert.match(client, /compactElapsed\("正在生成", waited\)/)
+  assert.match(client, /\$\{label\} · \$\{waited\}s/)
   assert.doesNotMatch(client, /正在画第/)
   assert.doesNotMatch(client, /正在逐格生成姿势拼图/)
   assert.doesNotMatch(client, /正在画姿势拼图/)

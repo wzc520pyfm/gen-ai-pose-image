@@ -22,3 +22,8 @@ export function useElapsedSeconds(active: boolean) {
 export function withElapsed(label: string, waited: number) {
   return waited > 0 ? `${label}（已等待 ${waited} 秒）` : label
 }
+
+/** Compact busy label, e.g. 正在生成 · 28s, short enough to leave a neighboring Stop control visible. */
+export function compactElapsed(label: string, waited: number) {
+  return waited > 0 ? `${label} · ${waited}s` : label
+}
