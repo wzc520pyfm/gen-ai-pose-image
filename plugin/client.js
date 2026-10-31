@@ -11175,7 +11175,7 @@ function PoseBrowser({
     onToggle(pose, view);
   }
   return /* @__PURE__ */ (0, import_jsx_runtime27.jsxs)("section", { className: "@container/poses flex min-h-0 flex-col", children: [
-    /* @__PURE__ */ (0, import_jsx_runtime27.jsxs)("div", { className: "px-4 pt-3 pb-2 @min-[768px]/studio:px-6", children: [
+    /* @__PURE__ */ (0, import_jsx_runtime27.jsxs)("div", { className: "px-4 pt-5 pb-2 @min-[768px]/studio:px-6", children: [
       /* @__PURE__ */ (0, import_jsx_runtime27.jsxs)("div", { className: "flex gap-1.5 overflow-x-auto pb-1", children: [
         /* @__PURE__ */ (0, import_jsx_runtime27.jsx)(SeriesPill, { active: allSeries, count: visiblePoseCount, onClick: () => {
           setSystemId("all");
@@ -11407,8 +11407,8 @@ function PoseCard({
         }
       )
     ] }),
-    /* @__PURE__ */ (0, import_jsx_runtime27.jsxs)("div", { className: "flex items-start justify-between gap-2 px-2.5 py-2", children: [
-      /* @__PURE__ */ (0, import_jsx_runtime27.jsx)("h3", { className: "line-clamp-2 min-w-0 flex-1 text-sm leading-5 font-medium", children: pose.name }),
+    /* @__PURE__ */ (0, import_jsx_runtime27.jsxs)("div", { className: "flex items-center justify-between gap-2 px-2.5 py-2", children: [
+      /* @__PURE__ */ (0, import_jsx_runtime27.jsx)("h3", { className: "min-w-0 flex-1 truncate text-sm leading-5 font-medium", title: pose.name, children: pose.name }),
       /* @__PURE__ */ (0, import_jsx_runtime27.jsx)("span", { className: "max-w-[46%] shrink-0 truncate pt-0.5 text-right text-xs text-muted-foreground", title: pose.category, children: pose.category })
     ] }),
     /* @__PURE__ */ (0, import_jsx_runtime27.jsx)("div", { role: "group", "aria-label": `${pose.name}的视角`, className: `grid gap-1 px-2 pb-2.5 ${columns}`, children: views.map((item) => {
@@ -13654,6 +13654,9 @@ function PoseStudio() {
   }
   .pt-3 {
     padding-top: calc(var(--spacing) * 3);
+  }
+  .pt-5 {
+    padding-top: calc(var(--spacing) * 5);
   }
   .pr-8 {
     padding-right: calc(var(--spacing) * 8);
