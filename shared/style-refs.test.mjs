@@ -65,7 +65,7 @@ test("pose reference generation hands two style images to generateImage", async 
   assert.match(generated.prompt, /严格模仿参考图的线稿风格与人偶质感，只按描述改姿态/)
 })
 
-test("costume reference generation hands the flat-lay samples and never an empty list", async () => {
+test("costume reference generation sends only SUM-0174 and turns the watermark off", async () => {
   let generated = null
   await generateStyledReference({
     kind: "costume",
