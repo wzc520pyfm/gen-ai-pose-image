@@ -134,5 +134,8 @@ test("gateway timeouts become a readable studio error", () => {
 test("beautify instructions tell the model to copy the reference style", () => {
   assert.match(beautifyInstruction({ kind: "pose", userPrompt: "叉腰" }), /严格模仿参考图的线稿风格与人偶质感，只按描述改姿态/)
   assert.match(beautifyInstruction({ kind: "costume", userPrompt: "风衣" }), /严格模仿参考图的构图、取景、机位距离、光线和地面柔和棚拍阴影/)
-  assert.match(beautifyInstruction({ kind: "costume", userPrompt: "风衣" }), /不要裸体/)
+  assert.match(beautifyInstruction({ kind: "costume", userPrompt: "风衣" }), /头部、脸部和手部不出现/)
+  assert.match(beautifyInstruction({ kind: "costume", userPrompt: "风衣" }), /日常外衣/)
+  assert.doesNotMatch(beautifyInstruction({ kind: "costume", userPrompt: "风衣" }), /裸体|裸露|内衣|性暗示|色情|皮肤|露骨/)
+  assert.doesNotMatch(beautifyInstruction({ kind: "pose", userPrompt: "叉腰" }), /裸体|裸露|内衣|性暗示|色情|露骨/)
 })
