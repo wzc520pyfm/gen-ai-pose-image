@@ -3,6 +3,7 @@ import { join } from "node:path"
 import { createRequire } from "node:module"
 import { searchPoses } from "../shared/catalog.mjs"
 import { searchCostumes } from "../shared/costumes.mjs"
+import { searchFaces, toFaceSearchResult } from "../shared/faces.mjs"
 import { toCostumeSearchResult, toPoseSearchResult } from "../shared/custom.mjs"
 import { planRequest, promptCards, runGeneration } from "../shared/jobs.mjs"
 import { listCustomCostumeAssets, listCustomPoseAssets } from "../shared/registry.mjs"
@@ -102,6 +103,7 @@ export function apply(ctx, config = {}) {
           "澜姿插件已安装。用户要按姿势参考出图时，先用 search_poses 查找姿势，再用 generate_pose_images，view_ids 传姿势 id 或具体视角 id。",
           "默认可一次选择多个姿势。默认模特是成年女性「大肥鱼」（社区 DeepSeek 鲸鱼娘的成年形象，蓝发、鲸耳、鲸尾、蓝白女仆装）。不要把角色画成未成年人或 Q 版。",
           "要换衣服时，先用 search_costumes 找没有人物的服装图，再把返回的 id 作为 costume_id 传给 generate_pose_images。换装仍保留脸、发型、鲸耳和鲸尾。内衣、泳装和性感分类默认隐藏。",
+          "要换脸或表情时，先用 search_faces 找脸部参考，再把返回的 id 作为 face_id 传给 generate_pose_images。脸部参考只提供五官、表情、脸型和发型；姿势和服装仍按各自的参考图。角色原有的鲸耳和鲸尾保留。脸库作者是ギア，许可是 CC0。",
           "工作室里上传或生成的自定义姿势和服装会带 source 为 custom。这些 id 可以直接交给 generate_pose_images。如果工具说找不到自定义参考图，请让用户先在澜姿工作室上传或生成，不要改用图库里的其他姿势或服装。",
           "没有 POSE_MUSE_API_KEY 时，generate_pose_images 会返回提示词；若 dsh-image-gen 可用，把提示词原样交给 edit_image 或 generate_image，并附上角色参考与姿势线稿。",
         ].join("\n"),
@@ -137,6 +139,30 @@ export function apply(ctx, config = {}) {
   }))
 
   ctx.tools.register(defineTool({
+    name: "search_faces",
+    description: "Search the CC0 face and expression library by ギア (ai-portrait-gallery.pages.dev): 1499 portrait references in 脸部特写 and 造型, filterable by hair length. Chinese section and style labels follow sleepy-zone/ai-ref-library-cn. Use a returned id as face_id in generate_pose_images. The tool does not return image bytes; generation loads the public original on demand.",
+    parameters: {
+      query: { type: "string", description: "Face id such as f009cba9893, Chinese or Japanese style label, section, or hair length." },
+      section: { type: "string", enum: ["脸部特写", "造型"], description: "脸部特写 is a plain-background face close-up. 造型 includes styling. Omit to search both." },
+      hair: { type: "string", enum: ["短发", "中发", "中长发", "长发"], description: "Hair length filter. Omit to search every length." },
+      limit: { type: "integer", description: "Max results, 1-30. Default 12." },
+    },
+    output: {
+      schema: { type: "object", additionalProperties: true },
+      render: (_args, value) => [{ type: "text", text: JSON.stringify(value) }],
+    },
+    async execute(args) {
+      const limit = Math.max(1, Math.min(30, Number(args.limit) || 12))
+      return toFaceSearchResult(searchFaces({
+        query: args.query ?? "",
+        section: args.section ?? "",
+        hair: args.hair ?? "",
+        limit,
+      }))
+    },
+  }))
+
+  ctx.tools.register(defineTool({
     name: "search_costumes",
     description: "Search clothing-only references from the costume gallery at ai-costume-gallery.pages.dev, plus custom costumes saved in the Lanpose studio on this machine. Custom hits have source custom. Images contain garments, not people. Use a returned id as costume_id in generate_pose_images. Lingerie, swimwear, and sexy categories stay hidden unless include_adult is true.",
     parameters: {
@@ -163,10 +189,11 @@ export function apply(ctx, config = {}) {
 
   ctx.tools.register(defineTool({
     name: "generate_pose_images",
-    description: "Generate images of the default adult whale-girl 大肥鱼, or describe a wardrobe change, using one or more pose references from search_poses. Custom pose and costume ids from the studio are accepted when their reference images are on this machine. If a custom id has no local image, the tool returns an error and does not substitute a catalog item. Pass view ids (or pose ids, which use the front view). Keeps the character's maid outfit unless keep_outfit is false or costume_id is set. costume_id swaps clothing from search_costumes while keeping the face, hair, whale ears, and whale tail. One image per pose unless mode is sheet.",
+    description: "Generate images of the default adult whale-girl 大肥鱼, or describe a wardrobe change, using one or more pose references from search_poses. Custom pose and costume ids from the studio are accepted when their reference images are on this machine. If a custom id has no local image, the tool returns an error and does not substitute a catalog item. Pass view ids (or pose ids, which use the front view). Keeps the character's maid outfit unless keep_outfit is false or costume_id is set. costume_id swaps clothing from search_costumes while keeping the face, hair, whale ears, and whale tail. face_id applies a face and expression reference from search_faces: facial features, expression, and hairstyle come from that image, while pose and costume references still apply and whale ears and tail stay. Reference order is character, optional face, optional costume, then pose. One image per pose unless mode is sheet.",
     parameters: {
       view_ids: { type: "array", items: { type: "string" }, required: true, description: "Pose or view ids from search_poses, including custom-pose ids. Up to 8 for each, 4 for sheet." },
       costume_id: { type: "string", description: "Optional costume id from search_costumes, such as SPR-0001 or a custom-costume id. The clothing-only reference replaces the maid outfit." },
+      face_id: { type: "string", description: "Optional face id from search_faces, such as f009cba9893. The public portrait is sent as a face and expression reference." },
       extra_prompt: { type: "string", description: "Optional scene, lighting, or wardrobe note." },
       keep_outfit: { type: "boolean", description: "Keep 大肥鱼's blue-and-white maid outfit, whale ears and tail. Default true. Ignored when costume_id is set." },
       aspect_ratio: { type: "string", enum: ["1:1", "3:4", "4:3", "9:16", "16:9"], description: "Default 3:4." },
@@ -200,17 +227,19 @@ export function apply(ctx, config = {}) {
         mode: args.mode === "sheet" ? "sheet" : "each",
         extraPrompt: args.extra_prompt || "",
         costumeId: typeof args.costume_id === "string" ? args.costume_id : "",
+        faceId: typeof args.face_id === "string" ? args.face_id : "",
         viewIds: Array.isArray(args.view_ids) ? args.view_ids : [],
       }
       if (!input.apiKey) {
         const plan = planRequest(input)
         const usesCustom = plan.items.some((item) => item.source === "custom") || plan.costume?.source === "custom"
         const customNote = usesCustom ? "这次用了工作室里的自定义参考。交给 dsh-image-gen 时请附上这些本地图片，不要换成图库里的其他姿势或服装。" : ""
+        const faceNote = input.faceId ? "参考图顺序是角色、脸部参考、可选的没有人物的服装图、姿势线稿。脸部参考只用于五官、表情、脸型和发型。" : ""
         return {
           generated: false,
           message: input.costumeId
-            ? `没有 POSE_MUSE_API_KEY。提示词已经按大肥鱼的成年形象、所选服装和姿势写好。若安装了 dsh-image-gen，请把每段提示词交给 edit_image 或 generate_image，并按顺序附上角色参考、没有人物的服装图和姿势线稿。不要把角色改成未成年人或 Q 版。${customNote}`
-            : `没有 POSE_MUSE_API_KEY。提示词已经按大肥鱼的成年形象和所选姿势写好。若安装了 dsh-image-gen，请把每段提示词交给 edit_image 或 generate_image，并附上角色参考图与姿势线稿。不要把角色改成未成年人或 Q 版。${customNote}`,
+            ? `没有 POSE_MUSE_API_KEY。提示词已经按大肥鱼的成年形象、所选服装和姿势写好。若安装了 dsh-image-gen，请把每段提示词交给 edit_image 或 generate_image，并按顺序附上角色参考、没有人物的服装图和姿势线稿。${faceNote}不要把角色改成未成年人或 Q 版。${customNote}`
+            : `没有 POSE_MUSE_API_KEY。提示词已经按大肥鱼的成年形象和所选姿势写好。若安装了 dsh-image-gen，请把每段提示词交给 edit_image 或 generate_image，并附上角色参考图与姿势线稿。${faceNote}不要把角色改成未成年人或 Q 版。${customNote}`,
           prompts: promptCards(plan),
         }
       }

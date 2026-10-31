@@ -105,10 +105,20 @@ export function reuseFromHistory(entry) {
         keywords: String(entry.costume.keywords || ""),
       }
     : null
+  const face = entry?.face?.id
+    ? {
+        id: String(entry.face.id),
+        section: String(entry.face.section || ""),
+        hair: String(entry.face.hair || ""),
+        label: String(entry.face.label || ""),
+        keywords: String(entry.face.keywords || ""),
+      }
+    : null
   return {
     selected,
     extraPrompt: typeof entry?.extraPrompt === "string" ? entry.extraPrompt : "",
     costume,
+    face,
   }
 }
 

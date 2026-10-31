@@ -37,6 +37,8 @@ export function Composer({
   keepOutfit,
   costume,
   onClearCostume,
+  face,
+  onClearFace,
   hasKey,
   running,
   progress,
@@ -70,6 +72,8 @@ export function Composer({
   keepOutfit: boolean
   costume: { id: string; label: string; keywords: string; thumbSrc?: string } | null
   onClearCostume: () => void
+  face: { id: string; section: string; hair: string; label: string; keywords: string } | null
+  onClearFace: () => void
   hasKey: boolean
   running: boolean
   progress: string
@@ -96,6 +100,8 @@ export function Composer({
   const limit = mode === "sheet" ? 4 : 8
   const poseThumb = (viewId: string, thumbSrc?: string) => thumbSrc || studioUrl(basePath, `/api/pose-image?id=${encodeURIComponent(viewId)}&size=thumb`)
   const costumeThumb = costume?.thumbSrc || (costume ? studioUrl(basePath, `/api/costume-image?id=${encodeURIComponent(costume.id)}&size=thumb`) : "")
+  const faceThumb = face ? studioUrl(basePath, `/api/face-image?id=${encodeURIComponent(face.id)}&size=thumb`) : ""
+  const faceCaption = face ? [face.section, face.hair, face.label].filter(Boolean).join(" · ") : ""
 
   return (
     <div className="flex flex-col gap-4">
@@ -108,6 +114,17 @@ export function Composer({
           <button type="button" className="text-xs text-muted-foreground underline-offset-2 hover:underline" onClick={onClear}>清空</button>
         ) : null}
       </div>
+
+      {face ? (
+        <div className="flex items-center gap-2 rounded-xl border border-primary/40 bg-card px-2 py-1.5">
+          <img src={faceThumb} alt="" className="h-14 w-11 rounded-md bg-white object-cover" />
+          <span className="min-w-0 flex-1">
+            <span className="block truncate text-sm">脸部 {face.id}</span>
+            <span className="line-clamp-2 text-xs text-muted-foreground">{faceCaption || "脸部参考"}</span>
+          </span>
+          <button type="button" className="px-1 text-xs text-muted-foreground" onClick={onClearFace} aria-label={`取消脸部 ${face.id}`}>取消</button>
+        </div>
+      ) : null}
 
       {costume ? (
         <div className="flex items-center gap-2 rounded-xl border border-primary/40 bg-card px-2 py-1.5">
@@ -122,7 +139,7 @@ export function Composer({
 
       {selected.length === 0 && !(localMode && costume) ? (
         <p className="rounded-xl bg-muted px-3 py-4 text-sm leading-6 text-muted-foreground">
-          从中间点选一个或多个姿势。每一张成图都会带上{characters.length ? "你导入的模特" : builtinName}，只把身体换成对应的线稿姿势。要换衣服，先到「服装」里点一套。
+          从中间点选一个或多个姿势。每一张成图都会带上{characters.length ? "你导入的模特" : builtinName}，只把身体换成对应的线稿姿势。要换衣服，先到「服装」里点一套。要换脸或表情，先到「脸部」里点一张。
         </p>
       ) : (
         <ul className="flex max-h-40 flex-col gap-2 overflow-auto">
@@ -142,17 +159,20 @@ export function Composer({
       {selected[0] ? (
         <div className="rounded-xl border bg-card p-3">
           <p className="text-xs text-muted-foreground">参考对照 · {selected[0].title}</p>
-          <div className={`mt-2 grid items-center gap-2 ${costume ? "grid-cols-3" : "grid-cols-[1fr_auto_1fr]"}`}>
+          <div className={`mt-2 grid items-center gap-2 ${face || costume ? (face && costume ? "grid-cols-4" : "grid-cols-3") : "grid-cols-[1fr_auto_1fr]"}`}>
             <img src={characterSrc} alt={characters.length ? "导入的模特" : `${builtinName}的多视角设定图`} className="aspect-[3/4] rounded-lg bg-[#f8fafc] object-contain" />
+            {face ? (
+              <img src={faceThumb} alt={`${face.id} 的脸部参考，只取五官、表情和发型`} className="aspect-[3/4] rounded-lg bg-white object-cover" />
+            ) : null}
             {costume ? (
               <img src={costumeThumb} alt={`${costume.id} 的服装参考，图中没有人物`} className="aspect-[3/4] rounded-lg bg-white object-contain" />
-            ) : (
+            ) : face ? null : (
               <span className="text-lg text-muted-foreground" aria-hidden="true">→</span>
             )}
             <img src={poseThumb(selected[0].viewId, selected[0].thumbSrc)} alt={`${selected[0].title} 的姿势线稿`} className="aspect-[3/4] rounded-lg bg-white object-contain" />
           </div>
           <p className="mt-2 text-xs leading-5 text-muted-foreground">
-            {costume ? "左边锁脸和鲸尾，中间是没有人物的衣服，右边只提供姿势。这还不是成图。" : "左边锁脸和衣服，右边只提供姿势。这还不是成图。"}
+            {referenceCaption(Boolean(face), Boolean(costume))}
           </p>
         </div>
       ) : costume ? (
@@ -197,7 +217,7 @@ export function Composer({
       </label>
 
       <p className="text-xs leading-5 text-muted-foreground">
-        {providerLabel} · {ASPECT_LABEL[aspectRatio]} · {mode === "sheet" ? `拼成一张（最多 ${limit} 个）` : `逐张出图（最多 ${limit} 张）`} · {costume ? `换成 ${costume.id}` : keepOutfit ? "保持服装" : "允许换衣服"}
+        {providerLabel} · {ASPECT_LABEL[aspectRatio]} · {mode === "sheet" ? `拼成一张（最多 ${limit} 个）` : `逐张出图（最多 ${limit} 张）`} · {face ? `脸部 ${face.id}` : "保持原脸"} · {costume ? `换成 ${costume.id}` : keepOutfit ? "保持服装" : "允许换衣服"}
         {" · "}
         <button type="button" className="text-primary underline-offset-2 hover:underline" onClick={onOpenSettings}>改设置</button>
       </p>
@@ -239,4 +259,11 @@ export function Composer({
       <HistoryPanel entries={history} onReuse={onReuseHistory} onDelete={onDeleteHistory} onClear={onClearHistory} />
     </div>
   )
+}
+
+function referenceCaption(hasFace: boolean, hasCostume: boolean) {
+  if (hasFace && hasCostume) return "顺序是角色、脸部参考、没有人物的衣服、姿势线稿。脸部图只提供五官、表情和发型。这还不是成图。"
+  if (hasFace) return "左边是角色，中间这张脸提供五官、表情和发型，右边只提供姿势。衣服仍按角色参考。这还不是成图。"
+  if (hasCostume) return "左边锁脸和鲸尾，中间是没有人物的衣服，右边只提供姿势。这还不是成图。"
+  return "左边锁脸和衣服，右边只提供姿势。这还不是成图。"
 }

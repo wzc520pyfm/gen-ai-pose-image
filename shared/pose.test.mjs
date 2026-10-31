@@ -182,7 +182,8 @@ test("the browser module id matches the npm package name", () => {
 test("tool output schemas declare whether extra fields are allowed", () => {
   const source = readFileSync(new URL("../plugin/index.mjs", import.meta.url), "utf8")
   const schemas = [...source.matchAll(/schema:\s*\{([^}]+)\}/g)].map((match) => match[1])
-  assert.equal(schemas.length, 3)
+  assert.match(source, /name: "search_faces"/)
+  assert.equal(schemas.length, 4)
   for (const schema of schemas) {
     assert.match(schema, /type:\s*"object"/)
     assert.match(schema, /additionalProperties:\s*true/)

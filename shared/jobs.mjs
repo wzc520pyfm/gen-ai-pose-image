@@ -10,6 +10,7 @@ import { characterForBuiltin, characterFromUploads } from "./character.mjs"
 import { resolveView } from "./catalog.mjs"
 import { isCustomCostumeId, isCustomPoseId, missingCustomCostumeMessage, missingCustomPoseMessage } from "./custom.mjs"
 import { costumeFile, fetchCostumeBytes, getCostume } from "./costumes.mjs"
+import { faceFile, fetchFaceBytes, getFace } from "./faces.mjs"
 import { assertBaseURL, defaultModel, generateImage } from "./generate.mjs"
 import { fetchPoseBytes } from "./poses.mjs"
 import { composePrompt } from "./prompt.mjs"
@@ -180,6 +181,22 @@ async function costumeReferences(plan, fetchCostume) {
   return [await modelImage(await fetchCostume(costumeFile(plan.costume, "preview")))]
 }
 
+function planFace(faceId) {
+  if (!faceId) return null
+  const face = getFace(faceId)
+  if (!face) throw new Error(`找不到脸部参考 ${faceId}`)
+  return face
+}
+
+async function faceReferences(plan, fetchFace) {
+  if (!plan.face) return []
+  return [await modelImage(await fetchFace(faceFile(plan.face, "full")))]
+}
+
+export function referenceImages({ characterImages, faceImages = [], costumeImages = [], poseImages = [] }) {
+  return [...characterImages, ...faceImages, ...costumeImages, ...poseImages]
+}
+
 export function planRequest(input = {}) {
   const provider = input.provider === "openai" || input.provider === "gemini" || input.provider === "seedream" ? input.provider : null
   if (!provider) throw new Error("不支持的生图接口")
@@ -199,20 +216,24 @@ export function planRequest(input = {}) {
   const character = characterCount > 0 ? characterFromUploads(characterCount) : characterForBuiltin(builtinModelId)
   const costumeId = typeof input.costumeId === "string" ? input.costumeId.trim() : ""
   const costume = planCostume(costumeId, input)
+  const faceId = typeof input.faceId === "string" ? input.faceId.trim() : ""
+  const face = planFace(faceId)
   if (input.engine === "comfyui" && items.length === 0) items.push({ viewId: "outfit", title: "仅换装", pose: null })
   const keepOutfit = costume ? false : input.keepOutfit !== false
   const extraPrompt = typeof input.extraPrompt === "string" ? input.extraPrompt.replace(/[^\S\n]+/g, " ").trim().slice(0, 2000) : ""
   const aspectRatio = ASPECTS.has(input.aspectRatio) ? input.aspectRatio : "3:4"
   const costumePrompt = costume ? { id: costume.id, keywords: costume.keywords } : null
-  let sheetPrompt = composePrompt({ character, poses: items.map((item) => item.pose).filter(Boolean), extraPrompt, keepOutfit, mode: "sheet", costume: costumePrompt })
+  const facePrompt = face ? { id: face.id, section: face.section, hair: face.hair, label: face.label, keywords: face.keywords } : null
+  const promptInput = { character, extraPrompt, keepOutfit, costume: costumePrompt, face: facePrompt, characterCount: characterCount || 1 }
+  let sheetPrompt = composePrompt({ ...promptInput, poses: items.map((item) => item.pose).filter(Boolean), mode: "sheet" })
   for (const item of items) {
     item.prompt = mode === "sheet"
       ? sheetPrompt
-      : composePrompt({ character, poses: [item.pose].filter(Boolean), extraPrompt, keepOutfit, mode: "each", costume: costumePrompt })
+      : composePrompt({ ...promptInput, poses: [item.pose].filter(Boolean), mode: "each" })
   }
   if (input.engine === "comfyui") {
     for (const item of items) {
-      const p = localPrompts({ pose: item.pose, costume, extraPrompt, characterCount: characterCount || 1, keepOutfit })
+      const p = localPrompts({ pose: item.pose, costume, face: facePrompt, extraPrompt, characterCount: characterCount || 1, keepOutfit })
       item.prompt = item.pose ? p.scaffold + "\n\n" + p.final : p.outfit
     }
     sheetPrompt = items.map((item, index) => `${index + 1}. ${item.prompt}`).join("\n\n")
@@ -231,6 +252,7 @@ export function planRequest(input = {}) {
     character,
     builtinModelId,
     costume,
+    face,
     items,
     uploads,
     extraPrompt,
@@ -262,7 +284,9 @@ export async function runGeneration(input, deps = {}) {
   const generate = deps.generate ?? generateImage
   const characterImages = await resolveCharacterImages(plan)
   const fetchCostume = deps.fetchCostume ?? fetchCostumeBytes
+  const fetchFace = deps.fetchFace ?? fetchFaceBytes
   const costumeImages = await costumeReferences(plan, fetchCostume)
+  const faceImages = await faceReferences(plan, fetchFace)
   const signal = deps.signal
   if (plan.mode === "sheet") {
     const poseImages = []
@@ -273,7 +297,7 @@ export async function runGeneration(input, deps = {}) {
       baseURL: plan.baseURL,
       model: plan.model,
       prompt: plan.sheetPrompt,
-      images: [...characterImages, ...costumeImages, ...poseImages],
+      images: referenceImages({ characterImages, faceImages, costumeImages, poseImages }),
       aspectRatio: plan.aspectRatio,
       signal,
     })
@@ -301,7 +325,7 @@ export async function runGeneration(input, deps = {}) {
         baseURL: plan.baseURL,
         model: plan.model,
         prompt: item.prompt,
-        images: [...characterImages, ...costumeImages, poseImage],
+        images: referenceImages({ characterImages, faceImages, costumeImages, poseImages: [poseImage] }),
         aspectRatio: plan.aspectRatio,
         signal,
       })
@@ -343,6 +367,7 @@ async function runLocalGeneration(plan, deps) {
   const cached = sheetCache.get(key)?.cells
   const characters = await resolveCharacterImages(plan)
   const garments = await costumeReferences(plan, deps.fetchCostume ?? fetchCostumeBytes)
+  const faces = await faceReferences(plan, deps.fetchFace ?? fetchFaceBytes)
   const generate = deps.generateLocal ?? generateLocal
   const results = []
   const images = []
@@ -350,7 +375,7 @@ async function runLocalGeneration(plan, deps) {
     deps.signal?.throwIfAborted()
     try {
       const poseImage = item.pose ? await poseReference(item, deps.fetchPose ?? fetchPoseBytes) : undefined
-      const image = cached?.get(item.viewId) ?? await generate({ characters, garment: garments[0], poseImage, pose: item.pose, costume: plan.costume, aspectRatio: plan.aspectRatio, extraPrompt: plan.extraPrompt, keepOutfit: plan.keepOutfit, signal: deps.signal })
+      const image = cached?.get(item.viewId) ?? await generate({ characters, garment: garments[0], poseImage, faceImage: faces[0], pose: item.pose, costume: plan.costume, face: plan.face, aspectRatio: plan.aspectRatio, extraPrompt: plan.extraPrompt, keepOutfit: plan.keepOutfit, signal: deps.signal })
       cached?.set(item.viewId, image)
       images.push(image)
       results.push({ viewId: item.viewId, title: item.title, prompt: item.prompt, ok: true, mediaType: image.mediaType, imageBase64: image.buffer.toString("base64"), referencesSent: true })

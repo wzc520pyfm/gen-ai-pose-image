@@ -12,6 +12,8 @@ DeepSeek Harness 插件，也是一个可以单独打开的姿势工作室。从
 
 服装来自 [ギア](https://x.com/giaaibusi) 的 [衣装集 COSTUME-DB-01](https://ai-costume-gallery.pages.dev/)，共 1407 套，图里没有人物。页面按需读取该站点的缩略图，本仓库只保存编号和关键词。选中一套之后，生图会换成这身衣服，并保留角色的脸、发型、鲸耳和鲸尾。内衣、泳装和性感分类跟成人向姿势共用同一个开关。
 
+脸部参考同样来自 [ギア](https://x.com/giaaibusi) 的 [AI 模型脸数据库](https://ai-portrait-gallery.pages.dev/)，共 1499 张，许可是 CC0。分区是脸部特写和造型，可以按发长筛选。中文分区和造型名参考 [sleepy-zone/ai-ref-library-cn](https://github.com/sleepy-zone/ai-ref-library-cn)，图像作者仍是ギア。本仓库只保存编号、标签和公开图地址，缩略图和原图按需从原站读取。选中一张之后，生图把它当作脸部和表情参考：五官、表情、脸型和发型跟这张图，姿势和服装仍按各自的参考，鲸耳和鲸尾保留。脸库没有单独的成人向分类。
+
 ## 效果
 
 同一套站立姿势「站立・对立式平衡・手扶腰」。第一张保持女仆装，第二张换成衣装集 SPR-0001。
@@ -50,13 +52,14 @@ npm run dev
 
 1. 在中间点选姿势，可以多选。标准全身是默认页；性感系和双人姿势需要明确打开「成人向」。
 2. 切到「服装」可以单选一套衣服。春夏秋冬和派对默认可见；内衣、泳装、性感需要打开「成人向」。
-3. 左侧可以导入其他模特，或继续用大肥鱼。选了服装之后，「保持服装」会暂时让位给这套衣服。
-4. 右上角「生图设置」里填写 Gemini 或 OpenAI 兼容接口的密钥。密钥只留在这台浏览器里。
-5. 没有密钥时，右侧仍会写出每一张图的提示词，可以复制到已安装的 `dsh-image-gen` 里生图。选了服装时，参考图顺序是角色、没有人物的衣服、姿势线稿。
-6. 姿势和服装页都有「自定义」。可以上传参考图，也可以写一句描述，让当前接口把描述扩写成提示词再生成参考图。姿势参考偏向线稿，服装参考是没有人物的平铺。没有密钥或文本接口不可用时，会在本地扩写，提示词仍可复制。自定义内容只存在这台浏览器里。
-7. 出图成功后会出现在右侧「历史」。刷新后还在。点开可以看当时的参数，「再用」会恢复姿势、服装和补充描述，然后再出图。可以删除一条，或清空全部。存储快满时会提示清理。
+3. 切到「脸部」可以单选一张脸部参考。可以按脸部特写或造型、发长筛选，也可以搜索编号和造型名，或点「随机一张」。不选则保持角色原来的脸。
+4. 左侧可以导入其他模特，或继续用大肥鱼。选了服装之后，「保持服装」会暂时让位给这套衣服。选了脸部之后，五官、表情和发型改用这张参考。
+5. 右上角「生图设置」里填写 Gemini 或 OpenAI 兼容接口的密钥。密钥只留在这台浏览器里。
+6. 没有密钥时，右侧仍会写出每一张图的提示词，可以复制到已安装的 `dsh-image-gen` 里生图。参考图顺序是角色、可选的脸部参考、可选的没有人物的衣服、姿势线稿。
+7. 姿势和服装页都有「自定义」。可以上传参考图，也可以写一句描述，让当前接口把描述扩写成提示词再生成参考图。姿势参考偏向线稿，服装参考是没有人物的平铺。没有密钥或文本接口不可用时，会在本地扩写，提示词仍可复制。自定义内容只存在这台浏览器里。
+8. 出图成功后会出现在右侧「历史」。刷新后还在。点开可以看当时的参数，「再用」会恢复姿势、服装、脸部和补充描述，然后再出图。可以删除一条，或清空全部。存储快满时会提示清理。
 
-Seedream 走火山方舟 `https://ark.cn-beijing.volces.com/api/v3`，默认模型 `doubao-seedream-5-0-flash-260915`，会把模特图、可选的服装图和姿势线稿一起提交。Gemini 默认模型是 `gemini-2.5-flash-image`。OpenAI 兼容接口会先走 `images/edits`；接口不支持编辑时，会退回纯文生图，并在结果上说明参考图没有送出。
+Seedream 走火山方舟 `https://ark.cn-beijing.volces.com/api/v3`，默认模型 `doubao-seedream-5-0-flash-260915`，会按同一顺序提交参考图：模特图、可选的脸部原图、可选的服装图、姿势线稿。Gemini 把同一组图放进 `generateContent` 的 inline data。OpenAI 兼容接口会先走 `images/edits`，按同样顺序附加 `image` 字段；接口不支持编辑时，会退回纯文生图，并在结果上说明参考图没有送出。Gemini 默认模型是 `gemini-2.5-flash-image`。
 
 服务器若已配置密钥，可以不把密钥放进浏览器：
 
@@ -80,8 +83,8 @@ dsh plugin --profile web add gen-ai-pose-image
 
 重启对应 profile 后：
 
-- 左侧栏多一项「澜姿 / 工作室」，和「插件」「自动化任务」排在一起。点开后是完整工作室，可以选姿势、换服装、换模特并生图。
-- Agent 可以使用 `search_poses`、`search_costumes` 和 `generate_pose_images`。换装时把服装编号传给 `costume_id`。工作室打开后，自定义姿势和服装也会出现在搜索里，并标成 `source: custom`。`generate_pose_images` 可以传这些 id。如果这台机器上还没有对应的参考图，工具会说明需要先在工作室上传或生成，不会换成图库里的别的姿势或服装。
+- 左侧栏多一项「澜姿 / 工作室」，和「插件」「自动化任务」排在一起。点开后是完整工作室，可以选姿势、换服装、换脸部参考、换模特并生图。
+- Agent 可以使用 `search_poses`、`search_costumes`、`search_faces` 和 `generate_pose_images`。换装时把服装编号传给 `costume_id`。换脸或表情时把脸部编号传给 `face_id`。工作室打开后，自定义姿势和服装也会出现在搜索里，并标成 `source: custom`。`generate_pose_images` 可以传这些 id。如果这台机器上还没有对应的参考图，工具会说明需要先在工作室上传或生成，不会换成图库里的别的姿势或服装。脸部参考没有自定义项，生成时从原站读取原图。
 - 给进程设置 `POSE_MUSE_API_KEY` 后，工具会直接出图并挂到会话里。没有密钥时，工具返回写好的提示词，方便交给 `dsh-image-gen` 的 `generate_image` / `edit_image`。
 
 成人向姿势和成人向服装默认不进搜索结果。只有明确要求时才给 `search_poses` 或 `search_costumes` 传 `include_adult: true`。
@@ -101,5 +104,6 @@ npm run typecheck
 
 - 姿势线稿和原始数据的著作权归 [ギア](https://x.com/giaaibusi)。作品是 [AI Pose Gallery](https://ai-pose-gallery.pages.dev/)；中文译名由 [Anhao](https://github.com/anhao) 维护在 [ai-pose-gallery-zh](https://github.com/anhao/ai-pose-gallery-zh)，图床是 [ai-pose-gallery.anhao.app](https://ai-pose-gallery.anhao.app)。上游说明这些图不得用于商业用途。
 - 服装图同样来自 [ギア](https://x.com/giaaibusi) 的 [衣装集 COSTUME-DB-01](https://ai-costume-gallery.pages.dev/)。仓库里只有编号和关键词。
+- 脸部参考图来自 [ギア](https://x.com/giaaibusi) 的 [AI 模型脸数据库](https://ai-portrait-gallery.pages.dev/)，许可是 CC0。仓库里只有编号、分区、发长、造型名和公开图地址。中文目录参考 [sleepy-zone/ai-ref-library-cn](https://github.com/sleepy-zone/ai-ref-library-cn)，不表示图像作者改成了该仓库的维护者。
 - [大肥鱼](https://github.com/TreapGoGo/deepseek-whale-girl) 设定图的作者是 [TreapGoGo](https://github.com/TreapGoGo)，版权所有 (c) 2026 TreapGoGo，按该仓库的 MIT 许可使用。这是社区形象，不代表深度求索。
 - [DeepSeek](https://www.deepseek.com/) 是深度求索的商标。这份许可不授予该商标。

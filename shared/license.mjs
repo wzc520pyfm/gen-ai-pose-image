@@ -16,6 +16,16 @@ export const THIRD_PARTY_NOTICES = [
     terms: "线稿和原始日文数据的著作权归ギア所有。Anhao 维护中文译名。该仓库的 MIT 许可只覆盖它自己的页面和脚本，不覆盖 img/、thumbs/ 与原始数据，上游也说明这些素材不得用于商业用途。把名称和地址收进澜姿，并不把原图的权利转成我们的 MIT 许可。",
   },
   {
+    id: "faces",
+    title: "脸部与表情参考",
+    holder: "ギア",
+    source: "https://github.com/sleepy-zone/ai-ref-library-cn",
+    upstream: "https://ai-portrait-gallery.pages.dev/",
+    author: "https://x.com/giaaibusi",
+    included: "本仓库只保存 1499 张脸部参考的编号、分区、发长、中日文造型名和公开图地址，不附带图片文件。页面按需读取 https://ai-portrait-gallery.pages.dev/ 的缩略图和原图。",
+    terms: "脸部图片由ギア以 CC0 发布。sleepy-zone/ai-ref-library-cn 只提供中文检索目录和分区译名，图像作者仍是ギア。把编号和地址收进澜姿，并不把原图的权利转成我们的 MIT 许可。",
+  },
+  {
     id: "costumes",
     title: "衣装集",
     holder: "ギア",
