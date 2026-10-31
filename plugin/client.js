@@ -10254,17 +10254,25 @@ function isStorageHigh(usage, quota, threshold = 0.8) {
   return used / cap >= threshold;
 }
 var POSE_STYLE_LOCK = "严格模仿参考图的线稿风格与人偶质感，只按描述改姿态。";
-var COSTUME_STYLE_LOCK = "严格模仿参考图的平铺商品图风格，只按描述改衣服。";
-function expandReferencePrompt({ kind = "pose", userPrompt = "", adult = false } = {}) {
+var COSTUME_STYLE_SHARED = "严格模仿参考图的构图、取景、机位距离、光线和地面柔和棚拍阴影。只画用户写到的衣物，不要照抄参考图里多出来的单件。未描述时严禁丝袜、连裤袜、黑丝、打底裤。没有提到的包、鞋、外套都不要添加。描述到的衣服要有穿上身后的立体体积，不要飘着的散件，不要平铺。描述里有鞋才把鞋穿在脚下，有包或配饰才佩戴或拿着。若有帽子，帽子与领口之间必须留出明显的空白，帽子悬在领口上方，不能贴在衣领上。";
+function costumeStyleLock(sensitivePromptOptimize = false) {
+  if (sensitivePromptOptimize === true) {
+    return `${COSTUME_STYLE_SHARED}画面里只有衣服，头部、脸部、手部和腿部不出现。裙子和袜子之间用衣物挡住，不要露出肢体。`;
+  }
+  return `${COSTUME_STYLE_SHARED}不要人，不要头，不要脸，不要手，不要腿，不要身体，不要皮肤。裙子和袜子之间不能露出腿或皮肤，必须用衣物挡住。`;
+}
+var COSTUME_STYLE_LOCK = costumeStyleLock(false);
+function expandReferencePrompt({ kind = "pose", userPrompt = "", adult = false, sensitivePromptOptimize = false } = {}) {
   const note = String(userPrompt ?? "").trim().slice(0, 2e3);
-  const safe = adult ? "" : "画面保持非露骨：不要裸体，不要内衣，不要性暗示。";
+  const safe = adult ? "" : "保持日常、得体、可公开展示的画面。";
+  const optimize = sensitivePromptOptimize === true;
   if (kind === "costume") {
     return [
-      "白底服装平铺参考图，只有衣服，没有人物，没有人台，没有假人，没有身体，商品摄影，光线均匀。",
-      COSTUME_STYLE_LOCK,
+      "服装参考图是隐形人穿着的造型。照着参考图的构图、取景、机位距离、光线和地面柔和棚拍阴影，只画用户写到的衣物。",
+      costumeStyleLock(optimize),
       safe,
-      note ? `服装描述：${note}` : "一套完整的日常外衣，包含上衣和下装，剪裁清楚。",
-      "不要文字，不要水印，不要人脸。"
+      note ? `服装描述：${note}` : "只画一件日常上衣，像已经穿好。不要自行添加袜子、鞋或包。",
+      "不要文字，不要水印。"
     ].filter(Boolean).join("\n");
   }
   return [
@@ -10467,16 +10475,17 @@ function messageForStatus(status, bodyText, fallback2) {
 }
 
 // lib/reference-client.ts
-function fallback(kind, userPrompt, adult, notice) {
+function fallback(kind, userPrompt, adult, sensitivePromptOptimize, notice) {
   return {
-    prompt: expandReferencePrompt({ kind, userPrompt, adult }),
+    prompt: expandReferencePrompt({ kind, userPrompt, adult, sensitivePromptOptimize }),
     source: "template",
     notice
   };
 }
 async function requestBeautify(basePath, settings, input) {
+  const optimize = input.sensitivePromptOptimize === true;
   if (!input.hasKey) {
-    return fallback(input.kind, input.userPrompt, input.adult, "没有密钥，已在本地扩写。提示词可以复制。");
+    return fallback(input.kind, input.userPrompt, input.adult, optimize, "没有密钥，已在本地扩写。提示词可以复制。");
   }
   try {
     const response = await fetch(studioUrl(basePath, "/api/beautify"), {
@@ -10489,12 +10498,13 @@ async function requestBeautify(basePath, settings, input) {
         textModel: settings.textModel,
         kind: input.kind,
         userPrompt: input.userPrompt,
-        adult: input.adult
+        adult: input.adult,
+        sensitivePromptOptimize: optimize
       })
     });
     const payload = await response.json();
     if (!response.ok || typeof payload.prompt !== "string" || payload.prompt.trim() === "") {
-      return fallback(input.kind, input.userPrompt, input.adult, payload.error || "文本接口不可用，已改用本地扩写。");
+      return fallback(input.kind, input.userPrompt, input.adult, optimize, payload.error || "文本接口不可用，已改用本地扩写。");
     }
     return {
       prompt: payload.prompt,
@@ -10502,7 +10512,7 @@ async function requestBeautify(basePath, settings, input) {
       notice: typeof payload.notice === "string" ? payload.notice : ""
     };
   } catch {
-    return fallback(input.kind, input.userPrompt, input.adult, "文本接口不可用，已改用本地扩写。");
+    return fallback(input.kind, input.userPrompt, input.adult, optimize, "文本接口不可用，已改用本地扩写。");
   }
 }
 async function requestReferenceImage(basePath, settings, prompt, kind) {
@@ -10516,7 +10526,8 @@ async function requestReferenceImage(basePath, settings, prompt, kind) {
       model: settings.model,
       aspectRatio: settings.aspectRatio,
       kind,
-      prompt
+      prompt,
+      sensitivePromptOptimize: settings.sensitivePromptOptimize === true
     })
   });
   const text = await response.text();
@@ -10545,7 +10556,8 @@ function CustomReferencePanel({
   onRequestAdult,
   settings,
   hasKey,
-  syncWarning
+  syncWarning,
+  onChangeSettings
 }) {
   const { basePath } = useStudioEnv();
   const fileRef = (0, import_react9.useRef)(null);
@@ -10585,14 +10597,15 @@ function CustomReferencePanel({
     setError("");
     setBusy("");
   }
-  async function fillPrompt(userPrompt, allowAdult) {
+  async function fillPrompt(userPrompt, allowAdult, optimize = settings.sensitivePromptOptimize) {
     setBusy("正在扩写提示词");
     setError("");
     const result = await requestBeautify(basePath, settings, {
       kind,
       userPrompt,
       adult: allowAdult,
-      hasKey
+      hasKey,
+      sensitivePromptOptimize: optimize
     });
     if (!editedRef.current) {
       setPrompt(result.prompt);
@@ -10670,7 +10683,7 @@ function CustomReferencePanel({
     }
   }
   return /* @__PURE__ */ (0, import_jsx_runtime25.jsxs)("div", { children: [
-    /* @__PURE__ */ (0, import_jsx_runtime25.jsx)("p", { className: "mb-3 text-sm leading-6 text-muted-foreground", children: kind === "pose" ? "自定义姿势只存在这台浏览器。上传或生成的图会当作姿势参考，出图顺序仍是角色、服装、姿势。" : "自定义服装只存在这台浏览器。生成时会偏向没有人物的平铺衣服。" }),
+    /* @__PURE__ */ (0, import_jsx_runtime25.jsx)("p", { className: "mb-3 text-sm leading-6 text-muted-foreground", children: kind === "pose" ? "自定义姿势只存在这台浏览器。上传或生成的图会当作姿势参考，出图顺序仍是角色、服装、姿势。" : "自定义服装只存在这台浏览器。生成时会做成隐形人穿着的成套衣服，没有头和手。" }),
     /* @__PURE__ */ (0, import_jsx_runtime25.jsxs)("div", { className: "mb-3 flex flex-wrap gap-2", children: [
       /* @__PURE__ */ (0, import_jsx_runtime25.jsx)(Button3, { type: "button", variant: "outline", size: "sm", onClick: () => openDialog("upload"), children: "上传" }),
       /* @__PURE__ */ (0, import_jsx_runtime25.jsx)(Button3, { type: "button", variant: "outline", size: "sm", onClick: () => openDialog("freeform"), children: "自由生成" }),
@@ -10731,7 +10744,7 @@ function CustomReferencePanel({
     /* @__PURE__ */ (0, import_jsx_runtime25.jsx)(Dialog, { open: open3, onOpenChange: setOpen, children: /* @__PURE__ */ (0, import_jsx_runtime25.jsxs)(DialogContent, { className: "max-h-[min(85dvh,85%)] max-w-[min(32rem,calc(100%-2rem))] overflow-y-auto", children: [
       /* @__PURE__ */ (0, import_jsx_runtime25.jsxs)(DialogHeader, { children: [
         /* @__PURE__ */ (0, import_jsx_runtime25.jsx)(DialogTitle3, { children: mode === "upload" ? `上传自定义${noun}` : mode === "freeform" ? `自由生成${noun}参考` : `按描述生成${noun}参考` }),
-        /* @__PURE__ */ (0, import_jsx_runtime25.jsx)(DialogDescription3, { children: kind === "pose" ? "姿势参考偏向白底线稿，只表达身体姿态。确认之后才会放进自定义库。" : "服装参考偏向没有人物的平铺衣服。确认之后才会放进自定义库。" })
+        /* @__PURE__ */ (0, import_jsx_runtime25.jsx)(DialogDescription3, { children: kind === "pose" ? "姿势参考偏向白底线稿，只表达身体姿态。确认之后才会放进自定义库。" : "服装参考偏向隐形穿着的成套造型，没有头、手和皮肤。确认之后才会放进自定义库。" })
       ] }),
       mode === "upload" ? /* @__PURE__ */ (0, import_jsx_runtime25.jsxs)("div", { className: "grid gap-2", children: [
         /* @__PURE__ */ (0, import_jsx_runtime25.jsx)(
@@ -10789,6 +10802,23 @@ function CustomReferencePanel({
         )
       ] }) : null,
       notice ? /* @__PURE__ */ (0, import_jsx_runtime25.jsx)("p", { className: "text-xs leading-5 text-muted-foreground", children: notice }) : null,
+      kind === "costume" && onChangeSettings ? /* @__PURE__ */ (0, import_jsx_runtime25.jsxs)("label", { className: "flex items-center justify-between gap-3 rounded-xl bg-muted px-3 py-3 text-sm", children: [
+        /* @__PURE__ */ (0, import_jsx_runtime25.jsxs)("span", { children: [
+          /* @__PURE__ */ (0, import_jsx_runtime25.jsx)("span", { className: "block font-medium", children: "违禁词优化" }),
+          /* @__PURE__ */ (0, import_jsx_runtime25.jsx)("span", { className: "mt-1 block text-xs leading-5 text-muted-foreground", children: "关闭时直接禁止人、腿和皮肤，并要求帽子悬在领口上方。打开后改成委婉说法，避开审核敏感词。切换后会按当前描述重新扩写。" })
+        ] }),
+        /* @__PURE__ */ (0, import_jsx_runtime25.jsx)(
+          Switch,
+          {
+            checked: settings.sensitivePromptOptimize,
+            onCheckedChange: (value) => {
+              onChangeSettings({ ...settings, sensitivePromptOptimize: value });
+              if (mode !== "upload" && !editedRef.current) void fillPrompt(description, showAdult && adult, value);
+            },
+            "aria-label": "违禁词优化"
+          }
+        )
+      ] }) : null,
       showAdult ? /* @__PURE__ */ (0, import_jsx_runtime25.jsxs)("label", { className: "flex items-center justify-between gap-3 rounded-xl bg-muted px-3 py-3 text-sm", children: [
         /* @__PURE__ */ (0, import_jsx_runtime25.jsx)("span", { children: "标成成人向参考。默认关闭，未打开成人向时不会用来出图。" }),
         /* @__PURE__ */ (0, import_jsx_runtime25.jsx)(
@@ -10836,7 +10866,8 @@ function CostumeBrowser({
   onDeleteCustom,
   settings,
   hasKey,
-  syncWarning
+  syncWarning,
+  onChangeSettings
 }) {
   const { basePath } = useStudioEnv();
   const [catalog, setCatalog] = (0, import_react10.useState)(null);
@@ -10951,7 +10982,8 @@ function CostumeBrowser({
           onRequestAdult: () => onRequestAdult("custom"),
           settings,
           hasKey,
-          syncWarning
+          syncWarning,
+          onChangeSettings
         }
       ) : null,
       !customSection && !catalog && !error ? /* @__PURE__ */ (0, import_jsx_runtime26.jsx)("div", { className: "grid grid-cols-2 gap-3 @min-[640px]/studio:grid-cols-3 @min-[1280px]/studio:grid-cols-4 @min-[1536px]/studio:grid-cols-5", children: Array.from({ length: 8 }, (_, index) => /* @__PURE__ */ (0, import_jsx_runtime26.jsx)("div", { className: "aspect-[2/3] animate-pulse rounded-2xl bg-muted" }, index)) }) : null,
@@ -11392,7 +11424,8 @@ var DEFAULT_SETTINGS = {
   aspectRatio: "3:4",
   keepOutfit: true,
   mode: "each",
-  showAdult: false
+  showAdult: false,
+  sensitivePromptOptimize: false
 };
 var KEY = "lanpose-settings-v1";
 function loadSettings() {
@@ -11414,7 +11447,8 @@ function loadSettings() {
       aspectRatio,
       keepOutfit: parsed.keepOutfit !== false,
       mode: parsed.mode === "sheet" ? "sheet" : "each",
-      showAdult: parsed.showAdult === true
+      showAdult: parsed.showAdult === true,
+      sensitivePromptOptimize: parsed.sensitivePromptOptimize === true
     };
   } catch {
     return DEFAULT_SETTINGS;
@@ -11535,6 +11569,13 @@ function SettingsDialog({
       /* @__PURE__ */ (0, import_jsx_runtime29.jsxs)("div", { className: "grid grid-cols-2 gap-2", children: [
         /* @__PURE__ */ (0, import_jsx_runtime29.jsx)(Button3, { variant: settings.mode === "each" ? "default" : "outline", onClick: () => patch({ mode: "each" }), children: "逐张" }),
         /* @__PURE__ */ (0, import_jsx_runtime29.jsx)(Button3, { variant: settings.mode === "sheet" ? "default" : "outline", onClick: () => patch({ mode: "sheet" }), children: "拼成一张" })
+      ] }),
+      /* @__PURE__ */ (0, import_jsx_runtime29.jsxs)("label", { className: "flex items-center justify-between gap-3 rounded-xl bg-muted px-3 py-3 text-sm", children: [
+        /* @__PURE__ */ (0, import_jsx_runtime29.jsxs)("span", { children: [
+          /* @__PURE__ */ (0, import_jsx_runtime29.jsx)("span", { className: "block font-medium", children: "违禁词优化" }),
+          /* @__PURE__ */ (0, import_jsx_runtime29.jsx)("span", { className: "mt-1 block text-xs leading-5 text-muted-foreground", children: "关闭时直接写不要人、不要腿、不要皮肤，并要求帽子悬在领口上方。画质更好，但 Seedream 可能返回 400。打开后改成委婉说法，避开审核敏感词。" })
+        ] }),
+        /* @__PURE__ */ (0, import_jsx_runtime29.jsx)(Switch, { checked: settings.sensitivePromptOptimize, onCheckedChange: (value) => patch({ sensitivePromptOptimize: value }), "aria-label": "违禁词优化" })
       ] }),
       /* @__PURE__ */ (0, import_jsx_runtime29.jsxs)("label", { className: "flex items-center justify-between gap-3 rounded-xl bg-muted px-3 py-3 text-sm", children: [
         /* @__PURE__ */ (0, import_jsx_runtime29.jsxs)("span", { children: [
@@ -12512,7 +12553,8 @@ function StudioFrame({ embedded }) {
           onDeleteCustom: (id) => void removeCustomCostume(id),
           settings,
           hasKey: Boolean(settings.apiKey.trim()) || serverKey,
-          syncWarning
+          syncWarning,
+          onChangeSettings: updateSettings
         }
       ) }),
       /* @__PURE__ */ (0, import_jsx_runtime32.jsx)("aside", { className: "hidden min-h-0 border-l bg-white px-4 py-5 @min-[1024px]/studio:block @min-[1024px]/studio:overflow-y-auto", children: composer })
