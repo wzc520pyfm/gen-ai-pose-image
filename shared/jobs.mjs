@@ -191,7 +191,19 @@ function planFace(faceId) {
 
 async function faceReferences(plan, fetchFace) {
   if (!plan.face) return []
-  return [await modelImage(await fetchFace(faceFile(plan.face, "full")))]
+  return [await compressFaceReference(await modelImage(await fetchFace(faceFile(plan.face, "full"))))]
+}
+
+/** Face originals are ~2MB PNGs. JPEG at the same pixel size uploads faster and gives Seedream less to decode. */
+export async function compressFaceReference(image) {
+  const { default: sharp } = await import("sharp")
+  const buffer = await sharp(image.buffer, { limitInputPixels: 40_000_000 })
+    .rotate()
+    .resize({ width: 1536, height: 1536, fit: "inside", withoutEnlargement: true })
+    .jpeg({ quality: 90 })
+    .toBuffer()
+  if (!buffer || buffer.byteLength < 32) throw new Error("脸部图压缩失败")
+  return { mediaType: "image/jpeg", buffer, role: "face" }
 }
 
 export function referenceImages({ characterImages, faceImages = [], costumeImages = [], poseImages = [] }) {
@@ -296,14 +308,14 @@ export async function runGeneration(input, deps = {}) {
   const plan = planRequest(input)
   if (plan.engine === "comfyui") return runLocalGeneration(plan, deps)
   if (!plan.apiKey) throw new Error("还没有填写 API Key。可以先在右侧看提示词，或到设置里填入 Seedream、Gemini 或 OpenAI 兼容接口的密钥。")
+  const signal = deps.signal
   const fetchPose = deps.fetchPose ?? fetchPoseBytes
   const generate = deps.generate ?? generateImage
   const characterImages = await resolveCharacterImages(plan)
   const fetchCostume = deps.fetchCostume ?? fetchCostumeBytes
-  const fetchFace = deps.fetchFace ?? fetchFaceBytes
+  const fetchFace = deps.fetchFace ?? ((path) => fetchFaceBytes(path, fetch, signal))
   const costumeImages = await costumeReferences(plan, fetchCostume)
   const faceImages = await faceReferences(plan, fetchFace)
-  const signal = deps.signal
   if (plan.mode === "sheet") {
     const poseImages = []
     for (const item of plan.items) poseImages.push(await poseReference(item, fetchPose))
@@ -383,7 +395,7 @@ async function runLocalGeneration(plan, deps) {
   const cached = sheetCache.get(key)?.cells
   const characters = await resolveCharacterImages(plan)
   const garments = await costumeReferences(plan, deps.fetchCostume ?? fetchCostumeBytes)
-  const faces = await faceReferences(plan, deps.fetchFace ?? fetchFaceBytes)
+  const faces = await faceReferences(plan, deps.fetchFace ?? ((path) => fetchFaceBytes(path, fetch, deps.signal)))
   const generate = deps.generateLocal ?? generateLocal
   const results = []
   const images = []

@@ -4,7 +4,8 @@ import { test } from "node:test"
 import { buildLocalGraph, localPrompts } from "./comfyui.mjs"
 import { DEFAULT_CHARACTER } from "./character.mjs"
 import { fetchFaceBytes, getFace, getFaceCatalog, isSafeFacePath, searchFaces } from "./faces.mjs"
-import { planRequest, referenceImages, runGeneration } from "./jobs.mjs"
+import { generateImage, generationTimeoutMs, FACE_GENERATION_TIMEOUT_MS, DEFAULT_GENERATION_TIMEOUT_MS } from "./generate.mjs"
+import { compressFaceReference, planRequest, referenceImages, runGeneration } from "./jobs.mjs"
 import { NO_MODEL_ID } from "./models.mjs"
 import { licenseNotices } from "./license.mjs"
 import { composePrompt } from "./prompt.mjs"
@@ -194,6 +195,53 @@ test("a face without a character sheet is enough to generate", async () => {
     buildLocalGraph({ files: { characters: [] }, costume: false, pose, aspectRatio: "3:4" }),
     /先选择一位模特，或选一张脸部参考/,
   )
+})
+
+test("a face reference is sent as a smaller jpeg and gets a longer provider budget", async () => {
+  assert.equal(generationTimeoutMs([{ role: "pose" }]), DEFAULT_GENERATION_TIMEOUT_MS)
+  assert.equal(generationTimeoutMs([{ role: "face" }]), FACE_GENERATION_TIMEOUT_MS)
+  assert.equal(generationTimeoutMs([{ role: "face" }], 110000), 110000)
+  const large = await sharp({ create: { width: 1800, height: 2000, channels: 3, background: "red" } }).png().toBuffer()
+  const face = await compressFaceReference({ mediaType: "image/png", buffer: large, role: "face" })
+  assert.equal(face.role, "face")
+  assert.equal(face.mediaType, "image/jpeg")
+  assert.ok(face.buffer.byteLength < large.byteLength)
+  const meta = await sharp(face.buffer).metadata()
+  assert.ok(meta.width <= 1536 && meta.height <= 1536)
+
+  const hang = (_url, init) => new Promise((_resolve, reject) => {
+    const keepAlive = setTimeout(() => {}, 1000)
+    const abort = () => {
+      clearTimeout(keepAlive)
+      const reason = init.signal?.reason
+      reject(reason instanceof Error ? reason : Object.assign(new Error("timeout"), { name: "TimeoutError" }))
+    }
+    if (init.signal?.aborted) abort()
+    else init.signal?.addEventListener("abort", abort, { once: true })
+  })
+  await assert.rejects(generateImage({
+    provider: "seedream",
+    apiKey: "test-key",
+    prompt: "face",
+    images: [{ role: "face", mediaType: "image/jpeg", buffer: face.buffer }],
+    aspectRatio: "3:4",
+    timeoutMs: 40,
+    fetchImpl: hang,
+  }), /生图超时/)
+  const stop = AbortSignal.abort()
+  await assert.rejects(generateImage({
+    provider: "seedream",
+    apiKey: "test-key",
+    prompt: "face",
+    images: [{ role: "face", mediaType: "image/jpeg", buffer: face.buffer }],
+    aspectRatio: "3:4",
+    timeoutMs: 30_000,
+    signal: stop,
+    fetchImpl: hang,
+  }), (error) => {
+    assert.notEqual(error.message, "生图超时。模型这次没有在时限内返回，请再试一次。")
+    return true
+  })
 })
 
 test("face bytes stay remote and license credits ギア under CC0", async () => {
