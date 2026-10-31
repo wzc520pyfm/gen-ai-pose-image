@@ -49,6 +49,8 @@ test("prompt locks the adult default character and the chosen pose", () => {
   assert.match(text, /禁止画成儿童/)
   assert.match(text, /后仰坐・单膝立起/)
   assert.match(text, /必须保留角色参考图中的服装/)
+  assert.match(text, /完整日常外衣/)
+  assert.doesNotMatch(text, /裸体|裸露|内衣|性暗示|色情/)
   const changed = composePrompt({
     character: DEFAULT_CHARACTER,
     poses: [{ name: "双人", category: "贴脸系", system: "双人缠绵", angle: "侧面", people: 2 }],

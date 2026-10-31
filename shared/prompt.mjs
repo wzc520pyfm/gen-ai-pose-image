@@ -54,7 +54,7 @@ function outfitLines({ character, costume, keepOutfit, face }) {
   if (keepOutfit) {
     return face
       ? "必须保留角色参考图中的服装和配饰。脸、表情、发色和发型改用脸部参考，不要照抄角色参考图上的脸。"
-      : "必须保留角色参考图中的服装、发色、发型和配饰。不要换成裸露或内衣，也不要照抄线稿的空白身体。"
+      : "必须保留角色参考图中的服装、发色、发型和配饰。衣服保持参考图里已经穿好的完整日常外衣，不要照抄线稿的空白身体。"
   }
   if (character.id === "dafeiyu") {
     return face

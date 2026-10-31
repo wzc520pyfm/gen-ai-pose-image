@@ -145,6 +145,7 @@ export function createPoseHandler(getConfig) {
             kind,
             userPrompt: typeof body.userPrompt === "string" ? body.userPrompt : "",
             adult: body.adult === true,
+            sensitivePromptOptimize: body.sensitivePromptOptimize === true,
             signal: req.signal,
           })
           return json(res, 200, result)
@@ -165,9 +166,14 @@ export function createPoseHandler(getConfig) {
             model: String(body.model || "").trim() || defaultModel(provider),
             prompt,
             aspectRatio: ASPECTS.has(body.aspectRatio) ? body.aspectRatio : "3:4",
+            sensitivePromptOptimize: body.sensitivePromptOptimize === true,
             signal: req.signal,
           })
-          return json(res, 200, { mediaType: image.mediaType, imageBase64: image.buffer.toString("base64") })
+          return json(res, 200, {
+            mediaType: image.mediaType,
+            imageBase64: image.buffer.toString("base64"),
+            ...(image.warning ? { warning: image.warning } : {}),
+          })
         }
         if (path === "/api/character-sheet") {
           const source = body.image

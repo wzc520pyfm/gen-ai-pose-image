@@ -1,4 +1,5 @@
-import { COSTUME_STYLE_LOCK, POSE_STYLE_LOCK, expandReferencePrompt } from "./custom.mjs"
+import { costumeBeautifyRole } from "./costume-prompt.mjs"
+import { POSE_STYLE_LOCK, expandReferencePrompt } from "./custom.mjs"
 import { defaultBaseURL, redact } from "./generate.mjs"
 
 /** Empty uses the provider default. A filled id is sent as written, even if it looks like an image model. */
@@ -21,19 +22,22 @@ function describedError(payload, status, secret) {
   return redact([code, message].filter(Boolean).join("：") || `文本接口失败（${status}）`, secret)
 }
 
-export function beautifyInstruction({ kind, userPrompt = "", adult = false }) {
+export function beautifyInstruction({ kind, userPrompt = "", adult = false, sensitivePromptOptimize = false } = {}) {
+  const optimize = sensitivePromptOptimize === true
   const role = kind === "costume"
-    ? `你在写服装参考图的文生图提示词。图里只能有衣服，不能有人、人台、假人或身体。${COSTUME_STYLE_LOCK}`
+    ? costumeBeautifyRole(optimize)
     : `你在写姿势参考图的文生图提示词。图应是白底黑色线稿，球关节人偶，只表达成年身体的姿态，不要上色，不要服装设计。${POSE_STYLE_LOCK}`
   const safety = adult
-    ? "用户已打开成人向。可以按描述包含暴露或亲密内容，但人物必须是成年人，禁止未成年人。"
-    : "不要生成露骨内容：不要裸体、内衣、泳装或性暗示。"
+    ? "用户已打开更多描述。按用户描述书写，画面中的角色按成年形象处理。"
+    : kind === "costume"
+      ? "写成日常、得体、可公开展示的画面。只保留用户写到的衣物。"
+      : "写成日常、得体、可公开展示的画面。"
   const note = String(userPrompt).trim()
   return [
     role,
     safety,
     "把简短描述扩写成一段可直接用于文生图的中文提示词。不要解释，不要加标题。",
-    note ? `描述：${note}` : "描述：（用户没有写，请给出一个清楚、普通、非露骨的示例）",
+    note ? `描述：${note}` : "描述：（用户没有写，请给出一个清楚、普通的日常示例）",
   ].join("\n")
 }
 
@@ -128,6 +132,7 @@ export async function beautifyPrompt({
   kind = "pose",
   userPrompt = "",
   adult = false,
+  sensitivePromptOptimize = false,
   fetchImpl = fetch,
   signal,
 } = {}) {
@@ -135,6 +140,7 @@ export async function beautifyPrompt({
     kind: kind === "costume" ? "costume" : "pose",
     userPrompt,
     adult: adult === true,
+    sensitivePromptOptimize: sensitivePromptOptimize === true,
   }
   const key = String(apiKey || "").trim()
   if (!key) return templateResult(input)

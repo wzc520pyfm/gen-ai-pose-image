@@ -1,3 +1,5 @@
+import { costumeVisiblePrompt } from "./costume-prompt.mjs"
+
 export function createCustomId(kind, random = () => globalThis.crypto.randomUUID()) {
   const suffix = String(random())
   return kind === "costume" ? `custom-costume-${suffix}` : `custom-pose-${suffix}`
@@ -67,19 +69,13 @@ export function customCostumeRecord(asset) {
 }
 
 export const POSE_STYLE_LOCK = "严格模仿参考图的线稿风格与人偶质感，只按描述改姿态。"
-export const COSTUME_STYLE_LOCK = "严格模仿参考图的平铺商品图风格，只按描述改衣服。"
 
-export function expandReferencePrompt({ kind = "pose", userPrompt = "", adult = false } = {}) {
+export function expandReferencePrompt({ kind = "pose", userPrompt = "", adult = false, sensitivePromptOptimize = false } = {}) {
   const note = String(userPrompt ?? "").trim().slice(0, 2000)
-  const safe = adult ? "" : "画面保持非露骨：不要裸体，不要内衣，不要性暗示。"
+  const safe = adult ? "" : "保持日常、得体、可公开展示的画面。"
+  const optimize = sensitivePromptOptimize === true
   if (kind === "costume") {
-    return [
-      "白底服装平铺参考图，只有衣服，没有人物，没有人台，没有假人，没有身体，商品摄影，光线均匀。",
-      COSTUME_STYLE_LOCK,
-      safe,
-      note ? `服装描述：${note}` : "一套完整的日常外衣，包含上衣和下装，剪裁清楚。",
-      "不要文字，不要水印，不要人脸。",
-    ].filter(Boolean).join("\n")
+    return costumeVisiblePrompt({ userPrompt: note, adult: adult === true, sensitivePromptOptimize: optimize })
   }
   return [
     "白底单人姿势线稿参考图，黑色干净线条，球关节人偶，全身，只表现身体姿态、重心、四肢和镜头角度。",
