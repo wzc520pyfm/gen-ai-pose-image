@@ -11037,9 +11037,6 @@ function CostumeBrowser({
 // components/face-browser.tsx
 var import_react11 = require("react");
 var import_jsx_runtime27 = require("react/jsx-runtime");
-var AUTHOR_URL2 = "https://x.com/giaaibusi";
-var GALLERY_URL = "https://ai-portrait-gallery.pages.dev/";
-var CATALOG_URL = "https://github.com/sleepy-zone/ai-ref-library-cn";
 function FaceBrowser({
   selectedId,
   onSelect
@@ -11098,18 +11095,6 @@ function FaceBrowser({
   return /* @__PURE__ */ (0, import_jsx_runtime27.jsxs)("section", { children: [
     /* @__PURE__ */ (0, import_jsx_runtime27.jsxs)("div", { className: "sticky top-0 z-10 border-b bg-white/95 px-4 py-3 backdrop-blur @min-[768px]/studio:px-6", children: [
       /* @__PURE__ */ (0, import_jsx_runtime27.jsx)("p", { className: "mb-2 text-sm leading-6 text-muted-foreground", children: "选一张脸部参考。生图会把这张图的五官、表情、脸型和发型用到角色上，姿势和服装仍按各自的参考。鲸耳和鲸尾保留。" }),
-      /* @__PURE__ */ (0, import_jsx_runtime27.jsxs)("p", { className: "mb-2 text-xs leading-5 text-muted-foreground", children: [
-        "图片作者是",
-        " ",
-        /* @__PURE__ */ (0, import_jsx_runtime27.jsx)("a", { className: "text-primary underline-offset-2 hover:underline", href: AUTHOR_URL2, target: "_blank", rel: "noopener noreferrer", children: "ギア" }),
-        "，以 CC0 发布在",
-        " ",
-        /* @__PURE__ */ (0, import_jsx_runtime27.jsx)("a", { className: "text-primary underline-offset-2 hover:underline", href: GALLERY_URL, target: "_blank", rel: "noopener noreferrer", children: "AI 模型脸数据库" }),
-        "。中文分区和造型名参考",
-        " ",
-        /* @__PURE__ */ (0, import_jsx_runtime27.jsx)("a", { className: "text-primary underline-offset-2 hover:underline", href: CATALOG_URL, target: "_blank", rel: "noopener noreferrer", children: "sleepy-zone/ai-ref-library-cn" }),
-        "。本页按需读取原站，不把原图放进仓库。"
-      ] }),
       /* @__PURE__ */ (0, import_jsx_runtime27.jsxs)("div", { className: "mb-2 flex flex-wrap gap-2", children: [
         /* @__PURE__ */ (0, import_jsx_runtime27.jsx)(FilterChip, { active: section === "", onClick: () => setSection(""), label: "全部", count: catalog?.total }),
         catalog?.sections.map((item) => /* @__PURE__ */ (0, import_jsx_runtime27.jsx)(FilterChip, { active: section === item.id, onClick: () => setSection(item.id), label: item.label, count: item.count }, item.id))

@@ -34,10 +34,6 @@ type FaceCatalog = {
   faces: FaceItem[]
 }
 
-const AUTHOR_URL = "https://x.com/giaaibusi"
-const GALLERY_URL = "https://ai-portrait-gallery.pages.dev/"
-const CATALOG_URL = "https://github.com/sleepy-zone/ai-ref-library-cn"
-
 export function FaceBrowser({
   selectedId,
   onSelect,
@@ -111,18 +107,6 @@ export function FaceBrowser({
       <div className="sticky top-0 z-10 border-b bg-white/95 px-4 py-3 backdrop-blur @min-[768px]/studio:px-6">
         <p className="mb-2 text-sm leading-6 text-muted-foreground">
           选一张脸部参考。生图会把这张图的五官、表情、脸型和发型用到角色上，姿势和服装仍按各自的参考。鲸耳和鲸尾保留。
-        </p>
-        <p className="mb-2 text-xs leading-5 text-muted-foreground">
-          图片作者是
-          {" "}
-          <a className="text-primary underline-offset-2 hover:underline" href={AUTHOR_URL} target="_blank" rel="noopener noreferrer">ギア</a>
-          ，以 CC0 发布在
-          {" "}
-          <a className="text-primary underline-offset-2 hover:underline" href={GALLERY_URL} target="_blank" rel="noopener noreferrer">AI 模型脸数据库</a>
-          。中文分区和造型名参考
-          {" "}
-          <a className="text-primary underline-offset-2 hover:underline" href={CATALOG_URL} target="_blank" rel="noopener noreferrer">sleepy-zone/ai-ref-library-cn</a>
-          。本页按需读取原站，不把原图放进仓库。
         </p>
         <div className="mb-2 flex flex-wrap gap-2">
           <FilterChip active={section === ""} onClick={() => setSection("")} label="全部" count={catalog?.total} />
