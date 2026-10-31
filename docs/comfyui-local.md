@@ -60,6 +60,7 @@ comfy.example.com {
             reverse_proxy 127.0.0.1:8188 {
                 header_up -Authorization
                 header_up -Origin
+                header_up -Sec-Fetch-Site
             }
         }
         @write {
@@ -70,12 +71,15 @@ comfy.example.com {
             reverse_proxy 127.0.0.1:8188 {
                 header_up -Authorization
                 header_up -Origin
+                header_up -Sec-Fetch-Site
             }
         }
         respond "Not found" 404
     }
 }
 ```
+
+网关先校验来源、Bearer 令牌和 API 白名单，再清理转发给 ComfyUI 的 `Origin`、`Sec-Fetch-Site` 和令牌头。部分 ComfyUI 版本在未启用自身 CORS 时会拒绝 `Sec-Fetch-Site: cross-site`，因此命令行连接成功仍需实际浏览器验收。不要在没有入口鉴权与来源检查的代理上直接套用这些清理规则。
 
 OPTIONS 不需要令牌，实际 API 请求仍须鉴权。代理校验网站来源后移除上游 Origin，避免 ComfyUI 再次拒绝；CORS 由代理统一处理，ComfyUI 不需要额外启用 CORS。此入口不提供 ComfyUI 编辑器、不开放 `/interrupt`、文件管理等接口，不构成多人任务隔离方案。使用隧道时保留同等鉴权及 CORS 设置，不要只把原始 8188 端口发布出去。
 
