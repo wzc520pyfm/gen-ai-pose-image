@@ -168,6 +168,11 @@ export function supportsCostumeLayerSplit(provider, model) {
   return /seedream-5-0-(?:pro|flash)(?:-|$)/i.test(id)
 }
 
+/** Catalog stance: weight on one leg, a soft arm, clothes that follow the shift. */
+export const COSTUME_POSE_LINE = "站姿要有时装目录的松弛感：重心放在一条腿上，另一只脚微微错开，肩膀放松，一只手臂自然弯曲，手落在身侧。衣服跟着这个姿势垂落，外套和下摆有一点摆动，不要站成双脚并拢、双臂贴身的笔直样子。"
+
+export const COSTUME_POSE_REF_LINE = "参考图只学习站姿、衣服垂坠和棚拍构图。不要照抄参考图里多出来的单件。画面里要有真人的头和身体。"
+
 export function costumeBeautifyRole(sensitivePromptOptimize = false) {
   const direct = sensitivePromptOptimize === true
     ? "用含蓄、可公开展示的说法描写已经穿好衣服的成年模特。"
@@ -175,6 +180,7 @@ export function costumeBeautifyRole(sensitivePromptOptimize = false) {
   return [
     "你在写服装参考图的文生图提示词。画面是一位成年模特穿着用户描述的衣服。",
     "浅灰无缝棚拍，正面全身，脚入镜，地面有柔和阴影。衣服穿在身上，不要摊开平铺。只写用户提到的衣物，不要加丝袜、连裤袜、打底裤，也不要加没写到的鞋、包或外套。帽子戴在头上，帽檐和衣领之间留出头发或额头。",
+    COSTUME_POSE_LINE,
     direct,
     "只写画面，不要写生成步骤。",
   ].join("\n")
@@ -186,6 +192,7 @@ export function costumeVisiblePrompt({ userPrompt = "", adult = false, sensitive
   const optimize = sensitivePromptOptimize === true
   const lines = [
     "浅灰无缝棚拍，正面全身，脚要入镜，地面有柔和阴影。成年模特穿着描述里的衣服，衣服要有立体体积，不要摊开平铺。",
+    COSTUME_POSE_LINE,
     "帽子戴在头上，帽檐和衣领之间留出头发或额头。",
     "只穿描述里写到的衣物。没写到的鞋、包、外套、袜子都不要加，也不要自行加丝袜、连裤袜或打底裤。",
     optimize ? "用日常、含蓄的说法。" : "头、脸、头发和手正常可见。",
@@ -203,6 +210,7 @@ export function costumeWearPrompt({ userPrompt = "", adult = false, sensitivePro
     `${WEAR_MARKER}下一步才会把人抠掉，所以这一步必须有头、有身体。`,
     "如果描述里要求去掉人物，或把帽子悬空、贴在领口上，都不要照做。帽子戴在头上，帽檐和衣领之间要能看到头发或额头。",
     "浅灰无缝棚拍，正面全身，脚要入镜，地面有柔和阴影。衣服穿在身上，要有立体体积，不要摊开平铺。",
+    COSTUME_POSE_LINE,
     "只穿描述里写到的衣物。没写到的鞋、包、外套、袜子都不要加，也不要自行加丝袜、连裤袜或打底裤。",
     optimize
       ? "用日常、含蓄的说法画一位已经穿好衣服的成年模特。"
@@ -232,7 +240,7 @@ export function costumeRemovalPrompt(sensitivePromptOptimize = false) {
   if (sensitivePromptOptimize === true) {
     return [
       "编辑这张已经穿好衣服的全身图。",
-      "去掉人物，只保留身上的衣物，衣物的位置、形状和颜色都不要改。",
+      "去掉人物，只保留身上的衣物，衣物的位置、形状、颜色和垂坠都不要改，站姿不要改直。",
       "头部、头发、脸部、脖子、手部和腿部都去掉，空出来的地方用原来的浅灰棚拍背景补上。",
       "帽子留在原来的高度，头所在的位置留空，不要把帽子移到领口上。",
       "不要新加丝袜、连裤袜、打底裤或其他没有出现的服饰。",
@@ -240,7 +248,7 @@ export function costumeRemovalPrompt(sensitivePromptOptimize = false) {
     ].join("")
   }
   return [
-    "编辑这张图：把人抠掉，只留已经穿上的衣服，位置和形状保持不变。",
+    "编辑这张图：把人抠掉，只留已经穿上的衣服，位置、形状和垂坠保持不变，站姿不要改直。",
     "去掉头、头发、脸、脖子、手、腿和皮肤，这些位置用原来的浅灰棚拍背景填上。",
     "帽子不要往下移，头的位置留空。",
     "不要新加丝袜、连裤袜或打底裤。",

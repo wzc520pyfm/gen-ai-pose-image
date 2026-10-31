@@ -11,7 +11,7 @@ export const POSE_STYLE_PATHS = Object.freeze([
   "img/full_single_P001_front.png",
 ])
 
-/** Catalog plates kept for inspection. Custom costume generation does not send them. */
+/** Catalog plates for the wear step: stance, drape, and studio framing. */
 export const COSTUME_STYLE_PATHS = Object.freeze([
   "png/SUM-0174.png",
   "png/AUT-0010.png",
@@ -103,7 +103,15 @@ export async function generateStyledReference(input = {}) {
   if (!kind) throw new Error("需要说明是姿势还是服装")
   if (kind === "costume") {
     const run = input.generateGhostCostume ?? generateGhostCostume
-    return referenceResult(await run(input))
+    let poseRefs = Array.isArray(input.poseRefs) ? input.poseRefs : null
+    if (!poseRefs) {
+      try {
+        poseRefs = await loadStyleRefs("costume", input)
+      } catch {
+        poseRefs = []
+      }
+    }
+    return referenceResult(await run({ ...input, poseRefs }))
   }
   const images = await loadStyleRefs(kind, input)
   const generate = input.generate ?? generateImage

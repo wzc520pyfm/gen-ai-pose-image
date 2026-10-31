@@ -66,7 +66,7 @@ test("pose reference generation hands two style images to generateImage", async 
   assert.match(generated.prompt, /严格模仿参考图的线稿风格与人偶质感，只按描述改姿态/)
 })
 
-test("costume reference generation wears the outfit, then removes the person, without style plates", async () => {
+test("costume wear step still runs when catalog stance plates cannot be read", async () => {
   let ran = null
   const image = await generateStyledReference({
     kind: "costume",
@@ -75,7 +75,7 @@ test("costume reference generation wears the outfit, then removes the person, wi
     prompt: "米色风衣",
     sensitivePromptOptimize: true,
     fetchCostume: async () => {
-      throw new Error("should not load ghost style plates")
+      throw new Error("服装图暂时读不到（404）")
     },
     generateGhostCostume: async (input) => {
       ran = input
@@ -83,10 +83,29 @@ test("costume reference generation wears the outfit, then removes the person, wi
     },
   })
   assert.equal(ran.prompt, "米色风衣")
-  assert.equal(ran.provider, "openai")
+  assert.deepEqual(ran.poseRefs, [])
   assert.equal(ran.sensitivePromptOptimize, true)
   assert.equal(image.warning, "已抠掉")
-  assert.equal(image.referencesSent, true)
+})
+
+test("costume wear step receives the catalog stance plates", async () => {
+  let ran = null
+  await generateStyledReference({
+    kind: "costume",
+    provider: "seedream",
+    apiKey: "test-key",
+    prompt: "风衣",
+    fetchCostume: async (path) => {
+      assert.ok(COSTUME_STYLE_PATHS.includes(path))
+      return { mediaType: "image/png", buffer: pngBuffer(), role: "costume" }
+    },
+    generateGhostCostume: async (input) => {
+      ran = input
+      return { mediaType: "image/png", buffer: Buffer.from("ok"), referencesSent: true }
+    },
+  })
+  assert.equal(ran.poseRefs.length, COSTUME_STYLE_PATHS.length)
+  assert.ok(ran.poseRefs.every((item) => item.mediaType === "image/jpeg" && item.buffer.byteLength >= 32))
 })
 
 test("a missing style sample errors and does not call text-only generation", async () => {
@@ -134,6 +153,7 @@ test("gateway timeouts become a readable studio error", () => {
 test("beautify instructions describe a worn outfit without the removal step", () => {
   assert.match(beautifyInstruction({ kind: "pose", userPrompt: "叉腰" }), /严格模仿参考图的线稿风格与人偶质感，只按描述改姿态/)
   const costume = beautifyInstruction({ kind: "costume", userPrompt: "风衣" })
+  assert.match(costume, /重心放在一条腿上/)
   assert.match(costume, /帽子戴在头上/)
   assert.match(costume, /风衣/)
   assert.match(costume, /头、脸和手正常可见/)

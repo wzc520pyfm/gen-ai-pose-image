@@ -70,6 +70,7 @@ test("reference prompts stay line-art for poses, and costume prompts wear the cl
   assert.match(pose, /严格模仿参考图的线稿风格与人偶质感，只按描述改姿态/)
   assert.doesNotMatch(pose, SENSITIVE_PROMPT)
   const costume = expandReferencePrompt({ kind: "costume", userPrompt: "", adult: false })
+  assert.match(costume, /重心放在一条腿上/)
   assert.match(costume, /帽子戴在头上/)
   assert.match(costume, /不要摊开平铺/)
   assert.match(costume, /连裤袜/)

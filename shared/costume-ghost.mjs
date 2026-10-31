@@ -1,5 +1,6 @@
 import { defaultModel, decomposeSeedreamImage, generateImage } from "./generate.mjs"
 import {
+  COSTUME_POSE_REF_LINE,
   costumeLayerPrompt,
   costumeRemovalPrompt,
   ensureWearPrompt,
@@ -147,7 +148,11 @@ export async function generateGhostCostume(input = {}) {
   const decompose = input.decompose ?? decomposeSeedreamImage
   const optimize = input.sensitivePromptOptimize === true
   const model = String(input.model || "").trim() || defaultModel(provider)
-  const wearPrompt = ensureWearPrompt(input.prompt, { adult: input.adult === true, sensitivePromptOptimize: optimize })
+  const poseRefs = (Array.isArray(input.poseRefs) ? input.poseRefs : []).filter((image) => image?.buffer)
+  let wearPrompt = ensureWearPrompt(input.prompt, { adult: input.adult === true, sensitivePromptOptimize: optimize })
+  if (poseRefs.length > 0 && !wearPrompt.includes(COSTUME_POSE_REF_LINE)) {
+    wearPrompt = `${wearPrompt}\n${COSTUME_POSE_REF_LINE}`.slice(0, 4000)
+  }
   const call = {
     provider,
     apiKey: input.apiKey,
@@ -160,7 +165,7 @@ export async function generateGhostCostume(input = {}) {
   const worn = await generate({
     ...call,
     prompt: wearPrompt,
-    images: [],
+    images: poseRefs,
     allowReferenceFallback: true,
     watermark: false,
     timeoutMs: 110000,

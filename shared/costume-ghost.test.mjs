@@ -109,6 +109,7 @@ test("ghost composite keeps the garment and leaves the person out", async () => 
       assert.equal(input.images.length, 0)
       assert.equal(input.watermark, false)
       assert.match(input.prompt, /这一步先画成年模特穿着衣服/)
+      assert.match(input.prompt, /重心放在一条腿上/)
       assert.match(input.prompt, /粉色贝雷帽/)
       return { mediaType: "image/png", buffer: tinyPng(), referencesSent: false }
     },
@@ -128,6 +129,31 @@ test("ghost composite keeps the garment and leaves the person out", async () => 
   assert.equal(image.warning, undefined)
   assert.deepEqual(await pixel(image.buffer, 8, 8), [220, 30, 30])
   assert.deepEqual(await pixel(image.buffer, 8, 34), [180, 180, 180])
+})
+
+test("wear step keeps the catalog stance plates off the removal edit", async () => {
+  const plate = await solid(8, 8, { r: 10, g: 20, b: 30, alpha: 1 })
+  const worn = await solid(12, 12, { r: 4, g: 5, b: 6, alpha: 1 })
+  const calls = []
+  await generateGhostCostume({
+    provider: "gemini",
+    apiKey: "test-key",
+    prompt: "白色风衣",
+    poseRefs: [{ mediaType: "image/png", buffer: plate, role: "costume" }],
+    generate: async (input) => {
+      calls.push(input)
+      if (calls.length === 1) return { mediaType: "image/png", buffer: worn, referencesSent: true }
+      return { mediaType: "image/png", buffer: worn, referencesSent: true }
+    },
+  })
+  assert.equal(calls.length, 2)
+  assert.equal(calls[0].images.length, 1)
+  assert.equal(calls[0].images[0].buffer.equals(plate), true)
+  assert.match(calls[0].prompt, /重心放在一条腿上/)
+  assert.match(calls[0].prompt, /参考图只学习站姿/)
+  assert.equal(calls[1].images.length, 1)
+  assert.equal(calls[1].images[0].buffer.equals(worn), true)
+  assert.match(calls[1].prompt, /站姿不要改直/)
 })
 
 test("a failed layer split falls back to one edit and never returns the worn photo", async () => {
