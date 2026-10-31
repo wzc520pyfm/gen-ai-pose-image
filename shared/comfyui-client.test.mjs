@@ -2,7 +2,7 @@ import test from "node:test"
 import assert from "node:assert/strict"
 import { build } from "esbuild"
 import { readFile } from "node:fs/promises"
-import { connectionURL, createComfyClient, checkComfyConnection, generateComfyTask, createSheetCache } from "./comfyui-client.mjs"
+import { connectionURL, createComfyClient, checkComfyConnection, generateComfyTask } from "./comfyui-client.mjs"
 import { buildLocalGraph } from "./comfyui.mjs"
 import { createPoseHandler } from "../plugin/http.mjs"
 
@@ -102,23 +102,6 @@ test("cancellation and timeout only delete this task, never globally interrupt",
     assert.deepEqual(JSON.parse(cleanup.body), { delete: ["our-prompt"] })
     assert.equal(cleanup.signal.aborted, false)
   }
-})
-
-test("retry cells retain successes, are bounded and expire; changed input uses a new key", () => {
-  let time = 0
-  const cache = createSheetCache({ now: () => time })
-  const first = cache.cells("input-1")
-  first.set("pose-1", new Blob(["success"]))
-  assert.equal(cache.cells("input-1").get("pose-1"), first.get("pose-1"))
-  assert.equal(cache.cells("changed-input").size, 0)
-  for (let i = 0; i < 4; i++) cache.cells(`next-${i}`)
-  assert.equal(cache.cells("input-1").size, 0)
-  cache.cells("expiring").set("pose", new Blob())
-  time = 600000
-  assert.equal(cache.cells("expiring").size, 0)
-  cache.cells("completed").set("pose", new Blob())
-  cache.delete("completed")
-  assert.equal(cache.cells("completed").size, 0)
 })
 
 test("settings migrate old ComfyUI selection and never persist or restore its token", async () => {

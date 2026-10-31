@@ -122,7 +122,6 @@ function StudioFrame({ embedded }: { embedded: boolean }) {
   const clearRequestedSystem = useCallback(() => setRequestedSystem(null), [])
   const clearCostumeFocus = useCallback(() => setCostumeFocus(null), [])
   const abortRef = useRef<AbortController | null>(null)
-  const localRetry = useRef("")
   const settingsRevision = useRef(0)
 
   const loadCatalog = useCallback(() => {
@@ -572,10 +571,10 @@ function StudioFrame({ embedded }: { embedded: boolean }) {
       characterImages: characters.map((image) => ({ mediaType: image.mediaType, dataBase64: image.dataBase64 })),
       builtinModelId: characters.length ? "" : activeModelId,
     }
-    const generateRequest = async (ids: string[], mode: StudioSettings["mode"], localRunId?: string) => {
+    const generateRequest = async (ids: string[], mode: StudioSettings["mode"]) => {
       const customReferences = await customReferenceBody(ids, costume?.id ?? "", customPoses, customCostumes)
       if (settings.engine === "comfyui") {
-        return resultCards(await requestComfyGenerate(basePath, settings, { ...bodyBase, mode, items: comfyItems(ids), costume, face, customReferences, localRunId }, controller.signal))
+        return resultCards(await requestComfyGenerate(basePath, settings, { ...bodyBase, mode, items: comfyItems(ids), costume, face, customReferences }, controller.signal))
       }
       return requestGenerate(basePath, { ...bodyBase, mode, viewIds: ids, customReferences }, controller.signal)
     }
@@ -592,9 +591,7 @@ function StudioFrame({ embedded }: { embedded: boolean }) {
     try {
       if (settings.mode === "sheet" || chosen.length === 0) {
         setProgress(chosen.length === 0 ? "正在通过 ComfyUI 换装" : settings.engine === "comfyui" ? "正在逐格生成姿势拼图" : "正在画姿势拼图")
-        const localRunId = localRetry.current || crypto.randomUUID()
-        const batch = await generateRequest(viewIds, settings.mode, localRunId)
-        localRetry.current = settings.engine === "comfyui" && batch.some((item) => !item.ok) ? localRunId : ""
+        const batch = await generateRequest(viewIds, settings.mode)
         setResults(batch)
         await rememberResults(batch, { ...snapshotBase, selection: chosen })
       } else {
@@ -610,7 +607,7 @@ function StudioFrame({ embedded }: { embedded: boolean }) {
         }
       }
     } catch (error) {
-      if (error instanceof DOMException && error.name === "AbortError") setRunError("已停止。已经画完的图还留在下面。")
+      if (error instanceof DOMException && error.name === "AbortError") setRunError("已停止。")
       else setRunError(error instanceof Error ? error.message : "生图失败")
     } finally {
       setRunning(false)

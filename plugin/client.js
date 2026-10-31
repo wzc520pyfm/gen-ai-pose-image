@@ -1445,22 +1445,6 @@ async function generateComfyTask({ url, token, characters, garment, poseImage, f
     }
   }
 }
-function createSheetCache({ now = Date.now } = {}) {
-  const entries = /* @__PURE__ */ new Map();
-  return {
-    cells(key) {
-      for (const [id, entry] of entries) if (now() - entry.created >= 6e5) entries.delete(id);
-      if (!entries.has(key)) {
-        if (entries.size >= 4) entries.delete(entries.keys().next().value);
-        entries.set(key, { created: now(), cells: /* @__PURE__ */ new Map() });
-      }
-      return entries.get(key).cells;
-    },
-    delete(key) {
-      entries.delete(key);
-    }
-  };
-}
 
 // shared/builtin-models.mjs
 var BUILTIN_MODELS = Object.freeze([
@@ -2003,7 +1987,6 @@ async function composeComfySheet(images, aspectRatio) {
   }
   return png(canvas);
 }
-var sheetCache = createSheetCache();
 async function requestComfyGenerate(basePath, settings, input, signal) {
   const url = connectionURL(settings.comfyuiURL);
   if (!input.items.length || input.items.length > (input.mode === "sheet" ? 4 : 8)) throw new Error("请选择有效数量的姿势或服装。");
@@ -2023,8 +2006,6 @@ async function requestComfyGenerate(basePath, settings, input, signal) {
   const customGarment = input.customReferences.costumes.find((c) => c.id === input.costume?.id);
   const garment = input.costume ? await prepareComfyImage(customGarment ? wireImage(customGarment) : await publicImage(`/api/costume-image?id=${encodeURIComponent(input.costume.id)}&size=preview`)) : void 0;
   const faceImage = input.face ? await prepareComfyImage(await publicImage(`/api/face-image?id=${encodeURIComponent(input.face.id)}&size=full`)) : void 0;
-  const key = input.mode === "sheet" && input.localRunId ? Array.from(new Uint8Array(await crypto.subtle.digest("SHA-256", new TextEncoder().encode(JSON.stringify({ input, url, token: settings.comfyuiToken }))))).map((n) => n.toString(16).padStart(2, "0")).join("") : "";
-  const cells = key ? sheetCache.cells(key) : /* @__PURE__ */ new Map();
   const cards = comfyPromptCards({ ...input, mode: "each", characterCount: characters.length });
   const results = [];
   const images = [];
@@ -2032,13 +2013,9 @@ async function requestComfyGenerate(basePath, settings, input, signal) {
     signal.throwIfAborted();
     const card = cards[index];
     try {
-      let image = cells.get(item.viewId);
-      if (!image) {
-        const customPose = input.customReferences.poses.find((p) => p.id === item.viewId);
-        const poseImage = item.pose ? await prepareComfyImage(customPose ? wireImage(customPose) : await publicImage(`/api/pose-image?id=${encodeURIComponent(item.viewId)}&size=full`)) : void 0;
-        image = await prepareComfyImage(await generateComfyTask({ url, token: settings.comfyuiToken, characters, garment, poseImage, faceImage, face: input.face, pose: item.pose, costume: input.costume, aspectRatio: input.aspectRatio, extraPrompt: input.extraPrompt, keepOutfit: input.keepOutfit, signal }));
-        cells.set(item.viewId, image);
-      }
+      const customPose = input.customReferences.poses.find((p) => p.id === item.viewId);
+      const poseImage = item.pose ? await prepareComfyImage(customPose ? wireImage(customPose) : await publicImage(`/api/pose-image?id=${encodeURIComponent(item.viewId)}&size=full`)) : void 0;
+      const image = await prepareComfyImage(await generateComfyTask({ url, token: settings.comfyuiToken, characters, garment, poseImage, faceImage, face: input.face, pose: item.pose, costume: input.costume, aspectRatio: input.aspectRatio, extraPrompt: input.extraPrompt, keepOutfit: input.keepOutfit, signal }));
       images.push(image);
       results.push({ ...card, ok: true, mediaType: "image/png", imageBase64: await blobToBase64(image), referencesSent: true });
     } catch (error) {
@@ -2048,7 +2025,6 @@ async function requestComfyGenerate(basePath, settings, input, signal) {
   }
   if (input.mode === "sheet" && results.every((r2) => r2.ok)) {
     const sheet = await composeComfySheet(images, input.aspectRatio);
-    if (key) sheetCache.delete(key);
     return [{ ...comfyPromptCards({ ...input, characterCount: characters.length })[0], ok: true, mediaType: "image/png", imageBase64: await blobToBase64(sheet), referencesSent: true }];
   }
   return results;
@@ -13315,7 +13291,6 @@ function StudioFrame({ embedded }) {
   const clearRequestedSystem = (0, import_react14.useCallback)(() => setRequestedSystem(null), []);
   const clearCostumeFocus = (0, import_react14.useCallback)(() => setCostumeFocus(null), []);
   const abortRef = (0, import_react14.useRef)(null);
-  const localRetry = (0, import_react14.useRef)("");
   const settingsRevision = (0, import_react14.useRef)(0);
   const loadCatalog = (0, import_react14.useCallback)(() => {
     setLoading(true);
@@ -13735,10 +13710,10 @@ function StudioFrame({ embedded }) {
       characterImages: characters.map((image) => ({ mediaType: image.mediaType, dataBase64: image.dataBase64 })),
       builtinModelId: characters.length ? "" : activeModelId
     };
-    const generateRequest = async (ids, mode, localRunId) => {
+    const generateRequest = async (ids, mode) => {
       const customReferences = await customReferenceBody(ids, costume?.id ?? "", customPoses, customCostumes);
       if (settings.engine === "comfyui") {
-        return resultCards(await requestComfyGenerate(basePath, settings, { ...bodyBase, mode, items: comfyItems(ids), costume, face, customReferences, localRunId }, controller.signal));
+        return resultCards(await requestComfyGenerate(basePath, settings, { ...bodyBase, mode, items: comfyItems(ids), costume, face, customReferences }, controller.signal));
       }
       return requestGenerate(basePath, { ...bodyBase, mode, viewIds: ids, customReferences }, controller.signal);
     };
@@ -13755,9 +13730,7 @@ function StudioFrame({ embedded }) {
     try {
       if (settings.mode === "sheet" || chosen.length === 0) {
         setProgress(chosen.length === 0 ? "正在通过 ComfyUI 换装" : settings.engine === "comfyui" ? "正在逐格生成姿势拼图" : "正在画姿势拼图");
-        const localRunId = localRetry.current || crypto.randomUUID();
-        const batch = await generateRequest(viewIds, settings.mode, localRunId);
-        localRetry.current = settings.engine === "comfyui" && batch.some((item) => !item.ok) ? localRunId : "";
+        const batch = await generateRequest(viewIds, settings.mode);
         setResults(batch);
         await rememberResults(batch, { ...snapshotBase, selection: chosen });
       } else {
@@ -13773,7 +13746,7 @@ function StudioFrame({ embedded }) {
         }
       }
     } catch (error) {
-      if (error instanceof DOMException && error.name === "AbortError") setRunError("已停止。已经画完的图还留在下面。");
+      if (error instanceof DOMException && error.name === "AbortError") setRunError("已停止。");
       else setRunError(error instanceof Error ? error.message : "生图失败");
     } finally {
       setRunning(false);

@@ -1,5 +1,5 @@
 import { dimensions, localPrompts, type ComfyPose } from "@/shared/comfyui.mjs"
-import { connectionURL, createSheetCache, generateComfyTask } from "@/shared/comfyui-client.mjs"
+import { connectionURL, generateComfyTask } from "@/shared/comfyui-client.mjs"
 import { getBuiltinModel } from "@/shared/builtin-models.mjs"
 import { base64ToBlob, blobToBase64, type CustomWire } from "@/lib/library"
 import type { StudioSettings } from "@/lib/settings"
@@ -72,13 +72,11 @@ export async function composeComfySheet(images: Blob[], aspectRatio: AspectRatio
   return png(canvas)
 }
 
-const sheetCache = createSheetCache()
 type GenerateInput = Omit<PromptInput, "characterCount"> & {
   aspectRatio: AspectRatio
   characterImages: CharacterImageInput[]
   builtinModelId: string
   customReferences: { poses: CustomWire[]; costumes: CustomWire[] }
-  localRunId?: string
 }
 
 export async function requestComfyGenerate(basePath: string, settings: StudioSettings, input: GenerateInput, signal: AbortSignal): Promise<GeneratedResult[]> {
@@ -100,8 +98,6 @@ export async function requestComfyGenerate(basePath: string, settings: StudioSet
   const customGarment = input.customReferences.costumes.find((c) => c.id === input.costume?.id)
   const garment = input.costume ? await prepareComfyImage(customGarment ? wireImage(customGarment) : await publicImage(`/api/costume-image?id=${encodeURIComponent(input.costume.id)}&size=preview`)) : undefined
   const faceImage = input.face ? await prepareComfyImage(await publicImage(`/api/face-image?id=${encodeURIComponent(input.face.id)}&size=full`)) : undefined
-  const key = input.mode === "sheet" && input.localRunId ? Array.from(new Uint8Array(await crypto.subtle.digest("SHA-256", new TextEncoder().encode(JSON.stringify({ input, url, token: settings.comfyuiToken }))))).map((n) => n.toString(16).padStart(2, "0")).join("") : ""
-  const cells = key ? sheetCache.cells(key) : new Map<string, Blob>()
   const cards = comfyPromptCards({ ...input, mode: "each", characterCount: characters.length })
   const results: GeneratedResult[] = []
   const images: Blob[] = []
@@ -109,13 +105,9 @@ export async function requestComfyGenerate(basePath: string, settings: StudioSet
     signal.throwIfAborted()
     const card = cards[index]
     try {
-      let image = cells.get(item.viewId)
-      if (!image) {
-        const customPose = input.customReferences.poses.find((p) => p.id === item.viewId)
-        const poseImage = item.pose ? await prepareComfyImage(customPose ? wireImage(customPose) : await publicImage(`/api/pose-image?id=${encodeURIComponent(item.viewId)}&size=full`)) : undefined
-        image = await prepareComfyImage(await generateComfyTask({ url, token: settings.comfyuiToken, characters, garment, poseImage, faceImage, face: input.face, pose: item.pose, costume: input.costume, aspectRatio: input.aspectRatio, extraPrompt: input.extraPrompt, keepOutfit: input.keepOutfit, signal }))
-        cells.set(item.viewId, image)
-      }
+      const customPose = input.customReferences.poses.find((p) => p.id === item.viewId)
+      const poseImage = item.pose ? await prepareComfyImage(customPose ? wireImage(customPose) : await publicImage(`/api/pose-image?id=${encodeURIComponent(item.viewId)}&size=full`)) : undefined
+      const image = await prepareComfyImage(await generateComfyTask({ url, token: settings.comfyuiToken, characters, garment, poseImage, faceImage, face: input.face, pose: item.pose, costume: input.costume, aspectRatio: input.aspectRatio, extraPrompt: input.extraPrompt, keepOutfit: input.keepOutfit, signal }))
       images.push(image)
       results.push({ ...card, ok: true, mediaType: "image/png", imageBase64: await blobToBase64(image), referencesSent: true })
     } catch (error) {
@@ -125,7 +117,6 @@ export async function requestComfyGenerate(basePath: string, settings: StudioSet
   }
   if (input.mode === "sheet" && results.every((r) => r.ok)) {
     const sheet = await composeComfySheet(images, input.aspectRatio)
-    if (key) sheetCache.delete(key)
     return [{ ...comfyPromptCards({ ...input, characterCount: characters.length })[0], ok: true, mediaType: "image/png", imageBase64: await blobToBase64(sheet), referencesSent: true }]
   }
   return results

@@ -112,17 +112,3 @@ export async function generateComfyTask({ url, token, characters, garment, poseI
   }
 }
 
-export function createSheetCache({ now = Date.now } = {}) {
-  const entries = new Map()
-  return {
-    cells(key) {
-      for (const [id, entry] of entries) if (now() - entry.created >= 600000) entries.delete(id)
-      if (!entries.has(key)) {
-        if (entries.size >= 4) entries.delete(entries.keys().next().value)
-        entries.set(key, { created: now(), cells: new Map() })
-      }
-      return entries.get(key).cells
-    },
-    delete(key) { entries.delete(key) },
-  }
-}
