@@ -2,7 +2,7 @@
 
 /* eslint-disable @next/next/no-img-element -- face references are proxied remote images */
 
-import { useEffect, useMemo, useState } from "react"
+import { useEffect, useMemo, useState, type ReactNode } from "react"
 import { Search, X } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -104,39 +104,55 @@ export function FaceBrowser({
 
   return (
     <section>
-      <div className="sticky top-0 z-10 border-b bg-white/95 px-4 py-3 backdrop-blur @min-[768px]/studio:px-6">
-        <p className="mb-2 text-sm leading-6 text-muted-foreground">
+      <div className="px-4 pt-3 pb-2 @min-[768px]/studio:px-6">
+        <p className="mb-2 text-sm leading-5 text-muted-foreground">
           选一张脸部参考。生图会把这张图的五官、表情、脸型和发型用上，姿势和服装仍按各自的参考。选了模特时，鲸耳和鲸尾按该角色保留；没选模特时，身份以这张脸为准，不另加鲸耳或鲸尾。
         </p>
-        <div className="mb-2 flex flex-wrap gap-2">
-          <FilterChip active={section === ""} onClick={() => setSection("")} label="全部" count={catalog?.total} />
+        <div className="flex gap-1.5 overflow-x-auto pb-1">
+          <SectionPill active={section === ""} count={catalog?.total} onClick={() => setSection("")}>全部</SectionPill>
           {catalog?.sections.map((item) => (
-            <FilterChip key={item.id} active={section === item.id} onClick={() => setSection(item.id)} label={item.label} count={item.count} />
+            <SectionPill key={item.id} active={section === item.id} count={item.count} onClick={() => setSection(item.id)}>
+              {item.label}
+            </SectionPill>
           ))}
         </div>
-        <div className="mb-2 flex flex-wrap items-center gap-2">
-          <FilterChip active={hair === ""} onClick={() => setHair("")} label="全部发长" />
-          {catalog?.hairs.map((item) => (
-            <FilterChip key={item.id} active={hair === item.id} onClick={() => setHair(item.id)} label={item.label} count={hairCounts.get(item.id) ?? 0} />
-          ))}
-          <button type="button" className="rounded-full bg-white px-3 py-1.5 text-sm ring-1 ring-border" onClick={randomFace} disabled={faces.length === 0}>
+        <div className="mt-2 flex flex-wrap items-center gap-2">
+          <div className="relative min-w-[8.5rem] flex-1">
+            <Search className="pointer-events-none absolute top-1/2 left-2.5 size-3.5 -translate-y-1/2 text-muted-foreground" />
+            <Input
+              value={query}
+              onChange={(event) => setQuery(event.target.value)}
+              placeholder="搜索编号、发长或造型"
+              aria-label="搜索脸部参考"
+              className="h-8 bg-card pr-8 pl-8 text-sm"
+            />
+            {query ? (
+              <button type="button" className="absolute top-1/2 right-2 -translate-y-1/2 text-muted-foreground" onClick={() => setQuery("")} aria-label="清空脸部搜索">
+                <X className="size-3.5" />
+              </button>
+            ) : null}
+          </div>
+          <div role="radiogroup" aria-label="发长" className="inline-flex h-8 min-w-0 items-center overflow-x-auto rounded-full bg-secondary p-0.5">
+            <HairSegment active={hair === ""} onClick={() => setHair("")}>全部发长</HairSegment>
+            {catalog?.hairs.map((item) => (
+              <HairSegment
+                key={item.id}
+                active={hair === item.id}
+                count={hairCounts.get(item.id) ?? 0}
+                onClick={() => setHair(item.id)}
+              >
+                {item.label}
+              </HairSegment>
+            ))}
+          </div>
+          <button
+            type="button"
+            onClick={randomFace}
+            disabled={faces.length === 0}
+            className="inline-flex h-8 shrink-0 items-center rounded-full px-2.5 text-xs text-muted-foreground ring-1 ring-border hover:bg-card hover:text-foreground disabled:opacity-40"
+          >
             随机一张
           </button>
-        </div>
-        <div className="relative">
-          <Search className="pointer-events-none absolute top-1/2 left-2.5 size-4 -translate-y-1/2 text-muted-foreground" />
-          <Input
-            value={query}
-            onChange={(event) => setQuery(event.target.value)}
-            placeholder="搜索编号、发长或造型"
-            aria-label="搜索脸部参考"
-            className="h-10 bg-card pr-9 pl-8"
-          />
-          {query ? (
-            <button type="button" className="absolute top-1/2 right-2 -translate-y-1/2 text-muted-foreground" onClick={() => setQuery("")} aria-label="清空脸部搜索">
-              <X className="size-4" />
-            </button>
-          ) : null}
         </div>
       </div>
       <div className="px-4 py-4 @min-[768px]/studio:px-6">
@@ -194,25 +210,50 @@ export function FaceBrowser({
   )
 }
 
-function FilterChip({
+function SectionPill({
   active,
-  onClick,
-  label,
   count,
+  onClick,
+  children,
 }: {
   active: boolean
-  onClick: () => void
-  label: string
   count?: number
+  onClick: () => void
+  children: ReactNode
 }) {
   return (
     <button
       type="button"
       onClick={onClick}
-      className={`inline-flex items-center whitespace-nowrap rounded-full px-3 py-1.5 text-sm ${active ? "bg-primary text-primary-foreground" : "bg-white ring-1 ring-border"}`}
+      className={`inline-flex h-8 shrink-0 items-center gap-1.5 rounded-full px-3 text-sm whitespace-nowrap ${active ? "bg-primary text-primary-foreground" : "bg-card text-foreground ring-1 ring-border"}`}
     >
-      {label}
-      {count !== undefined ? <span className={`ml-1.5 text-xs ${active ? "text-primary-foreground/80" : "text-muted-foreground"}`}>{count}</span> : null}
+      <span>{children}</span>
+      {count !== undefined ? <span className={`text-xs ${active ? "text-primary-foreground/80" : "text-muted-foreground"}`}>{count}</span> : null}
+    </button>
+  )
+}
+
+function HairSegment({
+  active,
+  count,
+  onClick,
+  children,
+}: {
+  active: boolean
+  count?: number
+  onClick: () => void
+  children: ReactNode
+}) {
+  return (
+    <button
+      type="button"
+      role="radio"
+      aria-checked={active}
+      onClick={onClick}
+      className={`inline-flex h-7 shrink-0 items-center gap-1 rounded-full px-2.5 text-xs whitespace-nowrap ${active ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:text-foreground"}`}
+    >
+      <span>{children}</span>
+      {count !== undefined ? <span className={active ? "text-primary-foreground/80" : "text-muted-foreground"}>{count}</span> : null}
     </button>
   )
 }

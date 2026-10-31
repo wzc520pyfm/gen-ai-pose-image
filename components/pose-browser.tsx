@@ -188,7 +188,7 @@ export function PoseBrowser({
   }
 
   function chooseView(pose: Pose, view: PoseView) {
-    setCardViews((current) => ({ ...current, [pose.id]: view.id }))
+    setCardViews((current) => (current[pose.id] === view.id ? current : { ...current, [pose.id]: view.id }))
     if (selected[pose.id] && selected[pose.id] !== view.id) onToggle(pose, view)
   }
 
@@ -482,6 +482,8 @@ function PoseCard({
               key={item.id}
               type="button"
               aria-pressed={active}
+              onMouseEnter={() => onChoose(item)}
+              onFocus={() => onChoose(item)}
               onClick={() => onChoose(item)}
               className={`flex min-w-0 flex-col items-center gap-0.5 rounded-md px-0.5 pt-0.5 pb-1 ${active ? "ring-2 ring-foreground" : "ring-1 ring-border hover:bg-muted"}`}
             >
