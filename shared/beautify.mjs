@@ -23,11 +23,13 @@ function describedError(payload, status, secret) {
 
 export function beautifyInstruction({ kind, userPrompt = "", adult = false }) {
   const role = kind === "costume"
-    ? `你在写服装参考图的文生图提示词。衣服要有穿上身后的立体体积，穿着者不可见，头部、脸部和手部不出现。写成穿戴整齐的日常外衣。${COSTUME_STYLE_LOCK}`
+    ? `你在写服装参考图的文生图提示词。只扩写用户提到的衣物，不要添加没写到的袜子、丝袜、连裤袜、包、鞋或外套。描述到的衣服要有穿上身后的立体体积，穿着者不可见，头部、脸部和手部不出现。若有帽子，帽子要留出头部空间，不要占满头的位置。${COSTUME_STYLE_LOCK}`
     : `你在写姿势参考图的文生图提示词。图应是白底黑色线稿，球关节人偶，只表达成年身体的姿态，不要上色，不要服装设计。${POSE_STYLE_LOCK}`
   const safety = adult
     ? "用户已打开更多描述。按用户描述书写，画面中的角色按成年形象处理。"
-    : "写成日常、得体、可公开展示的画面。衣着保持完整。"
+    : kind === "costume"
+      ? "写成日常、得体、可公开展示的画面。只保留用户写到的衣物。"
+      : "写成日常、得体、可公开展示的画面。"
   const note = String(userPrompt).trim()
   return [
     role,
