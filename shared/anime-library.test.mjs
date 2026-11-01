@@ -10,6 +10,7 @@ import { toCostumeSearchResult, toPoseSearchResult } from "./custom.mjs"
 import { toFaceSearchResult } from "./faces.mjs"
 import { DEFAULT_CHARACTER } from "./character.mjs"
 import { licenseNotices } from "./license.mjs"
+import { isLiveCostume, isLiveCostumeCategory, isLiveFace, isLiveFaceSection, isLivePose, isLivePoseSystem } from "./catalog-realm.mjs"
 
 test("anime plates stay out of the live catalogs and name the original host", () => {
   assert.equal(getCatalog().poseCount, 288)
@@ -63,6 +64,43 @@ test("anime plates stay out of the live catalogs and name the original host", ()
   assert.match(notices, /https:\/\/charadb-2fi\.pages\.dev\//)
   assert.match(notices, /たき AI/)
   assert.match(notices, /https:\/\/x\.com\/taki_auto/)
+})
+
+test("live catalogs and live filters contain no retired anime stand-ins", () => {
+  const poses = getCatalog()
+  assert.equal(poses.systems.some((system) => !isLivePoseSystem(system) && system.id !== "custom"), false)
+  assert.equal(poses.poses.some((pose) => !isLivePose(pose)), false)
+  assert.equal(JSON.stringify(poses).includes("publicdomainq"), false)
+  assert.equal(JSON.stringify(poses).includes("ANM-"), false)
+  assert.equal(poses.systems.some((system) => system.name.includes("二次元")), false)
+
+  const costumes = getCostumeCatalog()
+  assert.equal(costumes.categories.some((category) => !isLiveCostumeCategory(category)), false)
+  assert.equal(costumes.costumes.some((costume) => !isLiveCostume(costume)), false)
+  assert.equal(costumes.categories.some((category) => ["日常", "和风", "外套"].includes(category.label)), false)
+  assert.equal(JSON.stringify(costumes).includes("publicdomainq"), false)
+
+  const faces = getFaceCatalog()
+  assert.equal(faces.total, 1499)
+  assert.equal(faces.sections.some((section) => !isLiveFaceSection(section)), false)
+  assert.equal(faces.faces.some((face) => !isLiveFace(face)), false)
+  assert.equal(faces.sections.some((section) => section.label.includes("二次元")), false)
+
+  const mixedPose = { id: "anime_single_A01", systemId: "anime", system: "二次元姿势", credit: "publicdomainq.net" }
+  const mixedCostume = { id: "ANM-0005", category: "casual", label: "日常", credit: "publicdomainq.net" }
+  const mixedFace = { id: "anime_face_bob_smile", section: "anime-closeup", credit: "publicdomainq.net" }
+  assert.equal(isLivePose(mixedPose), false)
+  assert.equal(isLivePoseSystem({ id: "anime", name: "二次元姿势" }), false)
+  assert.equal(isLiveCostume(mixedCostume), false)
+  assert.equal(isLiveCostumeCategory({ id: "casual", label: "日常" }), false)
+  assert.equal(isLiveFace(mixedFace), false)
+  assert.equal(isLiveFaceSection({ id: "anime-closeup", label: "二次元特写" }), false)
+
+  const anime = getAnimePoseCatalog()
+  assert.equal(JSON.stringify(anime).includes("publicdomainq"), false)
+  assert.equal(JSON.stringify(getAnimeCostumeCatalog()).includes("ANM-"), false)
+  assert.equal(getAnimeCostumeCatalog().costumes.every((costume) => costume.credit === "charadb-2fi.pages.dev" && costume.author === "たき AI"), true)
+  assert.equal(getAnimeFaceCatalog().faces.every((face) => face.credit === "charadb-2fi.pages.dev" && face.sourceUrl === "https://charadb-2fi.pages.dev/"), true)
 })
 
 test("a worn anime outfit does not replace the live costume wording", () => {

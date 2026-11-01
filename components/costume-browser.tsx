@@ -8,6 +8,7 @@ import { CustomReferencePanel, type CustomCard, type CustomDraft } from "@/compo
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import type { StudioSettings } from "@/lib/settings"
+import { isLiveCostume, isLiveCostumeCategory, isRetiredAnimeStandIn } from "@/shared/catalog-realm.mjs"
 import { studioUrl, useStudioEnv } from "@/lib/studio-env"
 
 type Costume = {
@@ -93,30 +94,37 @@ export function CostumeBrowser({
   }, [basePath, realm])
 
   useEffect(() => {
-    if (!catalog) return
-    if (category === "custom") return
-    if (catalog.categories.some((item) => item.id === category)) return
-    const first = catalog.categories.find((item) => !item.adult) ?? catalog.categories[0]
-    if (first) setCategory(first.id)
-  }, [catalog, category])
-
-  useEffect(() => {
     if (!focusCategory || !showAdult) return
     setCategory(focusCategory)
     onFocusApplied()
   }, [focusCategory, showAdult, onFocusApplied])
 
+  const categories = useMemo(() => {
+    if (!catalog) return []
+    return catalog.categories.filter((item) => {
+      if (isRetiredAnimeStandIn({ id: item.id })) return false
+      return realm === "live" ? isLiveCostumeCategory(item) : true
+    })
+  }, [catalog, realm])
+  useEffect(() => {
+    if (category === "custom") return
+    if (categories.some((item) => item.id === category)) return
+    const first = categories.find((item) => !item.adult) ?? categories[0]
+    if (first) setCategory(first.id)
+  }, [categories, category])
   const costumes = useMemo(() => {
     if (!catalog) return []
     const parts = query.trim().toLowerCase().split(/\s+/).filter(Boolean)
     return catalog.costumes.filter((costume) => {
+      if (isRetiredAnimeStandIn(costume)) return false
+      if (realm === "live" && !isLiveCostume(costume)) return false
       if (!showAdult && costume.adult) return false
       if (costume.category !== category) return false
       if (!parts.length) return true
       const hay = `${costume.id} ${costume.keywords} ${costume.label}`.toLowerCase()
       return parts.every((part) => hay.includes(part))
     })
-  }, [catalog, category, query, showAdult])
+  }, [catalog, realm, category, query, showAdult])
 
   return (
     <section>
@@ -131,7 +139,7 @@ export function CostumeBrowser({
             自定义
             <span className={`ml-1.5 text-xs ${customSection ? "text-primary-foreground/80" : "text-muted-foreground"}`}>{visibleCustom.length}</span>
           </button>
-          {catalog?.categories.map((item) => (
+          {categories.map((item) => (
             <button
               key={item.id}
               type="button"

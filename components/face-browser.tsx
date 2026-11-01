@@ -6,6 +6,7 @@ import { useEffect, useMemo, useState, type ReactNode } from "react"
 import { Search, X } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
+import { isLiveFace, isLiveFaceSection, isRetiredAnimeStandIn } from "@/shared/catalog-realm.mjs"
 import { studioUrl, useStudioEnv } from "@/lib/studio-env"
 
 export type FaceItem = {
@@ -75,27 +76,36 @@ export function FaceBrowser({
     setShown(80)
   }, [realm])
 
+  const shownFaces = useMemo(() => {
+    if (!catalog) return []
+    return catalog.faces.filter((face) => {
+      if (isRetiredAnimeStandIn(face)) return false
+      return realm === "live" ? isLiveFace(face) : true
+    })
+  }, [catalog, realm])
+  const shownSections = useMemo(() => {
+    if (!catalog) return []
+    return catalog.sections.filter((item) => realm === "live" ? isLiveFaceSection(item) : item.id !== "anime-closeup" && item.id !== "anime-expression")
+  }, [catalog, realm])
   const hairCounts = useMemo(() => {
     const counts = new Map<string, number>()
-    if (!catalog) return counts
-    for (const face of catalog.faces) {
+    for (const face of shownFaces) {
       if (section && face.section !== section) continue
       counts.set(face.hair, (counts.get(face.hair) ?? 0) + 1)
     }
     return counts
-  }, [catalog, section])
+  }, [shownFaces, section])
 
   const faces = useMemo(() => {
-    if (!catalog) return []
     const parts = query.trim().toLowerCase().split(/\s+/).filter(Boolean)
-    return catalog.faces.filter((face) => {
+    return shownFaces.filter((face) => {
       if (section && face.section !== section) return false
       if (hair && face.hair !== hair) return false
       if (!parts.length) return true
       const hay = `${face.id} ${face.section} ${face.hair} ${face.label} ${face.keywords} ${face.hot ? "热门" : ""}`.toLowerCase()
       return parts.every((part) => hay.includes(part))
     })
-  }, [catalog, section, hair, query])
+  }, [shownFaces, section, hair, query])
 
   useEffect(() => {
     setShown(80)
@@ -122,8 +132,8 @@ export function FaceBrowser({
             : "选一张脸部参考。生图会把这张图的五官、表情、脸型和发型用到角色上，姿势和服装仍按各自的参考。鲸耳和鲸尾保留。"}
         </p>
         <div className="flex gap-1.5 overflow-x-auto pb-1">
-          <SectionPill active={section === ""} count={catalog?.total} onClick={() => setSection("")}>全部</SectionPill>
-          {catalog?.sections.map((item) => (
+          <SectionPill active={section === ""} count={shownFaces.length} onClick={() => setSection("")}>全部</SectionPill>
+          {shownSections.map((item) => (
             <SectionPill key={item.id} active={section === item.id} count={item.count} onClick={() => setSection(item.id)}>
               {item.label}
             </SectionPill>

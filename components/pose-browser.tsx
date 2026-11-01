@@ -10,6 +10,7 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } f
 import { Input } from "@/components/ui/input"
 import type { StudioSettings } from "@/lib/settings"
 import type { Catalog, Pose, PoseView } from "@/lib/types"
+import { isLivePose, isLivePoseSystem, isRetiredAnimeStandIn } from "@/shared/catalog-realm.mjs"
 import { studioUrl, useStudioEnv } from "@/lib/studio-env"
 
 const ANGLES = ["正面", "俯视", "仰视", "侧面", "斜侧"]
@@ -63,6 +64,7 @@ function PoseFigure({ view, alt, size = "thumb", compact = false }: { view: Pose
 }
 
 export function PoseBrowser({
+  realm = "live",
   catalog,
   loading,
   error,
@@ -80,6 +82,7 @@ export function PoseBrowser({
   hasKey,
   syncWarning,
 }: {
+  realm?: "live" | "anime"
   catalog: Catalog | null
   loading: boolean
   error: string
@@ -120,25 +123,31 @@ export function PoseBrowser({
     return () => window.removeEventListener("keydown", onKey)
   }, [])
 
+  const viewCatalog = useMemo(() => {
+    if (!catalog) return null
+    const poses = catalog.poses.filter((pose) => realm === "live" ? isLivePose(pose) : !isRetiredAnimeStandIn(pose))
+    const systems = catalog.systems.filter((system) => realm === "live" ? isLivePoseSystem(system) : system.id !== "custom")
+    return { ...catalog, poses, systems }
+  }, [catalog, realm])
   const system = !customSection && !allSeries
-    ? catalog?.systems.find((item) => item.id === systemId) ?? catalog?.systems[0]
+    ? viewCatalog?.systems.find((item) => item.id === systemId) ?? viewCatalog?.systems[0]
     : undefined
   const visibleCustom = customPoses.filter((item) => showAdult || !item.adult)
   const hiddenCustomAdult = customPoses.length - visibleCustom.length
   const visiblePoseCount = useMemo(() => {
-    if (!catalog) return 0
-    return catalog.poses.filter((pose) => showAdult || !pose.adult).length
-  }, [catalog, showAdult])
+    if (!viewCatalog) return 0
+    return viewCatalog.poses.filter((pose) => showAdult || !pose.adult).length
+  }, [viewCatalog, showAdult])
   const categories = useMemo(() => {
-    if (!catalog || (!allSeries && !system)) return ["全部"]
+    if (!viewCatalog || (!allSeries && !system)) return ["全部"]
     const names = new Set<string>()
-    for (const pose of catalog.poses) {
+    for (const pose of viewCatalog.poses) {
       if (!allSeries && pose.systemId !== system?.id) continue
       if (!showAdult && pose.adult) continue
       names.add(pose.category)
     }
     return ["全部", ...names]
-  }, [catalog, system, allSeries, showAdult])
+  }, [viewCatalog, system, allSeries, showAdult])
 
   useEffect(() => {
     if (!categories.includes(category)) setCategory("全部")
@@ -151,16 +160,16 @@ export function PoseBrowser({
       onRequestedSystemApplied()
       return
     }
-    if (!catalog?.systems.some((item) => item.id === requestedSystem)) return
+    if (!viewCatalog?.systems.some((item) => item.id === requestedSystem)) return
     setSystemId(requestedSystem)
     setCategory("全部")
     onRequestedSystemApplied()
-  }, [requestedSystem, showAdult, catalog, onRequestedSystemApplied])
+  }, [requestedSystem, showAdult, viewCatalog, onRequestedSystemApplied])
 
   const poses = useMemo(() => {
-    if (!catalog || (!allSeries && !system)) return []
+    if (!viewCatalog || (!allSeries && !system)) return []
     const parts = query.trim().toLowerCase().split(/\s+/).filter(Boolean)
-    return catalog.poses.filter((pose) => {
+    return viewCatalog.poses.filter((pose) => {
       if (!allSeries && pose.systemId !== system?.id) return false
       if (!showAdult && pose.adult) return false
       if (category !== "全部" && pose.category !== category) return false
@@ -169,10 +178,10 @@ export function PoseBrowser({
       const hay = `${pose.name} ${pose.code} ${pose.category} ${pose.system} ${pose.id}`.toLowerCase()
       return parts.every((part) => hay.includes(part))
     })
-  }, [catalog, system, allSeries, query, category, angle, showAdult])
+  }, [viewCatalog, system, allSeries, query, category, angle, showAdult])
 
-  const hiddenAdult = catalog
-    ? catalog.poses.filter((pose) => (allSeries || pose.systemId === system?.id) && pose.adult).length
+  const hiddenAdult = viewCatalog
+    ? viewCatalog.poses.filter((pose) => (allSeries || pose.systemId === system?.id) && pose.adult).length
     : 0
 
   function setPerspective(next: string) {
@@ -209,7 +218,7 @@ export function PoseBrowser({
           <SeriesPill active={allSeries} count={visiblePoseCount} onClick={() => { setSystemId("all"); setCategory("全部") }}>
             全部
           </SeriesPill>
-          {catalog?.systems.map((item) => {
+          {viewCatalog?.systems.map((item) => {
             const active = !customSection && !allSeries && item.id === system?.id
             return (
               <SeriesPill

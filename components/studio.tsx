@@ -978,6 +978,7 @@ function StudioFrame({ embedded }: { embedded: boolean }) {
             />
           ) : library === "poses" ? (
             <PoseBrowser
+              realm={realm}
               catalog={realm === "anime" ? animeCatalog : catalog}
               loading={realm === "anime" ? animeLoading : loading}
               error={realm === "anime" ? animeCatalogError : catalogError}
