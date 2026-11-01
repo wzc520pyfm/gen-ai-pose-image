@@ -28365,7 +28365,7 @@ function PoseBrowser({
   }
   return /* @__PURE__ */ (0, import_jsx_runtime38.jsxs)("section", { className: "@container/poses flex min-h-0 flex-col", children: [
     /* @__PURE__ */ (0, import_jsx_runtime38.jsxs)("div", { className: "px-4 pt-5 pb-2 @min-[768px]/studio:px-6", children: [
-      /* @__PURE__ */ (0, import_jsx_runtime38.jsxs)(
+      /* @__PURE__ */ (0, import_jsx_runtime38.jsx)("div", { className: "max-w-full overflow-x-auto", children: /* @__PURE__ */ (0, import_jsx_runtime38.jsxs)(
         ToggleButtonGroup2,
         {
           "aria-label": "姿势体系",
@@ -28373,7 +28373,7 @@ function PoseBrowser({
           disallowEmptySelection: true,
           selectedKeys: [seriesKey],
           onSelectionChange: chooseSeries,
-          className: "w-full max-w-full flex-wrap gap-0",
+          className: "w-max flex-nowrap gap-0",
           children: [
             /* @__PURE__ */ (0, import_jsx_runtime38.jsxs)(ToggleButton2, { id: "all", children: [
               "全部 ",
@@ -28382,8 +28382,7 @@ function PoseBrowser({
             catalog?.systems.map((item) => /* @__PURE__ */ (0, import_jsx_runtime38.jsxs)(ToggleButton2, { id: item.id, children: [
               item.name,
               " ",
-              item.poseCount,
-              item.adult ? " 成人向" : ""
+              item.poseCount
             ] }, item.id)),
             /* @__PURE__ */ (0, import_jsx_runtime38.jsxs)(ToggleButton2, { id: "custom", children: [
               "自定义 ",
@@ -28391,7 +28390,7 @@ function PoseBrowser({
             ] })
           ]
         }
-      ),
+      ) }),
       customSection ? null : /* @__PURE__ */ (0, import_jsx_runtime38.jsxs)("div", { className: "mt-2 flex flex-wrap items-center gap-2", children: [
         /* @__PURE__ */ (0, import_jsx_runtime38.jsx)(SearchField2, { "aria-label": "搜索姿势", value: query, onChange: setQuery, className: "min-w-[8.5rem] flex-1", children: /* @__PURE__ */ (0, import_jsx_runtime38.jsxs)(SearchField2.Group, { children: [
           /* @__PURE__ */ (0, import_jsx_runtime38.jsx)(SearchField2.SearchIcon, {}),
@@ -28563,7 +28562,16 @@ function PoseCard({
     /* @__PURE__ */ (0, import_jsx_runtime38.jsxs)(Card.Header, { className: "relative aspect-[3/4] overflow-hidden lanzi-paper p-0", children: [
       /* @__PURE__ */ (0, import_jsx_runtime38.jsx)("button", { type: "button", className: "block h-full w-full", onClick: onActivate, "aria-pressed": selected, children: /* @__PURE__ */ (0, import_jsx_runtime38.jsx)(PoseFigure, { view, alt: `${pose.name}，${view.angle}` }, view.id) }),
       selected ? /* @__PURE__ */ (0, import_jsx_runtime38.jsx)(Chip, { color: "accent", size: "sm", className: "pointer-events-none absolute top-2 left-2", children: "已选" }) : null,
-      /* @__PURE__ */ (0, import_jsx_runtime38.jsx)(Button2, { size: "sm", className: "absolute right-2 bottom-2", onPress: onPreview, children: "看线稿" })
+      /* @__PURE__ */ (0, import_jsx_runtime38.jsx)(
+        Button2,
+        {
+          variant: "ghost",
+          size: "sm",
+          className: "absolute right-1.5 bottom-1.5 h-7 min-h-0 bg-transparent px-1.5 text-xs font-medium text-[var(--eclipse)] underline-offset-2 hover:bg-transparent hover:underline",
+          onPress: onPreview,
+          children: "看线稿"
+        }
+      )
     ] }),
     /* @__PURE__ */ (0, import_jsx_runtime38.jsxs)("div", { className: "flex items-center justify-between gap-2 px-2.5 py-2", children: [
       /* @__PURE__ */ (0, import_jsx_runtime38.jsx)(Card.Title, { className: "min-w-0 flex-1 truncate text-sm leading-5 font-medium", title: pose.name, children: pose.name }),
@@ -30385,8 +30393,8 @@ function PoseStudio() {
   .right-1 {
     right: var(--spacing);
   }
-  .right-2 {
-    right: calc(var(--spacing) * 2);
+  .right-1\\.5 {
+    right: calc(var(--spacing) * 1.5);
   }
   .bottom-0 {
     bottom: 0px;
@@ -30394,8 +30402,8 @@ function PoseStudio() {
   .bottom-1 {
     bottom: var(--spacing);
   }
-  .bottom-2 {
-    bottom: calc(var(--spacing) * 2);
+  .bottom-1\\.5 {
+    bottom: calc(var(--spacing) * 1.5);
   }
   .left-1 {
     left: var(--spacing);
@@ -30545,6 +30553,9 @@ function PoseStudio() {
     width: 100%;
     height: 100%;
   }
+  .h-7 {
+    height: calc(var(--spacing) * 7);
+  }
   .h-8 {
     height: calc(var(--spacing) * 8);
   }
@@ -30613,6 +30624,9 @@ function PoseStudio() {
   }
   .w-full {
     width: 100%;
+  }
+  .w-max {
+    width: max-content;
   }
   .max-w-3xl {
     max-width: var(--container-3xl);
@@ -30688,6 +30702,9 @@ function PoseStudio() {
   }
   .flex-col {
     flex-direction: column;
+  }
+  .flex-nowrap {
+    flex-wrap: nowrap;
   }
   .flex-wrap {
     flex-wrap: wrap;
@@ -30875,6 +30892,9 @@ function PoseStudio() {
   .bg-slate-950 {
     background-color: var(--color-slate-950);
   }
+  .bg-transparent {
+    background-color: transparent;
+  }
   .bg-white {
     background-color: var(--color-white);
   }
@@ -31057,6 +31077,9 @@ function PoseStudio() {
   .text-\\[\\#fecaca\\] {
     color: #fecaca;
   }
+  .text-\\[var\\(--eclipse\\)\\] {
+    color: var(--eclipse);
+  }
   .text-amber-800 {
     color: var(--color-amber-800);
   }
@@ -31148,6 +31171,9 @@ function PoseStudio() {
   @media (hover: hover) {
     .hover\\:bg-secondary:hover {
       background-color: var(--secondary);
+    }
+    .hover\\:bg-transparent:hover {
+      background-color: transparent;
     }
     .hover\\:bg-white\\/10:hover {
       background-color: color-mix(in srgb, #fff 10%, transparent);

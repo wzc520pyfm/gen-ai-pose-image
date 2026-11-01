@@ -226,22 +226,24 @@ export function PoseBrowser({
   return (
     <section className="@container/poses flex min-h-0 flex-col">
       <div className="px-4 pt-5 pb-2 @min-[768px]/studio:px-6">
-        <ToggleButtonGroup
-          aria-label="姿势体系"
-          selectionMode="single"
-          disallowEmptySelection
-          selectedKeys={[seriesKey]}
-          onSelectionChange={chooseSeries}
-          className="w-full max-w-full flex-wrap gap-0"
-        >
-          <ToggleButton id="all">全部 {visiblePoseCount}</ToggleButton>
-          {catalog?.systems.map((item) => (
-            <ToggleButton key={item.id} id={item.id}>
-              {item.name} {item.poseCount}{item.adult ? " 成人向" : ""}
-            </ToggleButton>
-          ))}
-          <ToggleButton id="custom">自定义 {visibleCustom.length}</ToggleButton>
-        </ToggleButtonGroup>
+        <div className="max-w-full overflow-x-auto">
+          <ToggleButtonGroup
+            aria-label="姿势体系"
+            selectionMode="single"
+            disallowEmptySelection
+            selectedKeys={[seriesKey]}
+            onSelectionChange={chooseSeries}
+            className="w-max flex-nowrap gap-0"
+          >
+            <ToggleButton id="all">全部 {visiblePoseCount}</ToggleButton>
+            {catalog?.systems.map((item) => (
+              <ToggleButton key={item.id} id={item.id}>
+                {item.name} {item.poseCount}
+              </ToggleButton>
+            ))}
+            <ToggleButton id="custom">自定义 {visibleCustom.length}</ToggleButton>
+          </ToggleButtonGroup>
+        </div>
         {customSection ? null : (
           <div className="mt-2 flex flex-wrap items-center gap-2">
             <SearchField aria-label="搜索姿势" value={query} onChange={setQuery} className="min-w-[8.5rem] flex-1">
@@ -445,7 +447,14 @@ function PoseCard({
           <PoseFigure key={view.id} view={view} alt={`${pose.name}，${view.angle}`} />
         </button>
         {selected ? <Chip color="accent" size="sm" className="pointer-events-none absolute top-2 left-2">已选</Chip> : null}
-        <Button size="sm" className="absolute right-2 bottom-2" onPress={onPreview}>看线稿</Button>
+        <Button
+          variant="ghost"
+          size="sm"
+          className="absolute right-1.5 bottom-1.5 h-7 min-h-0 bg-transparent px-1.5 text-xs font-medium text-[var(--eclipse)] underline-offset-2 hover:bg-transparent hover:underline"
+          onPress={onPreview}
+        >
+          看线稿
+        </Button>
       </Card.Header>
       <div className="flex items-center justify-between gap-2 px-2.5 py-2">
         <Card.Title className="min-w-0 flex-1 truncate text-sm leading-5 font-medium" title={pose.name}>{pose.name}</Card.Title>
