@@ -16,6 +16,12 @@ export type Pose = {
   adult: boolean
   people: 1 | 2
   views: PoseView[]
+  keywords?: string
+  plate?: "line" | "illustration"
+  credit?: string
+  author?: string
+  sourceUrl?: string
+  license?: string
 }
 
 export type PoseSystem = {

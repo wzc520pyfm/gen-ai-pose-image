@@ -17,6 +17,7 @@ test("catalog keeps every translated pose and view", () => {
   assert.equal(catalog.viewCount, 1439)
   assert.equal(catalog.poses.length, 288)
   assert.equal(catalog.systems.reduce((sum, system) => sum + system.poseCount, 0), 288)
+  assert.equal(catalog.systems.some((item) => item.id === "anime"), false)
 })
 
 test("search stays on safe poses unless adult poses are included", () => {

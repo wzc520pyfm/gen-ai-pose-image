@@ -1,5 +1,15 @@
 import { costumeVisiblePrompt } from "./costume-prompt.mjs"
 
+function hostCredit(item) {
+  if (!item?.credit) return {}
+  return {
+    credit: item.credit,
+    sourceUrl: item.sourceUrl || "",
+    license: item.license || "",
+    ...(item.author ? { author: item.author } : {}),
+  }
+}
+
 export function createCustomId(kind, random = () => globalThis.crypto.randomUUID()) {
   const suffix = String(random())
   return kind === "costume" ? `custom-costume-${suffix}` : `custom-pose-${suffix}`
@@ -131,6 +141,7 @@ export function toPoseSearchResult(poses) {
       adult: pose.adult,
       people: pose.people,
       source: pose.source === "custom" ? "custom" : "catalog",
+      ...hostCredit(pose),
       views: (pose.views || []).map((view) => ({ id: view.id, angle: view.angle })),
     })),
   }
@@ -147,6 +158,7 @@ export function toCostumeSearchResult(costumes) {
       keywords: costume.keywords,
       adult: costume.adult,
       source: costume.source === "custom" ? "custom" : "catalog",
+      ...hostCredit(costume),
     })),
   }
 }

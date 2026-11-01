@@ -2,9 +2,9 @@ import { readFile } from "node:fs/promises"
 import { dirname, join } from "node:path"
 import { fileURLToPath } from "node:url"
 import { beautifyPrompt } from "../shared/beautify.mjs"
-import { getCatalog, resolveView } from "../shared/catalog.mjs"
-import { costumeFile, fetchCostumeBytes, getCostume, getCostumeCatalog } from "../shared/costumes.mjs"
-import { faceFile, fetchFaceBytes, getFace, getFaceCatalog } from "../shared/faces.mjs"
+import { getAnimePoseCatalog, getCatalog, resolveView } from "../shared/catalog.mjs"
+import { costumeFile, fetchCostumeBytes, getAnimeCostumeCatalog, getCostume, getCostumeCatalog } from "../shared/costumes.mjs"
+import { faceFile, fetchFaceBytes, getAnimeFaceCatalog, getFace, getFaceCatalog } from "../shared/faces.mjs"
 import { assertBaseURL, defaultModel } from "../shared/generate.mjs"
 import { generateCharacterSheet } from "../shared/character-sheet.mjs"
 import { statusForStudioError } from "../shared/http-status.mjs"
@@ -54,6 +54,9 @@ export function createPoseHandler(getConfig) {
       if (req.method === "GET" && path === "/api/catalog") return json(res, 200, getCatalog())
       if (req.method === "GET" && path === "/api/costumes") return json(res, 200, getCostumeCatalog())
       if (req.method === "GET" && path === "/api/faces") return json(res, 200, getFaceCatalog())
+      if (req.method === "GET" && path === "/api/anime/poses") return json(res, 200, getAnimePoseCatalog())
+      if (req.method === "GET" && path === "/api/anime/costumes") return json(res, 200, getAnimeCostumeCatalog())
+      if (req.method === "GET" && path === "/api/anime/faces") return json(res, 200, getAnimeFaceCatalog())
       if (req.method === "GET" && path === "/api/face-image") {
         const face = getFace(url.searchParams.get("id") ?? "")
         if (!face) return json(res, 404, { error: "找不到脸部参考" })

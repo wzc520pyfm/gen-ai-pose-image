@@ -18,12 +18,14 @@ function applyFacePrompt(text, face, index) {
 export function localPrompts({ pose, costume, face = null, extraPrompt = "", characterCount = 1, keepOutfit = true }) {
   const people = pose?.people > 1 ? "exactly two adult people, matching their positions and interaction in the pose reference; the main person matches the identity references, the other person is fully clothed" : "exactly one adult person, a single subject, no duplicate people"
   const action = pose ? `${pose.name}; ${pose.angle}; ${pose.category}` : "keep the original pose and framing"
-  const half = pose?.system?.includes("半身")
+  const half = pose?.system?.includes("半身") || pose?.category === "半身"
+  const illustrated = pose?.plate === "illustration" ? " The pose reference may be a finished illustration. Use it only for body pose and camera, not for face, outfit, hairstyle, or rendering style." : ""
+  const worn = costume?.plate === "worn" ? " The clothing reference may show a wearer. Copy only the garment, not their face, hair, or body." : ""
   const framing = half ? "an upper-body portrait from head to waist, with head and both arms visible" : "a full-body portrait with head and feet visible"
   const identity = characterCount > 1 ? "All additional identity images show the same main person from different views. Preserve that person's identity, face, hair, body type and visual style." : "Preserve the main person's identity, face, hair, body type and visual style."
   const prompts = {
-    outfit: `Edit <image1>: replace the main person's outfit with the complete outfit in <image2>. Match its colors, fabric, patterns, silhouette and accessories. Keep the original pose, face, hair, framing and background. ${identity} One image, no collage. ${extraPrompt}`,
-    scaffold: `A studio image of ${people}, ${framing}, wearing a loose opaque long-sleeved neutral gray shirt and full-length opaque trousers, fully dressed. Pose and camera: ${action}. Follow the depth map for body positions and composition, natural anatomy, simple neutral background. ${extraPrompt}`,
+    outfit: `Edit <image1>: replace the main person's outfit with the complete outfit in <image2>. Match its colors, fabric, patterns, silhouette and accessories. Keep the original pose, face, hair, framing and background. ${identity}${worn} One image, no collage. ${extraPrompt}`,
+    scaffold: `A studio image of ${people}, ${framing}, wearing a loose opaque long-sleeved neutral gray shirt and full-length opaque trousers, fully dressed. Pose and camera: ${action}.${illustrated} Follow the depth map for body positions and composition, natural anatomy, simple neutral background. ${extraPrompt}`,
     final: costume
       ? `Create one image of ${people}, ${framing}. Use <image1> only for pose and framing: ${action}. The main person's face and identity must precisely match the original in <image4>. Use <image2> for the person wearing the outfit. Dress the main person in the complete outfit from <image3>, accurately matching its colors, fabric, patterns, sleeves, neckline and silhouette. ${identity} Do not copy the scaffold's face or clothing. No collage, no text. ${extraPrompt}`
       : half
@@ -57,6 +59,7 @@ export function localPrompts({ pose, costume, face = null, extraPrompt = "", cha
     prompts.outfit = `${prompts.outfit} Keep the original face for this clothing edit; the face reference is applied in the final image.`
     prompts.final = applyFacePrompt(prompts.final, face, index)
   }
+  prompts.final = `${prompts.final}${illustrated}${worn}`
   return prompts
 }
 

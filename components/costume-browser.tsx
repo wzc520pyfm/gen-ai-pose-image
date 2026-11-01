@@ -8,6 +8,7 @@ import { CustomReferencePanel, type CustomCard, type CustomDraft } from "@/compo
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import type { StudioSettings } from "@/lib/settings"
+import { isLiveCostume, isLiveCostumeCategory, isRetiredAnimeStandIn } from "@/shared/catalog-realm.mjs"
 import { studioUrl, useStudioEnv } from "@/lib/studio-env"
 
 type Costume = {
@@ -17,6 +18,10 @@ type Costume = {
   keywords: string
   adult: boolean
   thumb: string
+  credit?: string
+  author?: string
+  sourceUrl?: string
+  plate?: "worn"
 }
 
 type CostumeCategory = {
@@ -34,6 +39,7 @@ type CostumeCatalog = {
 }
 
 export function CostumeBrowser({
+  realm = "live",
   showAdult,
   focusCategory,
   onFocusApplied,
@@ -48,6 +54,7 @@ export function CostumeBrowser({
   syncWarning,
   onChangeSettings,
 }: {
+  realm?: "live" | "anime"
   showAdult: boolean
   focusCategory: string | null
   onFocusApplied: () => void
@@ -73,7 +80,7 @@ export function CostumeBrowser({
 
   useEffect(() => {
     const controller = new AbortController()
-    fetch(studioUrl(basePath, "/api/costumes"), { signal: controller.signal })
+    fetch(studioUrl(basePath, realm === "anime" ? "/api/anime/costumes" : "/api/costumes"), { signal: controller.signal })
       .then(async (response) => {
         if (!response.ok) throw new Error("服装目录没有加载出来")
         return response.json() as Promise<CostumeCatalog>
@@ -84,7 +91,7 @@ export function CostumeBrowser({
         setError(cause instanceof Error ? cause.message : "服装目录没有加载出来")
       })
     return () => controller.abort()
-  }, [basePath])
+  }, [basePath, realm])
 
   useEffect(() => {
     if (!focusCategory || !showAdult) return
@@ -92,22 +99,37 @@ export function CostumeBrowser({
     onFocusApplied()
   }, [focusCategory, showAdult, onFocusApplied])
 
+  const categories = useMemo(() => {
+    if (!catalog) return []
+    return catalog.categories.filter((item) => {
+      if (isRetiredAnimeStandIn({ id: item.id })) return false
+      return realm === "live" ? isLiveCostumeCategory(item) : true
+    })
+  }, [catalog, realm])
+  useEffect(() => {
+    if (category === "custom") return
+    if (categories.some((item) => item.id === category)) return
+    const first = categories.find((item) => !item.adult) ?? categories[0]
+    if (first) setCategory(first.id)
+  }, [categories, category])
   const costumes = useMemo(() => {
     if (!catalog) return []
     const parts = query.trim().toLowerCase().split(/\s+/).filter(Boolean)
     return catalog.costumes.filter((costume) => {
+      if (isRetiredAnimeStandIn(costume)) return false
+      if (realm === "live" && !isLiveCostume(costume)) return false
       if (!showAdult && costume.adult) return false
       if (costume.category !== category) return false
       if (!parts.length) return true
       const hay = `${costume.id} ${costume.keywords} ${costume.label}`.toLowerCase()
       return parts.every((part) => hay.includes(part))
     })
-  }, [catalog, category, query, showAdult])
+  }, [catalog, realm, category, query, showAdult])
 
   return (
     <section>
       <div className="px-4 pt-3 pb-2 @min-[768px]/studio:px-6">
-        <p className="mb-2 text-sm text-muted-foreground">这些图里没有人物。选一套之后，大肥鱼会换上这身衣服，脸、头发、鲸耳和鲸尾保持不变。</p>
+        <p className="mb-2 text-sm text-muted-foreground">{realm === "anime" ? "这是二次元服装，和真人衣装集分开。图里有穿着者，生图只取衣服。原站是 charadb-2fi.pages.dev，作者たき AI。" : "这些图里没有人物。选一套之后，大肥鱼会换上这身衣服，脸、头发、鲸耳和鲸尾保持不变。"}</p>
         <div className="mb-2 flex flex-wrap gap-2">
           <button
             type="button"
@@ -117,7 +139,7 @@ export function CostumeBrowser({
             自定义
             <span className={`ml-1.5 text-xs ${customSection ? "text-primary-foreground/80" : "text-muted-foreground"}`}>{visibleCustom.length}</span>
           </button>
-          {catalog?.categories.map((item) => (
+          {categories.map((item) => (
             <button
               key={item.id}
               type="button"
@@ -216,6 +238,7 @@ export function CostumeBrowser({
                 <div className="space-y-1 px-3 py-2.5">
                   <p className="text-sm font-medium">{costume.id}</p>
                   <p className="line-clamp-1 text-xs text-muted-foreground @min-[640px]/studio:line-clamp-2">{costume.label} · {costume.keywords}</p>
+                  {costume.credit ? <p className="truncate text-[10px] leading-4 text-muted-foreground" title={costume.sourceUrl}>原站 {costume.author ? `${costume.credit} · ${costume.author}` : costume.credit}</p> : null}
                 </div>
               </button>
             )

@@ -1212,12 +1212,14 @@ function applyFacePrompt(text, face, index) {
 function localPrompts({ pose, costume, face = null, extraPrompt = "", characterCount = 1, keepOutfit = true }) {
   const people = pose?.people > 1 ? "exactly two adult people, matching their positions and interaction in the pose reference; the main person matches the identity references, the other person is fully clothed" : "exactly one adult person, a single subject, no duplicate people";
   const action = pose ? `${pose.name}; ${pose.angle}; ${pose.category}` : "keep the original pose and framing";
-  const half = pose?.system?.includes("半身");
+  const half = pose?.system?.includes("半身") || pose?.category === "半身";
+  const illustrated = pose?.plate === "illustration" ? " The pose reference may be a finished illustration. Use it only for body pose and camera, not for face, outfit, hairstyle, or rendering style." : "";
+  const worn = costume?.plate === "worn" ? " The clothing reference may show a wearer. Copy only the garment, not their face, hair, or body." : "";
   const framing = half ? "an upper-body portrait from head to waist, with head and both arms visible" : "a full-body portrait with head and feet visible";
   const identity = characterCount > 1 ? "All additional identity images show the same main person from different views. Preserve that person's identity, face, hair, body type and visual style." : "Preserve the main person's identity, face, hair, body type and visual style.";
   const prompts = {
-    outfit: `Edit <image1>: replace the main person's outfit with the complete outfit in <image2>. Match its colors, fabric, patterns, silhouette and accessories. Keep the original pose, face, hair, framing and background. ${identity} One image, no collage. ${extraPrompt}`,
-    scaffold: `A studio image of ${people}, ${framing}, wearing a loose opaque long-sleeved neutral gray shirt and full-length opaque trousers, fully dressed. Pose and camera: ${action}. Follow the depth map for body positions and composition, natural anatomy, simple neutral background. ${extraPrompt}`,
+    outfit: `Edit <image1>: replace the main person's outfit with the complete outfit in <image2>. Match its colors, fabric, patterns, silhouette and accessories. Keep the original pose, face, hair, framing and background. ${identity}${worn} One image, no collage. ${extraPrompt}`,
+    scaffold: `A studio image of ${people}, ${framing}, wearing a loose opaque long-sleeved neutral gray shirt and full-length opaque trousers, fully dressed. Pose and camera: ${action}.${illustrated} Follow the depth map for body positions and composition, natural anatomy, simple neutral background. ${extraPrompt}`,
     final: costume ? `Create one image of ${people}, ${framing}. Use <image1> only for pose and framing: ${action}. The main person's face and identity must precisely match the original in <image4>. Use <image2> for the person wearing the outfit. Dress the main person in the complete outfit from <image3>, accurately matching its colors, fabric, patterns, sleeves, neckline and silhouette. ${identity} Do not copy the scaffold's face or clothing. No collage, no text. ${extraPrompt}` : half ? `Create an upper-body portrait of ${people}, the exact same person in <image1>. Her face, facial features, hair, skin tone and visible clothes must precisely match <image1> and <image3>. Change her pose to match <image2>: ${action}. Keep her original clothing, including its colors, neckline, fabric and sleeves; do not copy the face or clothes from <image2>. Frame from head to waist with both hands visible, fully clothed, natural anatomy. ${identity} No collage, no text. ${extraPrompt}` : `Create a full-body portrait of ${people}. Use <image1> only for body pose and framing: ${action}. The face, identity, skin tone and hairstyle must match <image2>, not <image1>. Replace clothing on <image1> with the same outfit worn by the person in <image3>, matching the clothing, colors, fabric, sleeves and neckline. Do not copy clothes from <image1>. If the lower body is not visible in <image3>, add opaque full-length trousers or a long skirt appropriate to the outfit. Fully clothed. ${identity} Entire body and feet visible, natural anatomy. No collage, no text. ${extraPrompt}`
   };
   if (!costume && !keepOutfit) prompts.final = `Create one image of ${people}, ${framing}. Use ${half ? "<image2>" : "<image1>"} only for the body pose: ${action}. Preserve the face, hair and identity from ${half ? "<image1>" : "<image2>"}. You may change the clothes according to the following description, keeping every person fully clothed in opaque clothing. ${identity} No collage, no text. ${extraPrompt}`;
@@ -1247,6 +1249,7 @@ function localPrompts({ pose, costume, face = null, extraPrompt = "", characterC
     prompts.outfit = `${prompts.outfit} Keep the original face for this clothing edit; the face reference is applied in the final image.`;
     prompts.final = applyFacePrompt(prompts.final, face, index);
   }
+  prompts.final = `${prompts.final}${illustrated}${worn}`;
   return prompts;
 }
 function activeGraph(source, output) {
@@ -12015,9 +12018,45 @@ function CustomReferencePanel({
   ] });
 }
 
+// shared/catalog-realm.mjs
+var LIVE_COSTUME_CATEGORIES = /* @__PURE__ */ new Set(["春", "夏", "秋", "冬", "パーティ", "ランジェリー", "水着", "セクシー"]);
+var LIVE_FACE_SECTIONS = /* @__PURE__ */ new Set(["脸部特写", "造型"]);
+function isRetiredAnimeStandIn(item) {
+  const credit = item?.credit || "";
+  const id = String(item?.id || "");
+  return credit === "publicdomainq.net" || credit === "commons.wikimedia.org" || id.startsWith("ANM-") || id.startsWith("anime_face") || id.startsWith("anime-face") || item?.section === "anime-closeup" || item?.section === "anime-expression";
+}
+function isLivePose(pose) {
+  if (!pose || isRetiredAnimeStandIn(pose)) return false;
+  if (pose.systemId === "anime") return false;
+  if (String(pose.id || "").startsWith("anime_")) return false;
+  if (String(pose.system || "").includes("二次元")) return false;
+  return true;
+}
+function isLivePoseSystem(system) {
+  if (!system || system.id === "custom") return false;
+  if (system.id === "anime") return false;
+  return !String(system.name || "").includes("二次元");
+}
+function isLiveCostume(costume) {
+  if (!costume || isRetiredAnimeStandIn(costume)) return false;
+  return LIVE_COSTUME_CATEGORIES.has(costume.category);
+}
+function isLiveCostumeCategory(category) {
+  return LIVE_COSTUME_CATEGORIES.has(category?.id);
+}
+function isLiveFace(face) {
+  if (!face || isRetiredAnimeStandIn(face)) return false;
+  return LIVE_FACE_SECTIONS.has(face.section);
+}
+function isLiveFaceSection(section) {
+  return LIVE_FACE_SECTIONS.has(section?.id);
+}
+
 // components/costume-browser.tsx
 var import_jsx_runtime26 = require("react/jsx-runtime");
 function CostumeBrowser({
+  realm = "live",
   showAdult,
   focusCategory,
   onFocusApplied,
@@ -12042,7 +12081,7 @@ function CostumeBrowser({
   const [query, setQuery] = (0, import_react10.useState)("");
   (0, import_react10.useEffect)(() => {
     const controller = new AbortController();
-    fetch(studioUrl(basePath, "/api/costumes"), { signal: controller.signal }).then(async (response) => {
+    fetch(studioUrl(basePath, realm === "anime" ? "/api/anime/costumes" : "/api/costumes"), { signal: controller.signal }).then(async (response) => {
       if (!response.ok) throw new Error("服装目录没有加载出来");
       return response.json();
     }).then(setCatalog).catch((cause) => {
@@ -12050,26 +12089,41 @@ function CostumeBrowser({
       setError(cause instanceof Error ? cause.message : "服装目录没有加载出来");
     });
     return () => controller.abort();
-  }, [basePath]);
+  }, [basePath, realm]);
   (0, import_react10.useEffect)(() => {
     if (!focusCategory || !showAdult) return;
     setCategory(focusCategory);
     onFocusApplied();
   }, [focusCategory, showAdult, onFocusApplied]);
+  const categories = (0, import_react10.useMemo)(() => {
+    if (!catalog) return [];
+    return catalog.categories.filter((item) => {
+      if (isRetiredAnimeStandIn({ id: item.id })) return false;
+      return realm === "live" ? isLiveCostumeCategory(item) : true;
+    });
+  }, [catalog, realm]);
+  (0, import_react10.useEffect)(() => {
+    if (category === "custom") return;
+    if (categories.some((item) => item.id === category)) return;
+    const first = categories.find((item) => !item.adult) ?? categories[0];
+    if (first) setCategory(first.id);
+  }, [categories, category]);
   const costumes = (0, import_react10.useMemo)(() => {
     if (!catalog) return [];
     const parts = query.trim().toLowerCase().split(/\s+/).filter(Boolean);
     return catalog.costumes.filter((costume) => {
+      if (isRetiredAnimeStandIn(costume)) return false;
+      if (realm === "live" && !isLiveCostume(costume)) return false;
       if (!showAdult && costume.adult) return false;
       if (costume.category !== category) return false;
       if (!parts.length) return true;
       const hay = `${costume.id} ${costume.keywords} ${costume.label}`.toLowerCase();
       return parts.every((part) => hay.includes(part));
     });
-  }, [catalog, category, query, showAdult]);
+  }, [catalog, realm, category, query, showAdult]);
   return /* @__PURE__ */ (0, import_jsx_runtime26.jsxs)("section", { children: [
     /* @__PURE__ */ (0, import_jsx_runtime26.jsxs)("div", { className: "px-4 pt-3 pb-2 @min-[768px]/studio:px-6", children: [
-      /* @__PURE__ */ (0, import_jsx_runtime26.jsx)("p", { className: "mb-2 text-sm text-muted-foreground", children: "这些图里没有人物。选一套之后，大肥鱼会换上这身衣服，脸、头发、鲸耳和鲸尾保持不变。" }),
+      /* @__PURE__ */ (0, import_jsx_runtime26.jsx)("p", { className: "mb-2 text-sm text-muted-foreground", children: realm === "anime" ? "这是二次元服装，和真人衣装集分开。图里有穿着者，生图只取衣服。原站是 charadb-2fi.pages.dev，作者たき AI。" : "这些图里没有人物。选一套之后，大肥鱼会换上这身衣服，脸、头发、鲸耳和鲸尾保持不变。" }),
       /* @__PURE__ */ (0, import_jsx_runtime26.jsxs)("div", { className: "mb-2 flex flex-wrap gap-2", children: [
         /* @__PURE__ */ (0, import_jsx_runtime26.jsxs)(
           "button",
@@ -12083,7 +12137,7 @@ function CostumeBrowser({
             ]
           }
         ),
-        catalog?.categories.map((item) => /* @__PURE__ */ (0, import_jsx_runtime26.jsxs)(
+        categories.map((item) => /* @__PURE__ */ (0, import_jsx_runtime26.jsxs)(
           "button",
           {
             type: "button",
@@ -12183,7 +12237,11 @@ function CostumeBrowser({
                   costume.label,
                   " · ",
                   costume.keywords
-                ] })
+                ] }),
+                costume.credit ? /* @__PURE__ */ (0, import_jsx_runtime26.jsxs)("p", { className: "truncate text-[10px] leading-4 text-muted-foreground", title: costume.sourceUrl, children: [
+                  "原站 ",
+                  costume.author ? `${costume.credit} · ${costume.author}` : costume.credit
+                ] }) : null
               ] })
             ]
           },
@@ -12199,6 +12257,7 @@ function CostumeBrowser({
 var import_react11 = require("react");
 var import_jsx_runtime27 = require("react/jsx-runtime");
 function FaceBrowser({
+  realm = "live",
   selectedId,
   onSelect
 }) {
@@ -12211,7 +12270,7 @@ function FaceBrowser({
   const [shown, setShown] = (0, import_react11.useState)(80);
   (0, import_react11.useEffect)(() => {
     const controller = new AbortController();
-    fetch(studioUrl(basePath, "/api/faces"), { signal: controller.signal }).then(async (response) => {
+    fetch(studioUrl(basePath, realm === "anime" ? "/api/anime/faces" : "/api/faces"), { signal: controller.signal }).then(async (response) => {
       if (!response.ok) throw new Error("脸部目录没有加载出来");
       return response.json();
     }).then(setCatalog).catch((cause) => {
@@ -12219,27 +12278,41 @@ function FaceBrowser({
       setError(cause instanceof Error ? cause.message : "脸部目录没有加载出来");
     });
     return () => controller.abort();
-  }, [basePath]);
+  }, [basePath, realm]);
+  (0, import_react11.useEffect)(() => {
+    setSection("");
+    setHair("");
+    setShown(80);
+  }, [realm]);
+  const shownFaces = (0, import_react11.useMemo)(() => {
+    if (!catalog) return [];
+    return catalog.faces.filter((face) => {
+      if (isRetiredAnimeStandIn(face)) return false;
+      return realm === "live" ? isLiveFace(face) : true;
+    });
+  }, [catalog, realm]);
+  const shownSections = (0, import_react11.useMemo)(() => {
+    if (!catalog) return [];
+    return catalog.sections.filter((item) => realm === "live" ? isLiveFaceSection(item) : item.id !== "anime-closeup" && item.id !== "anime-expression");
+  }, [catalog, realm]);
   const hairCounts = (0, import_react11.useMemo)(() => {
     const counts = /* @__PURE__ */ new Map();
-    if (!catalog) return counts;
-    for (const face of catalog.faces) {
+    for (const face of shownFaces) {
       if (section && face.section !== section) continue;
       counts.set(face.hair, (counts.get(face.hair) ?? 0) + 1);
     }
     return counts;
-  }, [catalog, section]);
+  }, [shownFaces, section]);
   const faces = (0, import_react11.useMemo)(() => {
-    if (!catalog) return [];
     const parts = query.trim().toLowerCase().split(/\s+/).filter(Boolean);
-    return catalog.faces.filter((face) => {
+    return shownFaces.filter((face) => {
       if (section && face.section !== section) return false;
       if (hair && face.hair !== hair) return false;
       if (!parts.length) return true;
       const hay = `${face.id} ${face.section} ${face.hair} ${face.label} ${face.keywords} ${face.hot ? "热门" : ""}`.toLowerCase();
       return parts.every((part) => hay.includes(part));
     });
-  }, [catalog, section, hair, query]);
+  }, [shownFaces, section, hair, query]);
   (0, import_react11.useEffect)(() => {
     setShown(80);
   }, [section, hair, query]);
@@ -12255,10 +12328,10 @@ function FaceBrowser({
   }
   return /* @__PURE__ */ (0, import_jsx_runtime27.jsxs)("section", { children: [
     /* @__PURE__ */ (0, import_jsx_runtime27.jsxs)("div", { className: "px-4 pt-3 pb-2 @min-[768px]/studio:px-6", children: [
-      /* @__PURE__ */ (0, import_jsx_runtime27.jsx)("p", { className: "mb-2 text-sm leading-5 text-muted-foreground", children: "选一张脸部参考。生图会把这张图的五官、表情、脸型和发型用到角色上，姿势和服装仍按各自的参考。鲸耳和鲸尾保留。" }),
+      /* @__PURE__ */ (0, import_jsx_runtime27.jsx)("p", { className: "mb-2 text-sm leading-5 text-muted-foreground", children: realm === "anime" ? "这是二次元脸部，和真人脸库分开。原站是 charadb-2fi.pages.dev，作者たき AI。生图取发型、发色或眼睛，鲸耳和鲸尾仍保留。" : "选一张脸部参考。生图会把这张图的五官、表情、脸型和发型用到角色上，姿势和服装仍按各自的参考。鲸耳和鲸尾保留。" }),
       /* @__PURE__ */ (0, import_jsx_runtime27.jsxs)("div", { className: "flex gap-1.5 overflow-x-auto pb-1", children: [
-        /* @__PURE__ */ (0, import_jsx_runtime27.jsx)(SectionPill, { active: section === "", count: catalog?.total, onClick: () => setSection(""), children: "全部" }),
-        catalog?.sections.map((item) => /* @__PURE__ */ (0, import_jsx_runtime27.jsx)(SectionPill, { active: section === item.id, count: item.count, onClick: () => setSection(item.id), children: item.label }, item.id))
+        /* @__PURE__ */ (0, import_jsx_runtime27.jsx)(SectionPill, { active: section === "", count: shownFaces.length, onClick: () => setSection(""), children: "全部" }),
+        shownSections.map((item) => /* @__PURE__ */ (0, import_jsx_runtime27.jsx)(SectionPill, { active: section === item.id, count: item.count, onClick: () => setSection(item.id), children: item.label }, item.id))
       ] }),
       /* @__PURE__ */ (0, import_jsx_runtime27.jsxs)("div", { className: "mt-2 flex flex-wrap items-center gap-2", children: [
         /* @__PURE__ */ (0, import_jsx_runtime27.jsxs)("div", { className: "relative min-w-[8.5rem] flex-1", children: [
@@ -12332,7 +12405,11 @@ function FaceBrowser({
               ] }),
               /* @__PURE__ */ (0, import_jsx_runtime27.jsxs)("div", { className: "space-y-1 px-3 py-2.5", children: [
                 /* @__PURE__ */ (0, import_jsx_runtime27.jsx)("p", { className: "truncate text-sm font-medium", children: face.id }),
-                /* @__PURE__ */ (0, import_jsx_runtime27.jsx)("p", { className: "line-clamp-2 text-xs text-muted-foreground", children: caption })
+                /* @__PURE__ */ (0, import_jsx_runtime27.jsx)("p", { className: "line-clamp-2 text-xs text-muted-foreground", children: caption }),
+                face.credit ? /* @__PURE__ */ (0, import_jsx_runtime27.jsxs)("p", { className: "truncate text-[10px] leading-4 text-muted-foreground", title: face.sourceUrl, children: [
+                  "原站 ",
+                  face.author ? `${face.credit} · ${face.author}` : face.credit
+                ] }) : null
               ] })
             ]
           },
@@ -12435,6 +12512,7 @@ function PoseFigure({ view, alt, size = "thumb", compact = false }) {
   );
 }
 function PoseBrowser({
+  realm = "live",
   catalog,
   loading,
   error,
@@ -12473,23 +12551,29 @@ function PoseBrowser({
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
   }, []);
-  const system = !customSection && !allSeries ? catalog?.systems.find((item) => item.id === systemId) ?? catalog?.systems[0] : void 0;
+  const viewCatalog = (0, import_react12.useMemo)(() => {
+    if (!catalog) return null;
+    const poses2 = catalog.poses.filter((pose) => realm === "live" ? isLivePose(pose) : !isRetiredAnimeStandIn(pose));
+    const systems = catalog.systems.filter((system2) => realm === "live" ? isLivePoseSystem(system2) : system2.id !== "custom");
+    return { ...catalog, poses: poses2, systems };
+  }, [catalog, realm]);
+  const system = !customSection && !allSeries ? viewCatalog?.systems.find((item) => item.id === systemId) ?? viewCatalog?.systems[0] : void 0;
   const visibleCustom = customPoses.filter((item) => showAdult || !item.adult);
   const hiddenCustomAdult = customPoses.length - visibleCustom.length;
   const visiblePoseCount = (0, import_react12.useMemo)(() => {
-    if (!catalog) return 0;
-    return catalog.poses.filter((pose) => showAdult || !pose.adult).length;
-  }, [catalog, showAdult]);
+    if (!viewCatalog) return 0;
+    return viewCatalog.poses.filter((pose) => showAdult || !pose.adult).length;
+  }, [viewCatalog, showAdult]);
   const categories = (0, import_react12.useMemo)(() => {
-    if (!catalog || !allSeries && !system) return ["全部"];
+    if (!viewCatalog || !allSeries && !system) return ["全部"];
     const names = /* @__PURE__ */ new Set();
-    for (const pose of catalog.poses) {
+    for (const pose of viewCatalog.poses) {
       if (!allSeries && pose.systemId !== system?.id) continue;
       if (!showAdult && pose.adult) continue;
       names.add(pose.category);
     }
     return ["全部", ...names];
-  }, [catalog, system, allSeries, showAdult]);
+  }, [viewCatalog, system, allSeries, showAdult]);
   (0, import_react12.useEffect)(() => {
     if (!categories.includes(category)) setCategory("全部");
   }, [categories, category]);
@@ -12500,15 +12584,15 @@ function PoseBrowser({
       onRequestedSystemApplied();
       return;
     }
-    if (!catalog?.systems.some((item) => item.id === requestedSystem)) return;
+    if (!viewCatalog?.systems.some((item) => item.id === requestedSystem)) return;
     setSystemId(requestedSystem);
     setCategory("全部");
     onRequestedSystemApplied();
-  }, [requestedSystem, showAdult, catalog, onRequestedSystemApplied]);
+  }, [requestedSystem, showAdult, viewCatalog, onRequestedSystemApplied]);
   const poses = (0, import_react12.useMemo)(() => {
-    if (!catalog || !allSeries && !system) return [];
+    if (!viewCatalog || !allSeries && !system) return [];
     const parts = query.trim().toLowerCase().split(/\s+/).filter(Boolean);
-    return catalog.poses.filter((pose) => {
+    return viewCatalog.poses.filter((pose) => {
       if (!allSeries && pose.systemId !== system?.id) return false;
       if (!showAdult && pose.adult) return false;
       if (category !== "全部" && pose.category !== category) return false;
@@ -12517,8 +12601,8 @@ function PoseBrowser({
       const hay = `${pose.name} ${pose.code} ${pose.category} ${pose.system} ${pose.id}`.toLowerCase();
       return parts.every((part) => hay.includes(part));
     });
-  }, [catalog, system, allSeries, query, category, angle, showAdult]);
-  const hiddenAdult = catalog ? catalog.poses.filter((pose) => (allSeries || pose.systemId === system?.id) && pose.adult).length : 0;
+  }, [viewCatalog, system, allSeries, query, category, angle, showAdult]);
+  const hiddenAdult = viewCatalog ? viewCatalog.poses.filter((pose) => (allSeries || pose.systemId === system?.id) && pose.adult).length : 0;
   function setPerspective(next) {
     setAngle(next);
     setCardViews({});
@@ -12549,7 +12633,7 @@ function PoseBrowser({
           setSystemId("all");
           setCategory("全部");
         }, children: "全部" }),
-        catalog?.systems.map((item) => {
+        viewCatalog?.systems.map((item) => {
           const active = !customSection && !allSeries && item.id === system?.id;
           return /* @__PURE__ */ (0, import_jsx_runtime28.jsx)(
             SeriesPill,
@@ -12771,7 +12855,7 @@ function PoseCard({
           type: "button",
           className: "absolute right-2 bottom-2 rounded-full bg-black/60 px-2 py-0.5 text-[11px] text-white",
           onClick: onPreview,
-          children: "看线稿"
+          children: pose.plate === "illustration" ? "看参考" : "看线稿"
         }
       )
     ] }),
@@ -12779,7 +12863,11 @@ function PoseCard({
       /* @__PURE__ */ (0, import_jsx_runtime28.jsx)("h3", { className: "min-w-0 flex-1 truncate text-sm leading-5 font-medium", title: pose.name, children: pose.name }),
       /* @__PURE__ */ (0, import_jsx_runtime28.jsx)("span", { className: "max-w-[46%] shrink-0 truncate pt-0.5 text-right text-xs text-muted-foreground", title: pose.category, children: pose.category })
     ] }),
-    /* @__PURE__ */ (0, import_jsx_runtime28.jsx)("div", { role: "group", "aria-label": `${pose.name}的视角`, className: `grid gap-1 px-2 pb-2.5 ${columns}`, children: views.map((item) => {
+    pose.credit ? /* @__PURE__ */ (0, import_jsx_runtime28.jsxs)("p", { className: "truncate px-2.5 pb-1 text-[10px] leading-4 text-muted-foreground", title: pose.sourceUrl, children: [
+      "原站 ",
+      pose.author ? `${pose.credit} · ${pose.author}` : pose.credit
+    ] }) : null,
+    views.length > 1 ? /* @__PURE__ */ (0, import_jsx_runtime28.jsx)("div", { role: "group", "aria-label": `${pose.name}的视角`, className: `grid gap-1 px-2 pb-2.5 ${columns}`, children: views.map((item) => {
       const active = item.id === view.id;
       return /* @__PURE__ */ (0, import_jsx_runtime28.jsxs)(
         "button",
@@ -12797,7 +12885,7 @@ function PoseCard({
         },
         item.id
       );
-    }) })
+    }) }) : null
   ] });
 }
 function PoseSkeleton() {
@@ -13298,6 +13386,12 @@ function StudioFrame({ embedded }) {
   const [settings, setSettings] = (0, import_react14.useState)(DEFAULT_SETTINGS);
   const [settingsReady, setSettingsReady] = (0, import_react14.useState)(false);
   const [library, setLibrary] = (0, import_react14.useState)("poses");
+  const [realm, setRealm] = (0, import_react14.useState)("live");
+  const [animeCatalog, setAnimeCatalog] = (0, import_react14.useState)(null);
+  const [animeCatalogError, setAnimeCatalogError] = (0, import_react14.useState)("");
+  const [animeLoading, setAnimeLoading] = (0, import_react14.useState)(true);
+  const [animeCostumes, setAnimeCostumes] = (0, import_react14.useState)([]);
+  const [animeFaces, setAnimeFaces] = (0, import_react14.useState)([]);
   const [costume, setCostume] = (0, import_react14.useState)(null);
   const [face, setFace] = (0, import_react14.useState)(null);
   const [costumeFocus, setCostumeFocus] = (0, import_react14.useState)(null);
@@ -13346,6 +13440,38 @@ function StudioFrame({ embedded }) {
   (0, import_react14.useEffect)(() => {
     loadCatalog();
   }, [loadCatalog]);
+  (0, import_react14.useEffect)(() => {
+    const controller = new AbortController();
+    fetch(studioUrl(basePath, "/api/anime/poses"), { signal: controller.signal }).then(async (response) => {
+      if (!response.ok) throw new Error("二次元姿势没有加载出来");
+      return response.json();
+    }).then((payload) => {
+      setAnimeCatalog(payload);
+      setAnimeCatalogError("");
+    }).catch((error) => {
+      if (error instanceof DOMException && error.name === "AbortError") return;
+      setAnimeCatalogError(error instanceof Error ? error.message : "二次元姿势没有加载出来");
+    }).finally(() => setAnimeLoading(false));
+    return () => controller.abort();
+  }, [basePath]);
+  (0, import_react14.useEffect)(() => {
+    const controller = new AbortController();
+    fetch(studioUrl(basePath, "/api/anime/costumes"), { signal: controller.signal }).then(async (response) => {
+      if (!response.ok) throw new Error("二次元服装没有加载出来");
+      return response.json();
+    }).then((payload) => setAnimeCostumes(Array.isArray(payload.costumes) ? payload.costumes : [])).catch((error) => {
+      if (error instanceof DOMException && error.name === "AbortError") return;
+      setAnimeCostumes([]);
+    });
+    fetch(studioUrl(basePath, "/api/anime/faces"), { signal: controller.signal }).then(async (response) => {
+      if (!response.ok) throw new Error("二次元脸部没有加载出来");
+      return response.json();
+    }).then((payload) => setAnimeFaces(Array.isArray(payload.faces) ? payload.faces : [])).catch((error) => {
+      if (error instanceof DOMException && error.name === "AbortError") return;
+      setAnimeFaces([]);
+    });
+    return () => controller.abort();
+  }, [basePath]);
   (0, import_react14.useEffect)(() => {
     const controller = new AbortController();
     fetch(studioUrl(basePath, "/api/costumes"), { signal: controller.signal }).then(async (response) => {
@@ -13564,6 +13690,7 @@ function StudioFrame({ embedded }) {
   const poseById = (0, import_react14.useMemo)(() => {
     const map = /* @__PURE__ */ new Map();
     catalog?.poses.forEach((pose) => map.set(pose.id, pose));
+    animeCatalog?.poses.forEach((pose) => map.set(pose.id, pose));
     for (const asset of customPoses) {
       map.set(asset.id, {
         id: asset.id,
@@ -13578,7 +13705,7 @@ function StudioFrame({ embedded }) {
       });
     }
     return map;
-  }, [catalog, customPoses]);
+  }, [catalog, animeCatalog, customPoses]);
   const chosen = (0, import_react14.useMemo)(() => {
     return Object.entries(selected).flatMap(([poseId, viewId]) => {
       const pose = poseById.get(poseId);
@@ -13671,8 +13798,9 @@ function StudioFrame({ embedded }) {
     setSelected((current) => ({ ...current, [pose.id]: view.id }));
   }
   function randomizeCombo() {
-    if (!catalog) {
-      setLimitNote(catalogError || "姿势目录还没加载出来。");
+    const poseSource = realm === "anime" ? animeCatalog : catalog;
+    if (!poseSource) {
+      setLimitNote(realm === "anime" ? animeCatalogError || "二次元姿势还没加载出来。" : catalogError || "姿势目录还没加载出来。");
       return;
     }
     if (!costumeCatalogReady) {
@@ -13692,7 +13820,7 @@ function StudioFrame({ embedded }) {
       return;
     }
     const poses = [
-      ...catalog.poses,
+      ...poseSource.poses,
       ...customPoses.map((asset) => ({
         id: asset.id,
         adult: asset.adult,
@@ -13700,7 +13828,7 @@ function StudioFrame({ embedded }) {
       }))
     ];
     const costumes = [
-      ...costumeCatalog,
+      ...realm === "anime" ? animeCostumes : costumeCatalog,
       ...customCostumes.map((asset) => ({
         id: asset.id,
         label: asset.label,
@@ -13708,14 +13836,16 @@ function StudioFrame({ embedded }) {
         adult: asset.adult
       }))
     ];
-    const pick = pickRandomCombo({ poses, costumes, faces: faceCatalog, showAdult: settings.showAdult });
+    const pick = pickRandomCombo({ poses, costumes, faces: realm === "anime" ? animeFaces : faceCatalog, showAdult: settings.showAdult });
     if (!pick.ok || !pick.pose || !pick.view || !pick.costume || !pick.face) {
       setLimitNote(pick.message);
       return;
     }
     setLimitNote("");
+    const pickedCostume = pick.costume;
     setSelected({ [pick.pose.id]: pick.view.id });
-    setCostume({ id: pick.costume.id, label: pick.costume.label, keywords: pick.costume.keywords });
+    const wornPlate = [...costumeCatalog, ...animeCostumes].find((item) => item.id === pickedCostume.id)?.plate === "worn";
+    setCostume({ id: pickedCostume.id, label: pickedCostume.label, keywords: pickedCostume.keywords, ...wornPlate ? { plate: "worn" } : {} });
     setFace({
       id: pick.face.id,
       section: pick.face.section ?? "",
@@ -13738,7 +13868,8 @@ function StudioFrame({ embedded }) {
     setRunning(true);
     setRunError("");
     setResults([]);
-    const costumePick = costume ? { id: costume.id, label: costume.label, keywords: costume.keywords } : null;
+    const storedPlate = costume ? [...costumeCatalog, ...animeCostumes].find((item) => item.id === costume.id)?.plate : void 0;
+    const costumePick = costume ? { id: costume.id, label: costume.label, keywords: costume.keywords, ...costume.plate || storedPlate ? { plate: costume.plate || storedPlate } : {} } : null;
     const bodyBase = {
       engine: settings.engine,
       provider: settings.provider,
@@ -13756,7 +13887,7 @@ function StudioFrame({ embedded }) {
     const generateRequest = async (ids, mode) => {
       const customReferences = await customReferenceBody(ids, costume?.id ?? "", customPoses, customCostumes);
       if (settings.engine === "comfyui") {
-        return resultCards(await requestComfyGenerate(basePath, settings, { ...bodyBase, mode, items: comfyItems(ids), costume, face, customReferences }, controller.signal));
+        return resultCards(await requestComfyGenerate(basePath, settings, { ...bodyBase, mode, items: comfyItems(ids), costume: costumePick, face, customReferences }, controller.signal));
       }
       return requestGenerate(basePath, { ...bodyBase, mode, viewIds: ids, customReferences }, controller.signal);
     };
@@ -13964,6 +14095,30 @@ function StudioFrame({ embedded }) {
     /* @__PURE__ */ (0, import_jsx_runtime33.jsxs)("header", { className: "flex min-h-14 shrink-0 flex-wrap items-center gap-x-3 gap-y-2 border-b bg-white px-3 py-2 @min-[640px]/studio:px-4 @min-[768px]/studio:px-5", children: [
       /* @__PURE__ */ (0, import_jsx_runtime33.jsx)(WhaleMark, { className: "size-8 shrink-0" }),
       /* @__PURE__ */ (0, import_jsx_runtime33.jsx)("h1", { className: "shrink-0 text-base font-semibold", children: "澜姿" }),
+      /* @__PURE__ */ (0, import_jsx_runtime33.jsxs)("div", { className: "flex shrink-0 rounded-lg bg-muted p-1", role: "tablist", "aria-label": "图像类型", children: [
+        /* @__PURE__ */ (0, import_jsx_runtime33.jsx)(
+          "button",
+          {
+            type: "button",
+            role: "tab",
+            "aria-selected": realm === "live",
+            onClick: () => setRealm("live"),
+            className: `rounded-md px-3 py-1 text-sm whitespace-nowrap ${realm === "live" ? "bg-white font-medium shadow-sm" : "text-muted-foreground"}`,
+            children: "真人"
+          }
+        ),
+        /* @__PURE__ */ (0, import_jsx_runtime33.jsx)(
+          "button",
+          {
+            type: "button",
+            role: "tab",
+            "aria-selected": realm === "anime",
+            onClick: () => setRealm("anime"),
+            className: `rounded-md px-3 py-1 text-sm whitespace-nowrap ${realm === "anime" ? "bg-white font-medium shadow-sm" : "text-muted-foreground"}`,
+            children: "二次元"
+          }
+        )
+      ] }),
       /* @__PURE__ */ (0, import_jsx_runtime33.jsxs)("div", { className: "flex shrink-0 rounded-lg bg-muted p-1", role: "tablist", "aria-label": "图库", children: [
         /* @__PURE__ */ (0, import_jsx_runtime33.jsx)(
           "button",
@@ -14058,6 +14213,7 @@ function StudioFrame({ embedded }) {
       /* @__PURE__ */ (0, import_jsx_runtime33.jsx)("main", { className: "order-2 min-h-0 min-w-0 flex-1 overflow-y-auto @min-[1024px]/studio:order-none @min-[1024px]/studio:pb-8", children: library === "faces" ? /* @__PURE__ */ (0, import_jsx_runtime33.jsx)(
         FaceBrowser,
         {
+          realm,
           selectedId: face?.id ?? null,
           onSelect: (item) => setFace((current) => current?.id === item.id ? null : {
             id: item.id,
@@ -14070,9 +14226,10 @@ function StudioFrame({ embedded }) {
       ) : library === "poses" ? /* @__PURE__ */ (0, import_jsx_runtime33.jsx)(
         PoseBrowser,
         {
-          catalog,
-          loading,
-          error: catalogError,
+          realm,
+          catalog: realm === "anime" ? animeCatalog : catalog,
+          loading: realm === "anime" ? animeLoading : loading,
+          error: realm === "anime" ? animeCatalogError : catalogError,
           onRetry: loadCatalog,
           showAdult: settings.showAdult,
           requestedSystem,
@@ -14090,12 +14247,13 @@ function StudioFrame({ embedded }) {
       ) : /* @__PURE__ */ (0, import_jsx_runtime33.jsx)(
         CostumeBrowser,
         {
+          realm,
           showAdult: settings.showAdult,
           focusCategory: costumeFocus,
           onFocusApplied: clearCostumeFocus,
           onRequestAdult: (categoryId) => setAdultAsk(`costume:${categoryId}`),
           selectedId: costume?.id ?? null,
-          onSelect: (item) => setCostume((current) => current?.id === item.id ? null : { id: item.id, label: item.label, keywords: item.keywords }),
+          onSelect: (item) => setCostume((current) => current?.id === item.id ? null : { id: item.id, label: item.label, keywords: item.keywords, ...item.plate ? { plate: item.plate } : {} }),
           customCostumes: customCostumeCards,
           onSaveCustom: (draft) => saveCustom("costume", draft),
           onDeleteCustom: (id) => void removeCustomCostume(id),
@@ -16872,7 +17030,7 @@ function PoseStudio() {
       --shimmer-text-fill: initial;
     }
   }
-}\r
+}
 `;
       shadow.appendChild(style);
     }
