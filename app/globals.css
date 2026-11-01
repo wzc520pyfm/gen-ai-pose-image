@@ -60,8 +60,9 @@
   --primary-foreground: #f8fafc;
   --secondary: oklch(0.96 0.006 260);
   --secondary-foreground: oklch(0.28 0.02 262);
-  --muted: oklch(0.96 0.006 260);
-  --muted-foreground: oklch(0.48 0.02 262);
+  /* HeroUI uses --muted as muted text (tabs, placeholders), not as a fill. */
+  --muted: oklch(0.46 0.02 262);
+  --muted-foreground: var(--muted);
   --accent: #2563eb;
   --accent-foreground: #f8fafc;
   --destructive: oklch(0.55 0.2 25);
@@ -73,6 +74,12 @@
   --surface-foreground: var(--card-foreground);
   --overlay: var(--popover);
   --overlay-foreground: var(--popover-foreground);
+  --field-background: var(--secondary);
+  --field-foreground: var(--foreground);
+  --field-placeholder: var(--muted);
+  --field-border: var(--border);
+  --field-hover: color-mix(in oklch, var(--foreground) 5%, var(--secondary));
+  --field-focus: var(--field-background);
   --lanzi-rail: #0f172a;
   --lanzi-paper: #ffffff;
   color-scheme: light;
@@ -92,8 +99,8 @@
   --primary-foreground: #f8fafc;
   --secondary: oklch(0.3 0.016 262);
   --secondary-foreground: oklch(0.97 0.004 260);
-  --muted: oklch(0.3 0.016 262);
-  --muted-foreground: oklch(0.76 0.02 262);
+  --muted: oklch(0.82 0.015 262);
+  --muted-foreground: var(--muted);
   --accent: #2563eb;
   --accent-foreground: #f8fafc;
   --destructive: oklch(0.7 0.19 22);
@@ -104,9 +111,12 @@
   --surface-foreground: var(--card-foreground);
   --overlay: var(--popover);
   --overlay-foreground: var(--popover-foreground);
-  --field-background: oklch(0.2 0.012 262);
+  --field-background: var(--secondary);
   --field-foreground: var(--foreground);
-  --field-placeholder: var(--muted-foreground);
+  --field-placeholder: var(--muted);
+  --field-border: var(--border);
+  --field-hover: color-mix(in oklch, var(--foreground) 8%, var(--secondary));
+  --field-focus: var(--field-background);
   --segment: oklch(0.32 0.016 262);
   --segment-foreground: var(--foreground);
   --separator: oklch(1 0 0 / 14%);

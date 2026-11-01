@@ -12,8 +12,12 @@ import {
 
 export function useStudioTheme() {
   const { portalContainer } = useStudioEnv()
-  const [preference, setPreference] = useState<StudioThemePreference>(() => loadStudioTheme())
+  const [preference, setPreference] = useState<StudioThemePreference>("system")
   const [systemDark, setSystemDark] = useState(false)
+
+  useEffect(() => {
+    setPreference(loadStudioTheme())
+  }, [])
 
   useEffect(() => {
     const media = window.matchMedia("(prefers-color-scheme: dark)")

@@ -79,7 +79,7 @@ export function SettingsDialog({
             <Button variant={local ? "primary" : "outline"} onPress={() => patch({ engine: "comfyui" })}>ComfyUI</Button>
           </div>
           {local ? (
-            <div className="grid gap-2 rounded-xl bg-muted p-3 text-sm">
+            <div className="grid gap-2 rounded-xl bg-secondary p-3 text-sm">
               <p>统一换装与姿势工作流：选择服装、姿势或两者，网页自动切换分支。拼图逐格生成后排版，无需生图 API Key。</p>
               <Field label="ComfyUI 地址">
                 <Input value={settings.comfyuiURL} onChange={(event) => patch({ comfyuiURL: event.target.value })} placeholder="http://127.0.0.1:8188 或 https://comfy.example.com" autoComplete="off" />
@@ -111,7 +111,7 @@ export function SettingsDialog({
                   rel="noopener noreferrer"
                   aria-label="去申请 API Key"
                   title="去申请 API Key"
-                  className="inline-flex size-5 items-center justify-center rounded-md text-muted-foreground hover:bg-muted hover:text-foreground"
+                  className="inline-flex size-5 items-center justify-center rounded-md text-muted-foreground hover:bg-secondary hover:text-foreground"
                 >
                   <ExternalLink className="size-3.5" />
                 </a>
@@ -152,7 +152,7 @@ export function SettingsDialog({
             <Button variant={settings.mode === "each" ? "primary" : "outline"} onPress={() => patch({ mode: "each" })}>逐张</Button>
             <Button variant={settings.mode === "sheet" ? "primary" : "outline"} onPress={() => patch({ mode: "sheet" })}>拼成一张</Button>
           </div>
-          <div className="flex items-center justify-between gap-3 rounded-xl bg-muted px-3 py-3 text-sm">
+          <div className="flex items-center justify-between gap-3 rounded-xl bg-secondary px-3 py-3 text-sm">
             <span>
               <span className="block font-medium">违禁词优化</span>
               <span className="mt-1 block text-xs leading-5 text-muted-foreground">关闭时直接写不要头、不要腿、不要皮肤。打开后改成委婉说法，避开审核敏感词。</span>
@@ -169,7 +169,7 @@ export function SettingsDialog({
               </Switch.Content>
             </Switch>
           </div>
-          <div className="flex items-center justify-between gap-3 rounded-xl bg-muted px-3 py-3 text-sm">
+          <div className="flex items-center justify-between gap-3 rounded-xl bg-secondary px-3 py-3 text-sm">
             <span>
               <span className="block font-medium">显示成人向姿势</span>
               <span className="mt-1 block text-xs leading-5 text-muted-foreground">性感系、双人缠绵，以及上半身里的大胆分类。参考图仍是结构线稿，默认继续保持服装。</span>

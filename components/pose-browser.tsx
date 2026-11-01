@@ -232,7 +232,7 @@ export function PoseBrowser({
           disallowEmptySelection
           selectedKeys={[seriesKey]}
           onSelectionChange={chooseSeries}
-          className="flex flex-wrap gap-1.5"
+          className="w-full max-w-full flex-wrap gap-0"
         >
           <ToggleButton id="all">全部 {visiblePoseCount}</ToggleButton>
           {catalog?.systems.map((item) => (
@@ -463,7 +463,7 @@ function PoseCard({
               onMouseEnter={() => onChoose(item)}
               onFocus={() => onChoose(item)}
               onClick={() => onChoose(item)}
-              className={`flex min-w-0 flex-col items-center gap-0.5 rounded-md px-0.5 pt-0.5 pb-1 ${active ? "ring-2 ring-foreground" : "ring-1 ring-border hover:bg-muted"}`}
+              className={`flex min-w-0 flex-col items-center gap-0.5 rounded-md px-0.5 pt-0.5 pb-1 ${active ? "ring-2 ring-foreground" : "ring-1 ring-border hover:bg-secondary"}`}
             >
               <span className="block aspect-[3/4] w-full overflow-hidden rounded-sm lanzi-paper">
                 <PoseFigure view={item} alt="" size="thumb" compact />

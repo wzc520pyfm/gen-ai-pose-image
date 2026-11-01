@@ -69,7 +69,7 @@ export function HistoryPanel({
                     </ul>
                   ) : null}
                   {current.extraPrompt ? <p className="text-sm leading-6">补充描述：{current.extraPrompt}</p> : null}
-                  <pre className="max-h-40 overflow-auto rounded-xl bg-muted px-3 py-2 text-xs leading-5 whitespace-pre-wrap">{current.prompt}</pre>
+                  <pre className="max-h-40 overflow-auto rounded-xl bg-secondary px-3 py-2 text-xs leading-5 whitespace-pre-wrap">{current.prompt}</pre>
                 </Modal.Body>
                 <Modal.Footer>
                   <Button type="button" onPress={() => { onReuse(current); setOpenId(null) }}>再用</Button>

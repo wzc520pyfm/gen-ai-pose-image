@@ -152,7 +152,7 @@ export function Composer({
       ) : null}
 
       {selected.length === 0 && !(localMode && costume) ? (
-        <p className="rounded-xl bg-muted px-3 py-4 text-sm leading-6 text-muted-foreground">
+        <p className="rounded-xl bg-secondary px-3 py-4 text-sm leading-6 text-muted-foreground">
           从中间点选一个或多个姿势。每一张成图都会带上{characters.length ? "你导入的模特" : builtinName}，只把身体换成对应的线稿姿势。要换衣服，先到「服装」里点一套。要换脸或表情，先到「脸部」里点一张。
         </p>
       ) : (
@@ -210,7 +210,7 @@ export function Composer({
             </button>
           </div>
           {prompts.map((item) => (
-            <details key={item.viewId} className="rounded-xl bg-muted/70 px-3 py-2">
+            <details key={item.viewId} className="rounded-xl bg-secondary/70 px-3 py-2">
               <summary className="cursor-pointer text-sm">{item.title}</summary>
               <pre className="mt-2 max-h-48 overflow-auto text-xs leading-5 whitespace-pre-wrap">{item.prompt}</pre>
             </details>
@@ -226,7 +226,7 @@ export function Composer({
           onChange={(event) => onExtraPrompt(event.target.value)}
           placeholder="例如：海边黄昏，风吹起外套。不写也可以。"
           maxLength={2000}
-          className="min-h-20 bg-card"
+          className="min-h-20 w-full"
         />
       </label>
 

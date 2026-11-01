@@ -27159,7 +27159,7 @@ function HistoryPanel({
             "补充描述：",
             current.extraPrompt
           ] }) : null,
-          /* @__PURE__ */ (0, import_jsx_runtime33.jsx)("pre", { className: "max-h-40 overflow-auto rounded-xl bg-muted px-3 py-2 text-xs leading-5 whitespace-pre-wrap", children: current.prompt })
+          /* @__PURE__ */ (0, import_jsx_runtime33.jsx)("pre", { className: "max-h-40 overflow-auto rounded-xl bg-secondary px-3 py-2 text-xs leading-5 whitespace-pre-wrap", children: current.prompt })
         ] }),
         /* @__PURE__ */ (0, import_jsx_runtime33.jsxs)(Modal2.Footer, { children: [
           /* @__PURE__ */ (0, import_jsx_runtime33.jsx)(Button2, { type: "button", onPress: () => {
@@ -27296,7 +27296,7 @@ function Composer({
       ] }),
       /* @__PURE__ */ (0, import_jsx_runtime34.jsx)("button", { type: "button", className: "px-1 text-xs text-muted-foreground", onClick: onClearCostume, "aria-label": `取消服装 ${costume.id}`, children: "取消" })
     ] }) : null,
-    selected.length === 0 && !(localMode && costume) ? /* @__PURE__ */ (0, import_jsx_runtime34.jsxs)("p", { className: "rounded-xl bg-muted px-3 py-4 text-sm leading-6 text-muted-foreground", children: [
+    selected.length === 0 && !(localMode && costume) ? /* @__PURE__ */ (0, import_jsx_runtime34.jsxs)("p", { className: "rounded-xl bg-secondary px-3 py-4 text-sm leading-6 text-muted-foreground", children: [
       "从中间点选一个或多个姿势。每一张成图都会带上",
       characters.length ? "你导入的模特" : builtinName,
       "，只把身体换成对应的线稿姿势。要换衣服，先到「服装」里点一套。要换脸或表情，先到「脸部」里点一张。"
@@ -27342,7 +27342,7 @@ ${item.prompt}`).join("\n\n")),
           }
         )
       ] }),
-      prompts.map((item) => /* @__PURE__ */ (0, import_jsx_runtime34.jsxs)("details", { className: "rounded-xl bg-muted/70 px-3 py-2", children: [
+      prompts.map((item) => /* @__PURE__ */ (0, import_jsx_runtime34.jsxs)("details", { className: "rounded-xl bg-secondary/70 px-3 py-2", children: [
         /* @__PURE__ */ (0, import_jsx_runtime34.jsx)("summary", { className: "cursor-pointer text-sm", children: item.title }),
         /* @__PURE__ */ (0, import_jsx_runtime34.jsx)("pre", { className: "mt-2 max-h-48 overflow-auto text-xs leading-5 whitespace-pre-wrap", children: item.prompt })
       ] }, item.viewId))
@@ -27357,7 +27357,7 @@ ${item.prompt}`).join("\n\n")),
           onChange: (event) => onExtraPrompt(event.target.value),
           placeholder: "例如：海边黄昏，风吹起外套。不写也可以。",
           maxLength: 2e3,
-          className: "min-h-20 bg-card"
+          className: "min-h-20 w-full"
         }
       )
     ] }),
@@ -27755,7 +27755,7 @@ function CustomReferencePanel({
               onChange: (event) => setDescription(event.target.value),
               placeholder: kind === "pose" ? "例如：单手叉腰，身体微侧" : "例如：米色风衣，腰带，长款",
               maxLength: 2e3,
-              className: "min-h-20 bg-card"
+              className: "min-h-20 w-full"
             }
           ),
           /* @__PURE__ */ (0, import_jsx_runtime35.jsx)(
@@ -27783,12 +27783,12 @@ function CustomReferencePanel({
                 setPrompt(event.target.value);
               },
               maxLength: 4e3,
-              className: "min-h-28 bg-card"
+              className: "min-h-28 w-full"
             }
           )
         ] }) : null,
         notice ? /* @__PURE__ */ (0, import_jsx_runtime35.jsx)("p", { className: "text-xs leading-5 text-muted-foreground", children: notice }) : null,
-        kind === "costume" && onChangeSettings ? /* @__PURE__ */ (0, import_jsx_runtime35.jsxs)("div", { className: "flex items-center justify-between gap-3 rounded-xl bg-muted px-3 py-3 text-sm", children: [
+        kind === "costume" && onChangeSettings ? /* @__PURE__ */ (0, import_jsx_runtime35.jsxs)("div", { className: "flex items-center justify-between gap-3 rounded-xl bg-secondary px-3 py-3 text-sm", children: [
           /* @__PURE__ */ (0, import_jsx_runtime35.jsxs)("span", { children: [
             /* @__PURE__ */ (0, import_jsx_runtime35.jsx)("span", { className: "block font-medium", children: "违禁词优化" }),
             /* @__PURE__ */ (0, import_jsx_runtime35.jsx)("span", { className: "mt-1 block text-xs leading-5 text-muted-foreground", children: "关闭时直接写不要头、不要腿、不要皮肤。打开后改成委婉说法，避开审核敏感词。切换后会按当前描述重新扩写。" })
@@ -27806,7 +27806,7 @@ function CustomReferencePanel({
             }
           )
         ] }) : null,
-        showAdult ? /* @__PURE__ */ (0, import_jsx_runtime35.jsxs)("div", { className: "flex items-center justify-between gap-3 rounded-xl bg-muted px-3 py-3 text-sm", children: [
+        showAdult ? /* @__PURE__ */ (0, import_jsx_runtime35.jsxs)("div", { className: "flex items-center justify-between gap-3 rounded-xl bg-secondary px-3 py-3 text-sm", children: [
           /* @__PURE__ */ (0, import_jsx_runtime35.jsx)("span", { children: "标成成人向参考。默认关闭，未打开成人向时不会用来出图。" }),
           /* @__PURE__ */ (0, import_jsx_runtime35.jsx)(
             Switch2,
@@ -28373,7 +28373,7 @@ function PoseBrowser({
           disallowEmptySelection: true,
           selectedKeys: [seriesKey],
           onSelectionChange: chooseSeries,
-          className: "flex flex-wrap gap-1.5",
+          className: "w-full max-w-full flex-wrap gap-0",
           children: [
             /* @__PURE__ */ (0, import_jsx_runtime38.jsxs)(ToggleButton2, { id: "all", children: [
               "全部 ",
@@ -28579,7 +28579,7 @@ function PoseCard({
           onMouseEnter: () => onChoose(item),
           onFocus: () => onChoose(item),
           onClick: () => onChoose(item),
-          className: `flex min-w-0 flex-col items-center gap-0.5 rounded-md px-0.5 pt-0.5 pb-1 ${active ? "ring-2 ring-foreground" : "ring-1 ring-border hover:bg-muted"}`,
+          className: `flex min-w-0 flex-col items-center gap-0.5 rounded-md px-0.5 pt-0.5 pb-1 ${active ? "ring-2 ring-foreground" : "ring-1 ring-border hover:bg-secondary"}`,
           children: [
             /* @__PURE__ */ (0, import_jsx_runtime38.jsx)("span", { className: "block aspect-[3/4] w-full overflow-hidden rounded-sm lanzi-paper", children: /* @__PURE__ */ (0, import_jsx_runtime38.jsx)(PoseFigure, { view: item, alt: "", size: "thumb", compact: true }) }),
             /* @__PURE__ */ (0, import_jsx_runtime38.jsx)("span", { className: `max-w-full truncate text-[10px] leading-4 ${active ? "font-medium text-foreground" : "text-muted-foreground"}`, children: item.angle })
@@ -28727,7 +28727,7 @@ function SettingsDialog({
         /* @__PURE__ */ (0, import_jsx_runtime39.jsx)(Button2, { variant: !local && settings.provider === "openai" ? "primary" : "outline", onPress: () => chooseProvider("openai"), children: "OpenAI" }),
         /* @__PURE__ */ (0, import_jsx_runtime39.jsx)(Button2, { variant: local ? "primary" : "outline", onPress: () => patch({ engine: "comfyui" }), children: "ComfyUI" })
       ] }),
-      local ? /* @__PURE__ */ (0, import_jsx_runtime39.jsxs)("div", { className: "grid gap-2 rounded-xl bg-muted p-3 text-sm", children: [
+      local ? /* @__PURE__ */ (0, import_jsx_runtime39.jsxs)("div", { className: "grid gap-2 rounded-xl bg-secondary p-3 text-sm", children: [
         /* @__PURE__ */ (0, import_jsx_runtime39.jsx)("p", { children: "统一换装与姿势工作流：选择服装、姿势或两者，网页自动切换分支。拼图逐格生成后排版，无需生图 API Key。" }),
         /* @__PURE__ */ (0, import_jsx_runtime39.jsx)(Field, { label: "ComfyUI 地址", children: /* @__PURE__ */ (0, import_jsx_runtime39.jsx)(Input2, { value: settings.comfyuiURL, onChange: (event) => patch({ comfyuiURL: event.target.value }), placeholder: "http://127.0.0.1:8188 或 https://comfy.example.com", autoComplete: "off" }) }),
         /* @__PURE__ */ (0, import_jsx_runtime39.jsx)(Field, { label: "访问令牌（可选）", hint: "仅保留在当前页面，刷新后重新填写。远程入口必须实际校验此 Bearer 令牌。", children: /* @__PURE__ */ (0, import_jsx_runtime39.jsx)(Input2, { type: "password", value: settings.comfyuiToken, onChange: (event) => patch({ comfyuiToken: event.target.value }), autoComplete: "off" }) }),
@@ -28751,7 +28751,7 @@ function SettingsDialog({
                 rel: "noopener noreferrer",
                 "aria-label": "去申请 API Key",
                 title: "去申请 API Key",
-                className: "inline-flex size-5 items-center justify-center rounded-md text-muted-foreground hover:bg-muted hover:text-foreground",
+                className: "inline-flex size-5 items-center justify-center rounded-md text-muted-foreground hover:bg-secondary hover:text-foreground",
                 children: /* @__PURE__ */ (0, import_jsx_runtime39.jsx)(ExternalLink, { className: "size-3.5" })
               }
             ) : null
@@ -28784,7 +28784,7 @@ function SettingsDialog({
         /* @__PURE__ */ (0, import_jsx_runtime39.jsx)(Button2, { variant: settings.mode === "each" ? "primary" : "outline", onPress: () => patch({ mode: "each" }), children: "逐张" }),
         /* @__PURE__ */ (0, import_jsx_runtime39.jsx)(Button2, { variant: settings.mode === "sheet" ? "primary" : "outline", onPress: () => patch({ mode: "sheet" }), children: "拼成一张" })
       ] }),
-      /* @__PURE__ */ (0, import_jsx_runtime39.jsxs)("div", { className: "flex items-center justify-between gap-3 rounded-xl bg-muted px-3 py-3 text-sm", children: [
+      /* @__PURE__ */ (0, import_jsx_runtime39.jsxs)("div", { className: "flex items-center justify-between gap-3 rounded-xl bg-secondary px-3 py-3 text-sm", children: [
         /* @__PURE__ */ (0, import_jsx_runtime39.jsxs)("span", { children: [
           /* @__PURE__ */ (0, import_jsx_runtime39.jsx)("span", { className: "block font-medium", children: "违禁词优化" }),
           /* @__PURE__ */ (0, import_jsx_runtime39.jsx)("span", { className: "mt-1 block text-xs leading-5 text-muted-foreground", children: "关闭时直接写不要头、不要腿、不要皮肤。打开后改成委婉说法，避开审核敏感词。" })
@@ -28799,7 +28799,7 @@ function SettingsDialog({
           }
         )
       ] }),
-      /* @__PURE__ */ (0, import_jsx_runtime39.jsxs)("div", { className: "flex items-center justify-between gap-3 rounded-xl bg-muted px-3 py-3 text-sm", children: [
+      /* @__PURE__ */ (0, import_jsx_runtime39.jsxs)("div", { className: "flex items-center justify-between gap-3 rounded-xl bg-secondary px-3 py-3 text-sm", children: [
         /* @__PURE__ */ (0, import_jsx_runtime39.jsxs)("span", { children: [
           /* @__PURE__ */ (0, import_jsx_runtime39.jsx)("span", { className: "block font-medium", children: "显示成人向姿势" }),
           /* @__PURE__ */ (0, import_jsx_runtime39.jsx)("span", { className: "mt-1 block text-xs leading-5 text-muted-foreground", children: "性感系、双人缠绵，以及上半身里的大胆分类。参考图仍是结构线稿，默认继续保持服装。" })
@@ -28970,8 +28970,11 @@ function applyStudioTheme(element, mode) {
 // lib/use-studio-theme.ts
 function useStudioTheme() {
   const { portalContainer } = useStudioEnv();
-  const [preference, setPreference] = (0, import_react174.useState)(() => loadStudioTheme());
+  const [preference, setPreference] = (0, import_react174.useState)("system");
   const [systemDark, setSystemDark] = (0, import_react174.useState)(false);
+  (0, import_react174.useEffect)(() => {
+    setPreference(loadStudioTheme());
+  }, []);
   (0, import_react174.useEffect)(() => {
     const media = window.matchMedia("(prefers-color-scheme: dark)");
     const update = () => setSystemDark(media.matches);
@@ -29990,7 +29993,7 @@ function StudioFrame({ embedded }) {
         /* @__PURE__ */ (0, import_jsx_runtime44.jsx)("p", { className: "text-sm text-muted-foreground", children: "澜姿发布在 npm，包名是 gen-ai-pose-image。在已经装好 Harness 的机器上执行下面的命令，重启后左侧栏会出现「澜姿 / 工作室」，Agent 也能直接调用姿势生图。" })
       ] }),
       /* @__PURE__ */ (0, import_jsx_runtime44.jsxs)(Modal2.Body, { className: "grid gap-3", children: [
-        /* @__PURE__ */ (0, import_jsx_runtime44.jsx)("pre", { className: "overflow-auto rounded-xl bg-muted p-3 text-xs leading-5", children: "dsh plugin --profile web add gen-ai-pose-image" }),
+        /* @__PURE__ */ (0, import_jsx_runtime44.jsx)("pre", { className: "overflow-auto rounded-xl bg-secondary p-3 text-xs leading-5", children: "dsh plugin --profile web add gen-ai-pose-image" }),
         /* @__PURE__ */ (0, import_jsx_runtime44.jsx)("p", { className: "text-xs leading-5 text-muted-foreground", children: "网页工作室要在设置里填自己的 API Key。Harness 插件出图时，用启动环境里的 POSE_MUSE_API_KEY。" })
       ] })
     ] }) }) }),
@@ -30707,6 +30710,9 @@ function PoseStudio() {
   .justify-center {
     justify-content: center;
   }
+  .gap-0 {
+    gap: 0px;
+  }
   .gap-0\\.5 {
     gap: calc(var(--spacing) * 0.5);
   }
@@ -30854,17 +30860,17 @@ function PoseStudio() {
   .bg-card {
     background-color: var(--card);
   }
-  .bg-muted {
-    background-color: var(--muted);
-  }
-  .bg-muted\\/70 {
-    background-color: var(--muted);
-    @supports (color: color-mix(in lab, red, red)) {
-      background-color: color-mix(in oklab, var(--muted) 70%, transparent);
-    }
-  }
   .bg-primary {
     background-color: var(--primary);
+  }
+  .bg-secondary {
+    background-color: var(--secondary);
+  }
+  .bg-secondary\\/70 {
+    background-color: var(--secondary);
+    @supports (color: color-mix(in lab, red, red)) {
+      background-color: color-mix(in oklab, var(--secondary) 70%, transparent);
+    }
   }
   .bg-slate-950 {
     background-color: var(--color-slate-950);
@@ -31140,8 +31146,8 @@ function PoseStudio() {
     animation-play-state: running;
   }
   @media (hover: hover) {
-    .hover\\:bg-muted:hover {
-      background-color: var(--muted);
+    .hover\\:bg-secondary:hover {
+      background-color: var(--secondary);
     }
     .hover\\:bg-white\\/10:hover {
       background-color: color-mix(in srgb, #fff 10%, transparent);
@@ -43111,8 +43117,8 @@ function PoseStudio() {
   --primary-foreground: #f8fafc;
   --secondary: oklch(0.96 0.006 260);
   --secondary-foreground: oklch(0.28 0.02 262);
-  --muted: oklch(0.96 0.006 260);
-  --muted-foreground: oklch(0.48 0.02 262);
+  --muted: oklch(0.46 0.02 262);
+  --muted-foreground: var(--muted);
   --accent: #2563eb;
   --accent-foreground: #f8fafc;
   --destructive: oklch(0.55 0.2 25);
@@ -43124,6 +43130,15 @@ function PoseStudio() {
   --surface-foreground: var(--card-foreground);
   --overlay: var(--popover);
   --overlay-foreground: var(--popover-foreground);
+  --field-background: var(--secondary);
+  --field-foreground: var(--foreground);
+  --field-placeholder: var(--muted);
+  --field-border: var(--border);
+  --field-hover: var(--foreground);
+  @supports (color: color-mix(in lab, red, red)) {
+    --field-hover: color-mix(in oklch, var(--foreground) 5%, var(--secondary));
+  }
+  --field-focus: var(--field-background);
   --lanzi-rail: #0f172a;
   --lanzi-paper: #ffffff;
   color-scheme: light;
@@ -43139,8 +43154,8 @@ function PoseStudio() {
   --primary-foreground: #f8fafc;
   --secondary: oklch(0.3 0.016 262);
   --secondary-foreground: oklch(0.97 0.004 260);
-  --muted: oklch(0.3 0.016 262);
-  --muted-foreground: oklch(0.76 0.02 262);
+  --muted: oklch(0.82 0.015 262);
+  --muted-foreground: var(--muted);
   --accent: #2563eb;
   --accent-foreground: #f8fafc;
   --destructive: oklch(0.7 0.19 22);
@@ -43151,9 +43166,15 @@ function PoseStudio() {
   --surface-foreground: var(--card-foreground);
   --overlay: var(--popover);
   --overlay-foreground: var(--popover-foreground);
-  --field-background: oklch(0.2 0.012 262);
+  --field-background: var(--secondary);
   --field-foreground: var(--foreground);
-  --field-placeholder: var(--muted-foreground);
+  --field-placeholder: var(--muted);
+  --field-border: var(--border);
+  --field-hover: var(--foreground);
+  @supports (color: color-mix(in lab, red, red)) {
+    --field-hover: color-mix(in oklch, var(--foreground) 8%, var(--secondary));
+  }
+  --field-focus: var(--field-background);
   --segment: oklch(0.32 0.016 262);
   --segment-foreground: var(--foreground);
   --separator: oklch(1 0 0 / 14%);

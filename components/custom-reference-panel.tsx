@@ -291,7 +291,7 @@ export function CustomReferencePanel({
                 onChange={(event) => setDescription(event.target.value)}
                 placeholder={kind === "pose" ? "例如：单手叉腰，身体微侧" : "例如：米色风衣，腰带，长款"}
                 maxLength={2000}
-                className="min-h-20 bg-card"
+                className="min-h-20 w-full"
               />
               <Button
                 type="button"
@@ -316,13 +316,13 @@ export function CustomReferencePanel({
                   setPrompt(event.target.value)
                 }}
                 maxLength={4000}
-                className="min-h-28 bg-card"
+                className="min-h-28 w-full"
               />
             </label>
           ) : null}
           {notice ? <p className="text-xs leading-5 text-muted-foreground">{notice}</p> : null}
           {kind === "costume" && onChangeSettings ? (
-            <div className="flex items-center justify-between gap-3 rounded-xl bg-muted px-3 py-3 text-sm">
+            <div className="flex items-center justify-between gap-3 rounded-xl bg-secondary px-3 py-3 text-sm">
               <span>
                 <span className="block font-medium">违禁词优化</span>
                 <span className="mt-1 block text-xs leading-5 text-muted-foreground">关闭时直接写不要头、不要腿、不要皮肤。打开后改成委婉说法，避开审核敏感词。切换后会按当前描述重新扩写。</span>
@@ -344,7 +344,7 @@ export function CustomReferencePanel({
             </div>
           ) : null}
           {showAdult ? (
-            <div className="flex items-center justify-between gap-3 rounded-xl bg-muted px-3 py-3 text-sm">
+            <div className="flex items-center justify-between gap-3 rounded-xl bg-secondary px-3 py-3 text-sm">
               <span>标成成人向参考。默认关闭，未打开成人向时不会用来出图。</span>
               <Switch
                 isSelected={adult}
