@@ -386,7 +386,7 @@ export function PoseBrowser({
                   <p className="text-sm text-muted-foreground">{preview.pose.code} · {preview.pose.system} · {preview.pose.category} · {preview.view.angle}</p>
                 </Modal.Header>
                 <Modal.Body>
-                  <div className="mx-auto aspect-[3/4] w-full max-w-sm bg-white">
+                  <div className="mx-auto aspect-[3/4] w-full max-w-sm lanzi-paper">
                     <PoseFigure view={preview.view} alt={preview.pose.name} size="full" />
                   </div>
                   <div className="mt-3 flex flex-wrap gap-1.5">
@@ -440,7 +440,7 @@ function PoseCard({
   const columns = THUMB_COLS[Math.min(views.length, 5)] ?? "grid-cols-5"
   return (
     <Card className={`min-w-0 shadow-sm ${selected ? "border-primary ring-2 ring-primary/25" : "border-border"}`}>
-      <Card.Header className="relative aspect-[3/4] overflow-hidden bg-white p-0">
+      <Card.Header className="relative aspect-[3/4] overflow-hidden lanzi-paper p-0">
         <button type="button" className="block h-full w-full" onClick={onActivate} aria-pressed={selected}>
           <PoseFigure key={view.id} view={view} alt={`${pose.name}，${view.angle}`} />
         </button>
@@ -465,7 +465,7 @@ function PoseCard({
               onClick={() => onChoose(item)}
               className={`flex min-w-0 flex-col items-center gap-0.5 rounded-md px-0.5 pt-0.5 pb-1 ${active ? "ring-2 ring-foreground" : "ring-1 ring-border hover:bg-muted"}`}
             >
-              <span className="block aspect-[3/4] w-full overflow-hidden rounded-sm bg-white">
+              <span className="block aspect-[3/4] w-full overflow-hidden rounded-sm lanzi-paper">
                 <PoseFigure view={item} alt="" size="thumb" compact />
               </span>
               <span className={`max-w-full truncate text-[10px] leading-4 ${active ? "font-medium text-foreground" : "text-muted-foreground"}`}>{item.angle}</span>

@@ -1,5 +1,7 @@
 # 澜姿 HeroUI 一屏工作台重构 — Design Spec
 
+> **Shipping status:** Layouts A, B, and D are withdrawn. The studio ships as layout C only, with light and dark theme switching. `lanzi.studio.layout` is cleared on load. The A–D region maps below are historical.
+
 **Date:** 2026-11-01  
 **Repo:** `gen-ai-pose-image`（Web Next studio + DeepSeek Harness 插件）  
 **Status:** Approved in brainstorm; awaiting final user review of this doc before implementation plan

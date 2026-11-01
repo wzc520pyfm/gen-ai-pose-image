@@ -4,7 +4,6 @@
 
 import { Download, Sparkles } from "lucide-react"
 import { Button, Spinner, TextArea } from "@heroui/react"
-import { generateBlocked } from "@/shared/studio-recipe.mjs"
 import { HistoryPanel, type HistoryView } from "@/components/history-panel"
 import type { StoredCharacter } from "@/lib/characters"
 import type { AspectRatio, GenerateMode, PromptCard } from "@/lib/types"
@@ -119,7 +118,7 @@ export function Composer({
               variant="outline"
               isDisabled={running}
               onPress={onRandom}
-              className="border-[#fb7185]/50 bg-[#fff1f2] text-[#be123c] hover:bg-[#ffe4e6]"
+              className="lanzi-coral"
             >
               随机组合
             </Button>
@@ -132,7 +131,7 @@ export function Composer({
 
       {face ? (
         <div className="flex items-center gap-2 rounded-xl border border-primary/40 bg-card px-2 py-1.5">
-          <img src={faceThumb} alt="" className="h-14 w-11 rounded-md bg-white object-cover" />
+          <img src={faceThumb} alt="" className="h-14 w-11 rounded-md lanzi-paper object-cover" />
           <span className="min-w-0 flex-1">
             <span className="block truncate text-sm">脸部 {face.id}</span>
             <span className="line-clamp-2 text-xs text-muted-foreground">{faceCaption || "脸部参考"}</span>
@@ -143,7 +142,7 @@ export function Composer({
 
       {costume ? (
         <div className="flex items-center gap-2 rounded-xl border border-primary/40 bg-card px-2 py-1.5">
-          <img src={costumeThumb} alt="" className="h-14 w-10 rounded-md bg-white object-contain" />
+          <img src={costumeThumb} alt="" className="h-14 w-10 rounded-md lanzi-paper object-contain" />
           <span className="min-w-0 flex-1">
             <span className="block truncate text-sm">换成 {costume.id}</span>
             <span className="line-clamp-2 text-xs text-muted-foreground">{costume.label} · {costume.keywords}</span>
@@ -160,7 +159,7 @@ export function Composer({
         <ul className="flex max-h-40 flex-col gap-2 overflow-auto">
           {selected.map((item) => (
             <li key={item.poseId} className="flex items-center gap-2 rounded-xl border bg-card px-2 py-1.5">
-              <img src={poseThumb(item.viewId, item.thumbSrc)} alt="" className="h-12 w-9 rounded-md bg-white object-contain" />
+              <img src={poseThumb(item.viewId, item.thumbSrc)} alt="" className="h-12 w-9 rounded-md lanzi-paper object-contain" />
               <span className="min-w-0 flex-1">
                 <span className="block truncate text-sm">{item.title}</span>
                 <span className="text-xs text-muted-foreground">{item.angle}</span>
@@ -177,14 +176,14 @@ export function Composer({
           <div className={`mt-2 grid items-center gap-2 ${face || costume ? (face && costume ? "grid-cols-4" : "grid-cols-3") : "grid-cols-[1fr_auto_1fr]"}`}>
             <img src={characterSrc} alt={characters.length ? "导入的模特" : `${builtinName}的多视角设定图`} className="aspect-[3/4] rounded-lg bg-[#f8fafc] object-contain" />
             {face ? (
-              <img src={faceThumb} alt={`${face.id} 的脸部参考，只取五官、表情和发型`} className="aspect-[3/4] rounded-lg bg-white object-cover" />
+              <img src={faceThumb} alt={`${face.id} 的脸部参考，只取五官、表情和发型`} className="aspect-[3/4] rounded-lg lanzi-paper object-cover" />
             ) : null}
             {costume ? (
-              <img src={costumeThumb} alt={`${costume.id} 的服装参考，图中没有人物`} className="aspect-[3/4] rounded-lg bg-white object-contain" />
+              <img src={costumeThumb} alt={`${costume.id} 的服装参考，图中没有人物`} className="aspect-[3/4] rounded-lg lanzi-paper object-contain" />
             ) : face ? null : (
               <span className="text-lg text-muted-foreground" aria-hidden="true">→</span>
             )}
-            <img src={poseThumb(selected[0].viewId, selected[0].thumbSrc)} alt={`${selected[0].title} 的姿势线稿`} className="aspect-[3/4] rounded-lg bg-white object-contain" />
+            <img src={poseThumb(selected[0].viewId, selected[0].thumbSrc)} alt={`${selected[0].title} 的姿势线稿`} className="aspect-[3/4] rounded-lg lanzi-paper object-contain" />
           </div>
           <p className="mt-2 text-xs leading-5 text-muted-foreground">
             {referenceCaption(Boolean(face), Boolean(costume))}
@@ -193,7 +192,7 @@ export function Composer({
       ) : costume ? (
         <div className="rounded-xl border bg-card p-3">
           <p className="text-xs text-muted-foreground">已选服装 · {costume.id}</p>
-          <img src={costumeThumb} alt={`${costume.id}，${costume.keywords}`} className="mt-2 aspect-[2/3] max-h-48 rounded-lg bg-white object-contain" />
+          <img src={costumeThumb} alt={`${costume.id}，${costume.keywords}`} className="mt-2 aspect-[2/3] max-h-48 rounded-lg lanzi-paper object-contain" />
           <p className="mt-2 text-xs leading-5 text-muted-foreground">{localMode ? "未选择姿势，将保留人物原姿势，只更换服装。" : "还没选姿势。选好姿势后，角色会穿上这套衣服出图。"}</p>
         </div>
       ) : null}
@@ -249,12 +248,7 @@ export function Composer({
         <Button
           className="h-11 flex-1"
           variant="primary"
-          isDisabled={generateBlocked({
-            poseCount: selected.length,
-            localMode,
-            hasCostume: Boolean(costume),
-            mode,
-          })}
+          isDisabled={(selected.length === 0 && !(localMode && costume)) || selected.length > limit}
           onPress={onGenerate}
         >
           <Sparkles />
@@ -270,7 +264,7 @@ export function Composer({
           <h3 className="text-sm font-medium">成图</h3>
           {results.map((item) => (
             <article key={item.key} className="overflow-hidden rounded-xl border bg-card">
-              {item.ok && item.src ? <img src={item.src} alt={item.title} className="w-full bg-[#f7f4ee] object-contain" /> : null}
+              {item.ok && item.src ? <img src={item.src} alt={item.title} className="w-full lanzi-paper object-contain" /> : null}
               <div className="space-y-2 px-3 py-3">
                 <p className="text-sm font-medium">{item.title}</p>
                 {item.error ? <p className="text-sm text-destructive">{item.error}</p> : null}

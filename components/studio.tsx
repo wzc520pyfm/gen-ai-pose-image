@@ -11,15 +11,12 @@ import type { CustomDraft } from "@/components/custom-reference-panel"
 import type { HistoryView } from "@/components/history-panel"
 import { PoseBrowser } from "@/components/pose-browser"
 import { SettingsDialog } from "@/components/settings-dialog"
-import { LayoutARail, PreviewDrawer, PreviewFocus, PreviewPane } from "@/components/studio-preview"
 import { LibraryTabs } from "@/components/studio-library-tabs"
-import { ModelStrip } from "@/components/studio-model-strip"
-import { RecipeBar, type RecipeChip } from "@/components/studio-recipe"
 import { StudioShell } from "@/components/studio-shell"
-import { WorkbenchDrawer } from "@/components/studio-workbench"
 import { Button, Modal, Sheet, buttonVariants } from "@heroui/react"
-import { loadStudioLayout, projectLayoutChange, saveStudioLayout, type StudioLayoutId } from "@/lib/studio-layout"
+import { retireStudioLayout } from "@/lib/studio-layout"
 import { useOverlayPortal } from "@/lib/studio-env"
+import { useStudioTheme } from "@/lib/use-studio-theme"
 import { useStudioWide } from "@/lib/use-studio-wide"
 import { requestCharacterSheet } from "@/lib/character-client"
 import { readStoredCharacters, writeStoredCharacters, type StoredCharacter } from "@/lib/characters"
@@ -46,25 +43,6 @@ import {
 import { deleteSavedModel, listSavedModels, putSavedModel, readActiveModelId, readBuiltinUsed, writeActiveModelId, writeBuiltinUsed, type SavedModel } from "@/lib/models"
 import { getBuiltinModel } from "@/shared/builtin-models.mjs"
 import { pickRandomCombo } from "@/shared/random-combo.mjs"
-import {
-  createChromeBook,
-  libraryHeading,
-  previewDrawerPlacement,
-  reduceChrome,
-  showHeaderLibraryTabs,
-  showHeaderSettings,
-  showMobileWorkOrder,
-  workbenchPlacement,
-} from "@/shared/studio-chrome.mjs"
-import {
-  buildRecipe,
-  generateBlocked,
-  libraryForRecipeChip,
-  recipeAlerts,
-  showHeaderRandom,
-  showRecipeRandom,
-  showViewResult,
-} from "@/shared/studio-recipe.mjs"
 import { baseURLFor, DEFAULT_SETTINGS, loadSettings, modelFor, saveSettings, type StudioSettings } from "@/lib/settings"
 import { StudioEnvProvider, studioUrl, useStudioEnv, type StudioPortal } from "@/lib/studio-env"
 import { createCustomId, isCustomCostumeId, reuseFromHistory } from "@/shared/custom.mjs"
@@ -101,8 +79,8 @@ function StudioFrame({ embedded }: { embedded: boolean }) {
   const portal = useOverlayPortal()
   const studioRef = useRef<HTMLDivElement>(null)
   const wide = useStudioWide(studioRef)
-  const primedLayouts = useRef(new Set<StudioLayoutId>())
-  const [chromeBook, setChromeBook] = useState(createChromeBook)
+  const { resolved: theme, toggle: toggleTheme } = useStudioTheme()
+  useEffect(() => { retireStudioLayout() }, [])
   const [catalog, setCatalog] = useState<Catalog | null>(null)
   const [catalogError, setCatalogError] = useState("")
   const [costumeCatalog, setCostumeCatalog] = useState<Array<{ id: string; label: string; keywords: string; adult?: boolean }>>([])
@@ -115,7 +93,6 @@ function StudioFrame({ embedded }: { embedded: boolean }) {
   const [settings, setSettings] = useState<StudioSettings>(DEFAULT_SETTINGS)
   const [settingsReady, setSettingsReady] = useState(false)
   const [library, setLibrary] = useState<Library>("poses")
-  const [layout, setLayout] = useState<StudioLayoutId>(() => loadStudioLayout())
   const [costume, setCostume] = useState<CostumePick | null>(null)
   const [face, setFace] = useState<FacePick | null>(null)
   const [costumeFocus, setCostumeFocus] = useState<string | null>(null)
@@ -742,7 +719,7 @@ function StudioFrame({ embedded }: { embedded: boolean }) {
     setReuseNote(missingPose || missingCostume
       ? "已恢复还能找到的选择。有的自定义参考已经删除，请重新上传或生成后再出图。"
       : "已恢复那次的姿势和描述，可以再次生图。")
-    if (layout === "C" && !wide) setSheetOpen(true)
+    if (!wide) setSheetOpen(true)
   }
 
   const historyViews: HistoryView[] = history.map((entry) => ({
@@ -775,38 +752,6 @@ function StudioFrame({ embedded }: { embedded: boolean }) {
     adult: asset.adult,
     thumbUrl: costumeUrls[asset.id] || "",
   }))
-
-  function changeLayout(next: StudioLayoutId) {
-    const id = projectLayoutChange({ layout }, next).layout as StudioLayoutId
-    setLayout(id)
-    saveStudioLayout(id)
-  }
-
-  const chrome = chromeBook[layout]
-  const latestResultKey = latestSuccessKey(results)
-  useEffect(() => {
-    const key = latestResultKey
-    setChromeBook((book) => {
-      if (!primedLayouts.current.has(layout)) {
-        primedLayouts.current.add(layout)
-        return reduceChrome(book, layout, { type: "prime", resultKey: key })
-      }
-      return reduceChrome(book, layout, { type: "success", resultKey: key })
-    })
-  }, [layout, latestResultKey])
-
-  function openPreview() {
-    setChromeBook((book) => reduceChrome(book, layout, { type: "open-preview", wide }))
-  }
-  function dismissPreview() {
-    setChromeBook((book) => reduceChrome(book, layout, { type: "dismiss-preview" }))
-  }
-  function setWorkbenchOpen(open: boolean) {
-    setChromeBook((book) => reduceChrome(book, layout, open ? { type: "open-workbench", wide } : { type: "close-workbench" }))
-  }
-  function setModelStripOpen(open: boolean) {
-    setChromeBook((book) => reduceChrome(book, layout, { type: "set-model-strip", open }))
-  }
 
   const composer = (
     <Composer
@@ -857,17 +802,16 @@ function StudioFrame({ embedded }: { embedded: boolean }) {
       reuseNote={reuseNote}
       builtinName={getBuiltinModel(activeModelId)?.name || "大肥鱼"}
       builtinSheet={getBuiltinModel(activeModelId)?.sheet || "/muse/dafeiyu-sheet.png"}
-      showRandom={layout === "C"}
     />
   )
 
-  const libraryTabs = showHeaderLibraryTabs(layout) ? (
+  const libraryTabs = (
     <>
       <LibraryTabs library={library} onLibrary={setLibrary} />
       {face ? <span className="hidden min-w-0 truncate text-sm text-primary @min-[640px]/studio:inline">{face.id}</span> : null}
       {costume ? <span className="hidden min-w-0 truncate text-sm text-primary @min-[640px]/studio:inline">{costume.id}</span> : null}
     </>
-  ) : null
+  )
 
   const libraryPane = library === "faces" ? (
     <FaceBrowser
@@ -919,7 +863,6 @@ function StudioFrame({ embedded }: { embedded: boolean }) {
 
   const characterDock = (
     <CharacterDock
-      embedded={layout !== "C"}
       images={characters}
       onChange={updateCharacters}
       keepOutfit={settings.keepOutfit}
@@ -955,102 +898,8 @@ function StudioFrame({ embedded }: { embedded: boolean }) {
     />
   )
 
-  const recipe = buildRecipe({
-    face: face ? { id: face.id } : null,
-    costume: costume ? { id: costume.id } : null,
-    poses: chosen.map((item) => ({ id: item.poseId, title: item.title })),
-    keepOutfit: settings.keepOutfit,
-  })
-  const hasImage = latestResultKey !== ""
-  const viewResult = showViewResult(layout, chrome.previewOpen, hasImage) ? openPreview : undefined
-  const activeModel = models.find((model) => model.id === activeModelId)
-  const activeModelName = activeModel?.label || getBuiltinModel(activeModelId)?.name || "大肥鱼"
-  const activeThumb = activeModel?.images[0]
-    ? `data:${activeModel.images[0].mediaType};base64,${activeModel.images[0].dataBase64}`
-    : studioUrl(basePath, getBuiltinModel(activeModelId)?.portrait || "/muse/dafeiyu-portrait.jpg")
-  const removeChip = (id: string) => {
-    if (id === "face") {
-      setFace(null)
-      return
-    }
-    if (id === "costume") {
-      setCostume(null)
-      return
-    }
-    if (id === "poses-empty" || id === "poses-more") return
-    setSelected((current) => {
-      if (!current[id]) return current
-      const next = { ...current }
-      delete next[id]
-      return next
-    })
-  }
-  const recipeBar = layout === "C" ? null : (
-    <RecipeBar
-      variant={layout === "A" ? "dock" : layout === "B" ? "strip" : "pill"}
-      chips={recipe.chips as RecipeChip[]}
-      scoreLabel={recipe.scoreLabel}
-      running={running}
-      elapsed={waited}
-      blocked={generateBlocked({
-        poseCount: chosen.length,
-        localMode: settings.engine === "comfyui",
-        hasCostume: Boolean(costume),
-        mode: settings.mode,
-      })}
-      alerts={recipeAlerts({ workbenchOpen: chrome.workbenchOpen, runError, limitNote }).map((alert) => ({
-        id: String(alert.id),
-        status: alert.status === "danger" ? "danger" as const : "warning" as const,
-        text: String(alert.text),
-      }))}
-      onGenerate={() => void generate()}
-      onStop={() => abortRef.current?.abort()}
-      onOpenWorkbench={() => setWorkbenchOpen(true)}
-      onActivateChip={(chip) => setLibrary(libraryForRecipeChip(chip))}
-      onRemoveChip={removeChip}
-      onViewResult={viewResult}
-      onRandom={showRecipeRandom(layout) ? randomizeCombo : undefined}
-    />
-  )
-  const workbenchDrawer = layout === "C" || !chrome.workbenchOpen ? null : (
-    <WorkbenchDrawer
-      open
-      onOpenChange={setWorkbenchOpen}
-      placement={workbenchPlacement(layout, wide)}
-      includeDock={layout !== "B"}
-      modelName={activeModelName}
-      dockExpanded={chrome.modelStripOpen}
-      onDockExpanded={setModelStripOpen}
-      dock={characterDock}
-      composer={composer}
-    />
-  )
-  const previewOverlay = layout === "A"
-    ? <PreviewFocus open={chrome.previewOpen} onClose={dismissPreview} results={results} />
-    : layout === "D"
-      ? (
-        <PreviewDrawer
-          open={chrome.previewOpen}
-          onOpenChange={(open) => { if (open) openPreview(); else dismissPreview() }}
-          placement={previewDrawerPlacement(wide)}
-          results={results}
-        />
-      )
-      : null
-
   const headerTrailing = (
     <>
-      {showHeaderRandom(layout) ? (
-        <Button
-          variant="outline"
-          size="sm"
-          className="border-[#fb7185]/50 bg-[#fff1f2] text-[#be123c]"
-          isDisabled={running}
-          onPress={randomizeCombo}
-        >
-          随机组合
-        </Button>
-      ) : null}
       <Button variant="outline" size="sm" className="@max-[640px]/studio:hidden" onPress={() => setInstallOpen(true)}>装进 Harness</Button>
       <a
         href={REPOSITORY_URL}
@@ -1064,9 +913,9 @@ function StudioFrame({ embedded }: { embedded: boolean }) {
     </>
   )
 
-  const mobileWorkOrderTrigger = showMobileWorkOrder(layout) ? (
+  const mobileWorkOrderTrigger = (
     <>
-      <div className="shrink-0 border-t bg-white p-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] @min-[1024px]/studio:hidden">
+      <div className="shrink-0 border-t border-border bg-card p-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] @min-[1024px]/studio:hidden">
         <Button className="h-11 w-full" onPress={() => setSheetOpen(true)}>
           已选 {chosen.length} 个姿势{face ? ` · ${face.id}` : ""}{costume ? ` · ${costume.id}` : ""} · 去生图
         </Button>
@@ -1086,12 +935,12 @@ function StudioFrame({ embedded }: { embedded: boolean }) {
         </Sheet.Backdrop>
       </Sheet>
     </>
-  ) : null
+  )
 
   return (
-    <div className={`flex min-h-0 flex-col overflow-hidden ${embedded ? "h-full" : "h-dvh"}`}>
+    <div className={`flex min-h-0 flex-col overflow-hidden bg-background text-foreground ${embedded ? "h-full" : "h-dvh"}`}>
       {storageHigh ? (
-        <p className="shrink-0 border-b bg-amber-50 px-4 py-2 text-sm text-amber-950">
+        <p className="shrink-0 border-b border-amber-200 bg-amber-50 px-4 py-2 text-sm text-amber-950 dark:border-amber-800/60 dark:bg-amber-950/40 dark:text-amber-100">
           本机存储快满了。可以删除历史或自定义参考图。
           <button type="button" className="ml-2 underline" onClick={() => void clearHistory().then(() => setHistory([])).then(() => readStoragePressure()).then((pressure) => setStorageHigh(pressure.high))}>清空历史</button>
         </p>
@@ -1100,9 +949,8 @@ function StudioFrame({ embedded }: { embedded: boolean }) {
         <StudioShell
           embedded
           containerRef={studioRef}
-          layout={layout}
-          showSettings={showHeaderSettings(layout)}
-          onLayoutChange={changeLayout}
+          theme={theme}
+          onToggleTheme={toggleTheme}
           onOpenSettings={() => setSettingsOpen(true)}
           libraryTabs={libraryTabs}
           headerTrailing={headerTrailing}
@@ -1111,22 +959,6 @@ function StudioFrame({ embedded }: { embedded: boolean }) {
             characterDock,
             library: libraryPane,
             workOrder: composer,
-            preview: layout === "B" ? <PreviewPane results={results} /> : null,
-            recipe: recipeBar,
-            libraryRail: layout === "A" ? <LayoutARail library={library} onLibrary={setLibrary} onOpenSettings={() => setSettingsOpen(true)} /> : null,
-            modelStrip: layout === "B" ? (
-              <ModelStrip
-                open={chrome.modelStripOpen}
-                onOpenChange={setModelStripOpen}
-                name={activeModelName}
-                thumbSrc={activeThumb}
-                dock={characterDock}
-              />
-            ) : null,
-            previewOverlay,
-            workbenchDrawer,
-            librarySwitch: layout === "B" || layout === "D" ? <LibraryTabs library={library} onLibrary={setLibrary} /> : null,
-            libraryHeading: layout === "D" ? <h2 className="text-lg font-semibold">{libraryHeading(library)}</h2> : null,
           }}
         />
       </div>
@@ -1179,14 +1011,6 @@ function StudioFrame({ embedded }: { embedded: boolean }) {
     </div>
   )
 
-}
-
-function latestSuccessKey(results: ResultCard[]) {
-  for (let index = results.length - 1; index >= 0; index -= 1) {
-    const item = results[index]
-    if (item?.ok && item.src) return item.key
-  }
-  return ""
 }
 
 function GithubMark() {

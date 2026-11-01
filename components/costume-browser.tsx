@@ -195,7 +195,7 @@ export function CostumeBrowser({
             const selected = selectedId === costume.id
             return (
               <Card key={costume.id} className={`overflow-hidden text-left shadow-sm ${selected ? "border-primary ring-2 ring-primary/25" : "border-border"}`}>
-                <Card.Header className="relative aspect-[3/4] bg-white p-0 @min-[640px]/studio:aspect-[2/3]">
+                <Card.Header className="relative aspect-[3/4] lanzi-paper p-0 @min-[640px]/studio:aspect-[2/3]">
                   <button type="button" className="block h-full w-full" onClick={() => onSelect(costume)} aria-pressed={selected}>
                     <img
                       src={studioUrl(basePath, `/api/costume-image?id=${encodeURIComponent(costume.id)}&size=thumb`)}

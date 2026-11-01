@@ -1,31 +1,11 @@
-export const DEFAULT_STUDIO_LAYOUT = "C"
 export const STUDIO_LAYOUT_KEY = "lanzi.studio.layout"
-const ALLOWED = new Set(["A", "B", "C", "D"])
 
-export function normalizeStudioLayout(value) {
-  return ALLOWED.has(value) ? value : DEFAULT_STUDIO_LAYOUT
-}
-
-export function loadStudioLayout(storage) {
+export function retireStudioLayout(storage) {
   const store = storage ?? (typeof globalThis !== "undefined" ? globalThis.localStorage : null)
-  if (!store || typeof store.getItem !== "function") return DEFAULT_STUDIO_LAYOUT
+  if (!store || typeof store.removeItem !== "function") return
   try {
-    return normalizeStudioLayout(store.getItem(STUDIO_LAYOUT_KEY))
+    store.removeItem(STUDIO_LAYOUT_KEY)
   } catch {
-    return DEFAULT_STUDIO_LAYOUT
+    // ignore private mode
   }
-}
-
-export function saveStudioLayout(id, storage) {
-  const store = storage ?? (typeof globalThis !== "undefined" ? globalThis.localStorage : null)
-  if (!store || typeof store.setItem !== "function") return
-  try {
-    store.setItem(STUDIO_LAYOUT_KEY, normalizeStudioLayout(id))
-  } catch {
-    // ignore quota / private mode
-  }
-}
-
-export function projectLayoutChange(state, next) {
-  return { ...state, layout: normalizeStudioLayout(next) }
 }

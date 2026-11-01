@@ -1,5 +1,7 @@
 # Lanzi Library-First Layouts A/B/D Implementation Plan
 
+> **Withdrawn.** Layouts A, B, and D are not part of the product. Do not execute this plan. Layout C and the light/dark theme are the shipping studio.
+
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
 **Goal:** Redraw layouts A, B, and D so the pose / costume / face library is the stage, the workbench can collapse, and Web plus the DeepSeek Harness plugin share that shell.

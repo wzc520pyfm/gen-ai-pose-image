@@ -41,7 +41,7 @@ export function HistoryPanel({
         <div className="grid grid-cols-3 gap-2">
           {entries.map((entry) => (
             <button key={entry.id} type="button" className="overflow-hidden rounded-lg border bg-card text-left" onClick={() => setOpenId(entry.id)}>
-              <img src={entry.thumbUrl} alt={entry.title} className="aspect-[3/4] w-full bg-[#f7f4ee] object-contain" />
+              <img src={entry.thumbUrl} alt={entry.title} className="aspect-[3/4] w-full lanzi-paper object-contain" />
               <span className="line-clamp-2 px-1.5 py-1 text-[11px] leading-4">{entry.title}</span>
             </button>
           ))}
@@ -58,7 +58,7 @@ export function HistoryPanel({
                   <p className="text-sm text-muted-foreground">{new Date(current.createdAt).toLocaleString("zh-CN", { hour12: false })}</p>
                 </Modal.Header>
                 <Modal.Body className="grid gap-3">
-                  <img src={current.thumbUrl} alt={current.title} className="w-full rounded-xl bg-[#f7f4ee] object-contain" />
+                  <img src={current.thumbUrl} alt={current.title} className="w-full rounded-xl lanzi-paper object-contain" />
                   <p className="text-xs leading-5 text-muted-foreground">
                     {current.provider} · {current.aspectRatio} · {current.mode === "sheet" ? "拼图" : "逐张"} · {current.face ? `脸部 ${current.face.id}` : "保持原脸"} · {current.costume ? `换成 ${current.costume.id}` : current.keepOutfit ? "保持服装" : "允许换衣服"}
                     {current.model ? ` · ${current.model}` : ""}

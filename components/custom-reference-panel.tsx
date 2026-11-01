@@ -224,7 +224,7 @@ export function CustomReferencePanel({
           return (
             <article key={item.id} className={`overflow-hidden rounded-xl border bg-card text-left shadow-sm ${selected ? "border-primary ring-2 ring-primary/25" : "border-border"}`}>
               <button type="button" className="block w-full text-left" onClick={() => onToggle(item.id)} aria-pressed={selected}>
-                <div className="relative aspect-[3/4] bg-white">
+                <div className="relative aspect-[3/4] lanzi-paper">
                   {item.thumbUrl ? <img src={item.thumbUrl} alt={item.label} className="h-full w-full object-contain" /> : <div className="grid h-full place-items-center text-xs text-muted-foreground">读取中</div>}
                   {selected ? <span className="absolute top-2 left-2 rounded-full bg-primary px-2 py-0.5 text-[11px] text-primary-foreground">{kind === "pose" ? "已选" : "换这套"}</span> : null}
                 </div>
@@ -362,7 +362,7 @@ export function CustomReferencePanel({
               </Switch>
             </div>
           ) : null}
-          {previewUrl ? <img src={previewUrl} alt="参考图预览" className="mx-auto max-h-72 rounded-xl bg-white object-contain" /> : null}
+          {previewUrl ? <img src={previewUrl} alt="参考图预览" className="mx-auto max-h-72 rounded-xl lanzi-paper object-contain" /> : null}
           <label className="grid gap-1.5 text-sm">
             名称
             <Input value={label} onChange={(event) => setLabel(event.target.value)} maxLength={80} />

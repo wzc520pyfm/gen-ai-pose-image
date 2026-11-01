@@ -153,7 +153,7 @@ export function FaceBrowser({
             size="sm"
             onPress={randomFace}
             isDisabled={faces.length === 0}
-            className="border-[#fb7185]/50 bg-[#fff1f2] text-[#be123c]"
+            className="lanzi-coral"
           >
             随机一张
           </Button>
@@ -184,7 +184,7 @@ export function FaceBrowser({
               const caption = [face.section, face.hair, face.label].filter(Boolean).join(" · ")
               return (
                 <Card key={face.id} className={`overflow-hidden text-left shadow-sm ${selected ? "border-primary ring-2 ring-primary/25" : "border-border"}`}>
-                  <Card.Header className="relative aspect-[4/5] bg-white p-0">
+                  <Card.Header className="relative aspect-[4/5] lanzi-paper p-0">
                     <button type="button" className="block h-full w-full" onClick={() => onSelect(face)} aria-pressed={selected}>
                       <img
                         src={studioUrl(basePath, `/api/face-image?id=${encodeURIComponent(face.id)}&size=thumb`)}

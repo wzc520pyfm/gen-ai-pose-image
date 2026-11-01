@@ -221,7 +221,7 @@ export function CharacterDock({
         src={portrait}
         alt={custom ? (images[0]?.role === "sheet" ? "多视角设定图" : "导入的模特头像") : `${builtin?.name || "大肥鱼"}的正面全身像`}
         label="正在加载立绘"
-        boxClassName="relative hidden w-full shrink-0 overflow-hidden rounded-xl bg-white @min-[1024px]/studio:block"
+        boxClassName="relative hidden w-full shrink-0 overflow-hidden rounded-xl lanzi-paper @min-[1024px]/studio:block"
         imgClassName={`w-full ${images[0]?.role === "sheet" ? "max-h-56 object-contain" : "aspect-[3/4] object-cover object-top"}`}
         spinnerClassName="text-slate-500"
       />
@@ -237,8 +237,8 @@ export function CharacterDock({
           src={full}
           alt={`${builtin?.name || "大肥鱼"}的多视角设定图`}
           label="正在加载设定图"
-          boxClassName="relative hidden w-full shrink-0 overflow-hidden rounded-xl bg-white @min-[1024px]/studio:block"
-          imgClassName="max-h-56 w-full rounded-xl bg-white object-contain"
+          boxClassName="relative hidden w-full shrink-0 overflow-hidden rounded-xl lanzi-paper @min-[1024px]/studio:block"
+          imgClassName="max-h-56 w-full rounded-xl lanzi-paper object-contain"
           width={builtin?.id === "dafeiyu" ? 1448 : 1536}
           height={builtin?.id === "dafeiyu" ? 1086 : 1024}
           spinnerClassName="text-slate-500"
@@ -247,7 +247,7 @@ export function CharacterDock({
         <div className="grid grid-cols-3 gap-2">
           {images.map((image) => (
             <div key={image.id} className="relative">
-              <img src={`data:${image.mediaType};base64,${image.dataBase64}`} alt={image.role === "sheet" ? "多视角设定图" : "导入的模特参考"} className={`aspect-[3/4] w-full rounded-lg ${image.role === "sheet" ? "bg-white object-contain" : "object-cover"}`} />
+              <img src={`data:${image.mediaType};base64,${image.dataBase64}`} alt={image.role === "sheet" ? "多视角设定图" : "导入的模特参考"} className={`aspect-[3/4] w-full rounded-lg ${image.role === "sheet" ? "lanzi-paper object-contain" : "object-cover"}`} />
               {image.role === "sheet" ? <span className="absolute bottom-1 left-1 rounded-full bg-black/60 px-1.5 text-[10px] text-white">设定图</span> : null}
               <button
                 type="button"

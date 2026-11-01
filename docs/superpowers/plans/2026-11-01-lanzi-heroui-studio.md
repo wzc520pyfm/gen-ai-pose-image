@@ -1,5 +1,7 @@
 # Lanzi HeroUI One-Screen Studio Implementation Plan
 
+> **Shipping status:** The layout switcher and layouts A, B, and D were removed. Ship layout C only, plus light/dark theme. Tasks below that add A–D are historical.
+
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
 **Goal:** Rebuild the Lanzi one-screen studio IA with `StudioShell` + layouts A–D and migrate Web + DeepSeek Harness plugin UI to official `@heroui/react`, without changing generate/provider contracts.

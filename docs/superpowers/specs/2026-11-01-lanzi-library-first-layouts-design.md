@@ -1,5 +1,7 @@
 # 澜姿库优先布局 A / B / D — Design Spec
 
+> **Withdrawn.** The owner rejected layouts A, B, and D. Do not implement this spec. The shipping studio is layout C only, with light and dark theme. This file stays as a record of the rejected direction.
+
 **Date:** 2026-11-01
 **Repo:** `gen-ai-pose-image` (Web Next studio + DeepSeek Harness plugin)
 **Branch:** `cursor/lanzi-heroui-studio` (PR #31)
