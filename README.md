@@ -2,7 +2,7 @@
 
 # 澜姿
 
-可选的 **ComfyUI 本地生成**：保留原工作室和云端功能，用一套带开关的工作流完成换装、换姿势、两者组合、双人姿势及逐格拼图。需要在同一电脑运行工作室和 ComfyUI，详见[启动与工作流说明](docs/comfyui-local.md)。
+可选的 **ComfyUI 浏览器直连**：在在线网站填写本机或远程 HTTPS 地址，用一套带开关的工作流完成换装、姿势、组合生成及逐格拼图，无需在显卡电脑启动网站。原云端功能保留，详见[连接与工作流说明](docs/comfyui-local.md)。
 
 DeepSeek Harness 插件，也是一个可以单独打开的姿势工作室。从 [ai-pose-gallery-zh](https://github.com/anhao/ai-pose-gallery-zh) 的 288 组、1439 张姿势线稿里选一个或多个姿势，生成同一位模特的图。
 

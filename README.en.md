@@ -2,7 +2,7 @@
 
 # Lanpose
 
-Optional **local ComfyUI generation** preserves the existing studio and cloud providers. A unified workflow supports outfit edits, poses, combined edits, two-person poses, and sequential contact sheets. Run the studio server and ComfyUI on the same computer; see the [setup and workflow guide (Chinese)](docs/comfyui-local.md).
+Optional **direct browser-to-ComfyUI generation** preserves the studio and cloud providers. Enter a loopback or remote HTTPS endpoint in the deployed website; no studio server is needed on the GPU computer. The unified workflow supports outfit edits, poses, combined edits, and sequential contact sheets. See the [connection and workflow guide (Chinese)](docs/comfyui-local.md).
 
 A DeepSeek Harness plugin, and a pose studio you can open on its own. Pick one or more sketches from the 288 groups and 1,439 views in [ai-pose-gallery-zh](https://github.com/anhao/ai-pose-gallery-zh), then generate images of the same model.
 
