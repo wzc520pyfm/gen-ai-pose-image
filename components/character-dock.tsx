@@ -206,7 +206,7 @@ export function CharacterDock({
           size="sm"
           className="mt-1 shrink border-white/20 bg-white/10 text-white hover:bg-white/15 hover:text-white @min-[1024px]/studio:hidden"
           isDisabled={busy || sheetBusy || photoCount >= 3}
-          onClick={() => inputRef.current?.click()}
+          onPress={() => inputRef.current?.click()}
         >
           <ImagePlus />
           {busy ? "读图" : "导入"}
@@ -276,7 +276,7 @@ export function CharacterDock({
         variant="outline"
         className="hidden border-white/20 bg-white/10 text-white hover:bg-white/15 hover:text-white @min-[1024px]/studio:inline-flex"
         isDisabled={busy || sheetBusy || photoCount >= 3}
-        onClick={() => inputRef.current?.click()}
+        onPress={() => inputRef.current?.click()}
       >
         <ImagePlus />
         {busy ? "正在读图" : images.length ? "再加一张参考" : "导入其他模特"}
