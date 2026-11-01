@@ -2,10 +2,9 @@
 
 /* eslint-disable @next/next/no-img-element -- results are data URLs and pose thumbs are proxied */
 
-import { Download, Loader2, Sparkles } from "lucide-react"
-import { Button } from "@/components/ui/button"
+import { Download, Sparkles } from "lucide-react"
+import { Button, Spinner, TextArea } from "@heroui/react"
 import { HistoryPanel, type HistoryView } from "@/components/history-panel"
-import { Textarea } from "@/components/ui/textarea"
 import type { StoredCharacter } from "@/lib/characters"
 import type { AspectRatio, GenerateMode, PromptCard } from "@/lib/types"
 import { ASPECT_LABEL } from "@/lib/types"
@@ -42,6 +41,7 @@ export function Composer({
   hasKey,
   running,
   progress,
+  elapsed = 0,
   runError,
   prompts,
   promptError,
@@ -77,6 +77,7 @@ export function Composer({
   hasKey: boolean
   running: boolean
   progress: string
+  elapsed?: number
   runError: string
   prompts: PromptCard[]
   promptError: string
@@ -108,7 +109,16 @@ export function Composer({
       <div className="flex flex-wrap items-center justify-between gap-2">
         <div className="flex min-w-0 flex-wrap items-center gap-2">
           <h2 className="text-lg font-semibold">已选 {selected.length} 个姿势</h2>
-          <Button type="button" size="sm" variant="outline" disabled={running} onClick={onRandom}>随机组合</Button>
+          <Button
+            type="button"
+            size="sm"
+            variant="outline"
+            isDisabled={running}
+            onPress={onRandom}
+            className="border-[#fb7185]/50 bg-[#fff1f2] text-[#be123c] hover:bg-[#ffe4e6]"
+          >
+            随机组合
+          </Button>
         </div>
         {selected.length > 0 ? (
           <button type="button" className="text-xs text-muted-foreground underline-offset-2 hover:underline" onClick={onClear}>清空</button>
@@ -207,7 +217,7 @@ export function Composer({
 
       <label className="grid gap-1.5 text-sm">
         补充描述
-        <Textarea
+        <TextArea
           value={extraPrompt}
           onChange={(event) => onExtraPrompt(event.target.value)}
           placeholder="例如：海边黄昏，风吹起外套。不写也可以。"
@@ -224,13 +234,23 @@ export function Composer({
       {limitNote ? <p className="text-sm text-amber-800">{limitNote}</p> : null}
       {selected.length > limit ? <p className="text-sm text-amber-800">当前方式一次最多 {limit} 个姿势。</p> : null}
 
-      <div className="flex gap-2">
-        <Button className="h-11 flex-1" disabled={running || (selected.length === 0 && !(localMode && costume)) || selected.length > limit} onClick={onGenerate}>
-          {running ? <Loader2 className="animate-spin" /> : <Sparkles />}
-          {running ? progress || "正在生图" : hasKey ? (localMode && selected.length === 0 ? "仅换装生图" : "按所选姿势生图") : "填写密钥后生图"}
+      {running ? (
+        <div className="flex items-center gap-2">
+          <Spinner size="sm" />
+          <span className="text-sm" title={progress || undefined}>正在生成 · {elapsed}s</span>
+          <Button variant="danger" size="sm" onPress={onStop}>停止</Button>
+        </div>
+      ) : (
+        <Button
+          className="h-11 flex-1"
+          variant="primary"
+          isDisabled={(selected.length === 0 && !(localMode && costume)) || selected.length > limit}
+          onPress={onGenerate}
+        >
+          <Sparkles />
+          {hasKey ? (localMode && selected.length === 0 ? "仅换装生图" : "按所选姿势生图") : "填写密钥后生图"}
         </Button>
-        {running ? <Button variant="outline" className="h-11" onClick={onStop}>停止</Button> : null}
-      </div>
+      )}
       {!hasKey ? <p className="text-xs leading-5 text-muted-foreground">密钥只留在这台浏览器里。没有密钥时，下面的提示词仍然可以复制到 dsh-image-gen 里用。</p> : null}
       {reuseNote ? <p className="text-sm text-primary">{reuseNote}</p> : null}
       {runError ? <p className="text-sm text-destructive">{runError}</p> : null}

@@ -4,10 +4,8 @@
 
 import { useRef, useState } from "react"
 import { useElapsedSeconds, withElapsed } from "@/lib/elapsed"
-import { ChevronLeft, ChevronRight, ImagePlus, Loader2 } from "lucide-react"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Switch } from "@/components/ui/switch"
+import { ChevronLeft, ChevronRight, ImagePlus } from "lucide-react"
+import { Button, Input, Spinner, Switch } from "@heroui/react"
 import { fileToCharacter, type StoredCharacter } from "@/lib/characters"
 import { studioUrl, useStudioEnv } from "@/lib/studio-env"
 import { getBuiltinModel } from "@/shared/builtin-models.mjs"
@@ -207,7 +205,7 @@ export function CharacterDock({
           variant="outline"
           size="sm"
           className="mt-1 shrink border-white/20 bg-white/10 text-white hover:bg-white/15 hover:text-white @min-[1024px]/studio:hidden"
-          disabled={busy || sheetBusy || photoCount >= 3}
+          isDisabled={busy || sheetBusy || photoCount >= 3}
           onClick={() => inputRef.current?.click()}
         >
           <ImagePlus />
@@ -277,7 +275,7 @@ export function CharacterDock({
       <Button
         variant="outline"
         className="hidden border-white/20 bg-white/10 text-white hover:bg-white/15 hover:text-white @min-[1024px]/studio:inline-flex"
-        disabled={busy || sheetBusy || photoCount >= 3}
+        isDisabled={busy || sheetBusy || photoCount >= 3}
         onClick={() => inputRef.current?.click()}
       >
         <ImagePlus />
@@ -286,8 +284,8 @@ export function CharacterDock({
       <Button
         variant="outline"
         className="border-white/20 bg-white/10 text-white hover:bg-white/15 hover:text-white"
-        disabled={busy || sheetBusy}
-        onClick={() => sheetInputRef.current?.click()}
+        isDisabled={busy || sheetBusy}
+        onPress={() => sheetInputRef.current?.click()}
       >
         {busy ? "正在读图" : sheetAction}
       </Button>
@@ -296,8 +294,8 @@ export function CharacterDock({
         <Button
           variant="outline"
           className="border-white/20 bg-white/10 text-white hover:bg-white/15 hover:text-white"
-          disabled={sheetBusy}
-          onClick={() => {
+          isDisabled={sheetBusy}
+          onPress={() => {
             if (!hasKey) {
               onOpenSettings()
               return
@@ -322,7 +320,16 @@ export function CharacterDock({
               : "只借姿势，不借线稿里的身体。关掉后可在补充描述里换衣服。"}
           </span>
         </span>
-        <Switch checked={outfitLocked ? false : keepOutfit} onCheckedChange={onKeepOutfit} disabled={outfitLocked} aria-label="保持服装" />
+        <Switch
+          isSelected={outfitLocked ? false : keepOutfit}
+          onChange={onKeepOutfit}
+          isDisabled={outfitLocked}
+          aria-label="保持服装"
+        >
+          <Switch.Control>
+            <Switch.Thumb />
+          </Switch.Control>
+        </Switch>
       </label>
     </aside>
   )
@@ -374,7 +381,7 @@ function ModelFigure({
       />
       {pending ? (
         <div className="absolute inset-0 z-10 grid place-items-center" role="status" aria-live="polite">
-          <Loader2 className={`size-6 animate-spin ${spinnerClassName}`} />
+          <Spinner size="md" className={spinnerClassName} />
           <span className="sr-only">{label}</span>
         </div>
       ) : null}

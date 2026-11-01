@@ -780,6 +780,7 @@ function StudioFrame({ embedded }: { embedded: boolean }) {
       hasKey={settings.engine === "comfyui" || Boolean(settings.apiKey.trim()) || serverKey}
       running={running}
       progress={withElapsed(progress, waited)}
+      elapsed={waited}
       runError={runError}
       prompts={prompts}
       promptError={promptError}
@@ -989,6 +990,7 @@ function StudioFrame({ embedded }: { embedded: boolean }) {
                 faceLabel={face?.id ?? null}
                 running={running}
                 progress={withElapsed(progress, waited)}
+                elapsed={waited}
                 onGenerate={() => void generate()}
                 onStop={() => abortRef.current?.abort()}
               />

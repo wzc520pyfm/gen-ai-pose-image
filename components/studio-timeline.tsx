@@ -1,7 +1,7 @@
 "use client"
 
-import { Loader2, Sparkles } from "lucide-react"
-import { Button } from "@/components/ui/button"
+import { Sparkles } from "lucide-react"
+import { Button, Spinner } from "@heroui/react"
 
 export function TimelineBar({
   poseCount,
@@ -9,6 +9,7 @@ export function TimelineBar({
   faceLabel,
   running,
   progress,
+  elapsed = 0,
   onGenerate,
   onStop,
 }: {
@@ -17,6 +18,7 @@ export function TimelineBar({
   faceLabel?: string | null
   running: boolean
   progress?: string
+  elapsed?: number
   onGenerate: () => void
   onStop: () => void
 }) {
@@ -25,16 +27,19 @@ export function TimelineBar({
       <span className="rounded-full bg-slate-800 px-2.5 py-1 text-xs">姿势 {poseCount}</span>
       <span className="rounded-full bg-slate-800 px-2.5 py-1 text-xs">{costumeLabel ? `服装 ${costumeLabel}` : "未选服装"}</span>
       <span className="rounded-full bg-slate-800 px-2.5 py-1 text-xs">{faceLabel ? `脸部 ${faceLabel}` : "保持原脸"}</span>
-      <div className="ml-auto flex gap-2">
-        <Button className="h-9" disabled={running} onClick={onGenerate}>
-          {running ? <Loader2 className="animate-spin" /> : <Sparkles />}
-          {running ? progress || "正在生成" : "生图"}
-        </Button>
+      <div className="ml-auto flex items-center gap-2">
         {running ? (
-          <Button variant="outline" className="h-9 border-slate-600 bg-transparent text-slate-100 hover:bg-slate-800" onClick={onStop}>
-            停止
+          <>
+            <Spinner size="sm" />
+            <span className="text-sm text-slate-100" title={progress || undefined}>正在生成 · {elapsed}s</span>
+            <Button variant="danger" size="sm" onPress={onStop}>停止</Button>
+          </>
+        ) : (
+          <Button className="h-9" variant="primary" onPress={onGenerate}>
+            <Sparkles />
+            生图
           </Button>
-        ) : null}
+        )}
       </div>
     </div>
   )
