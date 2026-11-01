@@ -5,9 +5,7 @@
 import { useEffect, useMemo, useRef, useState, type ReactNode } from "react"
 import { ChevronDown, RotateCcw, Search, X } from "lucide-react"
 import { CustomReferencePanel, type CustomCard, type CustomDraft } from "@/components/custom-reference-panel"
-import { Button } from "@/components/ui/button"
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog"
-import { Input } from "@/components/ui/input"
+import { Button, Input, Modal } from "@heroui/react"
 import type { StudioSettings } from "@/lib/settings"
 import type { Catalog, Pose, PoseView } from "@/lib/types"
 import { studioUrl, useStudioEnv } from "@/lib/studio-env"
@@ -322,7 +320,7 @@ export function PoseBrowser({
         {!customSection && error ? (
           <div className="rounded-2xl border border-dashed border-border bg-card px-4 py-10 text-center">
             <p className="text-sm">{error}</p>
-            <Button className="mt-3" variant="outline" onClick={onRetry}>重新加载</Button>
+            <Button className="mt-3" variant="outline" onPress={onRetry}>重新加载</Button>
           </div>
         ) : null}
         {!customSection && !loading && !error && poses.length === 0 ? (
@@ -332,7 +330,7 @@ export function PoseBrowser({
               {hiddenAdult > 0 && !showAdult ? `这一体系里有 ${hiddenAdult} 个成人向姿势被收着。` : "换个词，或把分类、视角清掉。"}
             </p>
             {hiddenAdult > 0 && !showAdult ? (
-              <Button className="mt-3" variant="outline" onClick={() => onRequestAdult(system?.id ?? "sexy")}>显示成人向姿势</Button>
+              <Button className="mt-3" variant="outline" onPress={() => onRequestAdult(system?.id ?? "sexy")}>显示成人向姿势</Button>
             ) : null}
           </div>
         ) : null}
@@ -360,35 +358,42 @@ export function PoseBrowser({
         ) : null}
       </div>
 
-      <Dialog open={preview !== null} onOpenChange={(open) => { if (!open) setPreview(null) }}>
-        <DialogContent className="max-w-[min(36rem,calc(100%-2rem))]">
-          {preview ? (
-            <>
-              <DialogHeader>
-                <DialogTitle>{preview.pose.name}</DialogTitle>
-                <DialogDescription>{preview.pose.code} · {preview.pose.system} · {preview.pose.category} · {preview.view.angle}</DialogDescription>
-              </DialogHeader>
-              <div className="mx-auto aspect-[3/4] w-full max-w-sm bg-white">
-                <PoseFigure view={preview.view} alt={preview.pose.name} size="full" />
-              </div>
-              <div className="flex flex-wrap gap-1.5">
-                {orderedViews(preview.pose).map((view) => (
-                  <Button key={view.id} size="sm" variant={view.id === preview.view.id ? "default" : "outline"} onClick={() => setPreview({ pose: preview.pose, view })}>
-                    {view.angle}
+      <Modal.Backdrop isOpen={preview !== null} onOpenChange={(open) => { if (!open) setPreview(null) }}>
+        <Modal.Container size="lg">
+          <Modal.Dialog className="max-w-[min(36rem,calc(100%-2rem))]">
+            <Modal.CloseTrigger />
+            {preview ? (
+              <>
+                <Modal.Header>
+                  <Modal.Heading>{preview.pose.name}</Modal.Heading>
+                  <p className="text-sm text-muted-foreground">{preview.pose.code} · {preview.pose.system} · {preview.pose.category} · {preview.view.angle}</p>
+                </Modal.Header>
+                <Modal.Body>
+                  <div className="mx-auto aspect-[3/4] w-full max-w-sm bg-white">
+                    <PoseFigure view={preview.view} alt={preview.pose.name} size="full" />
+                  </div>
+                  <div className="mt-3 flex flex-wrap gap-1.5">
+                    {orderedViews(preview.pose).map((view) => (
+                      <Button key={view.id} size="sm" variant={view.id === preview.view.id ? "primary" : "outline"} onPress={() => setPreview({ pose: preview.pose, view })}>
+                        {view.angle}
+                      </Button>
+                    ))}
+                  </div>
+                </Modal.Body>
+                <Modal.Footer>
+                  <Button onPress={() => {
+                    setCardViews((current) => ({ ...current, [preview.pose.id]: preview.view.id }))
+                    onToggle(preview.pose, preview.view)
+                    setPreview(null)
+                  }}>
+                    {selected[preview.pose.id] === preview.view.id ? "从选择里去掉" : "用这个角度生图"}
                   </Button>
-                ))}
-              </div>
-              <Button onClick={() => {
-                setCardViews((current) => ({ ...current, [preview.pose.id]: preview.view.id }))
-                onToggle(preview.pose, preview.view)
-                setPreview(null)
-              }}>
-                {selected[preview.pose.id] === preview.view.id ? "从选择里去掉" : "用这个角度生图"}
-              </Button>
-            </>
-          ) : null}
-        </DialogContent>
-      </Dialog>
+                </Modal.Footer>
+              </>
+            ) : null}
+          </Modal.Dialog>
+        </Modal.Container>
+      </Modal.Backdrop>
     </section>
   )
 }

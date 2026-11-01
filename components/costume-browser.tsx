@@ -5,8 +5,7 @@
 import { useEffect, useMemo, useState } from "react"
 import { Search, X } from "lucide-react"
 import { CustomReferencePanel, type CustomCard, type CustomDraft } from "@/components/custom-reference-panel"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
+import { Button, Input } from "@heroui/react"
 import type { StudioSettings } from "@/lib/settings"
 import { studioUrl, useStudioEnv } from "@/lib/studio-env"
 
@@ -189,7 +188,7 @@ export function CostumeBrowser({
         {!customSection && error ? (
           <div className="rounded-2xl border border-dashed px-4 py-10 text-center text-sm">
             {error}
-            <div className="mt-3"><Button variant="outline" onClick={() => window.location.reload()}>重新加载</Button></div>
+            <div className="mt-3"><Button variant="outline" onPress={() => window.location.reload()}>重新加载</Button></div>
           </div>
         ) : null}
         {!customSection && catalog && costumes.length === 0 ? <p className="py-10 text-center text-sm text-muted-foreground">没有对上的服装。</p> : null}

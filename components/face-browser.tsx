@@ -4,8 +4,7 @@
 
 import { useEffect, useMemo, useState, type ReactNode } from "react"
 import { Search, X } from "lucide-react"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
+import { Button, Input } from "@heroui/react"
 import { studioUrl, useStudioEnv } from "@/lib/studio-env"
 
 export type FaceItem = {
@@ -149,7 +148,7 @@ export function FaceBrowser({
             type="button"
             onClick={randomFace}
             disabled={faces.length === 0}
-            className="inline-flex h-8 shrink-0 items-center rounded-full px-2.5 text-xs text-muted-foreground ring-1 ring-border hover:bg-card hover:text-foreground disabled:opacity-40"
+            className="inline-flex h-8 shrink-0 items-center rounded-full border border-[#fb7185]/50 bg-[#fff1f2] px-2.5 text-xs text-[#be123c] hover:bg-[#ffe4e6] disabled:opacity-40"
           >
             随机一张
           </button>
@@ -164,7 +163,7 @@ export function FaceBrowser({
         {error ? (
           <div className="rounded-2xl border border-dashed px-4 py-10 text-center text-sm">
             {error}
-            <div className="mt-3"><Button variant="outline" onClick={() => window.location.reload()}>重新加载</Button></div>
+            <div className="mt-3"><Button variant="outline" onPress={() => window.location.reload()}>重新加载</Button></div>
           </div>
         ) : null}
         {catalog && faces.length === 0 ? <p className="py-10 text-center text-sm text-muted-foreground">没有对上的脸部参考。</p> : null}
@@ -201,7 +200,7 @@ export function FaceBrowser({
         ) : null}
         {catalog && shown < faces.length ? (
           <div className="mt-4 flex justify-center">
-            <Button variant="outline" onClick={() => setShown((count) => count + 80)}>继续显示（还有 {faces.length - shown}）</Button>
+            <Button variant="outline" onPress={() => setShown((count) => count + 80)}>继续显示（还有 {faces.length - shown}）</Button>
           </div>
         ) : null}
         {catalog ? <p className="mt-6 text-xs leading-5 text-muted-foreground">{catalog.attribution}</p> : null}
