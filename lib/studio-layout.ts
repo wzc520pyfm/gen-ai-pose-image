@@ -3,6 +3,7 @@ export {
   STUDIO_LAYOUT_KEY,
   loadStudioLayout,
   normalizeStudioLayout,
+  projectLayoutChange,
   saveStudioLayout,
 } from "../shared/studio-layout.mjs"
 

@@ -25,3 +25,7 @@ export function saveStudioLayout(id, storage) {
     // ignore quota / private mode
   }
 }
+
+export function projectLayoutChange(state, next) {
+  return { ...state, layout: normalizeStudioLayout(next) }
+}
