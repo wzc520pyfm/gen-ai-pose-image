@@ -488,27 +488,29 @@ function PoseCard({
           原站 {pose.author ? `${pose.credit} · ${pose.author}` : pose.credit}
         </p>
       ) : null}
-      <div role="group" aria-label={`${pose.name}的视角`} className={`grid gap-1 px-2 pb-2.5 ${columns}`}>
-        {views.map((item) => {
-          const active = item.id === view.id
-          return (
-            <button
-              key={item.id}
-              type="button"
-              aria-pressed={active}
-              onMouseEnter={() => onChoose(item)}
-              onFocus={() => onChoose(item)}
-              onClick={() => onChoose(item)}
-              className={`flex min-w-0 flex-col items-center gap-0.5 rounded-md px-0.5 pt-0.5 pb-1 ${active ? "ring-2 ring-foreground" : "ring-1 ring-border hover:bg-muted"}`}
-            >
-              <span className="block aspect-[3/4] w-full overflow-hidden rounded-sm bg-white">
-                <PoseFigure view={item} alt="" size="thumb" compact />
-              </span>
-              <span className={`max-w-full truncate text-[10px] leading-4 ${active ? "font-medium text-foreground" : "text-muted-foreground"}`}>{item.angle}</span>
-            </button>
-          )
-        })}
-      </div>
+      {views.length > 1 ? (
+        <div role="group" aria-label={`${pose.name}的视角`} className={`grid gap-1 px-2 pb-2.5 ${columns}`}>
+          {views.map((item) => {
+            const active = item.id === view.id
+            return (
+              <button
+                key={item.id}
+                type="button"
+                aria-pressed={active}
+                onMouseEnter={() => onChoose(item)}
+                onFocus={() => onChoose(item)}
+                onClick={() => onChoose(item)}
+                className={`flex min-w-0 flex-col items-center gap-0.5 rounded-md px-0.5 pt-0.5 pb-1 ${active ? "ring-2 ring-foreground" : "ring-1 ring-border hover:bg-muted"}`}
+              >
+                <span className="block aspect-[3/4] w-full overflow-hidden rounded-sm bg-white">
+                  <PoseFigure view={item} alt="" size="thumb" compact />
+                </span>
+                <span className={`max-w-full truncate text-[10px] leading-4 ${active ? "font-medium text-foreground" : "text-muted-foreground"}`}>{item.angle}</span>
+              </button>
+            )
+          })}
+        </div>
+      ) : null}
     </article>
   )
 }

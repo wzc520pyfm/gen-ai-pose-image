@@ -93,7 +93,7 @@ Adult poses and adult costumes stay out of search results. Pass `include_adult: 
 
 The studio header switches between live-action plates and a separate anime library. Anime poses, clothing, and faces are not mixed into the original galleries.
 
-The anime plates come from [charadb-2fi.pages.dev](https://charadb-2fi.pages.dev/), by [たき AI](https://x.com/taki_auto), published 2026-11-01. This repository stores ids and URLs only. Thumbnails, clothing images, and pose line art are fetched from that site on demand. The site allows reference use in creative work and does not allow redistributing the image files or using them to depict minors. Cards name that original site. Swimwear stays behind the adult switch.
+The anime plates come from [charadb-2fi.pages.dev](https://charadb-2fi.pages.dev/), by [たき AI](https://x.com/taki_auto), published 2026-11-01. This repository stores ids and URLs only. Thumbnails, clothing images, and pose line art are fetched from that site on demand. Pose cards use the same layout as the live-action poses: front and side share one card, and a pose with only one view does not repeat that image in a second frame. The line-art button and generation load `/line/{id}.png`. The site allows reference use in creative work and does not allow redistributing the image files or using them to depict minors. Cards name that original site. Swimwear stays behind the adult switch.
 
 ## Checks
 

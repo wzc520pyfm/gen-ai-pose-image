@@ -12867,7 +12867,7 @@ function PoseCard({
       "原站 ",
       pose.author ? `${pose.credit} · ${pose.author}` : pose.credit
     ] }) : null,
-    /* @__PURE__ */ (0, import_jsx_runtime28.jsx)("div", { role: "group", "aria-label": `${pose.name}的视角`, className: `grid gap-1 px-2 pb-2.5 ${columns}`, children: views.map((item) => {
+    views.length > 1 ? /* @__PURE__ */ (0, import_jsx_runtime28.jsx)("div", { role: "group", "aria-label": `${pose.name}的视角`, className: `grid gap-1 px-2 pb-2.5 ${columns}`, children: views.map((item) => {
       const active = item.id === view.id;
       return /* @__PURE__ */ (0, import_jsx_runtime28.jsxs)(
         "button",
@@ -12885,7 +12885,7 @@ function PoseCard({
         },
         item.id
       );
-    }) })
+    }) }) : null
   ] });
 }
 function PoseSkeleton() {

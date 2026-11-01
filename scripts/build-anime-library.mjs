@@ -364,32 +364,33 @@ const host = {
   license: "参考利用可・禁止再配布画像",
 }
 
-const poses = []
+const poseDrafts = []
 const costumes = []
 const faces = []
 for (const item of raw.items) {
   if (SKIP.has(item.id)) continue
-  const label = item.parent ? translate(item.jp) : translate(item.jp)
+  const label = translate(item.jp)
   if (item.set === "pose") {
     const category = POSE_CATEGORY[item.cat]
     if (!category) throw new Error(`pose cat ${item.cat}`)
     const angle = angleOf(item.jp)
-    poses.push({
-      id: `anime_${item.id}`,
+    const angleId = angle === "侧面" ? "side" : "front"
+    poseDrafts.push({
+      id: item.id,
       system: "二次元姿势",
       systemId: "anime",
       code: item.id,
       category,
-      name: label,
+      name: label.replace(/（侧面）$/, ""),
       keywords: `二次元 ${item.tags}`,
       adult: false,
       people: item.tags.includes("2girls") ? 2 : 1,
       plate: "line",
       ...host,
       views: [{
-        id: `anime_${item.id}_${angle === "侧面" ? "side" : "front"}`,
+        id: `anime_${item.id}_${angleId}`,
         angle,
-        angleId: angle === "侧面" ? "side" : "front",
+        angleId,
         thumb: `${ORIGIN}/thumb/${item.id}.webp`,
         full: `${ORIGIN}/line/${item.id}.png`,
       }],
@@ -427,6 +428,27 @@ for (const item of raw.items) {
     })
   }
 }
+
+function groupPoseViews(drafts) {
+  const grouped = new Map()
+  for (const pose of drafts) {
+    const side = pose.code.endsWith("-s")
+    const base = side ? pose.code.slice(0, -2) : pose.code
+    const current = grouped.get(base)
+    if (!current) {
+      grouped.set(base, { ...pose, id: `anime_${base}`, code: base, views: [...pose.views] })
+      continue
+    }
+    current.views.push(...pose.views)
+    if (!side) current.name = pose.name
+    const extra = pose.keywords.replace(/^二次元 /, "")
+    if (extra && !current.keywords.includes(extra)) current.keywords = `${current.keywords} ${extra}`
+    current.people = Math.max(current.people, pose.people)
+  }
+  return [...grouped.values()]
+}
+
+const poses = groupPoseViews(poseDrafts)
 
 function groups(items, key, labelKey) {
   const map = new Map()
