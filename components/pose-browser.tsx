@@ -5,7 +5,8 @@
 import { useEffect, useMemo, useRef, useState } from "react"
 import { RotateCcw } from "lucide-react"
 import { CustomReferencePanel, type CustomCard, type CustomDraft } from "@/components/custom-reference-panel"
-import { Alert, Button, Card, Chip, ListBox, Modal, SearchField, Select, Skeleton, ToggleButton, ToggleButtonGroup } from "@heroui/react"
+import { Alert, Button, Card, Chip, ListBox, Modal, SearchField, Select, Skeleton, ToggleButton } from "@heroui/react"
+import { SegmentRow } from "@/components/studio-segment"
 import type { StudioSettings } from "@/lib/settings"
 import type { Catalog, Pose, PoseView } from "@/lib/types"
 import { studioUrl, useOverlayPortal, useStudioEnv } from "@/lib/studio-env"
@@ -226,24 +227,15 @@ export function PoseBrowser({
   return (
     <section className="@container/poses flex min-h-0 flex-col">
       <div className="px-4 pt-5 pb-2 @min-[768px]/studio:px-6">
-        <div className="max-w-full overflow-x-auto">
-          <ToggleButtonGroup
-            aria-label="姿势体系"
-            selectionMode="single"
-            disallowEmptySelection
-            selectedKeys={[seriesKey]}
-            onSelectionChange={chooseSeries}
-            className="w-max flex-nowrap gap-0"
-          >
-            <ToggleButton id="all">全部 {visiblePoseCount}</ToggleButton>
-            {catalog?.systems.map((item) => (
-              <ToggleButton key={item.id} id={item.id}>
-                {item.name} {item.poseCount}
-              </ToggleButton>
-            ))}
-            <ToggleButton id="custom">自定义 {visibleCustom.length}</ToggleButton>
-          </ToggleButtonGroup>
-        </div>
+        <SegmentRow ariaLabel="姿势体系" selectedKey={seriesKey} onSelectionChange={chooseSeries}>
+          <ToggleButton id="all">全部 {visiblePoseCount}</ToggleButton>
+          {catalog?.systems.map((item) => (
+            <ToggleButton key={item.id} id={item.id}>
+              {item.name} {item.poseCount}
+            </ToggleButton>
+          ))}
+          <ToggleButton id="custom">自定义 {visibleCustom.length}</ToggleButton>
+        </SegmentRow>
         {customSection ? null : (
           <div className="mt-2 flex flex-wrap items-center gap-2">
             <SearchField aria-label="搜索姿势" value={query} onChange={setQuery} className="min-w-[8.5rem] flex-1">
@@ -274,21 +266,18 @@ export function PoseBrowser({
               </Select.Popover>
             </Select>
             <div className="flex max-w-full items-center gap-1.5 @min-[640px]/poses:ml-auto">
-              <ToggleButtonGroup
-                aria-label="视角"
-                selectionMode="single"
-                disallowEmptySelection
-                selectedKeys={[angle || "all"]}
+              <SegmentRow
+                ariaLabel="视角"
+                selectedKey={angle || "all"}
                 onSelectionChange={(keys) => {
                   const id = firstKey(keys)
                   if (id == null) return
                   setPerspective(id === "all" ? "" : id)
                 }}
-                className="max-w-full overflow-x-auto"
               >
                 <ToggleButton id="all">全部视角</ToggleButton>
                 {ANGLES.map((item) => <ToggleButton key={item} id={item}>{item}</ToggleButton>)}
-              </ToggleButtonGroup>
+              </SegmentRow>
               <Button variant="outline" size="sm" onPress={resetFilters}>
                 <RotateCcw className="size-3.5" />
                 重置

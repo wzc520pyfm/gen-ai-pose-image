@@ -111,11 +111,11 @@ __export(harness_entry_exports, {
   name: () => name
 });
 module.exports = __toCommonJS(harness_entry_exports);
-var import_react178 = require("react");
+var import_react179 = require("react");
 var import_react_dom8 = require("react-dom");
 
 // components/studio.tsx
-var import_react176 = require("react");
+var import_react177 = require("react");
 
 // lib/elapsed.ts
 var import_react = require("react");
@@ -27430,7 +27430,7 @@ function referenceCaption(hasFace, hasCostume) {
 }
 
 // components/costume-browser.tsx
-var import_react164 = require("react");
+var import_react165 = require("react");
 
 // components/custom-reference-panel.tsx
 var import_react162 = require("react");
@@ -27841,8 +27841,31 @@ function CustomReferencePanel({
   ] });
 }
 
-// components/costume-browser.tsx
+// components/studio-segment.tsx
 var import_jsx_runtime36 = require("react/jsx-runtime");
+function SegmentRow({
+  ariaLabel,
+  selectedKey,
+  onSelectionChange,
+  className = "",
+  children
+}) {
+  return /* @__PURE__ */ (0, import_jsx_runtime36.jsx)("div", { className: `max-w-full overflow-x-auto ${className}`, children: /* @__PURE__ */ (0, import_jsx_runtime36.jsx)(
+    ToggleButtonGroup2,
+    {
+      "aria-label": ariaLabel,
+      selectionMode: "single",
+      disallowEmptySelection: true,
+      selectedKeys: [selectedKey],
+      onSelectionChange,
+      className: "w-max flex-nowrap gap-0",
+      children
+    }
+  ) });
+}
+
+// components/costume-browser.tsx
+var import_jsx_runtime37 = require("react/jsx-runtime");
 function CostumeBrowser({
   showAdult,
   focusCategory,
@@ -27859,14 +27882,14 @@ function CostumeBrowser({
   onChangeSettings
 }) {
   const { basePath } = useStudioEnv();
-  const [catalog, setCatalog] = (0, import_react164.useState)(null);
-  const [error, setError] = (0, import_react164.useState)("");
-  const [category, setCategory] = (0, import_react164.useState)("春");
+  const [catalog, setCatalog] = (0, import_react165.useState)(null);
+  const [error, setError] = (0, import_react165.useState)("");
+  const [category, setCategory] = (0, import_react165.useState)("春");
   const customSection = category === "custom";
   const visibleCustom = customCostumes.filter((item) => showAdult || !item.adult);
   const hiddenCustomAdult = customCostumes.length - visibleCustom.length;
-  const [query, setQuery] = (0, import_react164.useState)("");
-  (0, import_react164.useEffect)(() => {
+  const [query, setQuery] = (0, import_react165.useState)("");
+  (0, import_react165.useEffect)(() => {
     const controller = new AbortController();
     fetch(studioUrl(basePath, "/api/costumes"), { signal: controller.signal }).then(async (response) => {
       if (!response.ok) throw new Error("服装目录没有加载出来");
@@ -27877,12 +27900,12 @@ function CostumeBrowser({
     });
     return () => controller.abort();
   }, [basePath]);
-  (0, import_react164.useEffect)(() => {
+  (0, import_react165.useEffect)(() => {
     if (!focusCategory || !showAdult) return;
     setCategory(focusCategory);
     onFocusApplied();
   }, [focusCategory, showAdult, onFocusApplied]);
-  const costumes = (0, import_react164.useMemo)(() => {
+  const costumes = (0, import_react165.useMemo)(() => {
     if (!catalog) return [];
     const parts = query.trim().toLowerCase().split(/\s+/).filter(Boolean);
     return catalog.costumes.filter((costume) => {
@@ -27893,16 +27916,15 @@ function CostumeBrowser({
       return parts.every((part) => hay.includes(part));
     });
   }, [catalog, category, query, showAdult]);
-  return /* @__PURE__ */ (0, import_jsx_runtime36.jsxs)("section", { children: [
-    /* @__PURE__ */ (0, import_jsx_runtime36.jsxs)("div", { className: "px-4 pt-3 pb-2 @min-[768px]/studio:px-6", children: [
-      /* @__PURE__ */ (0, import_jsx_runtime36.jsx)("p", { className: "mb-2 text-sm text-muted-foreground", children: "这些图里没有人物。选一套之后，大肥鱼会换上这身衣服，脸、头发、鲸耳和鲸尾保持不变。" }),
-      /* @__PURE__ */ (0, import_jsx_runtime36.jsxs)(
-        ToggleButtonGroup2,
+  return /* @__PURE__ */ (0, import_jsx_runtime37.jsxs)("section", { children: [
+    /* @__PURE__ */ (0, import_jsx_runtime37.jsxs)("div", { className: "px-4 pt-3 pb-2 @min-[768px]/studio:px-6", children: [
+      /* @__PURE__ */ (0, import_jsx_runtime37.jsx)("p", { className: "mb-2 text-sm text-muted-foreground", children: "这些图里没有人物。选一套之后，大肥鱼会换上这身衣服，脸、头发、鲸耳和鲸尾保持不变。" }),
+      /* @__PURE__ */ (0, import_jsx_runtime37.jsxs)(
+        SegmentRow,
         {
-          "aria-label": "服装分类",
-          selectionMode: "single",
-          disallowEmptySelection: true,
-          selectedKeys: [category],
+          className: "mb-2",
+          ariaLabel: "服装分类",
+          selectedKey: category,
           onSelectionChange: (keys) => {
             const id = firstKey(keys);
             if (!id) return;
@@ -27917,29 +27939,27 @@ function CostumeBrowser({
             }
             setCategory(id);
           },
-          className: "mb-2 flex flex-wrap gap-2",
           children: [
-            /* @__PURE__ */ (0, import_jsx_runtime36.jsxs)(ToggleButton2, { id: "custom", children: [
+            /* @__PURE__ */ (0, import_jsx_runtime37.jsxs)(ToggleButton2, { id: "custom", children: [
               "自定义 ",
               visibleCustom.length
             ] }),
-            catalog?.categories.map((item) => /* @__PURE__ */ (0, import_jsx_runtime36.jsxs)(ToggleButton2, { id: item.id, children: [
+            catalog?.categories.map((item) => /* @__PURE__ */ (0, import_jsx_runtime37.jsxs)(ToggleButton2, { id: item.id, children: [
               item.label,
               " ",
-              item.count,
-              item.adult ? " 成人向" : ""
+              item.count
             ] }, item.id))
           ]
         }
       ),
-      customSection ? null : /* @__PURE__ */ (0, import_jsx_runtime36.jsx)(SearchField2, { "aria-label": "搜索服装", value: query, onChange: setQuery, children: /* @__PURE__ */ (0, import_jsx_runtime36.jsxs)(SearchField2.Group, { children: [
-        /* @__PURE__ */ (0, import_jsx_runtime36.jsx)(SearchField2.SearchIcon, {}),
-        /* @__PURE__ */ (0, import_jsx_runtime36.jsx)(SearchField2.Input, { placeholder: "搜索编号或关键词" }),
-        /* @__PURE__ */ (0, import_jsx_runtime36.jsx)(SearchField2.ClearButton, {})
+      customSection ? null : /* @__PURE__ */ (0, import_jsx_runtime37.jsx)(SearchField2, { "aria-label": "搜索服装", value: query, onChange: setQuery, children: /* @__PURE__ */ (0, import_jsx_runtime37.jsxs)(SearchField2.Group, { children: [
+        /* @__PURE__ */ (0, import_jsx_runtime37.jsx)(SearchField2.SearchIcon, {}),
+        /* @__PURE__ */ (0, import_jsx_runtime37.jsx)(SearchField2.Input, { placeholder: "搜索编号或关键词" }),
+        /* @__PURE__ */ (0, import_jsx_runtime37.jsx)(SearchField2.ClearButton, {})
       ] }) })
     ] }),
-    /* @__PURE__ */ (0, import_jsx_runtime36.jsxs)("div", { className: "px-4 py-4 @min-[768px]/studio:px-6", children: [
-      customSection ? /* @__PURE__ */ (0, import_jsx_runtime36.jsx)(
+    /* @__PURE__ */ (0, import_jsx_runtime37.jsxs)("div", { className: "px-4 py-4 @min-[768px]/studio:px-6", children: [
+      customSection ? /* @__PURE__ */ (0, import_jsx_runtime37.jsx)(
         CustomReferencePanel,
         {
           kind: "costume",
@@ -27968,20 +27988,20 @@ function CostumeBrowser({
           onChangeSettings
         }
       ) : null,
-      !customSection && !catalog && !error ? /* @__PURE__ */ (0, import_jsx_runtime36.jsx)("div", { className: "grid grid-cols-2 gap-3 @min-[640px]/studio:grid-cols-3 @min-[1280px]/studio:grid-cols-4 @min-[1536px]/studio:grid-cols-5", children: Array.from({ length: 8 }, (_, index) => /* @__PURE__ */ (0, import_jsx_runtime36.jsx)(Skeleton, { className: "block aspect-[2/3] w-full rounded-2xl" }, index)) }) : null,
-      !customSection && error ? /* @__PURE__ */ (0, import_jsx_runtime36.jsxs)(Alert, { status: "danger", children: [
-        /* @__PURE__ */ (0, import_jsx_runtime36.jsx)(Alert.Indicator, {}),
-        /* @__PURE__ */ (0, import_jsx_runtime36.jsxs)(Alert.Content, { children: [
-          /* @__PURE__ */ (0, import_jsx_runtime36.jsx)(Alert.Title, { children: error }),
-          /* @__PURE__ */ (0, import_jsx_runtime36.jsx)(Alert.Description, { children: /* @__PURE__ */ (0, import_jsx_runtime36.jsx)(Button2, { className: "mt-2", variant: "outline", onPress: () => window.location.reload(), children: "重新加载" }) })
+      !customSection && !catalog && !error ? /* @__PURE__ */ (0, import_jsx_runtime37.jsx)("div", { className: "grid grid-cols-2 gap-3 @min-[640px]/studio:grid-cols-3 @min-[1280px]/studio:grid-cols-4 @min-[1536px]/studio:grid-cols-5", children: Array.from({ length: 8 }, (_, index) => /* @__PURE__ */ (0, import_jsx_runtime37.jsx)(Skeleton, { className: "block aspect-[2/3] w-full rounded-2xl" }, index)) }) : null,
+      !customSection && error ? /* @__PURE__ */ (0, import_jsx_runtime37.jsxs)(Alert, { status: "danger", children: [
+        /* @__PURE__ */ (0, import_jsx_runtime37.jsx)(Alert.Indicator, {}),
+        /* @__PURE__ */ (0, import_jsx_runtime37.jsxs)(Alert.Content, { children: [
+          /* @__PURE__ */ (0, import_jsx_runtime37.jsx)(Alert.Title, { children: error }),
+          /* @__PURE__ */ (0, import_jsx_runtime37.jsx)(Alert.Description, { children: /* @__PURE__ */ (0, import_jsx_runtime37.jsx)(Button2, { className: "mt-2", variant: "outline", onPress: () => window.location.reload(), children: "重新加载" }) })
         ] })
       ] }) : null,
-      !customSection && catalog && costumes.length === 0 ? /* @__PURE__ */ (0, import_jsx_runtime36.jsx)("p", { className: "py-10 text-center text-sm text-muted-foreground", children: "没有对上的服装。" }) : null,
-      customSection ? null : /* @__PURE__ */ (0, import_jsx_runtime36.jsx)("div", { className: "grid grid-cols-2 gap-3 @min-[640px]/studio:grid-cols-3 @min-[1280px]/studio:grid-cols-4 @min-[1536px]/studio:grid-cols-5", children: costumes.map((costume) => {
+      !customSection && catalog && costumes.length === 0 ? /* @__PURE__ */ (0, import_jsx_runtime37.jsx)("p", { className: "py-10 text-center text-sm text-muted-foreground", children: "没有对上的服装。" }) : null,
+      customSection ? null : /* @__PURE__ */ (0, import_jsx_runtime37.jsx)("div", { className: "grid grid-cols-2 gap-3 @min-[640px]/studio:grid-cols-3 @min-[1280px]/studio:grid-cols-4 @min-[1536px]/studio:grid-cols-5", children: costumes.map((costume) => {
         const selected = selectedId === costume.id;
-        return /* @__PURE__ */ (0, import_jsx_runtime36.jsxs)(Card, { className: `overflow-hidden text-left shadow-sm ${selected ? "border-primary ring-2 ring-primary/25" : "border-border"}`, children: [
-          /* @__PURE__ */ (0, import_jsx_runtime36.jsxs)(Card.Header, { className: "relative aspect-[3/4] lanzi-paper p-0 @min-[640px]/studio:aspect-[2/3]", children: [
-            /* @__PURE__ */ (0, import_jsx_runtime36.jsx)("button", { type: "button", className: "block h-full w-full", onClick: () => onSelect(costume), "aria-pressed": selected, children: /* @__PURE__ */ (0, import_jsx_runtime36.jsx)(
+        return /* @__PURE__ */ (0, import_jsx_runtime37.jsxs)(Card, { className: `overflow-hidden text-left shadow-sm ${selected ? "border-primary ring-2 ring-primary/25" : "border-border"}`, children: [
+          /* @__PURE__ */ (0, import_jsx_runtime37.jsxs)(Card.Header, { className: "relative aspect-[3/4] lanzi-paper p-0 @min-[640px]/studio:aspect-[2/3]", children: [
+            /* @__PURE__ */ (0, import_jsx_runtime37.jsx)("button", { type: "button", className: "block h-full w-full", onClick: () => onSelect(costume), "aria-pressed": selected, children: /* @__PURE__ */ (0, import_jsx_runtime37.jsx)(
               "img",
               {
                 src: studioUrl(basePath, `/api/costume-image?id=${encodeURIComponent(costume.id)}&size=thumb`),
@@ -27990,11 +28010,11 @@ function CostumeBrowser({
                 className: "h-full w-full object-contain"
               }
             ) }),
-            selected ? /* @__PURE__ */ (0, import_jsx_runtime36.jsx)(Chip, { color: "accent", size: "sm", className: "pointer-events-none absolute top-2 left-2", children: "已选" }) : null
+            selected ? /* @__PURE__ */ (0, import_jsx_runtime37.jsx)(Chip, { color: "accent", size: "sm", className: "pointer-events-none absolute top-2 left-2", children: "已选" }) : null
           ] }),
-          /* @__PURE__ */ (0, import_jsx_runtime36.jsxs)(Card.Footer, { className: "block space-y-1 px-3 py-2.5", children: [
-            /* @__PURE__ */ (0, import_jsx_runtime36.jsx)(Card.Title, { className: "text-sm font-medium", children: costume.id }),
-            /* @__PURE__ */ (0, import_jsx_runtime36.jsxs)(Card.Description, { className: "line-clamp-1 text-xs @min-[640px]/studio:line-clamp-2", children: [
+          /* @__PURE__ */ (0, import_jsx_runtime37.jsxs)(Card.Footer, { className: "block space-y-1 px-3 py-2.5", children: [
+            /* @__PURE__ */ (0, import_jsx_runtime37.jsx)(Card.Title, { className: "text-sm font-medium", children: costume.id }),
+            /* @__PURE__ */ (0, import_jsx_runtime37.jsxs)(Card.Description, { className: "line-clamp-1 text-xs @min-[640px]/studio:line-clamp-2", children: [
               costume.label,
               " · ",
               costume.keywords
@@ -28002,7 +28022,7 @@ function CostumeBrowser({
           ] })
         ] }, costume.id);
       }) }),
-      !customSection && catalog ? /* @__PURE__ */ (0, import_jsx_runtime36.jsx)("p", { className: "mt-6 text-xs leading-5 text-muted-foreground", children: catalog.attribution }) : null
+      !customSection && catalog ? /* @__PURE__ */ (0, import_jsx_runtime37.jsx)("p", { className: "mt-6 text-xs leading-5 text-muted-foreground", children: catalog.attribution }) : null
     ] })
   ] });
 }
@@ -28013,20 +28033,20 @@ function firstKey(keys) {
 }
 
 // components/face-browser.tsx
-var import_react166 = require("react");
-var import_jsx_runtime37 = require("react/jsx-runtime");
+var import_react167 = require("react");
+var import_jsx_runtime38 = require("react/jsx-runtime");
 function FaceBrowser({
   selectedId,
   onSelect
 }) {
   const { basePath } = useStudioEnv();
-  const [catalog, setCatalog] = (0, import_react166.useState)(null);
-  const [error, setError] = (0, import_react166.useState)("");
-  const [section, setSection] = (0, import_react166.useState)("");
-  const [hair, setHair] = (0, import_react166.useState)("");
-  const [query, setQuery] = (0, import_react166.useState)("");
-  const [shown, setShown] = (0, import_react166.useState)(80);
-  (0, import_react166.useEffect)(() => {
+  const [catalog, setCatalog] = (0, import_react167.useState)(null);
+  const [error, setError] = (0, import_react167.useState)("");
+  const [section, setSection] = (0, import_react167.useState)("");
+  const [hair, setHair] = (0, import_react167.useState)("");
+  const [query, setQuery] = (0, import_react167.useState)("");
+  const [shown, setShown] = (0, import_react167.useState)(80);
+  (0, import_react167.useEffect)(() => {
     const controller = new AbortController();
     fetch(studioUrl(basePath, "/api/faces"), { signal: controller.signal }).then(async (response) => {
       if (!response.ok) throw new Error("脸部目录没有加载出来");
@@ -28037,7 +28057,7 @@ function FaceBrowser({
     });
     return () => controller.abort();
   }, [basePath]);
-  const hairCounts = (0, import_react166.useMemo)(() => {
+  const hairCounts = (0, import_react167.useMemo)(() => {
     const counts = /* @__PURE__ */ new Map();
     if (!catalog) return counts;
     for (const face of catalog.faces) {
@@ -28046,7 +28066,7 @@ function FaceBrowser({
     }
     return counts;
   }, [catalog, section]);
-  const faces = (0, import_react166.useMemo)(() => {
+  const faces = (0, import_react167.useMemo)(() => {
     if (!catalog) return [];
     const parts = query.trim().toLowerCase().split(/\s+/).filter(Boolean);
     return catalog.faces.filter((face) => {
@@ -28057,7 +28077,7 @@ function FaceBrowser({
       return parts.every((part) => hay.includes(part));
     });
   }, [catalog, section, hair, query]);
-  (0, import_react166.useEffect)(() => {
+  (0, import_react167.useEffect)(() => {
     setShown(80);
   }, [section, hair, query]);
   const visible2 = faces.slice(0, shown);
@@ -28070,28 +28090,25 @@ function FaceBrowser({
     if (!face || face.id === selectedId) return;
     onSelect(face);
   }
-  return /* @__PURE__ */ (0, import_jsx_runtime37.jsxs)("section", { children: [
-    /* @__PURE__ */ (0, import_jsx_runtime37.jsxs)("div", { className: "px-4 pt-3 pb-2 @min-[768px]/studio:px-6", children: [
-      /* @__PURE__ */ (0, import_jsx_runtime37.jsx)("p", { className: "mb-2 text-sm leading-5 text-muted-foreground", children: "选一张脸部参考。生图会把这张图的五官、表情、脸型和发型用到角色上，姿势和服装仍按各自的参考。鲸耳和鲸尾保留。" }),
-      /* @__PURE__ */ (0, import_jsx_runtime37.jsxs)(
-        ToggleButtonGroup2,
+  return /* @__PURE__ */ (0, import_jsx_runtime38.jsxs)("section", { children: [
+    /* @__PURE__ */ (0, import_jsx_runtime38.jsxs)("div", { className: "px-4 pt-3 pb-2 @min-[768px]/studio:px-6", children: [
+      /* @__PURE__ */ (0, import_jsx_runtime38.jsx)("p", { className: "mb-2 text-sm leading-5 text-muted-foreground", children: "选一张脸部参考。生图会把这张图的五官、表情、脸型和发型用到角色上，姿势和服装仍按各自的参考。鲸耳和鲸尾保留。" }),
+      /* @__PURE__ */ (0, import_jsx_runtime38.jsxs)(
+        SegmentRow,
         {
-          "aria-label": "脸部分组",
-          selectionMode: "single",
-          disallowEmptySelection: true,
-          selectedKeys: [section || "all"],
+          ariaLabel: "脸部分组",
+          selectedKey: section || "all",
           onSelectionChange: (keys) => {
             const id = firstKey2(keys);
             if (id == null) return;
             setSection(id === "all" ? "" : id);
           },
-          className: "flex flex-wrap gap-1.5",
           children: [
-            /* @__PURE__ */ (0, import_jsx_runtime37.jsxs)(ToggleButton2, { id: "all", children: [
+            /* @__PURE__ */ (0, import_jsx_runtime38.jsxs)(ToggleButton2, { id: "all", children: [
               "全部",
               catalog ? ` ${catalog.total}` : ""
             ] }),
-            catalog?.sections.map((item) => /* @__PURE__ */ (0, import_jsx_runtime37.jsxs)(ToggleButton2, { id: item.id, children: [
+            catalog?.sections.map((item) => /* @__PURE__ */ (0, import_jsx_runtime38.jsxs)(ToggleButton2, { id: item.id, children: [
               item.label,
               " ",
               item.count
@@ -28099,28 +28116,25 @@ function FaceBrowser({
           ]
         }
       ),
-      /* @__PURE__ */ (0, import_jsx_runtime37.jsxs)("div", { className: "mt-2 flex flex-wrap items-center gap-2", children: [
-        /* @__PURE__ */ (0, import_jsx_runtime37.jsx)(SearchField2, { "aria-label": "搜索脸部参考", value: query, onChange: setQuery, className: "min-w-[8.5rem] flex-1", children: /* @__PURE__ */ (0, import_jsx_runtime37.jsxs)(SearchField2.Group, { children: [
-          /* @__PURE__ */ (0, import_jsx_runtime37.jsx)(SearchField2.SearchIcon, {}),
-          /* @__PURE__ */ (0, import_jsx_runtime37.jsx)(SearchField2.Input, { placeholder: "搜索编号、发长或造型" }),
-          /* @__PURE__ */ (0, import_jsx_runtime37.jsx)(SearchField2.ClearButton, {})
+      /* @__PURE__ */ (0, import_jsx_runtime38.jsxs)("div", { className: "mt-2 flex flex-wrap items-center gap-2", children: [
+        /* @__PURE__ */ (0, import_jsx_runtime38.jsx)(SearchField2, { "aria-label": "搜索脸部参考", value: query, onChange: setQuery, className: "min-w-[8.5rem] flex-1", children: /* @__PURE__ */ (0, import_jsx_runtime38.jsxs)(SearchField2.Group, { children: [
+          /* @__PURE__ */ (0, import_jsx_runtime38.jsx)(SearchField2.SearchIcon, {}),
+          /* @__PURE__ */ (0, import_jsx_runtime38.jsx)(SearchField2.Input, { placeholder: "搜索编号、发长或造型" }),
+          /* @__PURE__ */ (0, import_jsx_runtime38.jsx)(SearchField2.ClearButton, {})
         ] }) }),
-        /* @__PURE__ */ (0, import_jsx_runtime37.jsxs)(
-          ToggleButtonGroup2,
+        /* @__PURE__ */ (0, import_jsx_runtime38.jsxs)(
+          SegmentRow,
           {
-            "aria-label": "发长",
-            selectionMode: "single",
-            disallowEmptySelection: true,
-            selectedKeys: [hair || "all"],
+            ariaLabel: "发长",
+            selectedKey: hair || "all",
             onSelectionChange: (keys) => {
               const id = firstKey2(keys);
               if (id == null) return;
               setHair(id === "all" ? "" : id);
             },
-            className: "max-w-full overflow-x-auto",
             children: [
-              /* @__PURE__ */ (0, import_jsx_runtime37.jsx)(ToggleButton2, { id: "all", children: "全部发长" }),
-              catalog?.hairs.map((item) => /* @__PURE__ */ (0, import_jsx_runtime37.jsxs)(ToggleButton2, { id: item.id, children: [
+              /* @__PURE__ */ (0, import_jsx_runtime38.jsx)(ToggleButton2, { id: "all", children: "全部发长" }),
+              catalog?.hairs.map((item) => /* @__PURE__ */ (0, import_jsx_runtime38.jsxs)(ToggleButton2, { id: item.id, children: [
                 item.label,
                 " ",
                 hairCounts.get(item.id) ?? 0
@@ -28128,7 +28142,7 @@ function FaceBrowser({
             ]
           }
         ),
-        /* @__PURE__ */ (0, import_jsx_runtime37.jsx)(
+        /* @__PURE__ */ (0, import_jsx_runtime38.jsx)(
           Button2,
           {
             variant: "outline",
@@ -28141,22 +28155,22 @@ function FaceBrowser({
         )
       ] })
     ] }),
-    /* @__PURE__ */ (0, import_jsx_runtime37.jsxs)("div", { className: "px-4 py-4 @min-[768px]/studio:px-6", children: [
-      !catalog && !error ? /* @__PURE__ */ (0, import_jsx_runtime37.jsx)("div", { className: "grid grid-cols-2 gap-3 @min-[640px]/studio:grid-cols-3 @min-[1280px]/studio:grid-cols-4 @min-[1536px]/studio:grid-cols-5", children: Array.from({ length: 8 }, (_, index) => /* @__PURE__ */ (0, import_jsx_runtime37.jsx)(Skeleton, { className: "block aspect-[4/5] w-full rounded-2xl" }, index)) }) : null,
-      error ? /* @__PURE__ */ (0, import_jsx_runtime37.jsxs)(Alert, { status: "danger", children: [
-        /* @__PURE__ */ (0, import_jsx_runtime37.jsx)(Alert.Indicator, {}),
-        /* @__PURE__ */ (0, import_jsx_runtime37.jsxs)(Alert.Content, { children: [
-          /* @__PURE__ */ (0, import_jsx_runtime37.jsx)(Alert.Title, { children: error }),
-          /* @__PURE__ */ (0, import_jsx_runtime37.jsx)(Alert.Description, { children: /* @__PURE__ */ (0, import_jsx_runtime37.jsx)(Button2, { className: "mt-2", variant: "outline", onPress: () => window.location.reload(), children: "重新加载" }) })
+    /* @__PURE__ */ (0, import_jsx_runtime38.jsxs)("div", { className: "px-4 py-4 @min-[768px]/studio:px-6", children: [
+      !catalog && !error ? /* @__PURE__ */ (0, import_jsx_runtime38.jsx)("div", { className: "grid grid-cols-2 gap-3 @min-[640px]/studio:grid-cols-3 @min-[1280px]/studio:grid-cols-4 @min-[1536px]/studio:grid-cols-5", children: Array.from({ length: 8 }, (_, index) => /* @__PURE__ */ (0, import_jsx_runtime38.jsx)(Skeleton, { className: "block aspect-[4/5] w-full rounded-2xl" }, index)) }) : null,
+      error ? /* @__PURE__ */ (0, import_jsx_runtime38.jsxs)(Alert, { status: "danger", children: [
+        /* @__PURE__ */ (0, import_jsx_runtime38.jsx)(Alert.Indicator, {}),
+        /* @__PURE__ */ (0, import_jsx_runtime38.jsxs)(Alert.Content, { children: [
+          /* @__PURE__ */ (0, import_jsx_runtime38.jsx)(Alert.Title, { children: error }),
+          /* @__PURE__ */ (0, import_jsx_runtime38.jsx)(Alert.Description, { children: /* @__PURE__ */ (0, import_jsx_runtime38.jsx)(Button2, { className: "mt-2", variant: "outline", onPress: () => window.location.reload(), children: "重新加载" }) })
         ] })
       ] }) : null,
-      catalog && faces.length === 0 ? /* @__PURE__ */ (0, import_jsx_runtime37.jsx)("p", { className: "py-10 text-center text-sm text-muted-foreground", children: "没有对上的脸部参考。" }) : null,
-      catalog ? /* @__PURE__ */ (0, import_jsx_runtime37.jsx)("div", { className: "grid grid-cols-2 gap-3 @min-[640px]/studio:grid-cols-3 @min-[1280px]/studio:grid-cols-4 @min-[1536px]/studio:grid-cols-5", children: visible2.map((face) => {
+      catalog && faces.length === 0 ? /* @__PURE__ */ (0, import_jsx_runtime38.jsx)("p", { className: "py-10 text-center text-sm text-muted-foreground", children: "没有对上的脸部参考。" }) : null,
+      catalog ? /* @__PURE__ */ (0, import_jsx_runtime38.jsx)("div", { className: "grid grid-cols-2 gap-3 @min-[640px]/studio:grid-cols-3 @min-[1280px]/studio:grid-cols-4 @min-[1536px]/studio:grid-cols-5", children: visible2.map((face) => {
         const selected = selectedId === face.id;
         const caption = [face.section, face.hair, face.label].filter(Boolean).join(" · ");
-        return /* @__PURE__ */ (0, import_jsx_runtime37.jsxs)(Card, { className: `overflow-hidden text-left shadow-sm ${selected ? "border-primary ring-2 ring-primary/25" : "border-border"}`, children: [
-          /* @__PURE__ */ (0, import_jsx_runtime37.jsxs)(Card.Header, { className: "relative aspect-[4/5] lanzi-paper p-0", children: [
-            /* @__PURE__ */ (0, import_jsx_runtime37.jsx)("button", { type: "button", className: "block h-full w-full", onClick: () => onSelect(face), "aria-pressed": selected, children: /* @__PURE__ */ (0, import_jsx_runtime37.jsx)(
+        return /* @__PURE__ */ (0, import_jsx_runtime38.jsxs)(Card, { className: `overflow-hidden text-left shadow-sm ${selected ? "border-primary ring-2 ring-primary/25" : "border-border"}`, children: [
+          /* @__PURE__ */ (0, import_jsx_runtime38.jsxs)(Card.Header, { className: "relative aspect-[4/5] lanzi-paper p-0", children: [
+            /* @__PURE__ */ (0, import_jsx_runtime38.jsx)("button", { type: "button", className: "block h-full w-full", onClick: () => onSelect(face), "aria-pressed": selected, children: /* @__PURE__ */ (0, import_jsx_runtime38.jsx)(
               "img",
               {
                 src: studioUrl(basePath, `/api/face-image?id=${encodeURIComponent(face.id)}&size=thumb`),
@@ -28165,20 +28179,20 @@ function FaceBrowser({
                 className: "h-full w-full object-cover"
               }
             ) }),
-            selected ? /* @__PURE__ */ (0, import_jsx_runtime37.jsx)(Chip, { color: "accent", size: "sm", className: "pointer-events-none absolute top-2 left-2", children: "已选" }) : null
+            selected ? /* @__PURE__ */ (0, import_jsx_runtime38.jsx)(Chip, { color: "accent", size: "sm", className: "pointer-events-none absolute top-2 left-2", children: "已选" }) : null
           ] }),
-          /* @__PURE__ */ (0, import_jsx_runtime37.jsxs)(Card.Footer, { className: "block space-y-1 px-3 py-2.5", children: [
-            /* @__PURE__ */ (0, import_jsx_runtime37.jsx)(Card.Title, { className: "truncate text-sm font-medium", children: face.id }),
-            /* @__PURE__ */ (0, import_jsx_runtime37.jsx)(Card.Description, { className: "line-clamp-2 text-xs", children: caption })
+          /* @__PURE__ */ (0, import_jsx_runtime38.jsxs)(Card.Footer, { className: "block space-y-1 px-3 py-2.5", children: [
+            /* @__PURE__ */ (0, import_jsx_runtime38.jsx)(Card.Title, { className: "truncate text-sm font-medium", children: face.id }),
+            /* @__PURE__ */ (0, import_jsx_runtime38.jsx)(Card.Description, { className: "line-clamp-2 text-xs", children: caption })
           ] })
         ] }, face.id);
       }) }) : null,
-      catalog && shown < faces.length ? /* @__PURE__ */ (0, import_jsx_runtime37.jsx)("div", { className: "mt-4 flex justify-center", children: /* @__PURE__ */ (0, import_jsx_runtime37.jsxs)(Button2, { variant: "outline", onPress: () => setShown((count) => count + 80), children: [
+      catalog && shown < faces.length ? /* @__PURE__ */ (0, import_jsx_runtime38.jsx)("div", { className: "mt-4 flex justify-center", children: /* @__PURE__ */ (0, import_jsx_runtime38.jsxs)(Button2, { variant: "outline", onPress: () => setShown((count) => count + 80), children: [
         "继续显示（还有 ",
         faces.length - shown,
         "）"
       ] }) }) : null,
-      catalog ? /* @__PURE__ */ (0, import_jsx_runtime37.jsx)("p", { className: "mt-6 text-xs leading-5 text-muted-foreground", children: catalog.attribution }) : null
+      catalog ? /* @__PURE__ */ (0, import_jsx_runtime38.jsx)("p", { className: "mt-6 text-xs leading-5 text-muted-foreground", children: catalog.attribution }) : null
     ] })
   ] });
 }
@@ -28189,8 +28203,8 @@ function firstKey2(keys) {
 }
 
 // components/pose-browser.tsx
-var import_react168 = require("react");
-var import_jsx_runtime38 = require("react/jsx-runtime");
+var import_react169 = require("react");
+var import_jsx_runtime39 = require("react/jsx-runtime");
 var ANGLES = ["正面", "俯视", "仰视", "侧面", "斜侧"];
 var THUMB_COLS = ["", "grid-cols-1", "grid-cols-2", "grid-cols-3", "grid-cols-4", "grid-cols-5"];
 var POSE_GRID = "grid grid-cols-2 gap-3 @min-[640px]/poses:grid-cols-3 @min-[780px]/poses:grid-cols-4";
@@ -28218,11 +28232,11 @@ function shownView(pose, selectedViewId, cardViewId, angle) {
 }
 function PoseFigure({ view, alt, size = "thumb", compact = false }) {
   const { basePath } = useStudioEnv();
-  const [failed, setFailed] = (0, import_react168.useState)(false);
+  const [failed, setFailed] = (0, import_react169.useState)(false);
   if (failed) {
-    return /* @__PURE__ */ (0, import_jsx_runtime38.jsx)("div", { className: `grid h-full place-items-center text-center text-muted-foreground ${compact ? "px-0.5 text-[10px] leading-3" : "px-3 text-xs"}`, children: compact ? "无图" : "线稿暂时加载不到" });
+    return /* @__PURE__ */ (0, import_jsx_runtime39.jsx)("div", { className: `grid h-full place-items-center text-center text-muted-foreground ${compact ? "px-0.5 text-[10px] leading-3" : "px-3 text-xs"}`, children: compact ? "无图" : "线稿暂时加载不到" });
   }
-  return /* @__PURE__ */ (0, import_jsx_runtime38.jsx)(
+  return /* @__PURE__ */ (0, import_jsx_runtime39.jsx)(
     "img",
     {
       src: studioUrl(basePath, `/api/pose-image?id=${encodeURIComponent(view.id)}&size=${size}`),
@@ -28251,17 +28265,17 @@ function PoseBrowser({
   hasKey,
   syncWarning
 }) {
-  const [systemId, setSystemId] = (0, import_react168.useState)("full");
+  const [systemId, setSystemId] = (0, import_react169.useState)("full");
   const customSection = systemId === "custom";
   const allSeries = systemId === "all";
-  const [category, setCategory] = (0, import_react168.useState)("全部");
-  const [angle, setAngle] = (0, import_react168.useState)("");
-  const [query, setQuery] = (0, import_react168.useState)("");
-  const [cardViews, setCardViews] = (0, import_react168.useState)({});
-  const [preview, setPreview] = (0, import_react168.useState)(null);
-  const searchRef = (0, import_react168.useRef)(null);
+  const [category, setCategory] = (0, import_react169.useState)("全部");
+  const [angle, setAngle] = (0, import_react169.useState)("");
+  const [query, setQuery] = (0, import_react169.useState)("");
+  const [cardViews, setCardViews] = (0, import_react169.useState)({});
+  const [preview, setPreview] = (0, import_react169.useState)(null);
+  const searchRef = (0, import_react169.useRef)(null);
   const portal = useOverlayPortal();
-  (0, import_react168.useEffect)(() => {
+  (0, import_react169.useEffect)(() => {
     const onKey = (event) => {
       const target = event.target;
       const typing = target instanceof HTMLElement && (target.tagName === "INPUT" || target.tagName === "TEXTAREA" || target.tagName === "SELECT");
@@ -28277,11 +28291,11 @@ function PoseBrowser({
   const seriesKey = customSection ? "custom" : allSeries ? "all" : system?.id ?? "all";
   const visibleCustom = customPoses.filter((item) => showAdult || !item.adult);
   const hiddenCustomAdult = customPoses.length - visibleCustom.length;
-  const visiblePoseCount = (0, import_react168.useMemo)(() => {
+  const visiblePoseCount = (0, import_react169.useMemo)(() => {
     if (!catalog) return 0;
     return catalog.poses.filter((pose) => showAdult || !pose.adult).length;
   }, [catalog, showAdult]);
-  const categories = (0, import_react168.useMemo)(() => {
+  const categories = (0, import_react169.useMemo)(() => {
     if (!catalog || !allSeries && !system) return ["全部"];
     const names = /* @__PURE__ */ new Set();
     for (const pose of catalog.poses) {
@@ -28291,10 +28305,10 @@ function PoseBrowser({
     }
     return ["全部", ...names];
   }, [catalog, system, allSeries, showAdult]);
-  (0, import_react168.useEffect)(() => {
+  (0, import_react169.useEffect)(() => {
     if (!categories.includes(category)) setCategory("全部");
   }, [categories, category]);
-  (0, import_react168.useEffect)(() => {
+  (0, import_react169.useEffect)(() => {
     if (!requestedSystem || !showAdult) return;
     if (requestedSystem === "custom") {
       setSystemId("custom");
@@ -28306,7 +28320,7 @@ function PoseBrowser({
     setCategory("全部");
     onRequestedSystemApplied();
   }, [requestedSystem, showAdult, catalog, onRequestedSystemApplied]);
-  const poses = (0, import_react168.useMemo)(() => {
+  const poses = (0, import_react169.useMemo)(() => {
     if (!catalog || !allSeries && !system) return [];
     const parts = query.trim().toLowerCase().split(/\s+/).filter(Boolean);
     return catalog.poses.filter((pose) => {
@@ -28363,41 +28377,30 @@ function PoseBrowser({
     setSystemId(id);
     setCategory("全部");
   }
-  return /* @__PURE__ */ (0, import_jsx_runtime38.jsxs)("section", { className: "@container/poses flex min-h-0 flex-col", children: [
-    /* @__PURE__ */ (0, import_jsx_runtime38.jsxs)("div", { className: "px-4 pt-5 pb-2 @min-[768px]/studio:px-6", children: [
-      /* @__PURE__ */ (0, import_jsx_runtime38.jsx)("div", { className: "max-w-full overflow-x-auto", children: /* @__PURE__ */ (0, import_jsx_runtime38.jsxs)(
-        ToggleButtonGroup2,
-        {
-          "aria-label": "姿势体系",
-          selectionMode: "single",
-          disallowEmptySelection: true,
-          selectedKeys: [seriesKey],
-          onSelectionChange: chooseSeries,
-          className: "w-max flex-nowrap gap-0",
-          children: [
-            /* @__PURE__ */ (0, import_jsx_runtime38.jsxs)(ToggleButton2, { id: "all", children: [
-              "全部 ",
-              visiblePoseCount
-            ] }),
-            catalog?.systems.map((item) => /* @__PURE__ */ (0, import_jsx_runtime38.jsxs)(ToggleButton2, { id: item.id, children: [
-              item.name,
-              " ",
-              item.poseCount
-            ] }, item.id)),
-            /* @__PURE__ */ (0, import_jsx_runtime38.jsxs)(ToggleButton2, { id: "custom", children: [
-              "自定义 ",
-              visibleCustom.length
-            ] })
-          ]
-        }
-      ) }),
-      customSection ? null : /* @__PURE__ */ (0, import_jsx_runtime38.jsxs)("div", { className: "mt-2 flex flex-wrap items-center gap-2", children: [
-        /* @__PURE__ */ (0, import_jsx_runtime38.jsx)(SearchField2, { "aria-label": "搜索姿势", value: query, onChange: setQuery, className: "min-w-[8.5rem] flex-1", children: /* @__PURE__ */ (0, import_jsx_runtime38.jsxs)(SearchField2.Group, { children: [
-          /* @__PURE__ */ (0, import_jsx_runtime38.jsx)(SearchField2.SearchIcon, {}),
-          /* @__PURE__ */ (0, import_jsx_runtime38.jsx)(SearchField2.Input, { ref: searchRef, placeholder: "搜索姿势名称、编号（如 P001）" }),
-          /* @__PURE__ */ (0, import_jsx_runtime38.jsx)(SearchField2.ClearButton, {})
+  return /* @__PURE__ */ (0, import_jsx_runtime39.jsxs)("section", { className: "@container/poses flex min-h-0 flex-col", children: [
+    /* @__PURE__ */ (0, import_jsx_runtime39.jsxs)("div", { className: "px-4 pt-5 pb-2 @min-[768px]/studio:px-6", children: [
+      /* @__PURE__ */ (0, import_jsx_runtime39.jsxs)(SegmentRow, { ariaLabel: "姿势体系", selectedKey: seriesKey, onSelectionChange: chooseSeries, children: [
+        /* @__PURE__ */ (0, import_jsx_runtime39.jsxs)(ToggleButton2, { id: "all", children: [
+          "全部 ",
+          visiblePoseCount
+        ] }),
+        catalog?.systems.map((item) => /* @__PURE__ */ (0, import_jsx_runtime39.jsxs)(ToggleButton2, { id: item.id, children: [
+          item.name,
+          " ",
+          item.poseCount
+        ] }, item.id)),
+        /* @__PURE__ */ (0, import_jsx_runtime39.jsxs)(ToggleButton2, { id: "custom", children: [
+          "自定义 ",
+          visibleCustom.length
+        ] })
+      ] }),
+      customSection ? null : /* @__PURE__ */ (0, import_jsx_runtime39.jsxs)("div", { className: "mt-2 flex flex-wrap items-center gap-2", children: [
+        /* @__PURE__ */ (0, import_jsx_runtime39.jsx)(SearchField2, { "aria-label": "搜索姿势", value: query, onChange: setQuery, className: "min-w-[8.5rem] flex-1", children: /* @__PURE__ */ (0, import_jsx_runtime39.jsxs)(SearchField2.Group, { children: [
+          /* @__PURE__ */ (0, import_jsx_runtime39.jsx)(SearchField2.SearchIcon, {}),
+          /* @__PURE__ */ (0, import_jsx_runtime39.jsx)(SearchField2.Input, { ref: searchRef, placeholder: "搜索姿势名称、编号（如 P001）" }),
+          /* @__PURE__ */ (0, import_jsx_runtime39.jsx)(SearchField2.ClearButton, {})
         ] }) }),
-        /* @__PURE__ */ (0, import_jsx_runtime38.jsxs)(
+        /* @__PURE__ */ (0, import_jsx_runtime39.jsxs)(
           Select2,
           {
             "aria-label": "动作分类",
@@ -28407,43 +28410,40 @@ function PoseBrowser({
             },
             className: "shrink-0",
             children: [
-              /* @__PURE__ */ (0, import_jsx_runtime38.jsxs)(Select2.Trigger, { children: [
-                /* @__PURE__ */ (0, import_jsx_runtime38.jsx)(Select2.Value, {}),
-                /* @__PURE__ */ (0, import_jsx_runtime38.jsx)(Select2.Indicator, {})
+              /* @__PURE__ */ (0, import_jsx_runtime39.jsxs)(Select2.Trigger, { children: [
+                /* @__PURE__ */ (0, import_jsx_runtime39.jsx)(Select2.Value, {}),
+                /* @__PURE__ */ (0, import_jsx_runtime39.jsx)(Select2.Indicator, {})
               ] }),
-              /* @__PURE__ */ (0, import_jsx_runtime38.jsx)(Select2.Popover, { ...portal, children: /* @__PURE__ */ (0, import_jsx_runtime38.jsx)(ListBox2, { children: categories.map((item) => /* @__PURE__ */ (0, import_jsx_runtime38.jsx)(ListBox2.Item, { id: item, textValue: item === "全部" ? "全部动作分类" : item, children: item === "全部" ? "全部动作分类" : item }, item)) }) })
+              /* @__PURE__ */ (0, import_jsx_runtime39.jsx)(Select2.Popover, { ...portal, children: /* @__PURE__ */ (0, import_jsx_runtime39.jsx)(ListBox2, { children: categories.map((item) => /* @__PURE__ */ (0, import_jsx_runtime39.jsx)(ListBox2.Item, { id: item, textValue: item === "全部" ? "全部动作分类" : item, children: item === "全部" ? "全部动作分类" : item }, item)) }) })
             ]
           }
         ),
-        /* @__PURE__ */ (0, import_jsx_runtime38.jsxs)("div", { className: "flex max-w-full items-center gap-1.5 @min-[640px]/poses:ml-auto", children: [
-          /* @__PURE__ */ (0, import_jsx_runtime38.jsxs)(
-            ToggleButtonGroup2,
+        /* @__PURE__ */ (0, import_jsx_runtime39.jsxs)("div", { className: "flex max-w-full items-center gap-1.5 @min-[640px]/poses:ml-auto", children: [
+          /* @__PURE__ */ (0, import_jsx_runtime39.jsxs)(
+            SegmentRow,
             {
-              "aria-label": "视角",
-              selectionMode: "single",
-              disallowEmptySelection: true,
-              selectedKeys: [angle || "all"],
+              ariaLabel: "视角",
+              selectedKey: angle || "all",
               onSelectionChange: (keys) => {
                 const id = firstKey3(keys);
                 if (id == null) return;
                 setPerspective(id === "all" ? "" : id);
               },
-              className: "max-w-full overflow-x-auto",
               children: [
-                /* @__PURE__ */ (0, import_jsx_runtime38.jsx)(ToggleButton2, { id: "all", children: "全部视角" }),
-                ANGLES.map((item) => /* @__PURE__ */ (0, import_jsx_runtime38.jsx)(ToggleButton2, { id: item, children: item }, item))
+                /* @__PURE__ */ (0, import_jsx_runtime39.jsx)(ToggleButton2, { id: "all", children: "全部视角" }),
+                ANGLES.map((item) => /* @__PURE__ */ (0, import_jsx_runtime39.jsx)(ToggleButton2, { id: item, children: item }, item))
               ]
             }
           ),
-          /* @__PURE__ */ (0, import_jsx_runtime38.jsxs)(Button2, { variant: "outline", size: "sm", onPress: resetFilters, children: [
-            /* @__PURE__ */ (0, import_jsx_runtime38.jsx)(RotateCcw, { className: "size-3.5" }),
+          /* @__PURE__ */ (0, import_jsx_runtime39.jsxs)(Button2, { variant: "outline", size: "sm", onPress: resetFilters, children: [
+            /* @__PURE__ */ (0, import_jsx_runtime39.jsx)(RotateCcw, { className: "size-3.5" }),
             "重置"
           ] })
         ] })
       ] })
     ] }),
-    /* @__PURE__ */ (0, import_jsx_runtime38.jsxs)("div", { className: "px-4 py-3 @min-[768px]/studio:px-6", children: [
-      customSection ? /* @__PURE__ */ (0, import_jsx_runtime38.jsx)(
+    /* @__PURE__ */ (0, import_jsx_runtime39.jsxs)("div", { className: "px-4 py-3 @min-[768px]/studio:px-6", children: [
+      customSection ? /* @__PURE__ */ (0, import_jsx_runtime39.jsx)(
         CustomReferencePanel,
         {
           kind: "pose",
@@ -28475,23 +28475,23 @@ function PoseBrowser({
           syncWarning
         }
       ) : null,
-      !customSection && loading ? /* @__PURE__ */ (0, import_jsx_runtime38.jsx)(PoseSkeleton, {}) : null,
-      !customSection && error ? /* @__PURE__ */ (0, import_jsx_runtime38.jsxs)(Alert, { status: "danger", children: [
-        /* @__PURE__ */ (0, import_jsx_runtime38.jsx)(Alert.Indicator, {}),
-        /* @__PURE__ */ (0, import_jsx_runtime38.jsxs)(Alert.Content, { children: [
-          /* @__PURE__ */ (0, import_jsx_runtime38.jsx)(Alert.Title, { children: error }),
-          /* @__PURE__ */ (0, import_jsx_runtime38.jsx)(Alert.Description, { children: /* @__PURE__ */ (0, import_jsx_runtime38.jsx)(Button2, { className: "mt-2", variant: "outline", onPress: onRetry, children: "重新加载" }) })
+      !customSection && loading ? /* @__PURE__ */ (0, import_jsx_runtime39.jsx)(PoseSkeleton, {}) : null,
+      !customSection && error ? /* @__PURE__ */ (0, import_jsx_runtime39.jsxs)(Alert, { status: "danger", children: [
+        /* @__PURE__ */ (0, import_jsx_runtime39.jsx)(Alert.Indicator, {}),
+        /* @__PURE__ */ (0, import_jsx_runtime39.jsxs)(Alert.Content, { children: [
+          /* @__PURE__ */ (0, import_jsx_runtime39.jsx)(Alert.Title, { children: error }),
+          /* @__PURE__ */ (0, import_jsx_runtime39.jsx)(Alert.Description, { children: /* @__PURE__ */ (0, import_jsx_runtime39.jsx)(Button2, { className: "mt-2", variant: "outline", onPress: onRetry, children: "重新加载" }) })
         ] })
       ] }) : null,
-      !customSection && !loading && !error && poses.length === 0 ? /* @__PURE__ */ (0, import_jsx_runtime38.jsxs)("div", { className: "rounded-2xl border border-dashed border-border bg-card px-4 py-12 text-center", children: [
-        /* @__PURE__ */ (0, import_jsx_runtime38.jsx)("p", { className: "text-lg font-semibold", children: "没有对上的姿势" }),
-        /* @__PURE__ */ (0, import_jsx_runtime38.jsx)("p", { className: "mt-1 text-sm text-muted-foreground", children: hiddenAdult > 0 && !showAdult ? `这一体系里有 ${hiddenAdult} 个成人向姿势被收着。` : "换个词，或把分类、视角清掉。" }),
-        hiddenAdult > 0 && !showAdult ? /* @__PURE__ */ (0, import_jsx_runtime38.jsx)(Button2, { className: "mt-3", variant: "outline", onPress: () => onRequestAdult(system?.id ?? "sexy"), children: "显示成人向姿势" }) : null
+      !customSection && !loading && !error && poses.length === 0 ? /* @__PURE__ */ (0, import_jsx_runtime39.jsxs)("div", { className: "rounded-2xl border border-dashed border-border bg-card px-4 py-12 text-center", children: [
+        /* @__PURE__ */ (0, import_jsx_runtime39.jsx)("p", { className: "text-lg font-semibold", children: "没有对上的姿势" }),
+        /* @__PURE__ */ (0, import_jsx_runtime39.jsx)("p", { className: "mt-1 text-sm text-muted-foreground", children: hiddenAdult > 0 && !showAdult ? `这一体系里有 ${hiddenAdult} 个成人向姿势被收着。` : "换个词，或把分类、视角清掉。" }),
+        hiddenAdult > 0 && !showAdult ? /* @__PURE__ */ (0, import_jsx_runtime39.jsx)(Button2, { className: "mt-3", variant: "outline", onPress: () => onRequestAdult(system?.id ?? "sexy"), children: "显示成人向姿势" }) : null
       ] }) : null,
-      customSection ? null : /* @__PURE__ */ (0, import_jsx_runtime38.jsx)("div", { className: POSE_GRID, children: poses.map((pose) => {
+      customSection ? null : /* @__PURE__ */ (0, import_jsx_runtime39.jsx)("div", { className: POSE_GRID, children: poses.map((pose) => {
         const view = shownView(pose, selected[pose.id], cardViews[pose.id], angle);
         if (!view) return null;
-        return /* @__PURE__ */ (0, import_jsx_runtime38.jsx)(
+        return /* @__PURE__ */ (0, import_jsx_runtime39.jsx)(
           PoseCard,
           {
             pose,
@@ -28504,7 +28504,7 @@ function PoseBrowser({
           pose.id
         );
       }) }),
-      catalog && !customSection ? /* @__PURE__ */ (0, import_jsx_runtime38.jsxs)("p", { className: "mt-6 max-w-3xl text-xs leading-5 text-muted-foreground", children: [
+      catalog && !customSection ? /* @__PURE__ */ (0, import_jsx_runtime39.jsxs)("p", { className: "mt-6 max-w-3xl text-xs leading-5 text-muted-foreground", children: [
         catalog.attribution,
         " 图床：",
         catalog.origin,
@@ -28513,14 +28513,14 @@ function PoseBrowser({
         "。"
       ] }) : null
     ] }),
-    /* @__PURE__ */ (0, import_jsx_runtime38.jsx)(Modal2.Backdrop, { isOpen: preview !== null, onOpenChange: (open) => {
+    /* @__PURE__ */ (0, import_jsx_runtime39.jsx)(Modal2.Backdrop, { isOpen: preview !== null, onOpenChange: (open) => {
       if (!open) setPreview(null);
-    }, ...portal, children: /* @__PURE__ */ (0, import_jsx_runtime38.jsx)(Modal2.Container, { size: "lg", children: /* @__PURE__ */ (0, import_jsx_runtime38.jsxs)(Modal2.Dialog, { className: "max-w-[min(36rem,calc(100%-2rem))]", children: [
-      /* @__PURE__ */ (0, import_jsx_runtime38.jsx)(Modal2.CloseTrigger, {}),
-      preview ? /* @__PURE__ */ (0, import_jsx_runtime38.jsxs)(import_jsx_runtime38.Fragment, { children: [
-        /* @__PURE__ */ (0, import_jsx_runtime38.jsxs)(Modal2.Header, { children: [
-          /* @__PURE__ */ (0, import_jsx_runtime38.jsx)(Modal2.Heading, { children: preview.pose.name }),
-          /* @__PURE__ */ (0, import_jsx_runtime38.jsxs)("p", { className: "text-sm text-muted-foreground", children: [
+    }, ...portal, children: /* @__PURE__ */ (0, import_jsx_runtime39.jsx)(Modal2.Container, { size: "lg", children: /* @__PURE__ */ (0, import_jsx_runtime39.jsxs)(Modal2.Dialog, { className: "max-w-[min(36rem,calc(100%-2rem))]", children: [
+      /* @__PURE__ */ (0, import_jsx_runtime39.jsx)(Modal2.CloseTrigger, {}),
+      preview ? /* @__PURE__ */ (0, import_jsx_runtime39.jsxs)(import_jsx_runtime39.Fragment, { children: [
+        /* @__PURE__ */ (0, import_jsx_runtime39.jsxs)(Modal2.Header, { children: [
+          /* @__PURE__ */ (0, import_jsx_runtime39.jsx)(Modal2.Heading, { children: preview.pose.name }),
+          /* @__PURE__ */ (0, import_jsx_runtime39.jsxs)("p", { className: "text-sm text-muted-foreground", children: [
             preview.pose.code,
             " · ",
             preview.pose.system,
@@ -28530,11 +28530,11 @@ function PoseBrowser({
             preview.view.angle
           ] })
         ] }),
-        /* @__PURE__ */ (0, import_jsx_runtime38.jsxs)(Modal2.Body, { children: [
-          /* @__PURE__ */ (0, import_jsx_runtime38.jsx)("div", { className: "mx-auto aspect-[3/4] w-full max-w-sm lanzi-paper", children: /* @__PURE__ */ (0, import_jsx_runtime38.jsx)(PoseFigure, { view: preview.view, alt: preview.pose.name, size: "full" }) }),
-          /* @__PURE__ */ (0, import_jsx_runtime38.jsx)("div", { className: "mt-3 flex flex-wrap gap-1.5", children: orderedViews(preview.pose).map((view) => /* @__PURE__ */ (0, import_jsx_runtime38.jsx)(Button2, { size: "sm", variant: view.id === preview.view.id ? "primary" : "outline", onPress: () => setPreview({ pose: preview.pose, view }), children: view.angle }, view.id)) })
+        /* @__PURE__ */ (0, import_jsx_runtime39.jsxs)(Modal2.Body, { children: [
+          /* @__PURE__ */ (0, import_jsx_runtime39.jsx)("div", { className: "mx-auto aspect-[3/4] w-full max-w-sm lanzi-paper", children: /* @__PURE__ */ (0, import_jsx_runtime39.jsx)(PoseFigure, { view: preview.view, alt: preview.pose.name, size: "full" }) }),
+          /* @__PURE__ */ (0, import_jsx_runtime39.jsx)("div", { className: "mt-3 flex flex-wrap gap-1.5", children: orderedViews(preview.pose).map((view) => /* @__PURE__ */ (0, import_jsx_runtime39.jsx)(Button2, { size: "sm", variant: view.id === preview.view.id ? "primary" : "outline", onPress: () => setPreview({ pose: preview.pose, view }), children: view.angle }, view.id)) })
         ] }),
-        /* @__PURE__ */ (0, import_jsx_runtime38.jsx)(Modal2.Footer, { children: /* @__PURE__ */ (0, import_jsx_runtime38.jsx)(Button2, { onPress: () => {
+        /* @__PURE__ */ (0, import_jsx_runtime39.jsx)(Modal2.Footer, { children: /* @__PURE__ */ (0, import_jsx_runtime39.jsx)(Button2, { onPress: () => {
           setCardViews((current) => ({ ...current, [preview.pose.id]: preview.view.id }));
           onToggle(preview.pose, preview.view);
           setPreview(null);
@@ -28558,11 +28558,11 @@ function PoseCard({
 }) {
   const views = orderedViews(pose);
   const columns = THUMB_COLS[Math.min(views.length, 5)] ?? "grid-cols-5";
-  return /* @__PURE__ */ (0, import_jsx_runtime38.jsxs)(Card, { className: `min-w-0 shadow-sm ${selected ? "border-primary ring-2 ring-primary/25" : "border-border"}`, children: [
-    /* @__PURE__ */ (0, import_jsx_runtime38.jsxs)(Card.Header, { className: "relative aspect-[3/4] overflow-hidden lanzi-paper p-0", children: [
-      /* @__PURE__ */ (0, import_jsx_runtime38.jsx)("button", { type: "button", className: "block h-full w-full", onClick: onActivate, "aria-pressed": selected, children: /* @__PURE__ */ (0, import_jsx_runtime38.jsx)(PoseFigure, { view, alt: `${pose.name}，${view.angle}` }, view.id) }),
-      selected ? /* @__PURE__ */ (0, import_jsx_runtime38.jsx)(Chip, { color: "accent", size: "sm", className: "pointer-events-none absolute top-2 left-2", children: "已选" }) : null,
-      /* @__PURE__ */ (0, import_jsx_runtime38.jsx)(
+  return /* @__PURE__ */ (0, import_jsx_runtime39.jsxs)(Card, { className: `min-w-0 shadow-sm ${selected ? "border-primary ring-2 ring-primary/25" : "border-border"}`, children: [
+    /* @__PURE__ */ (0, import_jsx_runtime39.jsxs)(Card.Header, { className: "relative aspect-[3/4] overflow-hidden lanzi-paper p-0", children: [
+      /* @__PURE__ */ (0, import_jsx_runtime39.jsx)("button", { type: "button", className: "block h-full w-full", onClick: onActivate, "aria-pressed": selected, children: /* @__PURE__ */ (0, import_jsx_runtime39.jsx)(PoseFigure, { view, alt: `${pose.name}，${view.angle}` }, view.id) }),
+      selected ? /* @__PURE__ */ (0, import_jsx_runtime39.jsx)(Chip, { color: "accent", size: "sm", className: "pointer-events-none absolute top-2 left-2", children: "已选" }) : null,
+      /* @__PURE__ */ (0, import_jsx_runtime39.jsx)(
         Button2,
         {
           variant: "ghost",
@@ -28573,13 +28573,13 @@ function PoseCard({
         }
       )
     ] }),
-    /* @__PURE__ */ (0, import_jsx_runtime38.jsxs)("div", { className: "flex items-center justify-between gap-2 px-2.5 py-2", children: [
-      /* @__PURE__ */ (0, import_jsx_runtime38.jsx)(Card.Title, { className: "min-w-0 flex-1 truncate text-sm leading-5 font-medium", title: pose.name, children: pose.name }),
-      /* @__PURE__ */ (0, import_jsx_runtime38.jsx)(Card.Description, { className: "max-w-[46%] shrink-0 truncate text-right text-xs", children: pose.category })
+    /* @__PURE__ */ (0, import_jsx_runtime39.jsxs)("div", { className: "flex items-center justify-between gap-2 px-2.5 py-2", children: [
+      /* @__PURE__ */ (0, import_jsx_runtime39.jsx)(Card.Title, { className: "min-w-0 flex-1 truncate text-sm leading-5 font-medium", title: pose.name, children: pose.name }),
+      /* @__PURE__ */ (0, import_jsx_runtime39.jsx)(Card.Description, { className: "max-w-[46%] shrink-0 truncate text-right text-xs", children: pose.category })
     ] }),
-    /* @__PURE__ */ (0, import_jsx_runtime38.jsx)(Card.Footer, { children: /* @__PURE__ */ (0, import_jsx_runtime38.jsx)("div", { role: "group", "aria-label": `${pose.name}的视角`, className: `grid w-full gap-1 ${columns}`, children: views.map((item) => {
+    /* @__PURE__ */ (0, import_jsx_runtime39.jsx)(Card.Footer, { children: /* @__PURE__ */ (0, import_jsx_runtime39.jsx)("div", { role: "group", "aria-label": `${pose.name}的视角`, className: `grid w-full gap-1 ${columns}`, children: views.map((item) => {
       const active = item.id === view.id;
-      return /* @__PURE__ */ (0, import_jsx_runtime38.jsxs)(
+      return /* @__PURE__ */ (0, import_jsx_runtime39.jsxs)(
         "button",
         {
           type: "button",
@@ -28589,8 +28589,8 @@ function PoseCard({
           onClick: () => onChoose(item),
           className: `flex min-w-0 flex-col items-center gap-0.5 rounded-md px-0.5 pt-0.5 pb-1 ${active ? "ring-2 ring-foreground" : "ring-1 ring-border hover:bg-secondary"}`,
           children: [
-            /* @__PURE__ */ (0, import_jsx_runtime38.jsx)("span", { className: "block aspect-[3/4] w-full overflow-hidden rounded-sm lanzi-paper", children: /* @__PURE__ */ (0, import_jsx_runtime38.jsx)(PoseFigure, { view: item, alt: "", size: "thumb", compact: true }) }),
-            /* @__PURE__ */ (0, import_jsx_runtime38.jsx)("span", { className: `max-w-full truncate text-[10px] leading-4 ${active ? "font-medium text-foreground" : "text-muted-foreground"}`, children: item.angle })
+            /* @__PURE__ */ (0, import_jsx_runtime39.jsx)("span", { className: "block aspect-[3/4] w-full overflow-hidden rounded-sm lanzi-paper", children: /* @__PURE__ */ (0, import_jsx_runtime39.jsx)(PoseFigure, { view: item, alt: "", size: "thumb", compact: true }) }),
+            /* @__PURE__ */ (0, import_jsx_runtime39.jsx)("span", { className: `max-w-full truncate text-[10px] leading-4 ${active ? "font-medium text-foreground" : "text-muted-foreground"}`, children: item.angle })
           ]
         },
         item.id
@@ -28599,11 +28599,11 @@ function PoseCard({
   ] });
 }
 function PoseSkeleton() {
-  return /* @__PURE__ */ (0, import_jsx_runtime38.jsx)("div", { className: `mb-4 ${POSE_GRID}`, children: Array.from({ length: 8 }, (_, index) => /* @__PURE__ */ (0, import_jsx_runtime38.jsx)(Skeleton, { className: "block aspect-[3/4] w-full rounded-2xl" }, index)) });
+  return /* @__PURE__ */ (0, import_jsx_runtime39.jsx)("div", { className: `mb-4 ${POSE_GRID}`, children: Array.from({ length: 8 }, (_, index) => /* @__PURE__ */ (0, import_jsx_runtime39.jsx)(Skeleton, { className: "block aspect-[3/4] w-full rounded-2xl" }, index)) });
 }
 
 // components/settings-dialog.tsx
-var import_react170 = require("react");
+var import_react171 = require("react");
 
 // shared/beautify.mjs
 function textModelFor(provider, textModel) {
@@ -28675,7 +28675,7 @@ function baseURLFor(provider) {
 }
 
 // components/settings-dialog.tsx
-var import_jsx_runtime39 = require("react/jsx-runtime");
+var import_jsx_runtime40 = require("react/jsx-runtime");
 function SettingsDialog({
   open,
   onOpenChange,
@@ -28683,10 +28683,10 @@ function SettingsDialog({
   onChange
 }) {
   const portal = useOverlayPortal();
-  const [connection, setConnection] = (0, import_react170.useState)("");
-  const [checking, setChecking] = (0, import_react170.useState)(false);
-  const checkRef = (0, import_react170.useRef)(null);
-  (0, import_react170.useEffect)(() => {
+  const [connection, setConnection] = (0, import_react171.useState)("");
+  const [checking, setChecking] = (0, import_react171.useState)(false);
+  const checkRef = (0, import_react171.useRef)(null);
+  (0, import_react171.useEffect)(() => {
     setConnection("");
     setChecking(false);
     checkRef.current?.abort();
@@ -28722,36 +28722,36 @@ function SettingsDialog({
     });
   }
   const local = settings.engine === "comfyui";
-  return /* @__PURE__ */ (0, import_jsx_runtime39.jsx)(Modal2.Backdrop, { isOpen: open, onOpenChange, ...portal, children: /* @__PURE__ */ (0, import_jsx_runtime39.jsx)(Modal2.Container, { size: "lg", scroll: "inside", children: /* @__PURE__ */ (0, import_jsx_runtime39.jsxs)(Modal2.Dialog, { className: "max-h-[min(85dvh,85%)] max-w-[min(32rem,calc(100%-2rem))]", children: [
-    /* @__PURE__ */ (0, import_jsx_runtime39.jsx)(Modal2.CloseTrigger, {}),
-    /* @__PURE__ */ (0, import_jsx_runtime39.jsxs)(Modal2.Header, { children: [
-      /* @__PURE__ */ (0, import_jsx_runtime39.jsx)(Modal2.Heading, { children: "生图设置" }),
-      /* @__PURE__ */ (0, import_jsx_runtime39.jsx)("p", { className: "text-sm text-muted-foreground", children: "云端密钥存在当前浏览器；ComfyUI 令牌仅保留在当前页面，不会写入历史或提示词。" })
+  return /* @__PURE__ */ (0, import_jsx_runtime40.jsx)(Modal2.Backdrop, { isOpen: open, onOpenChange, ...portal, children: /* @__PURE__ */ (0, import_jsx_runtime40.jsx)(Modal2.Container, { size: "lg", scroll: "inside", children: /* @__PURE__ */ (0, import_jsx_runtime40.jsxs)(Modal2.Dialog, { className: "max-h-[min(85dvh,85%)] max-w-[min(32rem,calc(100%-2rem))]", children: [
+    /* @__PURE__ */ (0, import_jsx_runtime40.jsx)(Modal2.CloseTrigger, {}),
+    /* @__PURE__ */ (0, import_jsx_runtime40.jsxs)(Modal2.Header, { children: [
+      /* @__PURE__ */ (0, import_jsx_runtime40.jsx)(Modal2.Heading, { children: "生图设置" }),
+      /* @__PURE__ */ (0, import_jsx_runtime40.jsx)("p", { className: "text-sm text-muted-foreground", children: "云端密钥存在当前浏览器；ComfyUI 令牌仅保留在当前页面，不会写入历史或提示词。" })
     ] }),
-    /* @__PURE__ */ (0, import_jsx_runtime39.jsxs)(Modal2.Body, { className: "grid gap-3", children: [
-      /* @__PURE__ */ (0, import_jsx_runtime39.jsxs)("div", { className: "flex flex-wrap gap-2", children: [
-        /* @__PURE__ */ (0, import_jsx_runtime39.jsx)(Button2, { variant: !local && settings.provider === "seedream" ? "primary" : "outline", onPress: () => chooseProvider("seedream"), children: "Seedream" }),
-        /* @__PURE__ */ (0, import_jsx_runtime39.jsx)(Button2, { variant: !local && settings.provider === "gemini" ? "primary" : "outline", onPress: () => chooseProvider("gemini"), children: "Gemini" }),
-        /* @__PURE__ */ (0, import_jsx_runtime39.jsx)(Button2, { variant: !local && settings.provider === "openai" ? "primary" : "outline", onPress: () => chooseProvider("openai"), children: "OpenAI" }),
-        /* @__PURE__ */ (0, import_jsx_runtime39.jsx)(Button2, { variant: local ? "primary" : "outline", onPress: () => patch({ engine: "comfyui" }), children: "ComfyUI" })
+    /* @__PURE__ */ (0, import_jsx_runtime40.jsxs)(Modal2.Body, { className: "grid gap-3", children: [
+      /* @__PURE__ */ (0, import_jsx_runtime40.jsxs)("div", { className: "flex flex-wrap gap-2", children: [
+        /* @__PURE__ */ (0, import_jsx_runtime40.jsx)(Button2, { variant: !local && settings.provider === "seedream" ? "primary" : "outline", onPress: () => chooseProvider("seedream"), children: "Seedream" }),
+        /* @__PURE__ */ (0, import_jsx_runtime40.jsx)(Button2, { variant: !local && settings.provider === "gemini" ? "primary" : "outline", onPress: () => chooseProvider("gemini"), children: "Gemini" }),
+        /* @__PURE__ */ (0, import_jsx_runtime40.jsx)(Button2, { variant: !local && settings.provider === "openai" ? "primary" : "outline", onPress: () => chooseProvider("openai"), children: "OpenAI" }),
+        /* @__PURE__ */ (0, import_jsx_runtime40.jsx)(Button2, { variant: local ? "primary" : "outline", onPress: () => patch({ engine: "comfyui" }), children: "ComfyUI" })
       ] }),
-      local ? /* @__PURE__ */ (0, import_jsx_runtime39.jsxs)("div", { className: "grid gap-2 rounded-xl bg-secondary p-3 text-sm", children: [
-        /* @__PURE__ */ (0, import_jsx_runtime39.jsx)("p", { children: "统一换装与姿势工作流：选择服装、姿势或两者，网页自动切换分支。拼图逐格生成后排版，无需生图 API Key。" }),
-        /* @__PURE__ */ (0, import_jsx_runtime39.jsx)(Field, { label: "ComfyUI 地址", children: /* @__PURE__ */ (0, import_jsx_runtime39.jsx)(Input2, { value: settings.comfyuiURL, onChange: (event) => patch({ comfyuiURL: event.target.value }), placeholder: "http://127.0.0.1:8188 或 https://comfy.example.com", autoComplete: "off" }) }),
-        /* @__PURE__ */ (0, import_jsx_runtime39.jsx)(Field, { label: "访问令牌（可选）", hint: "仅保留在当前页面，刷新后重新填写。远程入口必须实际校验此 Bearer 令牌。", children: /* @__PURE__ */ (0, import_jsx_runtime39.jsx)(Input2, { type: "password", value: settings.comfyuiToken, onChange: (event) => patch({ comfyuiToken: event.target.value }), autoComplete: "off" }) }),
-        /* @__PURE__ */ (0, import_jsx_runtime39.jsx)("p", { className: "text-xs leading-5 text-muted-foreground", children: "浏览器直接连接 ComfyUI，无需在电脑启动网站。同机使用回环地址；手机或其他电脑请填远程 HTTPS 地址。需允许当前网站跨域访问，并在浏览器询问时允许本地网络权限。图片会存入你的 ComfyUI input/output。" }),
-        /* @__PURE__ */ (0, import_jsx_runtime39.jsxs)("p", { className: "text-xs leading-5 text-muted-foreground", children: [
+      local ? /* @__PURE__ */ (0, import_jsx_runtime40.jsxs)("div", { className: "grid gap-2 rounded-xl bg-secondary p-3 text-sm", children: [
+        /* @__PURE__ */ (0, import_jsx_runtime40.jsx)("p", { children: "统一换装与姿势工作流：选择服装、姿势或两者，网页自动切换分支。拼图逐格生成后排版，无需生图 API Key。" }),
+        /* @__PURE__ */ (0, import_jsx_runtime40.jsx)(Field, { label: "ComfyUI 地址", children: /* @__PURE__ */ (0, import_jsx_runtime40.jsx)(Input2, { value: settings.comfyuiURL, onChange: (event) => patch({ comfyuiURL: event.target.value }), placeholder: "http://127.0.0.1:8188 或 https://comfy.example.com", autoComplete: "off" }) }),
+        /* @__PURE__ */ (0, import_jsx_runtime40.jsx)(Field, { label: "访问令牌（可选）", hint: "仅保留在当前页面，刷新后重新填写。远程入口必须实际校验此 Bearer 令牌。", children: /* @__PURE__ */ (0, import_jsx_runtime40.jsx)(Input2, { type: "password", value: settings.comfyuiToken, onChange: (event) => patch({ comfyuiToken: event.target.value }), autoComplete: "off" }) }),
+        /* @__PURE__ */ (0, import_jsx_runtime40.jsx)("p", { className: "text-xs leading-5 text-muted-foreground", children: "浏览器直接连接 ComfyUI，无需在电脑启动网站。同机使用回环地址；手机或其他电脑请填远程 HTTPS 地址。需允许当前网站跨域访问，并在浏览器询问时允许本地网络权限。图片会存入你的 ComfyUI input/output。" }),
+        /* @__PURE__ */ (0, import_jsx_runtime40.jsxs)("p", { className: "text-xs leading-5 text-muted-foreground", children: [
           "已有本地模式现已改为浏览器直连，请重新测试连接。",
-          /* @__PURE__ */ (0, import_jsx_runtime39.jsx)("a", { className: "underline", href: "https://github.com/wzc520pyfm/gen-ai-pose-image/blob/main/docs/comfyui-local.md", target: "_blank", rel: "noreferrer", children: "连接配置说明" })
+          /* @__PURE__ */ (0, import_jsx_runtime40.jsx)("a", { className: "underline", href: "https://github.com/wzc520pyfm/gen-ai-pose-image/blob/main/docs/comfyui-local.md", target: "_blank", rel: "noreferrer", children: "连接配置说明" })
         ] }),
-        /* @__PURE__ */ (0, import_jsx_runtime39.jsx)(Button2, { variant: "outline", isDisabled: checking, onPress: () => void checkConnection(), children: checking ? "检查中…" : "测试连接" }),
-        connection ? /* @__PURE__ */ (0, import_jsx_runtime39.jsx)("p", { role: "status", className: "text-xs leading-5", children: connection }) : null
-      ] }) : /* @__PURE__ */ (0, import_jsx_runtime39.jsxs)(import_jsx_runtime39.Fragment, { children: [
-        /* @__PURE__ */ (0, import_jsx_runtime39.jsx)("p", { className: "text-xs leading-5 text-muted-foreground", children: settings.provider === "seedream" ? "火山方舟 Seedream。会把模特图和姿势线稿一起提交，默认生图模型 doubao-seedream-5-0-flash-260915。" : settings.provider === "gemini" ? "默认生图模型 gemini-2.5-flash-image。官方地址留空即可；中转站把根地址填进下面。" : "会先把模特图和姿势线稿交给 images/edits。接口不支持编辑时，自动改走文生图，并在结果上标明。" }),
-        /* @__PURE__ */ (0, import_jsx_runtime39.jsxs)("div", { className: "grid gap-1.5 text-sm", children: [
-          /* @__PURE__ */ (0, import_jsx_runtime39.jsxs)("div", { className: "flex items-center gap-1", children: [
-            /* @__PURE__ */ (0, import_jsx_runtime39.jsx)("span", { children: "API Key" }),
-            settings.provider === "seedream" ? /* @__PURE__ */ (0, import_jsx_runtime39.jsx)(
+        /* @__PURE__ */ (0, import_jsx_runtime40.jsx)(Button2, { variant: "outline", isDisabled: checking, onPress: () => void checkConnection(), children: checking ? "检查中…" : "测试连接" }),
+        connection ? /* @__PURE__ */ (0, import_jsx_runtime40.jsx)("p", { role: "status", className: "text-xs leading-5", children: connection }) : null
+      ] }) : /* @__PURE__ */ (0, import_jsx_runtime40.jsxs)(import_jsx_runtime40.Fragment, { children: [
+        /* @__PURE__ */ (0, import_jsx_runtime40.jsx)("p", { className: "text-xs leading-5 text-muted-foreground", children: settings.provider === "seedream" ? "火山方舟 Seedream。会把模特图和姿势线稿一起提交，默认生图模型 doubao-seedream-5-0-flash-260915。" : settings.provider === "gemini" ? "默认生图模型 gemini-2.5-flash-image。官方地址留空即可；中转站把根地址填进下面。" : "会先把模特图和姿势线稿交给 images/edits。接口不支持编辑时，自动改走文生图，并在结果上标明。" }),
+        /* @__PURE__ */ (0, import_jsx_runtime40.jsxs)("div", { className: "grid gap-1.5 text-sm", children: [
+          /* @__PURE__ */ (0, import_jsx_runtime40.jsxs)("div", { className: "flex items-center gap-1", children: [
+            /* @__PURE__ */ (0, import_jsx_runtime40.jsx)("span", { children: "API Key" }),
+            settings.provider === "seedream" ? /* @__PURE__ */ (0, import_jsx_runtime40.jsx)(
               "a",
               {
                 href: "https://exp.volcengine.com/ark/gen_image?model=doubao-seedream-5-0-flash-260915",
@@ -28760,13 +28760,13 @@ function SettingsDialog({
                 "aria-label": "去申请 API Key",
                 title: "去申请 API Key",
                 className: "inline-flex size-5 items-center justify-center rounded-md text-muted-foreground hover:bg-secondary hover:text-foreground",
-                children: /* @__PURE__ */ (0, import_jsx_runtime39.jsx)(ExternalLink, { className: "size-3.5" })
+                children: /* @__PURE__ */ (0, import_jsx_runtime40.jsx)(ExternalLink, { className: "size-3.5" })
               }
             ) : null
           ] }),
-          /* @__PURE__ */ (0, import_jsx_runtime39.jsx)(Input2, { type: "password", autoComplete: "off", value: settings.apiKey, onChange: (event) => patch({ apiKey: event.target.value }), placeholder: settings.provider === "seedream" ? "填入火山方舟 API Key" : "填入 API Key" })
+          /* @__PURE__ */ (0, import_jsx_runtime40.jsx)(Input2, { type: "password", autoComplete: "off", value: settings.apiKey, onChange: (event) => patch({ apiKey: event.target.value }), placeholder: settings.provider === "seedream" ? "填入火山方舟 API Key" : "填入 API Key" })
         ] }),
-        /* @__PURE__ */ (0, import_jsx_runtime39.jsx)(Field, { label: "接口根地址", children: /* @__PURE__ */ (0, import_jsx_runtime39.jsx)(
+        /* @__PURE__ */ (0, import_jsx_runtime40.jsx)(Field, { label: "接口根地址", children: /* @__PURE__ */ (0, import_jsx_runtime40.jsx)(
           Input2,
           {
             value: settings.baseURL,
@@ -28774,8 +28774,8 @@ function SettingsDialog({
             placeholder: settings.provider === "seedream" ? "https://ark.cn-beijing.volces.com/api/v3" : settings.provider === "gemini" ? "https://generativelanguage.googleapis.com/v1beta" : "https://api.openai.com/v1"
           }
         ) }),
-        /* @__PURE__ */ (0, import_jsx_runtime39.jsx)(Field, { label: "生图模型", children: /* @__PURE__ */ (0, import_jsx_runtime39.jsx)(Input2, { value: settings.model, onChange: (event) => patch({ model: event.target.value }), placeholder: modelFor(settings.provider) }) }),
-        /* @__PURE__ */ (0, import_jsx_runtime39.jsx)(Field, { label: "文本模型（可选）", hint: "只用于「扩写提示词」。留空则使用当前接口的默认文本模型。", children: /* @__PURE__ */ (0, import_jsx_runtime39.jsx)(
+        /* @__PURE__ */ (0, import_jsx_runtime40.jsx)(Field, { label: "生图模型", children: /* @__PURE__ */ (0, import_jsx_runtime40.jsx)(Input2, { value: settings.model, onChange: (event) => patch({ model: event.target.value }), placeholder: modelFor(settings.provider) }) }),
+        /* @__PURE__ */ (0, import_jsx_runtime40.jsx)(Field, { label: "文本模型（可选）", hint: "只用于「扩写提示词」。留空则使用当前接口的默认文本模型。", children: /* @__PURE__ */ (0, import_jsx_runtime40.jsx)(
           Input2,
           {
             value: settings.textModel,
@@ -28784,41 +28784,41 @@ function SettingsDialog({
           }
         ) })
       ] }),
-      /* @__PURE__ */ (0, import_jsx_runtime39.jsxs)("div", { className: "grid gap-2", children: [
-        /* @__PURE__ */ (0, import_jsx_runtime39.jsx)(Label2, { children: "比例" }),
-        /* @__PURE__ */ (0, import_jsx_runtime39.jsx)("div", { className: "flex flex-wrap gap-1.5", children: ASPECT_RATIOS.map((ratio) => /* @__PURE__ */ (0, import_jsx_runtime39.jsx)(Button2, { size: "sm", variant: settings.aspectRatio === ratio ? "primary" : "outline", onPress: () => patch({ aspectRatio: ratio }), children: ASPECT_LABEL[ratio] }, ratio)) })
+      /* @__PURE__ */ (0, import_jsx_runtime40.jsxs)("div", { className: "grid gap-2", children: [
+        /* @__PURE__ */ (0, import_jsx_runtime40.jsx)(Label2, { children: "比例" }),
+        /* @__PURE__ */ (0, import_jsx_runtime40.jsx)("div", { className: "flex flex-wrap gap-1.5", children: ASPECT_RATIOS.map((ratio) => /* @__PURE__ */ (0, import_jsx_runtime40.jsx)(Button2, { size: "sm", variant: settings.aspectRatio === ratio ? "primary" : "outline", onPress: () => patch({ aspectRatio: ratio }), children: ASPECT_LABEL[ratio] }, ratio)) })
       ] }),
-      /* @__PURE__ */ (0, import_jsx_runtime39.jsxs)("div", { className: "grid grid-cols-2 gap-2", children: [
-        /* @__PURE__ */ (0, import_jsx_runtime39.jsx)(Button2, { variant: settings.mode === "each" ? "primary" : "outline", onPress: () => patch({ mode: "each" }), children: "逐张" }),
-        /* @__PURE__ */ (0, import_jsx_runtime39.jsx)(Button2, { variant: settings.mode === "sheet" ? "primary" : "outline", onPress: () => patch({ mode: "sheet" }), children: "拼成一张" })
+      /* @__PURE__ */ (0, import_jsx_runtime40.jsxs)("div", { className: "grid grid-cols-2 gap-2", children: [
+        /* @__PURE__ */ (0, import_jsx_runtime40.jsx)(Button2, { variant: settings.mode === "each" ? "primary" : "outline", onPress: () => patch({ mode: "each" }), children: "逐张" }),
+        /* @__PURE__ */ (0, import_jsx_runtime40.jsx)(Button2, { variant: settings.mode === "sheet" ? "primary" : "outline", onPress: () => patch({ mode: "sheet" }), children: "拼成一张" })
       ] }),
-      /* @__PURE__ */ (0, import_jsx_runtime39.jsxs)("div", { className: "flex items-center justify-between gap-3 rounded-xl bg-secondary px-3 py-3 text-sm", children: [
-        /* @__PURE__ */ (0, import_jsx_runtime39.jsxs)("span", { children: [
-          /* @__PURE__ */ (0, import_jsx_runtime39.jsx)("span", { className: "block font-medium", children: "违禁词优化" }),
-          /* @__PURE__ */ (0, import_jsx_runtime39.jsx)("span", { className: "mt-1 block text-xs leading-5 text-muted-foreground", children: "关闭时直接写不要头、不要腿、不要皮肤。打开后改成委婉说法，避开审核敏感词。" })
+      /* @__PURE__ */ (0, import_jsx_runtime40.jsxs)("div", { className: "flex items-center justify-between gap-3 rounded-xl bg-secondary px-3 py-3 text-sm", children: [
+        /* @__PURE__ */ (0, import_jsx_runtime40.jsxs)("span", { children: [
+          /* @__PURE__ */ (0, import_jsx_runtime40.jsx)("span", { className: "block font-medium", children: "违禁词优化" }),
+          /* @__PURE__ */ (0, import_jsx_runtime40.jsx)("span", { className: "mt-1 block text-xs leading-5 text-muted-foreground", children: "关闭时直接写不要头、不要腿、不要皮肤。打开后改成委婉说法，避开审核敏感词。" })
         ] }),
-        /* @__PURE__ */ (0, import_jsx_runtime39.jsx)(
+        /* @__PURE__ */ (0, import_jsx_runtime40.jsx)(
           Switch2,
           {
             isSelected: settings.sensitivePromptOptimize,
             onChange: (value) => patch({ sensitivePromptOptimize: value }),
             "aria-label": "违禁词优化",
-            children: /* @__PURE__ */ (0, import_jsx_runtime39.jsx)(Switch2.Content, { children: /* @__PURE__ */ (0, import_jsx_runtime39.jsx)(Switch2.Control, { children: /* @__PURE__ */ (0, import_jsx_runtime39.jsx)(Switch2.Thumb, {}) }) })
+            children: /* @__PURE__ */ (0, import_jsx_runtime40.jsx)(Switch2.Content, { children: /* @__PURE__ */ (0, import_jsx_runtime40.jsx)(Switch2.Control, { children: /* @__PURE__ */ (0, import_jsx_runtime40.jsx)(Switch2.Thumb, {}) }) })
           }
         )
       ] }),
-      /* @__PURE__ */ (0, import_jsx_runtime39.jsxs)("div", { className: "flex items-center justify-between gap-3 rounded-xl bg-secondary px-3 py-3 text-sm", children: [
-        /* @__PURE__ */ (0, import_jsx_runtime39.jsxs)("span", { children: [
-          /* @__PURE__ */ (0, import_jsx_runtime39.jsx)("span", { className: "block font-medium", children: "显示成人向姿势" }),
-          /* @__PURE__ */ (0, import_jsx_runtime39.jsx)("span", { className: "mt-1 block text-xs leading-5 text-muted-foreground", children: "性感系、双人缠绵，以及上半身里的大胆分类。参考图仍是结构线稿，默认继续保持服装。" })
+      /* @__PURE__ */ (0, import_jsx_runtime40.jsxs)("div", { className: "flex items-center justify-between gap-3 rounded-xl bg-secondary px-3 py-3 text-sm", children: [
+        /* @__PURE__ */ (0, import_jsx_runtime40.jsxs)("span", { children: [
+          /* @__PURE__ */ (0, import_jsx_runtime40.jsx)("span", { className: "block font-medium", children: "显示成人向姿势" }),
+          /* @__PURE__ */ (0, import_jsx_runtime40.jsx)("span", { className: "mt-1 block text-xs leading-5 text-muted-foreground", children: "性感系、双人缠绵，以及上半身里的大胆分类。参考图仍是结构线稿，默认继续保持服装。" })
         ] }),
-        /* @__PURE__ */ (0, import_jsx_runtime39.jsx)(
+        /* @__PURE__ */ (0, import_jsx_runtime40.jsx)(
           Switch2,
           {
             isSelected: settings.showAdult,
             onChange: (value) => patch({ showAdult: value }),
             "aria-label": "显示成人向姿势",
-            children: /* @__PURE__ */ (0, import_jsx_runtime39.jsx)(Switch2.Content, { children: /* @__PURE__ */ (0, import_jsx_runtime39.jsx)(Switch2.Control, { children: /* @__PURE__ */ (0, import_jsx_runtime39.jsx)(Switch2.Thumb, {}) }) })
+            children: /* @__PURE__ */ (0, import_jsx_runtime40.jsx)(Switch2.Content, { children: /* @__PURE__ */ (0, import_jsx_runtime40.jsx)(Switch2.Control, { children: /* @__PURE__ */ (0, import_jsx_runtime40.jsx)(Switch2.Thumb, {}) }) })
           }
         )
       ] })
@@ -28826,15 +28826,15 @@ function SettingsDialog({
   ] }) }) });
 }
 function Field({ label, hint, children }) {
-  return /* @__PURE__ */ (0, import_jsx_runtime39.jsxs)("label", { className: "grid gap-1.5 text-sm", children: [
-    /* @__PURE__ */ (0, import_jsx_runtime39.jsx)("span", { children: label }),
+  return /* @__PURE__ */ (0, import_jsx_runtime40.jsxs)("label", { className: "grid gap-1.5 text-sm", children: [
+    /* @__PURE__ */ (0, import_jsx_runtime40.jsx)("span", { children: label }),
     children,
-    hint ? /* @__PURE__ */ (0, import_jsx_runtime39.jsx)("span", { className: "text-xs leading-5 text-muted-foreground", children: hint }) : null
+    hint ? /* @__PURE__ */ (0, import_jsx_runtime40.jsx)("span", { className: "text-xs leading-5 text-muted-foreground", children: hint }) : null
   ] });
 }
 
 // components/studio-library-tabs.tsx
-var import_jsx_runtime40 = require("react/jsx-runtime");
+var import_jsx_runtime41 = require("react/jsx-runtime");
 var TABS = [
   { id: "poses", label: "姿势" },
   { id: "costumes", label: "服装" },
@@ -28844,7 +28844,7 @@ function LibraryTabs({
   library,
   onLibrary
 }) {
-  return /* @__PURE__ */ (0, import_jsx_runtime40.jsx)(
+  return /* @__PURE__ */ (0, import_jsx_runtime41.jsx)(
     Tabs2,
     {
       selectedKey: library,
@@ -28852,43 +28852,43 @@ function LibraryTabs({
         if (key == null) return;
         onLibrary(String(key));
       },
-      children: /* @__PURE__ */ (0, import_jsx_runtime40.jsx)(Tabs2.ListContainer, { children: /* @__PURE__ */ (0, import_jsx_runtime40.jsx)(Tabs2.List, { "aria-label": "图库", children: TABS.map((tab) => /* @__PURE__ */ (0, import_jsx_runtime40.jsxs)(Tabs2.Tab, { id: tab.id, children: [
+      children: /* @__PURE__ */ (0, import_jsx_runtime41.jsx)(Tabs2.ListContainer, { children: /* @__PURE__ */ (0, import_jsx_runtime41.jsx)(Tabs2.List, { "aria-label": "图库", children: TABS.map((tab) => /* @__PURE__ */ (0, import_jsx_runtime41.jsxs)(Tabs2.Tab, { id: tab.id, children: [
         tab.label,
-        /* @__PURE__ */ (0, import_jsx_runtime40.jsx)(Tabs2.Indicator, {})
+        /* @__PURE__ */ (0, import_jsx_runtime41.jsx)(Tabs2.Indicator, {})
       ] }, tab.id)) }) })
     }
   );
 }
 
 // components/whale-mark.tsx
-var import_jsx_runtime41 = require("react/jsx-runtime");
+var import_jsx_runtime42 = require("react/jsx-runtime");
 function WhaleMark({ className = "size-8" }) {
-  return /* @__PURE__ */ (0, import_jsx_runtime41.jsxs)("svg", { viewBox: "0 0 48 48", className, "aria-hidden": "true", children: [
-    /* @__PURE__ */ (0, import_jsx_runtime41.jsx)("rect", { width: "48", height: "48", rx: "12", fill: "#2563eb" }),
-    /* @__PURE__ */ (0, import_jsx_runtime41.jsx)(
+  return /* @__PURE__ */ (0, import_jsx_runtime42.jsxs)("svg", { viewBox: "0 0 48 48", className, "aria-hidden": "true", children: [
+    /* @__PURE__ */ (0, import_jsx_runtime42.jsx)("rect", { width: "48", height: "48", rx: "12", fill: "#2563eb" }),
+    /* @__PURE__ */ (0, import_jsx_runtime42.jsx)(
       "path",
       {
         fill: "#eff6ff",
         d: "M8 28c2-8 10-14 18-13 2-4 8-6 13-3-1 2-1 4 0 6 3 1 5 4 5 8-4 1-7 4-8 8-6 2-14 1-20-3-2 2-5 3-8 2 1-2 1-4 0-5Z"
       }
     ),
-    /* @__PURE__ */ (0, import_jsx_runtime41.jsx)("circle", { cx: "33", cy: "22", r: "1.3", fill: "#1e3a8a" }),
-    /* @__PURE__ */ (0, import_jsx_runtime41.jsx)("path", { d: "M14 20c2 1 3 3 2 5", stroke: "#1e3a8a", strokeWidth: "1.4", fill: "none", strokeLinecap: "round" })
+    /* @__PURE__ */ (0, import_jsx_runtime42.jsx)("circle", { cx: "33", cy: "22", r: "1.3", fill: "#1e3a8a" }),
+    /* @__PURE__ */ (0, import_jsx_runtime42.jsx)("path", { d: "M14 20c2 1 3 3 2 5", stroke: "#1e3a8a", strokeWidth: "1.4", fill: "none", strokeLinecap: "round" })
   ] });
 }
 
 // components/studio-layouts.tsx
-var import_jsx_runtime42 = require("react/jsx-runtime");
+var import_jsx_runtime43 = require("react/jsx-runtime");
 function StudioLayoutGrid({ regions }) {
-  return /* @__PURE__ */ (0, import_jsx_runtime42.jsxs)("div", { className: "flex min-h-0 flex-1 flex-col @min-[1024px]/studio:grid @min-[1024px]/studio:grid-cols-[300px_minmax(0,1fr)_340px]", "data-layout": "C", children: [
+  return /* @__PURE__ */ (0, import_jsx_runtime43.jsxs)("div", { className: "flex min-h-0 flex-1 flex-col @min-[1024px]/studio:grid @min-[1024px]/studio:grid-cols-[300px_minmax(0,1fr)_340px]", "data-layout": "C", children: [
     regions.characterDock,
-    /* @__PURE__ */ (0, import_jsx_runtime42.jsx)("main", { className: "order-2 min-h-0 min-w-0 flex-1 overflow-y-auto bg-background @min-[1024px]/studio:order-none", children: regions.library }),
-    /* @__PURE__ */ (0, import_jsx_runtime42.jsx)("aside", { className: "hidden min-h-0 border-l border-border bg-card px-4 py-5 @min-[1024px]/studio:block @min-[1024px]/studio:overflow-y-auto", children: regions.workOrder })
+    /* @__PURE__ */ (0, import_jsx_runtime43.jsx)("main", { className: "order-2 min-h-0 min-w-0 flex-1 overflow-y-auto bg-background @min-[1024px]/studio:order-none", children: regions.library }),
+    /* @__PURE__ */ (0, import_jsx_runtime43.jsx)("aside", { className: "hidden min-h-0 border-l border-border bg-card px-4 py-5 @min-[1024px]/studio:block @min-[1024px]/studio:overflow-y-auto", children: regions.workOrder })
   ] });
 }
 
 // components/studio-shell.tsx
-var import_jsx_runtime43 = require("react/jsx-runtime");
+var import_jsx_runtime44 = require("react/jsx-runtime");
 function StudioShell({
   embedded = false,
   theme,
@@ -28900,27 +28900,27 @@ function StudioShell({
   regions,
   containerRef
 }) {
-  return /* @__PURE__ */ (0, import_jsx_runtime43.jsxs)("div", { ref: containerRef, className: `@container/studio flex min-h-0 flex-col overflow-hidden bg-background text-foreground ${embedded ? "h-full" : "h-dvh"}`, children: [
-    /* @__PURE__ */ (0, import_jsx_runtime43.jsxs)("header", { className: "flex min-h-14 shrink-0 flex-wrap items-center gap-x-3 gap-y-2 border-b border-border bg-card px-3 py-2", children: [
-      /* @__PURE__ */ (0, import_jsx_runtime43.jsx)(WhaleMark, { className: "size-8 shrink-0" }),
-      /* @__PURE__ */ (0, import_jsx_runtime43.jsx)("h1", { className: "shrink-0 text-base font-semibold", children: "澜姿" }),
+  return /* @__PURE__ */ (0, import_jsx_runtime44.jsxs)("div", { ref: containerRef, className: `@container/studio flex min-h-0 flex-col overflow-hidden bg-background text-foreground ${embedded ? "h-full" : "h-dvh"}`, children: [
+    /* @__PURE__ */ (0, import_jsx_runtime44.jsxs)("header", { className: "flex min-h-14 shrink-0 flex-wrap items-center gap-x-3 gap-y-2 border-b border-border bg-card px-3 py-2", children: [
+      /* @__PURE__ */ (0, import_jsx_runtime44.jsx)(WhaleMark, { className: "size-8 shrink-0" }),
+      /* @__PURE__ */ (0, import_jsx_runtime44.jsx)("h1", { className: "shrink-0 text-base font-semibold", children: "澜姿" }),
       libraryTabs,
-      /* @__PURE__ */ (0, import_jsx_runtime43.jsxs)("div", { className: "ml-auto flex shrink-0 items-center gap-2", children: [
+      /* @__PURE__ */ (0, import_jsx_runtime44.jsxs)("div", { className: "ml-auto flex shrink-0 items-center gap-2", children: [
         headerTrailing,
-        /* @__PURE__ */ (0, import_jsx_runtime43.jsx)(
+        /* @__PURE__ */ (0, import_jsx_runtime44.jsx)(
           Button2,
           {
             variant: "secondary",
             isIconOnly: true,
             "aria-label": theme === "dark" ? "切换到浅色" : "切换到深色",
             onPress: onToggleTheme,
-            children: theme === "dark" ? /* @__PURE__ */ (0, import_jsx_runtime43.jsx)(Sun, { className: "size-4" }) : /* @__PURE__ */ (0, import_jsx_runtime43.jsx)(Moon, { className: "size-4" })
+            children: theme === "dark" ? /* @__PURE__ */ (0, import_jsx_runtime44.jsx)(Sun, { className: "size-4" }) : /* @__PURE__ */ (0, import_jsx_runtime44.jsx)(Moon, { className: "size-4" })
           }
         ),
-        /* @__PURE__ */ (0, import_jsx_runtime43.jsx)(Button2, { variant: "secondary", isIconOnly: true, "aria-label": "生图设置", onPress: onOpenSettings, children: /* @__PURE__ */ (0, import_jsx_runtime43.jsx)(Settings, { className: "size-4" }) })
+        /* @__PURE__ */ (0, import_jsx_runtime44.jsx)(Button2, { variant: "secondary", isIconOnly: true, "aria-label": "生图设置", onPress: onOpenSettings, children: /* @__PURE__ */ (0, import_jsx_runtime44.jsx)(Settings, { className: "size-4" }) })
       ] })
     ] }),
-    /* @__PURE__ */ (0, import_jsx_runtime43.jsx)(StudioLayoutGrid, { regions }),
+    /* @__PURE__ */ (0, import_jsx_runtime44.jsx)(StudioLayoutGrid, { regions }),
     mobileWorkOrderTrigger
   ] });
 }
@@ -28937,7 +28937,7 @@ function retireStudioLayout(storage) {
 }
 
 // lib/use-studio-theme.ts
-var import_react174 = require("react");
+var import_react175 = require("react");
 
 // shared/studio-theme.mjs
 var STUDIO_THEME_KEY = "lanzi.studio.theme";
@@ -28978,12 +28978,12 @@ function applyStudioTheme(element, mode) {
 // lib/use-studio-theme.ts
 function useStudioTheme() {
   const { portalContainer } = useStudioEnv();
-  const [preference, setPreference] = (0, import_react174.useState)("system");
-  const [systemDark, setSystemDark] = (0, import_react174.useState)(false);
-  (0, import_react174.useEffect)(() => {
+  const [preference, setPreference] = (0, import_react175.useState)("system");
+  const [systemDark, setSystemDark] = (0, import_react175.useState)(false);
+  (0, import_react175.useEffect)(() => {
     setPreference(loadStudioTheme());
   }, []);
-  (0, import_react174.useEffect)(() => {
+  (0, import_react175.useEffect)(() => {
     const media = window.matchMedia("(prefers-color-scheme: dark)");
     const update = () => setSystemDark(media.matches);
     update();
@@ -28991,7 +28991,7 @@ function useStudioTheme() {
     return () => media.removeEventListener("change", update);
   }, []);
   const resolved = resolveStudioTheme(preference, systemDark);
-  (0, import_react174.useEffect)(() => {
+  (0, import_react175.useEffect)(() => {
     applyStudioTheme(document.documentElement, resolved);
     applyPortalTheme(portalContainer, resolved);
   }, [portalContainer, resolved]);
@@ -29009,11 +29009,11 @@ function applyPortalTheme(portalContainer, mode) {
 }
 
 // lib/use-studio-wide.ts
-var import_react175 = require("react");
+var import_react176 = require("react");
 var STUDIO_WIDE_MIN = 1024;
 function useStudioWide(ref) {
-  const [wide, setWide] = (0, import_react175.useState)(false);
-  (0, import_react175.useLayoutEffect)(() => {
+  const [wide, setWide] = (0, import_react176.useState)(false);
+  (0, import_react176.useLayoutEffect)(() => {
     const el = ref.current;
     if (!el) return;
     const update = (width) => setWide(width >= STUDIO_WIDE_MIN);
@@ -29159,74 +29159,74 @@ function pickRandomCombo({ poses = [], costumes = [], faces, showAdult = false, 
 }
 
 // components/studio.tsx
-var import_jsx_runtime44 = require("react/jsx-runtime");
+var import_jsx_runtime45 = require("react/jsx-runtime");
 var REPOSITORY_URL = "https://github.com/wzc520pyfm/gen-ai-pose-image";
 function Studio({
   basePath = "",
   embedded = false,
   portalContainer = null
 }) {
-  return /* @__PURE__ */ (0, import_jsx_runtime44.jsx)(StudioEnvProvider, { basePath, portalContainer, children: /* @__PURE__ */ (0, import_jsx_runtime44.jsx)(StudioFrame, { embedded }) });
+  return /* @__PURE__ */ (0, import_jsx_runtime45.jsx)(StudioEnvProvider, { basePath, portalContainer, children: /* @__PURE__ */ (0, import_jsx_runtime45.jsx)(StudioFrame, { embedded }) });
 }
 function StudioFrame({ embedded }) {
   const { basePath } = useStudioEnv();
   const portal = useOverlayPortal();
-  const studioRef = (0, import_react176.useRef)(null);
+  const studioRef = (0, import_react177.useRef)(null);
   const wide = useStudioWide(studioRef);
   const { resolved: theme, toggle: toggleTheme } = useStudioTheme();
-  (0, import_react176.useEffect)(() => {
+  (0, import_react177.useEffect)(() => {
     retireStudioLayout();
   }, []);
-  const [catalog, setCatalog] = (0, import_react176.useState)(null);
-  const [catalogError, setCatalogError] = (0, import_react176.useState)("");
-  const [costumeCatalog, setCostumeCatalog] = (0, import_react176.useState)([]);
-  const [costumeCatalogReady, setCostumeCatalogReady] = (0, import_react176.useState)(false);
-  const [costumeCatalogError, setCostumeCatalogError] = (0, import_react176.useState)("");
-  const [faceCatalog, setFaceCatalog] = (0, import_react176.useState)([]);
-  const [faceCatalogReady, setFaceCatalogReady] = (0, import_react176.useState)(false);
-  const [faceCatalogError, setFaceCatalogError] = (0, import_react176.useState)("");
-  const [loading, setLoading] = (0, import_react176.useState)(true);
-  const [settings, setSettings] = (0, import_react176.useState)(DEFAULT_SETTINGS);
-  const [settingsReady, setSettingsReady] = (0, import_react176.useState)(false);
-  const [library, setLibrary] = (0, import_react176.useState)("poses");
-  const [costume, setCostume] = (0, import_react176.useState)(null);
-  const [face, setFace] = (0, import_react176.useState)(null);
-  const [costumeFocus, setCostumeFocus] = (0, import_react176.useState)(null);
-  const [requestedSystem, setRequestedSystem] = (0, import_react176.useState)(null);
-  const [settingsOpen, setSettingsOpen] = (0, import_react176.useState)(false);
-  const [installOpen, setInstallOpen] = (0, import_react176.useState)(false);
-  const [adultAsk, setAdultAsk] = (0, import_react176.useState)(null);
-  const [characters, setCharacters] = (0, import_react176.useState)([]);
-  const [models, setModels] = (0, import_react176.useState)([]);
-  const [activeModelId, setActiveModelId] = (0, import_react176.useState)(DEFAULT_MODEL_ID);
-  const [builtinUsed, setBuiltinUsed] = (0, import_react176.useState)({});
-  const [sheetBusy, setSheetBusy] = (0, import_react176.useState)(false);
-  const [sheetError, setSheetError] = (0, import_react176.useState)("");
-  const [selected, setSelected] = (0, import_react176.useState)({});
-  const [extraPrompt, setExtraPrompt] = (0, import_react176.useState)("");
-  const [prompts, setPrompts] = (0, import_react176.useState)([]);
-  const [promptError, setPromptError] = (0, import_react176.useState)("");
-  const [results, setResults] = (0, import_react176.useState)([]);
-  const [running, setRunning] = (0, import_react176.useState)(false);
-  const [progress, setProgress] = (0, import_react176.useState)("");
+  const [catalog, setCatalog] = (0, import_react177.useState)(null);
+  const [catalogError, setCatalogError] = (0, import_react177.useState)("");
+  const [costumeCatalog, setCostumeCatalog] = (0, import_react177.useState)([]);
+  const [costumeCatalogReady, setCostumeCatalogReady] = (0, import_react177.useState)(false);
+  const [costumeCatalogError, setCostumeCatalogError] = (0, import_react177.useState)("");
+  const [faceCatalog, setFaceCatalog] = (0, import_react177.useState)([]);
+  const [faceCatalogReady, setFaceCatalogReady] = (0, import_react177.useState)(false);
+  const [faceCatalogError, setFaceCatalogError] = (0, import_react177.useState)("");
+  const [loading, setLoading] = (0, import_react177.useState)(true);
+  const [settings, setSettings] = (0, import_react177.useState)(DEFAULT_SETTINGS);
+  const [settingsReady, setSettingsReady] = (0, import_react177.useState)(false);
+  const [library, setLibrary] = (0, import_react177.useState)("poses");
+  const [costume, setCostume] = (0, import_react177.useState)(null);
+  const [face, setFace] = (0, import_react177.useState)(null);
+  const [costumeFocus, setCostumeFocus] = (0, import_react177.useState)(null);
+  const [requestedSystem, setRequestedSystem] = (0, import_react177.useState)(null);
+  const [settingsOpen, setSettingsOpen] = (0, import_react177.useState)(false);
+  const [installOpen, setInstallOpen] = (0, import_react177.useState)(false);
+  const [adultAsk, setAdultAsk] = (0, import_react177.useState)(null);
+  const [characters, setCharacters] = (0, import_react177.useState)([]);
+  const [models, setModels] = (0, import_react177.useState)([]);
+  const [activeModelId, setActiveModelId] = (0, import_react177.useState)(DEFAULT_MODEL_ID);
+  const [builtinUsed, setBuiltinUsed] = (0, import_react177.useState)({});
+  const [sheetBusy, setSheetBusy] = (0, import_react177.useState)(false);
+  const [sheetError, setSheetError] = (0, import_react177.useState)("");
+  const [selected, setSelected] = (0, import_react177.useState)({});
+  const [extraPrompt, setExtraPrompt] = (0, import_react177.useState)("");
+  const [prompts, setPrompts] = (0, import_react177.useState)([]);
+  const [promptError, setPromptError] = (0, import_react177.useState)("");
+  const [results, setResults] = (0, import_react177.useState)([]);
+  const [running, setRunning] = (0, import_react177.useState)(false);
+  const [progress, setProgress] = (0, import_react177.useState)("");
   const waited = useElapsedSeconds(running);
-  const [runError, setRunError] = (0, import_react176.useState)("");
-  const [limitNote, setLimitNote] = (0, import_react176.useState)("");
-  const [serverKey, setServerKey] = (0, import_react176.useState)(false);
-  const [sheetOpen, setSheetOpen] = (0, import_react176.useState)(false);
-  const [customPoses, setCustomPoses] = (0, import_react176.useState)([]);
-  const [customCostumes, setCustomCostumes] = (0, import_react176.useState)([]);
-  const [history, setHistory] = (0, import_react176.useState)([]);
-  const [storageHigh, setStorageHigh] = (0, import_react176.useState)(false);
-  const [syncWarning, setSyncWarning] = (0, import_react176.useState)("");
-  const [reuseNote, setReuseNote] = (0, import_react176.useState)("");
-  const libraryReady = (0, import_react176.useRef)(false);
-  const modelLoadGen = (0, import_react176.useRef)(0);
-  const clearRequestedSystem = (0, import_react176.useCallback)(() => setRequestedSystem(null), []);
-  const clearCostumeFocus = (0, import_react176.useCallback)(() => setCostumeFocus(null), []);
-  const abortRef = (0, import_react176.useRef)(null);
-  const settingsRevision = (0, import_react176.useRef)(0);
-  const loadCatalog = (0, import_react176.useCallback)(() => {
+  const [runError, setRunError] = (0, import_react177.useState)("");
+  const [limitNote, setLimitNote] = (0, import_react177.useState)("");
+  const [serverKey, setServerKey] = (0, import_react177.useState)(false);
+  const [sheetOpen, setSheetOpen] = (0, import_react177.useState)(false);
+  const [customPoses, setCustomPoses] = (0, import_react177.useState)([]);
+  const [customCostumes, setCustomCostumes] = (0, import_react177.useState)([]);
+  const [history, setHistory] = (0, import_react177.useState)([]);
+  const [storageHigh, setStorageHigh] = (0, import_react177.useState)(false);
+  const [syncWarning, setSyncWarning] = (0, import_react177.useState)("");
+  const [reuseNote, setReuseNote] = (0, import_react177.useState)("");
+  const libraryReady = (0, import_react177.useRef)(false);
+  const modelLoadGen = (0, import_react177.useRef)(0);
+  const clearRequestedSystem = (0, import_react177.useCallback)(() => setRequestedSystem(null), []);
+  const clearCostumeFocus = (0, import_react177.useCallback)(() => setCostumeFocus(null), []);
+  const abortRef = (0, import_react177.useRef)(null);
+  const settingsRevision = (0, import_react177.useRef)(0);
+  const loadCatalog = (0, import_react177.useCallback)(() => {
     setLoading(true);
     setCatalogError("");
     fetch(studioUrl(basePath, "/api/catalog")).then(async (response) => {
@@ -29234,10 +29234,10 @@ function StudioFrame({ embedded }) {
       return response.json();
     }).then(setCatalog).catch((error) => setCatalogError(error instanceof Error ? error.message : "姿势目录没有加载出来")).finally(() => setLoading(false));
   }, [basePath]);
-  (0, import_react176.useEffect)(() => {
+  (0, import_react177.useEffect)(() => {
     loadCatalog();
   }, [loadCatalog]);
-  (0, import_react176.useEffect)(() => {
+  (0, import_react177.useEffect)(() => {
     const controller = new AbortController();
     fetch(studioUrl(basePath, "/api/costumes"), { signal: controller.signal }).then(async (response) => {
       if (!response.ok) throw new Error("服装目录没有加载出来");
@@ -29253,7 +29253,7 @@ function StudioFrame({ embedded }) {
     });
     return () => controller.abort();
   }, [basePath]);
-  (0, import_react176.useEffect)(() => {
+  (0, import_react177.useEffect)(() => {
     const controller = new AbortController();
     fetch(studioUrl(basePath, "/api/faces"), { signal: controller.signal }).then(async (response) => {
       if (!response.ok) throw new Error("脸部目录没有加载出来");
@@ -29269,7 +29269,7 @@ function StudioFrame({ embedded }) {
     });
     return () => controller.abort();
   }, [basePath]);
-  (0, import_react176.useEffect)(() => {
+  (0, import_react177.useEffect)(() => {
     const local = loadSettings();
     setSettings(local);
     setSettingsReady(true);
@@ -29291,7 +29291,7 @@ function StudioFrame({ embedded }) {
     }).catch(() => {
     });
   }, [basePath]);
-  (0, import_react176.useEffect)(() => {
+  (0, import_react177.useEffect)(() => {
     const gen = ++modelLoadGen.current;
     Promise.all([readStoredCharacters(), listSavedModels(), readActiveModelId()]).then(([images, saved, activeId]) => {
       if (modelLoadGen.current !== gen) return;
@@ -29312,7 +29312,7 @@ function StudioFrame({ embedded }) {
     }).catch(() => {
     });
   }, []);
-  (0, import_react176.useEffect)(() => {
+  (0, import_react177.useEffect)(() => {
     let cancelled = false;
     Promise.all([listCustomPoses(), listCustomCostumes(), listHistory(), readStoragePressure()]).then(([poses, costumes, entries, pressure]) => {
       if (cancelled) return;
@@ -29328,7 +29328,7 @@ function StudioFrame({ embedded }) {
       cancelled = true;
     };
   }, []);
-  (0, import_react176.useEffect)(() => {
+  (0, import_react177.useEffect)(() => {
     if (!libraryReady.current || !settingsReady || settings.engine === "comfyui") {
       setSyncWarning("");
       return;
@@ -29452,7 +29452,7 @@ function StudioFrame({ embedded }) {
   const poseUrls = useBlobUrls(customPoses);
   const costumeUrls = useBlobUrls(customCostumes);
   const historyUrls = useBlobUrls(history);
-  const poseById = (0, import_react176.useMemo)(() => {
+  const poseById = (0, import_react177.useMemo)(() => {
     const map = /* @__PURE__ */ new Map();
     catalog?.poses.forEach((pose) => map.set(pose.id, pose));
     for (const asset of customPoses) {
@@ -29470,7 +29470,7 @@ function StudioFrame({ embedded }) {
     }
     return map;
   }, [catalog, customPoses]);
-  const chosen = (0, import_react176.useMemo)(() => {
+  const chosen = (0, import_react177.useMemo)(() => {
     return Object.entries(selected).flatMap(([poseId, viewId]) => {
       const pose = poseById.get(poseId);
       const view = pose?.views.find((item) => item.id === viewId);
@@ -29478,7 +29478,7 @@ function StudioFrame({ embedded }) {
       return [{ poseId, viewId, title: pose.name, angle: view.angle, thumbSrc: poseUrls[poseId] }];
     });
   }, [selected, poseById, poseUrls]);
-  const comfyItems = (0, import_react176.useCallback)((viewIds) => {
+  const comfyItems = (0, import_react177.useCallback)((viewIds) => {
     if (!viewIds.length && costume) return [{ viewId: "outfit", title: "仅换装", pose: null }];
     return viewIds.map((id) => {
       for (const pose of poseById.values()) {
@@ -29489,7 +29489,7 @@ function StudioFrame({ embedded }) {
     });
   }, [poseById, costume]);
   const selectionKey = chosen.map((item) => item.viewId).join("|");
-  (0, import_react176.useEffect)(() => {
+  (0, import_react177.useEffect)(() => {
     if (!selectionKey && !(settings.engine === "comfyui" && costume?.id)) {
       setPrompts([]);
       setPromptError("");
@@ -29800,7 +29800,7 @@ function StudioFrame({ embedded }) {
     adult: asset.adult,
     thumbUrl: costumeUrls[asset.id] || ""
   }));
-  const composer = /* @__PURE__ */ (0, import_jsx_runtime44.jsx)(
+  const composer = /* @__PURE__ */ (0, import_jsx_runtime45.jsx)(
     Composer,
     {
       selected: chosen,
@@ -29852,12 +29852,12 @@ function StudioFrame({ embedded }) {
       builtinSheet: getBuiltinModel(activeModelId)?.sheet || "/muse/dafeiyu-sheet.png"
     }
   );
-  const libraryTabs = /* @__PURE__ */ (0, import_jsx_runtime44.jsxs)(import_jsx_runtime44.Fragment, { children: [
-    /* @__PURE__ */ (0, import_jsx_runtime44.jsx)(LibraryTabs, { library, onLibrary: setLibrary }),
-    face ? /* @__PURE__ */ (0, import_jsx_runtime44.jsx)("span", { className: "hidden min-w-0 truncate text-sm text-primary @min-[640px]/studio:inline", children: face.id }) : null,
-    costume ? /* @__PURE__ */ (0, import_jsx_runtime44.jsx)("span", { className: "hidden min-w-0 truncate text-sm text-primary @min-[640px]/studio:inline", children: costume.id }) : null
+  const libraryTabs = /* @__PURE__ */ (0, import_jsx_runtime45.jsxs)(import_jsx_runtime45.Fragment, { children: [
+    /* @__PURE__ */ (0, import_jsx_runtime45.jsx)(LibraryTabs, { library, onLibrary: setLibrary }),
+    face ? /* @__PURE__ */ (0, import_jsx_runtime45.jsx)("span", { className: "hidden min-w-0 truncate text-sm text-primary @min-[640px]/studio:inline", children: face.id }) : null,
+    costume ? /* @__PURE__ */ (0, import_jsx_runtime45.jsx)("span", { className: "hidden min-w-0 truncate text-sm text-primary @min-[640px]/studio:inline", children: costume.id }) : null
   ] });
-  const libraryPane = library === "faces" ? /* @__PURE__ */ (0, import_jsx_runtime44.jsx)(
+  const libraryPane = library === "faces" ? /* @__PURE__ */ (0, import_jsx_runtime45.jsx)(
     FaceBrowser,
     {
       selectedId: face?.id ?? null,
@@ -29869,7 +29869,7 @@ function StudioFrame({ embedded }) {
         keywords: item.keywords
       })
     }
-  ) : library === "poses" ? /* @__PURE__ */ (0, import_jsx_runtime44.jsx)(
+  ) : library === "poses" ? /* @__PURE__ */ (0, import_jsx_runtime45.jsx)(
     PoseBrowser,
     {
       catalog,
@@ -29889,7 +29889,7 @@ function StudioFrame({ embedded }) {
       hasKey: Boolean(settings.apiKey.trim()) || serverKey,
       syncWarning
     }
-  ) : /* @__PURE__ */ (0, import_jsx_runtime44.jsx)(
+  ) : /* @__PURE__ */ (0, import_jsx_runtime45.jsx)(
     CostumeBrowser,
     {
       showAdult: settings.showAdult,
@@ -29907,7 +29907,7 @@ function StudioFrame({ embedded }) {
       onChangeSettings: updateSettings
     }
   );
-  const characterDock = /* @__PURE__ */ (0, import_jsx_runtime44.jsx)(
+  const characterDock = /* @__PURE__ */ (0, import_jsx_runtime45.jsx)(
     CharacterDock,
     {
       images: characters,
@@ -29940,9 +29940,9 @@ function StudioFrame({ embedded }) {
       }
     }
   );
-  const headerTrailing = /* @__PURE__ */ (0, import_jsx_runtime44.jsxs)(import_jsx_runtime44.Fragment, { children: [
-    /* @__PURE__ */ (0, import_jsx_runtime44.jsx)(Button2, { variant: "outline", size: "sm", className: "@max-[640px]/studio:hidden", onPress: () => setInstallOpen(true), children: "装进 Harness" }),
-    /* @__PURE__ */ (0, import_jsx_runtime44.jsx)(
+  const headerTrailing = /* @__PURE__ */ (0, import_jsx_runtime45.jsxs)(import_jsx_runtime45.Fragment, { children: [
+    /* @__PURE__ */ (0, import_jsx_runtime45.jsx)(Button2, { variant: "outline", size: "sm", className: "@max-[640px]/studio:hidden", onPress: () => setInstallOpen(true), children: "装进 Harness" }),
+    /* @__PURE__ */ (0, import_jsx_runtime45.jsx)(
       "a",
       {
         href: REPOSITORY_URL,
@@ -29950,12 +29950,12 @@ function StudioFrame({ embedded }) {
         rel: "noopener noreferrer",
         "aria-label": "打开 GitHub 仓库",
         className: buttonVariants({ variant: "outline", size: "sm", isIconOnly: true }),
-        children: /* @__PURE__ */ (0, import_jsx_runtime44.jsx)(GithubMark, {})
+        children: /* @__PURE__ */ (0, import_jsx_runtime45.jsx)(GithubMark, {})
       }
     )
   ] });
-  const mobileWorkOrderTrigger = /* @__PURE__ */ (0, import_jsx_runtime44.jsxs)(import_jsx_runtime44.Fragment, { children: [
-    /* @__PURE__ */ (0, import_jsx_runtime44.jsx)("div", { className: "shrink-0 border-t border-border bg-card p-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] @min-[1024px]/studio:hidden", children: /* @__PURE__ */ (0, import_jsx_runtime44.jsxs)(Button2, { className: "h-11 w-full", onPress: () => setSheetOpen(true), children: [
+  const mobileWorkOrderTrigger = /* @__PURE__ */ (0, import_jsx_runtime45.jsxs)(import_jsx_runtime45.Fragment, { children: [
+    /* @__PURE__ */ (0, import_jsx_runtime45.jsx)("div", { className: "shrink-0 border-t border-border bg-card p-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] @min-[1024px]/studio:hidden", children: /* @__PURE__ */ (0, import_jsx_runtime45.jsxs)(Button2, { className: "h-11 w-full", onPress: () => setSheetOpen(true), children: [
       "已选 ",
       chosen.length,
       " 个姿势",
@@ -29963,19 +29963,19 @@ function StudioFrame({ embedded }) {
       costume ? ` · ${costume.id}` : "",
       " · 去生图"
     ] }) }),
-    /* @__PURE__ */ (0, import_jsx_runtime44.jsx)(Sheet2, { isOpen: sheetOpen, onOpenChange: setSheetOpen, placement: "bottom", children: /* @__PURE__ */ (0, import_jsx_runtime44.jsx)(Sheet2.Backdrop, { ...portal, children: /* @__PURE__ */ (0, import_jsx_runtime44.jsx)(Sheet2.Content, { className: "max-h-[min(85dvh,85%)] rounded-t-3xl", children: /* @__PURE__ */ (0, import_jsx_runtime44.jsxs)(Sheet2.Dialog, { children: [
-      /* @__PURE__ */ (0, import_jsx_runtime44.jsx)(Sheet2.Handle, {}),
-      /* @__PURE__ */ (0, import_jsx_runtime44.jsx)(Sheet2.CloseTrigger, {}),
-      /* @__PURE__ */ (0, import_jsx_runtime44.jsx)(Sheet2.Header, { children: /* @__PURE__ */ (0, import_jsx_runtime44.jsx)(Sheet2.Heading, { children: "生图" }) }),
-      /* @__PURE__ */ (0, import_jsx_runtime44.jsx)(Sheet2.Body, { className: "overflow-y-auto px-4 pb-6", children: composer })
+    /* @__PURE__ */ (0, import_jsx_runtime45.jsx)(Sheet2, { isOpen: sheetOpen, onOpenChange: setSheetOpen, placement: "bottom", children: /* @__PURE__ */ (0, import_jsx_runtime45.jsx)(Sheet2.Backdrop, { ...portal, children: /* @__PURE__ */ (0, import_jsx_runtime45.jsx)(Sheet2.Content, { className: "max-h-[min(85dvh,85%)] rounded-t-3xl", children: /* @__PURE__ */ (0, import_jsx_runtime45.jsxs)(Sheet2.Dialog, { children: [
+      /* @__PURE__ */ (0, import_jsx_runtime45.jsx)(Sheet2.Handle, {}),
+      /* @__PURE__ */ (0, import_jsx_runtime45.jsx)(Sheet2.CloseTrigger, {}),
+      /* @__PURE__ */ (0, import_jsx_runtime45.jsx)(Sheet2.Header, { children: /* @__PURE__ */ (0, import_jsx_runtime45.jsx)(Sheet2.Heading, { children: "生图" }) }),
+      /* @__PURE__ */ (0, import_jsx_runtime45.jsx)(Sheet2.Body, { className: "overflow-y-auto px-4 pb-6", children: composer })
     ] }) }) }) })
   ] });
-  return /* @__PURE__ */ (0, import_jsx_runtime44.jsxs)("div", { className: `flex min-h-0 flex-col overflow-hidden bg-background text-foreground ${embedded ? "h-full" : "h-dvh"}`, children: [
-    storageHigh ? /* @__PURE__ */ (0, import_jsx_runtime44.jsxs)("p", { className: "shrink-0 border-b border-amber-200 bg-amber-50 px-4 py-2 text-sm text-amber-950 dark:border-amber-800/60 dark:bg-amber-950/40 dark:text-amber-100", children: [
+  return /* @__PURE__ */ (0, import_jsx_runtime45.jsxs)("div", { className: `flex min-h-0 flex-col overflow-hidden bg-background text-foreground ${embedded ? "h-full" : "h-dvh"}`, children: [
+    storageHigh ? /* @__PURE__ */ (0, import_jsx_runtime45.jsxs)("p", { className: "shrink-0 border-b border-amber-200 bg-amber-50 px-4 py-2 text-sm text-amber-950 dark:border-amber-800/60 dark:bg-amber-950/40 dark:text-amber-100", children: [
       "本机存储快满了。可以删除历史或自定义参考图。",
-      /* @__PURE__ */ (0, import_jsx_runtime44.jsx)("button", { type: "button", className: "ml-2 underline", onClick: () => void clearHistory().then(() => setHistory([])).then(() => readStoragePressure()).then((pressure) => setStorageHigh(pressure.high)), children: "清空历史" })
+      /* @__PURE__ */ (0, import_jsx_runtime45.jsx)("button", { type: "button", className: "ml-2 underline", onClick: () => void clearHistory().then(() => setHistory([])).then(() => readStoragePressure()).then((pressure) => setStorageHigh(pressure.high)), children: "清空历史" })
     ] }) : null,
-    /* @__PURE__ */ (0, import_jsx_runtime44.jsx)("div", { className: "min-h-0 flex-1 overflow-hidden", children: /* @__PURE__ */ (0, import_jsx_runtime44.jsx)(
+    /* @__PURE__ */ (0, import_jsx_runtime45.jsx)("div", { className: "min-h-0 flex-1 overflow-hidden", children: /* @__PURE__ */ (0, import_jsx_runtime45.jsx)(
       StudioShell,
       {
         embedded: true,
@@ -29993,29 +29993,29 @@ function StudioFrame({ embedded }) {
         }
       }
     ) }),
-    /* @__PURE__ */ (0, import_jsx_runtime44.jsx)(SettingsDialog, { open: settingsOpen, onOpenChange: setSettingsOpen, settings, onChange: updateSettings }),
-    /* @__PURE__ */ (0, import_jsx_runtime44.jsx)(Modal2.Backdrop, { isOpen: installOpen, onOpenChange: setInstallOpen, ...portal, children: /* @__PURE__ */ (0, import_jsx_runtime44.jsx)(Modal2.Container, { children: /* @__PURE__ */ (0, import_jsx_runtime44.jsxs)(Modal2.Dialog, { className: "max-w-[min(32rem,calc(100%-2rem))]", children: [
-      /* @__PURE__ */ (0, import_jsx_runtime44.jsx)(Modal2.CloseTrigger, {}),
-      /* @__PURE__ */ (0, import_jsx_runtime44.jsxs)(Modal2.Header, { children: [
-        /* @__PURE__ */ (0, import_jsx_runtime44.jsx)(Modal2.Heading, { children: "装进 DeepSeek Harness" }),
-        /* @__PURE__ */ (0, import_jsx_runtime44.jsx)("p", { className: "text-sm text-muted-foreground", children: "澜姿发布在 npm，包名是 gen-ai-pose-image。在已经装好 Harness 的机器上执行下面的命令，重启后左侧栏会出现「澜姿 / 工作室」，Agent 也能直接调用姿势生图。" })
+    /* @__PURE__ */ (0, import_jsx_runtime45.jsx)(SettingsDialog, { open: settingsOpen, onOpenChange: setSettingsOpen, settings, onChange: updateSettings }),
+    /* @__PURE__ */ (0, import_jsx_runtime45.jsx)(Modal2.Backdrop, { isOpen: installOpen, onOpenChange: setInstallOpen, ...portal, children: /* @__PURE__ */ (0, import_jsx_runtime45.jsx)(Modal2.Container, { children: /* @__PURE__ */ (0, import_jsx_runtime45.jsxs)(Modal2.Dialog, { className: "max-w-[min(32rem,calc(100%-2rem))]", children: [
+      /* @__PURE__ */ (0, import_jsx_runtime45.jsx)(Modal2.CloseTrigger, {}),
+      /* @__PURE__ */ (0, import_jsx_runtime45.jsxs)(Modal2.Header, { children: [
+        /* @__PURE__ */ (0, import_jsx_runtime45.jsx)(Modal2.Heading, { children: "装进 DeepSeek Harness" }),
+        /* @__PURE__ */ (0, import_jsx_runtime45.jsx)("p", { className: "text-sm text-muted-foreground", children: "澜姿发布在 npm，包名是 gen-ai-pose-image。在已经装好 Harness 的机器上执行下面的命令，重启后左侧栏会出现「澜姿 / 工作室」，Agent 也能直接调用姿势生图。" })
       ] }),
-      /* @__PURE__ */ (0, import_jsx_runtime44.jsxs)(Modal2.Body, { className: "grid gap-3", children: [
-        /* @__PURE__ */ (0, import_jsx_runtime44.jsx)("pre", { className: "overflow-auto rounded-xl bg-secondary p-3 text-xs leading-5", children: "dsh plugin --profile web add gen-ai-pose-image" }),
-        /* @__PURE__ */ (0, import_jsx_runtime44.jsx)("p", { className: "text-xs leading-5 text-muted-foreground", children: "网页工作室要在设置里填自己的 API Key。Harness 插件出图时，用启动环境里的 POSE_MUSE_API_KEY。" })
+      /* @__PURE__ */ (0, import_jsx_runtime45.jsxs)(Modal2.Body, { className: "grid gap-3", children: [
+        /* @__PURE__ */ (0, import_jsx_runtime45.jsx)("pre", { className: "overflow-auto rounded-xl bg-secondary p-3 text-xs leading-5", children: "dsh plugin --profile web add gen-ai-pose-image" }),
+        /* @__PURE__ */ (0, import_jsx_runtime45.jsx)("p", { className: "text-xs leading-5 text-muted-foreground", children: "网页工作室要在设置里填自己的 API Key。Harness 插件出图时，用启动环境里的 POSE_MUSE_API_KEY。" })
       ] })
     ] }) }) }),
-    /* @__PURE__ */ (0, import_jsx_runtime44.jsx)(Modal2.Backdrop, { isOpen: adultAsk !== null, onOpenChange: (open) => {
+    /* @__PURE__ */ (0, import_jsx_runtime45.jsx)(Modal2.Backdrop, { isOpen: adultAsk !== null, onOpenChange: (open) => {
       if (!open) setAdultAsk(null);
-    }, ...portal, children: /* @__PURE__ */ (0, import_jsx_runtime44.jsx)(Modal2.Container, { children: /* @__PURE__ */ (0, import_jsx_runtime44.jsxs)(Modal2.Dialog, { className: "max-w-[min(28rem,calc(100%-2rem))]", children: [
-      /* @__PURE__ */ (0, import_jsx_runtime44.jsx)(Modal2.CloseTrigger, {}),
-      /* @__PURE__ */ (0, import_jsx_runtime44.jsxs)(Modal2.Header, { children: [
-        /* @__PURE__ */ (0, import_jsx_runtime44.jsx)(Modal2.Heading, { children: adultAsk === "custom" || adultAsk === "costume:custom" ? "这些是成人向自定义参考" : adultAsk?.startsWith("costume:") ? "这些是成人向服装" : "这些是成人向姿势" }),
-        /* @__PURE__ */ (0, import_jsx_runtime44.jsx)("p", { className: "text-sm text-muted-foreground", children: adultAsk === "custom" || adultAsk === "costume:custom" ? "自定义参考里标成成人向的图默认不显示。打开之后才能点选。生图仍要求角色是成年人。" : adultAsk?.startsWith("costume:") ? "内衣、泳装和性感分类里的图仍然没有人物，只是衣服本身更暴露。打开之后可以点选。生图会换成这套衣服，并保留角色的脸、头发、鲸耳和鲸尾。" : "来自原图库的性感系、双人缠绵，以及上半身里的大胆分类。画面仍是结构线稿。打开之后，生图默认继续保持模特的服装，只借用姿势。" })
+    }, ...portal, children: /* @__PURE__ */ (0, import_jsx_runtime45.jsx)(Modal2.Container, { children: /* @__PURE__ */ (0, import_jsx_runtime45.jsxs)(Modal2.Dialog, { className: "max-w-[min(28rem,calc(100%-2rem))]", children: [
+      /* @__PURE__ */ (0, import_jsx_runtime45.jsx)(Modal2.CloseTrigger, {}),
+      /* @__PURE__ */ (0, import_jsx_runtime45.jsxs)(Modal2.Header, { children: [
+        /* @__PURE__ */ (0, import_jsx_runtime45.jsx)(Modal2.Heading, { children: adultAsk === "custom" || adultAsk === "costume:custom" ? "这些是成人向自定义参考" : adultAsk?.startsWith("costume:") ? "这些是成人向服装" : "这些是成人向姿势" }),
+        /* @__PURE__ */ (0, import_jsx_runtime45.jsx)("p", { className: "text-sm text-muted-foreground", children: adultAsk === "custom" || adultAsk === "costume:custom" ? "自定义参考里标成成人向的图默认不显示。打开之后才能点选。生图仍要求角色是成年人。" : adultAsk?.startsWith("costume:") ? "内衣、泳装和性感分类里的图仍然没有人物，只是衣服本身更暴露。打开之后可以点选。生图会换成这套衣服，并保留角色的脸、头发、鲸耳和鲸尾。" : "来自原图库的性感系、双人缠绵，以及上半身里的大胆分类。画面仍是结构线稿。打开之后，生图默认继续保持模特的服装，只借用姿势。" })
       ] }),
-      /* @__PURE__ */ (0, import_jsx_runtime44.jsxs)(Modal2.Footer, { children: [
-        /* @__PURE__ */ (0, import_jsx_runtime44.jsx)(Button2, { variant: "outline", onPress: () => setAdultAsk(null), children: "先不看" }),
-        /* @__PURE__ */ (0, import_jsx_runtime44.jsx)(Button2, { onPress: () => {
+      /* @__PURE__ */ (0, import_jsx_runtime45.jsxs)(Modal2.Footer, { children: [
+        /* @__PURE__ */ (0, import_jsx_runtime45.jsx)(Button2, { variant: "outline", onPress: () => setAdultAsk(null), children: "先不看" }),
+        /* @__PURE__ */ (0, import_jsx_runtime45.jsx)(Button2, { onPress: () => {
           if (adultAsk?.startsWith("costume:")) {
             setCostumeFocus(adultAsk.slice("costume:".length));
             setLibrary("costumes");
@@ -30030,14 +30030,14 @@ function StudioFrame({ embedded }) {
   ] });
 }
 function GithubMark() {
-  return /* @__PURE__ */ (0, import_jsx_runtime44.jsxs)("svg", { viewBox: "0 0 24 24", fill: "none", stroke: "currentColor", strokeWidth: "2", strokeLinecap: "round", strokeLinejoin: "round", "aria-hidden": "true", children: [
-    /* @__PURE__ */ (0, import_jsx_runtime44.jsx)("path", { d: "M15 22v-4a4.8 4.8 0 0 0-1-3.5c3 0 6-2 6-5.5.08-1.25-.27-2.48-1-3.5.28-1.15.28-2.35 0-3.5 0 0-1 0-3 1.5-2.64-.5-5.36-.5-8 0C6 2 5 2 5 2c-.3 1.15-.3 2.35 0 3.5A5.403 5.403 0 0 0 4 9c0 3.5 3 5.5 6 5.5-.39.49-.68 1.05-.85 1.65-.17.6-.22 1.23-.15 1.85v4" }),
-    /* @__PURE__ */ (0, import_jsx_runtime44.jsx)("path", { d: "M9 18c-4.51 2-5-2-7-2" })
+  return /* @__PURE__ */ (0, import_jsx_runtime45.jsxs)("svg", { viewBox: "0 0 24 24", fill: "none", stroke: "currentColor", strokeWidth: "2", strokeLinecap: "round", strokeLinejoin: "round", "aria-hidden": "true", children: [
+    /* @__PURE__ */ (0, import_jsx_runtime45.jsx)("path", { d: "M15 22v-4a4.8 4.8 0 0 0-1-3.5c3 0 6-2 6-5.5.08-1.25-.27-2.48-1-3.5.28-1.15.28-2.35 0-3.5 0 0-1 0-3 1.5-2.64-.5-5.36-.5-8 0C6 2 5 2 5 2c-.3 1.15-.3 2.35 0 3.5A5.403 5.403 0 0 0 4 9c0 3.5 3 5.5 6 5.5-.39.49-.68 1.05-.85 1.65-.17.6-.22 1.23-.15 1.85v4" }),
+    /* @__PURE__ */ (0, import_jsx_runtime45.jsx)("path", { d: "M9 18c-4.51 2-5-2-7-2" })
   ] });
 }
 function useBlobUrls(items) {
-  const [urls, setUrls] = (0, import_react176.useState)({});
-  (0, import_react176.useEffect)(() => {
+  const [urls, setUrls] = (0, import_react177.useState)({});
+  (0, import_react177.useEffect)(() => {
     const created = {};
     for (const item of items) created[item.id] = URL.createObjectURL(item.image);
     setUrls(created);
@@ -30086,14 +30086,14 @@ function resultCards(results) {
 }
 
 // plugin/harness-entry.tsx
-var import_jsx_runtime45 = require("react/jsx-runtime");
+var import_jsx_runtime46 = require("react/jsx-runtime");
 var name = "gen-ai-pose-image";
 var inject = ["slots"];
 var SIDEBAR_LABEL = "澜姿 / 工作室";
 function PosePanelIcon({ size = 16 }) {
-  return /* @__PURE__ */ (0, import_jsx_runtime45.jsxs)("svg", { width: size, height: size, viewBox: "0 0 16 16", fill: "none", "aria-hidden": "true", children: [
-    /* @__PURE__ */ (0, import_jsx_runtime45.jsx)("circle", { cx: "8", cy: "3.1", r: "1.35", stroke: "currentColor", strokeWidth: "1.3" }),
-    /* @__PURE__ */ (0, import_jsx_runtime45.jsx)(
+  return /* @__PURE__ */ (0, import_jsx_runtime46.jsxs)("svg", { width: size, height: size, viewBox: "0 0 16 16", fill: "none", "aria-hidden": "true", children: [
+    /* @__PURE__ */ (0, import_jsx_runtime46.jsx)("circle", { cx: "8", cy: "3.1", r: "1.35", stroke: "currentColor", strokeWidth: "1.3" }),
+    /* @__PURE__ */ (0, import_jsx_runtime46.jsx)(
       "path",
       {
         d: "M8 4.7v3.4M5.1 7.1h5.8M6.1 13.4 8 8.1l1.9 5.3",
@@ -30106,10 +30106,10 @@ function PosePanelIcon({ size = 16 }) {
   ] });
 }
 function PoseStudio() {
-  const hostRef = (0, import_react178.useRef)(null);
-  const [mount, setMount] = (0, import_react178.useState)(null);
-  const [portalContainer, setPortalContainer] = (0, import_react178.useState)(null);
-  (0, import_react178.useEffect)(() => {
+  const hostRef = (0, import_react179.useRef)(null);
+  const [mount, setMount] = (0, import_react179.useState)(null);
+  const [portalContainer, setPortalContainer] = (0, import_react179.useState)(null);
+  (0, import_react179.useEffect)(() => {
     const host = hostRef.current;
     if (!host) return;
     const shadow = host.shadowRoot ?? host.attachShadow({ mode: "open" });
@@ -43757,8 +43757,8 @@ function PoseStudio() {
     setPortalContainer(shadow);
     setMount(node);
   }, []);
-  return /* @__PURE__ */ (0, import_jsx_runtime45.jsx)("div", { ref: hostRef, "data-lanpose-host": "", style: { height: "100%", width: "100%", minHeight: 0, minWidth: 0, flex: "1 1 auto" }, children: mount && portalContainer ? (0, import_react_dom8.createPortal)(
-    /* @__PURE__ */ (0, import_jsx_runtime45.jsx)(Studio, { embedded: true, basePath: "/dsh-pose-muse", portalContainer }),
+  return /* @__PURE__ */ (0, import_jsx_runtime46.jsx)("div", { ref: hostRef, "data-lanpose-host": "", style: { height: "100%", width: "100%", minHeight: 0, minWidth: 0, flex: "1 1 auto" }, children: mount && portalContainer ? (0, import_react_dom8.createPortal)(
+    /* @__PURE__ */ (0, import_jsx_runtime46.jsx)(Studio, { embedded: true, basePath: "/dsh-pose-muse", portalContainer }),
     mount
   ) : null });
 }

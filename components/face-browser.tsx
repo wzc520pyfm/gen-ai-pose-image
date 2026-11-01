@@ -3,7 +3,8 @@
 /* eslint-disable @next/next/no-img-element -- face references are proxied remote images */
 
 import { useEffect, useMemo, useState } from "react"
-import { Alert, Button, Card, Chip, SearchField, Skeleton, ToggleButton, ToggleButtonGroup } from "@heroui/react"
+import { Alert, Button, Card, Chip, SearchField, Skeleton, ToggleButton } from "@heroui/react"
+import { SegmentRow } from "@/components/studio-segment"
 import { studioUrl, useStudioEnv } from "@/lib/studio-env"
 
 export type FaceItem = {
@@ -106,23 +107,20 @@ export function FaceBrowser({
         <p className="mb-2 text-sm leading-5 text-muted-foreground">
           选一张脸部参考。生图会把这张图的五官、表情、脸型和发型用到角色上，姿势和服装仍按各自的参考。鲸耳和鲸尾保留。
         </p>
-        <ToggleButtonGroup
-          aria-label="脸部分组"
-          selectionMode="single"
-          disallowEmptySelection
-          selectedKeys={[section || "all"]}
+        <SegmentRow
+          ariaLabel="脸部分组"
+          selectedKey={section || "all"}
           onSelectionChange={(keys) => {
             const id = firstKey(keys)
             if (id == null) return
             setSection(id === "all" ? "" : id)
           }}
-          className="flex flex-wrap gap-1.5"
         >
           <ToggleButton id="all">全部{catalog ? ` ${catalog.total}` : ""}</ToggleButton>
           {catalog?.sections.map((item) => (
             <ToggleButton key={item.id} id={item.id}>{item.label} {item.count}</ToggleButton>
           ))}
-        </ToggleButtonGroup>
+        </SegmentRow>
         <div className="mt-2 flex flex-wrap items-center gap-2">
           <SearchField aria-label="搜索脸部参考" value={query} onChange={setQuery} className="min-w-[8.5rem] flex-1">
             <SearchField.Group>
@@ -131,23 +129,20 @@ export function FaceBrowser({
               <SearchField.ClearButton />
             </SearchField.Group>
           </SearchField>
-          <ToggleButtonGroup
-            aria-label="发长"
-            selectionMode="single"
-            disallowEmptySelection
-            selectedKeys={[hair || "all"]}
+          <SegmentRow
+            ariaLabel="发长"
+            selectedKey={hair || "all"}
             onSelectionChange={(keys) => {
               const id = firstKey(keys)
               if (id == null) return
               setHair(id === "all" ? "" : id)
             }}
-            className="max-w-full overflow-x-auto"
           >
             <ToggleButton id="all">全部发长</ToggleButton>
             {catalog?.hairs.map((item) => (
               <ToggleButton key={item.id} id={item.id}>{item.label} {hairCounts.get(item.id) ?? 0}</ToggleButton>
             ))}
-          </ToggleButtonGroup>
+          </SegmentRow>
           <Button
             variant="outline"
             size="sm"

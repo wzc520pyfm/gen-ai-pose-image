@@ -4,7 +4,8 @@
 
 import { useEffect, useMemo, useState } from "react"
 import { CustomReferencePanel, type CustomCard, type CustomDraft } from "@/components/custom-reference-panel"
-import { Alert, Button, Card, Chip, SearchField, Skeleton, ToggleButton, ToggleButtonGroup } from "@heroui/react"
+import { Alert, Button, Card, Chip, SearchField, Skeleton, ToggleButton } from "@heroui/react"
+import { SegmentRow } from "@/components/studio-segment"
 import type { StudioSettings } from "@/lib/settings"
 import { studioUrl, useStudioEnv } from "@/lib/studio-env"
 
@@ -106,11 +107,10 @@ export function CostumeBrowser({
     <section>
       <div className="px-4 pt-3 pb-2 @min-[768px]/studio:px-6">
         <p className="mb-2 text-sm text-muted-foreground">这些图里没有人物。选一套之后，大肥鱼会换上这身衣服，脸、头发、鲸耳和鲸尾保持不变。</p>
-        <ToggleButtonGroup
-          aria-label="服装分类"
-          selectionMode="single"
-          disallowEmptySelection
-          selectedKeys={[category]}
+        <SegmentRow
+          className="mb-2"
+          ariaLabel="服装分类"
+          selectedKey={category}
           onSelectionChange={(keys) => {
             const id = firstKey(keys)
             if (!id) return
@@ -125,15 +125,14 @@ export function CostumeBrowser({
             }
             setCategory(id)
           }}
-          className="mb-2 flex flex-wrap gap-2"
         >
           <ToggleButton id="custom">自定义 {visibleCustom.length}</ToggleButton>
           {catalog?.categories.map((item) => (
             <ToggleButton key={item.id} id={item.id}>
-              {item.label} {item.count}{item.adult ? " 成人向" : ""}
+              {item.label} {item.count}
             </ToggleButton>
           ))}
-        </ToggleButtonGroup>
+        </SegmentRow>
         {customSection ? null : (
           <SearchField aria-label="搜索服装" value={query} onChange={setQuery}>
             <SearchField.Group>
