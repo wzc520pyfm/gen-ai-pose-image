@@ -4,7 +4,7 @@
 
 import { useState } from "react"
 import type { ResultCard } from "@/components/composer"
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
+import { Modal } from "@heroui/react"
 
 export function PreviewPane({ results }: { results: ResultCard[] }) {
   const [zoomSrc, setZoomSrc] = useState<string | null>(null)
@@ -24,14 +24,19 @@ export function PreviewPane({ results }: { results: ResultCard[] }) {
       ) : (
         <p className="text-sm text-muted-foreground">成图预览</p>
       )}
-      <Dialog open={zoomSrc !== null} onOpenChange={(open) => { if (!open) setZoomSrc(null) }}>
-        <DialogContent className="max-w-[min(48rem,calc(100%-2rem))] p-2">
-          <DialogHeader className="sr-only">
-            <DialogTitle>成图预览</DialogTitle>
-          </DialogHeader>
-          {zoomSrc ? <img src={zoomSrc} alt="成图预览" className="max-h-[80dvh] w-full object-contain" /> : null}
-        </DialogContent>
-      </Dialog>
+      <Modal.Backdrop isOpen={zoomSrc !== null} onOpenChange={(open) => { if (!open) setZoomSrc(null) }}>
+        <Modal.Container size="cover">
+          <Modal.Dialog className="max-w-[min(48rem,calc(100%-2rem))] p-2">
+            <Modal.CloseTrigger />
+            <Modal.Header className="sr-only">
+              <Modal.Heading>成图预览</Modal.Heading>
+            </Modal.Header>
+            <Modal.Body>
+              {zoomSrc ? <img src={zoomSrc} alt="成图预览" className="max-h-[80dvh] w-full object-contain" /> : null}
+            </Modal.Body>
+          </Modal.Dialog>
+        </Modal.Container>
+      </Modal.Backdrop>
     </div>
   )
 }

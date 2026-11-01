@@ -3,11 +3,7 @@
 import { useEffect, useRef, useState, type ReactNode } from "react"
 import { ExternalLink } from "lucide-react"
 
-import { Button } from "@/components/ui/button"
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { Switch } from "@/components/ui/switch"
+import { Button, Input, Label, Modal, Switch } from "@heroui/react"
 import { textModelFor } from "@/shared/beautify.mjs"
 import { baseURLFor, modelFor, type StudioSettings } from "@/lib/settings"
 import { ASPECT_LABEL, ASPECT_RATIOS, type AspectRatio, type ProviderId } from "@/lib/types"
@@ -65,18 +61,20 @@ export function SettingsDialog({
   const local = settings.engine === "comfyui"
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-h-[min(85dvh,85%)] max-w-[min(32rem,calc(100%-2rem))] overflow-y-auto">
-        <DialogHeader>
-          <DialogTitle>生图设置</DialogTitle>
-          <DialogDescription>云端密钥存在当前浏览器；ComfyUI 令牌仅保留在当前页面，不会写入历史或提示词。</DialogDescription>
-        </DialogHeader>
-        <div className="grid gap-3">
+    <Modal.Backdrop isOpen={open} onOpenChange={onOpenChange}>
+      <Modal.Container size="lg" scroll="inside">
+        <Modal.Dialog className="max-h-[min(85dvh,85%)] max-w-[min(32rem,calc(100%-2rem))]">
+          <Modal.CloseTrigger />
+          <Modal.Header>
+            <Modal.Heading>生图设置</Modal.Heading>
+            <p className="text-sm text-muted-foreground">云端密钥存在当前浏览器；ComfyUI 令牌仅保留在当前页面，不会写入历史或提示词。</p>
+          </Modal.Header>
+          <Modal.Body className="grid gap-3">
           <div className="flex flex-wrap gap-2">
-            <Button variant={!local && settings.provider === "seedream" ? "default" : "outline"} onClick={() => chooseProvider("seedream")}>Seedream</Button>
-            <Button variant={!local && settings.provider === "gemini" ? "default" : "outline"} onClick={() => chooseProvider("gemini")}>Gemini</Button>
-            <Button variant={!local && settings.provider === "openai" ? "default" : "outline"} onClick={() => chooseProvider("openai")}>OpenAI</Button>
-            <Button variant={local ? "default" : "outline"} onClick={() => patch({ engine: "comfyui" })}>ComfyUI</Button>
+            <Button variant={!local && settings.provider === "seedream" ? "primary" : "outline"} onPress={() => chooseProvider("seedream")}>Seedream</Button>
+            <Button variant={!local && settings.provider === "gemini" ? "primary" : "outline"} onPress={() => chooseProvider("gemini")}>Gemini</Button>
+            <Button variant={!local && settings.provider === "openai" ? "primary" : "outline"} onPress={() => chooseProvider("openai")}>OpenAI</Button>
+            <Button variant={local ? "primary" : "outline"} onPress={() => patch({ engine: "comfyui" })}>ComfyUI</Button>
           </div>
           {local ? (
             <div className="grid gap-2 rounded-xl bg-muted p-3 text-sm">
@@ -89,7 +87,7 @@ export function SettingsDialog({
               </Field>
               <p className="text-xs leading-5 text-muted-foreground">浏览器直接连接 ComfyUI，无需在电脑启动网站。同机使用回环地址；手机或其他电脑请填远程 HTTPS 地址。需允许当前网站跨域访问，并在浏览器询问时允许本地网络权限。图片会存入你的 ComfyUI input/output。</p>
               <p className="text-xs leading-5 text-muted-foreground">已有本地模式现已改为浏览器直连，请重新测试连接。<a className="underline" href="https://github.com/wzc520pyfm/gen-ai-pose-image/blob/main/docs/comfyui-local.md" target="_blank" rel="noreferrer">连接配置说明</a></p>
-              <Button variant="outline" disabled={checking} onClick={() => void checkConnection()}>{checking ? "检查中…" : "测试连接"}</Button>
+              <Button variant="outline" isDisabled={checking} onPress={() => void checkConnection()}>{checking ? "检查中…" : "测试连接"}</Button>
               {connection ? <p role="status" className="text-xs leading-5">{connection}</p> : null}
             </div>
           ) : (
@@ -142,33 +140,50 @@ export function SettingsDialog({
             <Label>比例</Label>
             <div className="flex flex-wrap gap-1.5">
               {ASPECT_RATIOS.map((ratio) => (
-                <Button key={ratio} size="sm" variant={settings.aspectRatio === ratio ? "default" : "outline"} onClick={() => patch({ aspectRatio: ratio as AspectRatio })}>
+                <Button key={ratio} size="sm" variant={settings.aspectRatio === ratio ? "primary" : "outline"} onPress={() => patch({ aspectRatio: ratio as AspectRatio })}>
                   {ASPECT_LABEL[ratio]}
                 </Button>
               ))}
             </div>
           </div>
           <div className="grid grid-cols-2 gap-2">
-            <Button variant={settings.mode === "each" ? "default" : "outline"} onClick={() => patch({ mode: "each" })}>逐张</Button>
-            <Button variant={settings.mode === "sheet" ? "default" : "outline"} onClick={() => patch({ mode: "sheet" })}>拼成一张</Button>
+            <Button variant={settings.mode === "each" ? "primary" : "outline"} onPress={() => patch({ mode: "each" })}>逐张</Button>
+            <Button variant={settings.mode === "sheet" ? "primary" : "outline"} onPress={() => patch({ mode: "sheet" })}>拼成一张</Button>
           </div>
           <label className="flex items-center justify-between gap-3 rounded-xl bg-muted px-3 py-3 text-sm">
             <span>
               <span className="block font-medium">违禁词优化</span>
               <span className="mt-1 block text-xs leading-5 text-muted-foreground">关闭时直接写不要头、不要腿、不要皮肤。打开后改成委婉说法，避开审核敏感词。</span>
             </span>
-            <Switch checked={settings.sensitivePromptOptimize} onCheckedChange={(value) => patch({ sensitivePromptOptimize: value })} aria-label="违禁词优化" />
+            <Switch
+              isSelected={settings.sensitivePromptOptimize}
+              onChange={(value) => patch({ sensitivePromptOptimize: value })}
+              aria-label="违禁词优化"
+            >
+              <Switch.Control>
+                <Switch.Thumb />
+              </Switch.Control>
+            </Switch>
           </label>
           <label className="flex items-center justify-between gap-3 rounded-xl bg-muted px-3 py-3 text-sm">
             <span>
               <span className="block font-medium">显示成人向姿势</span>
               <span className="mt-1 block text-xs leading-5 text-muted-foreground">性感系、双人缠绵，以及上半身里的大胆分类。参考图仍是结构线稿，默认继续保持服装。</span>
             </span>
-            <Switch checked={settings.showAdult} onCheckedChange={(value) => patch({ showAdult: value })} aria-label="显示成人向姿势" />
+            <Switch
+              isSelected={settings.showAdult}
+              onChange={(value) => patch({ showAdult: value })}
+              aria-label="显示成人向姿势"
+            >
+              <Switch.Control>
+                <Switch.Thumb />
+              </Switch.Control>
+            </Switch>
           </label>
-        </div>
-      </DialogContent>
-    </Dialog>
+          </Modal.Body>
+        </Modal.Dialog>
+      </Modal.Container>
+    </Modal.Backdrop>
   )
 }
 

@@ -14,9 +14,7 @@ import { SettingsDialog } from "@/components/settings-dialog"
 import { LayoutARail, PreviewPane } from "@/components/studio-preview"
 import { StudioShell } from "@/components/studio-shell"
 import { TimelineBar } from "@/components/studio-timeline"
-import { Button, buttonVariants } from "@/components/ui/button"
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog"
-import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet"
+import { Button, Modal, Sheet, buttonVariants } from "@heroui/react"
 import { loadStudioLayout, normalizeStudioLayout, saveStudioLayout, type StudioLayoutId } from "@/lib/studio-layout"
 import { requestCharacterSheet } from "@/lib/character-client"
 import { readStoredCharacters, writeStoredCharacters, type StoredCharacter } from "@/lib/characters"
@@ -930,13 +928,13 @@ function StudioFrame({ embedded }: { embedded: boolean }) {
 
   const headerTrailing = (
     <>
-      <Button variant="outline" size="sm" className="@max-[640px]/studio:hidden" onClick={() => setInstallOpen(true)}>装进 Harness</Button>
+      <Button variant="outline" size="sm" className="@max-[640px]/studio:hidden" onPress={() => setInstallOpen(true)}>装进 Harness</Button>
       <a
         href={REPOSITORY_URL}
         target="_blank"
         rel="noopener noreferrer"
         aria-label="打开 GitHub 仓库"
-        className={buttonVariants({ variant: "outline", size: "icon" })}
+        className={buttonVariants({ variant: "outline", size: "sm", isIconOnly: true })}
       >
         <GithubMark />
       </a>
@@ -946,17 +944,23 @@ function StudioFrame({ embedded }: { embedded: boolean }) {
   const mobileWorkOrderTrigger = (
     <>
       <div className="shrink-0 border-t bg-white p-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] @min-[1024px]/studio:hidden">
-        <Button className="h-11 w-full" onClick={() => setSheetOpen(true)}>
+        <Button className="h-11 w-full" onPress={() => setSheetOpen(true)}>
           已选 {chosen.length} 个姿势{face ? ` · ${face.id}` : ""}{costume ? ` · ${costume.id}` : ""} · 去生图
         </Button>
       </div>
-      <Sheet open={sheetOpen} onOpenChange={setSheetOpen}>
-        <SheetContent side="bottom" className="max-h-[min(85dvh,85%)] overflow-y-auto rounded-t-3xl">
-          <SheetHeader>
-            <SheetTitle>生图</SheetTitle>
-          </SheetHeader>
-          <div className="px-4 pb-6">{composer}</div>
-        </SheetContent>
+      <Sheet isOpen={sheetOpen} onOpenChange={setSheetOpen} placement="bottom">
+        <Sheet.Backdrop>
+          <Sheet.Content className="max-h-[min(85dvh,85%)] rounded-t-3xl">
+            <Sheet.Dialog>
+              <Sheet.Handle />
+              <Sheet.CloseTrigger />
+              <Sheet.Header>
+                <Sheet.Heading>生图</Sheet.Heading>
+              </Sheet.Header>
+              <Sheet.Body className="overflow-y-auto px-4 pb-6">{composer}</Sheet.Body>
+            </Sheet.Dialog>
+          </Sheet.Content>
+        </Sheet.Backdrop>
       </Sheet>
     </>
   )
@@ -1000,43 +1004,51 @@ function StudioFrame({ embedded }: { embedded: boolean }) {
         />
       </div>
       <SettingsDialog open={settingsOpen} onOpenChange={setSettingsOpen} settings={settings} onChange={updateSettings} />
-      <Dialog open={installOpen} onOpenChange={setInstallOpen}>
-        <DialogContent className="max-w-[min(32rem,calc(100%-2rem))]">
-          <DialogHeader>
-            <DialogTitle>装进 DeepSeek Harness</DialogTitle>
-            <DialogDescription>澜姿发布在 npm，包名是 gen-ai-pose-image。在已经装好 Harness 的机器上执行下面的命令，重启后左侧栏会出现「澜姿 / 工作室」，Agent 也能直接调用姿势生图。</DialogDescription>
-          </DialogHeader>
-          <pre className="overflow-auto rounded-xl bg-muted p-3 text-xs leading-5">dsh plugin --profile web add gen-ai-pose-image</pre>
-          <p className="text-xs leading-5 text-muted-foreground">网页工作室要在设置里填自己的 API Key。Harness 插件出图时，用启动环境里的 POSE_MUSE_API_KEY。</p>
-        </DialogContent>
-      </Dialog>
-      <Dialog open={adultAsk !== null} onOpenChange={(open) => { if (!open) setAdultAsk(null) }}>
-        <DialogContent className="max-w-[min(28rem,calc(100%-2rem))]">
-          <DialogHeader>
-            <DialogTitle>{adultAsk === "custom" || adultAsk === "costume:custom" ? "这些是成人向自定义参考" : adultAsk?.startsWith("costume:") ? "这些是成人向服装" : "这些是成人向姿势"}</DialogTitle>
-            <DialogDescription>
-              {adultAsk === "custom" || adultAsk === "costume:custom"
-                ? "自定义参考里标成成人向的图默认不显示。打开之后才能点选。生图仍要求角色是成年人。"
-                : adultAsk?.startsWith("costume:")
-                ? "内衣、泳装和性感分类里的图仍然没有人物，只是衣服本身更暴露。打开之后可以点选。生图会换成这套衣服，并保留角色的脸、头发、鲸耳和鲸尾。"
-                : "来自原图库的性感系、双人缠绵，以及上半身里的大胆分类。画面仍是结构线稿。打开之后，生图默认继续保持模特的服装，只借用姿势。"}
-            </DialogDescription>
-          </DialogHeader>
-          <div className="flex justify-end gap-2">
-            <Button variant="outline" onClick={() => setAdultAsk(null)}>先不看</Button>
-            <Button onClick={() => {
-              if (adultAsk?.startsWith("costume:")) {
-                setCostumeFocus(adultAsk.slice("costume:".length))
-                setLibrary("costumes")
-              } else if (adultAsk) {
-                setRequestedSystem(adultAsk)
-              }
-              updateSettings({ ...settings, showAdult: true })
-              setAdultAsk(null)
-            }}>{adultAsk?.startsWith("costume:") ? "显示成人向服装" : "显示成人向姿势"}</Button>
-          </div>
-        </DialogContent>
-      </Dialog>
+      <Modal.Backdrop isOpen={installOpen} onOpenChange={setInstallOpen}>
+        <Modal.Container>
+          <Modal.Dialog className="max-w-[min(32rem,calc(100%-2rem))]">
+            <Modal.CloseTrigger />
+            <Modal.Header>
+              <Modal.Heading>装进 DeepSeek Harness</Modal.Heading>
+              <p className="text-sm text-muted-foreground">澜姿发布在 npm，包名是 gen-ai-pose-image。在已经装好 Harness 的机器上执行下面的命令，重启后左侧栏会出现「澜姿 / 工作室」，Agent 也能直接调用姿势生图。</p>
+            </Modal.Header>
+            <Modal.Body className="grid gap-3">
+              <pre className="overflow-auto rounded-xl bg-muted p-3 text-xs leading-5">dsh plugin --profile web add gen-ai-pose-image</pre>
+              <p className="text-xs leading-5 text-muted-foreground">网页工作室要在设置里填自己的 API Key。Harness 插件出图时，用启动环境里的 POSE_MUSE_API_KEY。</p>
+            </Modal.Body>
+          </Modal.Dialog>
+        </Modal.Container>
+      </Modal.Backdrop>
+      <Modal.Backdrop isOpen={adultAsk !== null} onOpenChange={(open) => { if (!open) setAdultAsk(null) }}>
+        <Modal.Container>
+          <Modal.Dialog className="max-w-[min(28rem,calc(100%-2rem))]">
+            <Modal.CloseTrigger />
+            <Modal.Header>
+              <Modal.Heading>{adultAsk === "custom" || adultAsk === "costume:custom" ? "这些是成人向自定义参考" : adultAsk?.startsWith("costume:") ? "这些是成人向服装" : "这些是成人向姿势"}</Modal.Heading>
+              <p className="text-sm text-muted-foreground">
+                {adultAsk === "custom" || adultAsk === "costume:custom"
+                  ? "自定义参考里标成成人向的图默认不显示。打开之后才能点选。生图仍要求角色是成年人。"
+                  : adultAsk?.startsWith("costume:")
+                  ? "内衣、泳装和性感分类里的图仍然没有人物，只是衣服本身更暴露。打开之后可以点选。生图会换成这套衣服，并保留角色的脸、头发、鲸耳和鲸尾。"
+                  : "来自原图库的性感系、双人缠绵，以及上半身里的大胆分类。画面仍是结构线稿。打开之后，生图默认继续保持模特的服装，只借用姿势。"}
+              </p>
+            </Modal.Header>
+            <Modal.Footer>
+              <Button variant="outline" onPress={() => setAdultAsk(null)}>先不看</Button>
+              <Button onPress={() => {
+                if (adultAsk?.startsWith("costume:")) {
+                  setCostumeFocus(adultAsk.slice("costume:".length))
+                  setLibrary("costumes")
+                } else if (adultAsk) {
+                  setRequestedSystem(adultAsk)
+                }
+                updateSettings({ ...settings, showAdult: true })
+                setAdultAsk(null)
+              }}>{adultAsk?.startsWith("costume:") ? "显示成人向服装" : "显示成人向姿势"}</Button>
+            </Modal.Footer>
+          </Modal.Dialog>
+        </Modal.Container>
+      </Modal.Backdrop>
     </div>
   )
 

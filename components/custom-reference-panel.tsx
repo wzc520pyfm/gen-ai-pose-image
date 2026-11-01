@@ -8,11 +8,7 @@ import { base64ToBlob, fileToJpegBlob } from "@/lib/library"
 import { requestBeautify, requestReferenceImage } from "@/lib/reference-client"
 import type { StudioSettings } from "@/lib/settings"
 import { useStudioEnv } from "@/lib/studio-env"
-import { Button } from "@/components/ui/button"
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog"
-import { Input } from "@/components/ui/input"
-import { Switch } from "@/components/ui/switch"
-import { Textarea } from "@/components/ui/textarea"
+import { Button, Input, Modal, Switch, TextArea } from "@heroui/react"
 
 export type CustomCard = {
   id: string
@@ -207,9 +203,9 @@ export function CustomReferencePanel({
           : "自定义服装只存在这台浏览器。上传或生成的图会当作服装参考。"}
       </p>
       <div className="mb-3 flex flex-wrap gap-2">
-        <Button type="button" variant="outline" size="sm" onClick={() => openDialog("upload")}>上传</Button>
-        <Button type="button" variant="outline" size="sm" onClick={() => openDialog("freeform")}>自由生成</Button>
-        <Button type="button" variant="outline" size="sm" onClick={() => openDialog("describe")}>按描述生成</Button>
+        <Button type="button" variant="outline" size="sm" onPress={() => openDialog("upload")}>上传</Button>
+        <Button type="button" variant="outline" size="sm" onPress={() => openDialog("freeform")}>自由生成</Button>
+        <Button type="button" variant="outline" size="sm" onPress={() => openDialog("describe")}>按描述生成</Button>
       </div>
       {syncWarning ? <p className="mb-3 text-sm text-amber-800">{syncWarning}</p> : null}
       {items.length === 0 ? (
@@ -217,7 +213,7 @@ export function CustomReferencePanel({
           <p className="text-sm font-medium">还没有自定义{noun}</p>
           <p className="mt-1 text-sm text-muted-foreground">可以上传一张图，或写一句描述再生成参考图。</p>
           {hiddenAdult > 0 && !showAdult ? (
-            <Button className="mt-3" variant="outline" onClick={onRequestAdult}>显示 {hiddenAdult} 张成人向参考</Button>
+            <Button className="mt-3" variant="outline" onPress={onRequestAdult}>显示 {hiddenAdult} 张成人向参考</Button>
           ) : null}
         </div>
       ) : null}
@@ -257,19 +253,22 @@ export function CustomReferencePanel({
         })}
       </div>
       {hiddenAdult > 0 && !showAdult && items.length > 0 ? (
-        <Button className="mt-3" variant="outline" onClick={onRequestAdult}>还有 {hiddenAdult} 张成人向参考被收着</Button>
+        <Button className="mt-3" variant="outline" onPress={onRequestAdult}>还有 {hiddenAdult} 张成人向参考被收着</Button>
       ) : null}
 
-      <Dialog open={open} onOpenChange={setOpen}>
-        <DialogContent className="max-h-[min(85dvh,85%)] max-w-[min(32rem,calc(100%-2rem))] overflow-y-auto">
-          <DialogHeader>
-            <DialogTitle>{mode === "upload" ? `上传自定义${noun}` : mode === "freeform" ? `自由生成${noun}参考` : `按描述生成${noun}参考`}</DialogTitle>
-            <DialogDescription>
-              {kind === "pose"
-                ? "姿势参考偏向白底线稿，只表达身体姿态。确认之后才会放进自定义库。"
-                : "按描述生成一套服装参考。确认之后才会放进自定义库。"}
-            </DialogDescription>
-          </DialogHeader>
+      <Modal.Backdrop isOpen={open} onOpenChange={setOpen}>
+        <Modal.Container size="lg" scroll="inside">
+          <Modal.Dialog className="max-h-[min(85dvh,85%)] max-w-[min(32rem,calc(100%-2rem))]">
+            <Modal.CloseTrigger />
+            <Modal.Header>
+              <Modal.Heading>{mode === "upload" ? `上传自定义${noun}` : mode === "freeform" ? `自由生成${noun}参考` : `按描述生成${noun}参考`}</Modal.Heading>
+              <p className="text-sm text-muted-foreground">
+                {kind === "pose"
+                  ? "姿势参考偏向白底线稿，只表达身体姿态。确认之后才会放进自定义库。"
+                  : "按描述生成一套服装参考。确认之后才会放进自定义库。"}
+              </p>
+            </Modal.Header>
+            <Modal.Body className="grid gap-3">
           {mode === "upload" ? (
             <div className="grid gap-2">
               <input
@@ -280,13 +279,13 @@ export function CustomReferencePanel({
                 aria-label={`选择${noun}图片`}
                 onChange={(event) => void onFile(event.target.files?.[0])}
               />
-              <Button type="button" variant="outline" onClick={() => fileRef.current?.click()}>选择图片</Button>
+              <Button type="button" variant="outline" onPress={() => fileRef.current?.click()}>选择图片</Button>
             </div>
           ) : null}
           {mode === "describe" ? (
             <label className="grid gap-1.5 text-sm">
               简短描述
-              <Textarea
+              <TextArea
                 value={description}
                 onChange={(event) => setDescription(event.target.value)}
                 placeholder={kind === "pose" ? "例如：单手叉腰，身体微侧" : "例如：米色风衣，腰带，长款"}
@@ -296,8 +295,8 @@ export function CustomReferencePanel({
               <Button
                 type="button"
                 variant="outline"
-                disabled={Boolean(busy) || description.trim() === ""}
-                onClick={() => {
+                isDisabled={Boolean(busy) || description.trim() === ""}
+                onPress={() => {
                   editedRef.current = false
                   void fillPrompt(description, showAdult && adult)
                 }}
@@ -309,7 +308,7 @@ export function CustomReferencePanel({
           {mode !== "upload" ? (
             <label className="grid gap-1.5 text-sm">
               提示词
-              <Textarea
+              <TextArea
                 value={prompt}
                 onChange={(event) => {
                   editedRef.current = true
@@ -328,26 +327,34 @@ export function CustomReferencePanel({
                 <span className="mt-1 block text-xs leading-5 text-muted-foreground">关闭时直接写不要头、不要腿、不要皮肤。打开后改成委婉说法，避开审核敏感词。切换后会按当前描述重新扩写。</span>
               </span>
               <Switch
-                checked={settings.sensitivePromptOptimize}
-                onCheckedChange={(value) => {
+                isSelected={settings.sensitivePromptOptimize}
+                onChange={(value) => {
                   onChangeSettings({ ...settings, sensitivePromptOptimize: value })
                   if (mode !== "upload" && !editedRef.current) void fillPrompt(description, showAdult && adult, value)
                 }}
                 aria-label="违禁词优化"
-              />
+              >
+                <Switch.Control>
+                  <Switch.Thumb />
+                </Switch.Control>
+              </Switch>
             </label>
           ) : null}
           {showAdult ? (
             <label className="flex items-center justify-between gap-3 rounded-xl bg-muted px-3 py-3 text-sm">
               <span>标成成人向参考。默认关闭，未打开成人向时不会用来出图。</span>
               <Switch
-                checked={adult}
-                onCheckedChange={(value) => {
+                isSelected={adult}
+                onChange={(value) => {
                   setAdult(value)
                   if (mode !== "upload" && !editedRef.current) void fillPrompt(description, value)
                 }}
                 aria-label="标成成人向参考"
-              />
+              >
+                <Switch.Control>
+                  <Switch.Thumb />
+                </Switch.Control>
+              </Switch>
             </label>
           ) : null}
           {previewUrl ? <img src={previewUrl} alt="参考图预览" className="mx-auto max-h-72 rounded-xl bg-white object-contain" /> : null}
@@ -359,16 +366,18 @@ export function CustomReferencePanel({
           <div className="flex flex-wrap gap-2">
             {mode !== "upload" ? (
               <>
-                <Button type="button" variant="outline" disabled={!prompt.trim()} onClick={() => void navigator.clipboard.writeText(prompt)}>复制提示词</Button>
-                <Button type="button" variant="outline" disabled={Boolean(busy)} onClick={() => void generateImage()}>{busy === generateBusy ? withElapsed(busy, waited) : "生成参考图"}</Button>
+                <Button type="button" variant="outline" isDisabled={!prompt.trim()} onPress={() => void navigator.clipboard.writeText(prompt)}>复制提示词</Button>
+                <Button type="button" variant="outline" isDisabled={Boolean(busy)} onPress={() => void generateImage()}>{busy === generateBusy ? withElapsed(busy, waited) : "生成参考图"}</Button>
               </>
             ) : null}
-            <Button type="button" disabled={Boolean(busy) || !previewBlob} onClick={() => void save()}>{busy === "正在保存" ? busy : "保存到自定义"}</Button>
+            <Button type="button" isDisabled={Boolean(busy) || !previewBlob} onPress={() => void save()}>{busy === "正在保存" ? busy : "保存到自定义"}</Button>
           </div>
           {busy === "正在扩写提示词" && mode === "freeform" ? <p className="text-xs text-muted-foreground">{withElapsed(busy, waited)}</p> : null}
           {busy === "正在读取图片" ? <p className="text-xs text-muted-foreground">{busy}</p> : null}
-        </DialogContent>
-      </Dialog>
+            </Modal.Body>
+          </Modal.Dialog>
+        </Modal.Container>
+      </Modal.Backdrop>
     </div>
   )
 }
