@@ -1,32 +1,8 @@
-import baseCatalog from "../data/faces.json" with { type: "json" }
-import { ANIME_FACE_NOTE, animeFaces } from "./anime-library.mjs"
+import catalog from "../data/faces.json" with { type: "json" }
+import { ANIME_FACE_SECTIONS, animeFaceCatalog } from "./anime-library.mjs"
 import { fetchRemoteImage, isAbsoluteImageUrl, isAllowedRemoteImage } from "./remote-image.mjs"
 
-function counted(rows, extras, key) {
-  const groups = rows.map((item) => ({ ...item }))
-  const byKey = new Map(groups.map((item) => [item.id, item]))
-  for (const extra of extras) {
-    const found = byKey.get(extra[key])
-    if (found) found.count += 1
-  }
-  return groups
-}
-
-const animeSections = [
-  { id: "anime-closeup", label: "二次元特写", count: animeFaces.filter((item) => item.section === "anime-closeup").length },
-  { id: "anime-expression", label: "表情", count: animeFaces.filter((item) => item.section === "anime-expression").length },
-]
-
-const catalog = {
-  ...baseCatalog,
-  attribution: `${baseCatalog.attribution}${ANIME_FACE_NOTE}`,
-  total: baseCatalog.total + animeFaces.length,
-  sections: [...baseCatalog.sections, ...animeSections],
-  hairs: counted(baseCatalog.hairs, animeFaces, "hair"),
-  faces: [...baseCatalog.faces, ...animeFaces],
-}
-
-const byId = new Map(catalog.faces.map((face) => [face.id, face]))
+const byId = new Map([...catalog.faces, ...animeFaceCatalog.faces].map((face) => [face.id, face]))
 const cache = new Map()
 const ORIGIN = "https://ai-portrait-gallery.pages.dev"
 
@@ -34,15 +10,21 @@ export function getFaceCatalog() {
   return catalog
 }
 
+export function getAnimeFaceCatalog() {
+  return animeFaceCatalog
+}
+
 export function getFace(id) {
   return byId.get(id)
 }
 
-export function searchFaces({ query = "", section = "", hair = "", limit = 60 } = {}) {
+export function searchFaces({ query = "", section = "", hair = "", realm = "", limit = 60 } = {}) {
   const parts = String(query).trim().toLowerCase().split(/\s+/).filter(Boolean)
   const cap = Math.max(1, Math.min(120, Number(limit) || 60))
+  const animeOnly = realm === "anime" || ANIME_FACE_SECTIONS.has(section)
+  const pool = animeOnly ? animeFaceCatalog.faces : catalog.faces
   const matches = []
-  for (const face of catalog.faces) {
+  for (const face of pool) {
     if (section && face.section !== section) continue
     if (hair && face.hair !== hair) continue
     if (parts.length > 0) {

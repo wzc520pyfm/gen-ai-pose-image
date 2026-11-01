@@ -1,5 +1,14 @@
-import { hostCredit } from "./anime-library.mjs"
 import { costumeVisiblePrompt } from "./costume-prompt.mjs"
+
+function hostCredit(item) {
+  if (!item?.credit) return {}
+  return {
+    credit: item.credit,
+    sourceUrl: item.sourceUrl || "",
+    license: item.license || "",
+    ...(item.author ? { author: item.author } : {}),
+  }
+}
 
 export function createCustomId(kind, random = () => globalThis.crypto.randomUUID()) {
   const suffix = String(random())

@@ -51,12 +51,13 @@ export const THIRD_PARTY_NOTICES = [
   },
   {
     id: "anime-plates",
-    title: "二次元姿势、服装与脸部补充",
-    holder: "各图像所在站点上的作者",
-    source: "https://publicdomainq.net/",
-    upstream: "https://commons.wikimedia.org/",
-    included: "本仓库另存 11 组二次元姿势、8 套二次元服装和 8 张二次元脸部的编号、中文名称、英文关键词和公开图地址，不附带图片文件。页面按需从 publicdomainq.net 或 upload.wikimedia.org 读取。",
-    terms: "这些图由图像所在站点以公有领域、CC0 或 CC BY-SA 发布。每条目录记录写明图像站点、许可和原页面。CC BY-SA 的条目同时写明作者。澜姿的 MIT 许可不覆盖这些图片。",
+    title: "二次元姿势、服装与脸部",
+    holder: "たき AI",
+    source: "https://charadb-2fi.pages.dev/",
+    upstream: "https://x.com/taki_auto",
+    author: "https://x.com/taki_auto",
+    included: "本仓库另存二次元姿势 281 组、服装 439 套、脸部 306 张的编号、中文名称、英文关键词和原站图地址，不附带图片文件。页面按需从 https://charadb-2fi.pages.dev/ 读取。公开日期是 2026-11-01。",
+    terms: "原站允许把这些图用作创作参考，包括加工。禁止再分发、转载或转售图像本身，也不许用来表现未成年人或实在的人物。署名不是对方的要求，这里仍然注明原站和作者たき AI。澜姿的 MIT 许可不覆盖这些图片。",
   },
 ]
 

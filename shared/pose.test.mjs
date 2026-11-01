@@ -13,11 +13,11 @@ import { PROJECT_LICENSE, licenseNotices } from "./license.mjs"
 
 test("catalog keeps every translated pose and view", () => {
   const catalog = getCatalog()
-  assert.equal(catalog.poseCount, 299)
-  assert.equal(catalog.viewCount, 1450)
-  assert.equal(catalog.poses.length, 299)
-  assert.equal(catalog.systems.reduce((sum, system) => sum + system.poseCount, 0), 299)
-  assert.equal(catalog.systems.find((item) => item.id === "anime")?.poseCount, 11)
+  assert.equal(catalog.poseCount, 288)
+  assert.equal(catalog.viewCount, 1439)
+  assert.equal(catalog.poses.length, 288)
+  assert.equal(catalog.systems.reduce((sum, system) => sum + system.poseCount, 0), 288)
+  assert.equal(catalog.systems.some((item) => item.id === "anime"), false)
 })
 
 test("search stays on safe poses unless adult poses are included", () => {

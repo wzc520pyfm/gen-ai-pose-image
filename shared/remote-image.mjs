@@ -1,4 +1,4 @@
-const HOSTS = new Set(["publicdomainq.net", "upload.wikimedia.org"])
+const HOSTS = new Set(["charadb-2fi.pages.dev"])
 
 export function isAbsoluteImageUrl(value) {
   return typeof value === "string" && /^[a-z][a-z0-9+.-]*:/i.test(value)
@@ -17,10 +17,9 @@ export function isAllowedRemoteImage(value) {
   if (!HOSTS.has(url.hostname)) return false
   const path = decodeURI(url.pathname)
   if (path.includes("..") || path.includes("//")) return false
-  if (url.hostname === "publicdomainq.net") {
-    return /^\/(?:pictures|images)\/[A-Za-z0-9/_-]+\.(?:jpg|jpeg|png|webp)$/.test(path)
-  }
-  return /^\/wikipedia\/commons\/[0-9a-f]\/[0-9a-f]{2}\/[A-Za-z0-9_.-]+\.(?:jpg|jpeg|png|webp)$/.test(path)
+  return /^\/thumb\/[HOP]\d{3}(?:-[a-z0-9]+)?\.webp$/.test(path)
+    || /^\/img\/[HOP]\d{3}(?:-[a-z0-9]+)?\.jpg$/.test(path)
+    || /^\/line\/P\d{3}(?:-[a-z0-9]+)?\.png$/.test(path)
 }
 
 function mediaTypeFor(remoteUrl, header) {

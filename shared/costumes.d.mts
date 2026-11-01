@@ -4,6 +4,11 @@ export type Costume = {
   label: string
   keywords: string
   adult: boolean
+  plate?: "worn" | "garment"
+  credit?: string
+  author?: string
+  sourceUrl?: string
+  license?: string
   thumb: string
   preview: string
   full: string
@@ -20,10 +25,12 @@ export type CostumeCatalog = {
 }
 
 export function getCostumeCatalog(): CostumeCatalog
+export function getAnimeCostumeCatalog(): CostumeCatalog
 export function getCostume(id: string): Costume | undefined
 export function searchCostumes(query?: {
   query?: string
   category?: string
+  realm?: string
   includeAdult?: boolean
   limit?: number
   custom?: Array<{ id?: string; label?: string; keywords?: string; adult?: boolean; userPrompt?: string; dataBase64?: string }>

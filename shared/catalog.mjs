@@ -1,33 +1,20 @@
-import baseCatalog from "../data/catalog.json" with { type: "json" }
-import { ANIME_POSE_NOTE, animePoses } from "./anime-library.mjs"
+import catalog from "../data/catalog.json" with { type: "json" }
+import { animePoseCatalog } from "./anime-library.mjs"
 import { customPoseRecord, isCustomPoseId } from "./custom.mjs"
-
-const catalog = {
-  ...baseCatalog,
-  attribution: `${baseCatalog.attribution}${ANIME_POSE_NOTE}`,
-  poseCount: baseCatalog.poseCount + animePoses.length,
-  viewCount: baseCatalog.viewCount + animePoses.reduce((sum, pose) => sum + pose.views.length, 0),
-  systems: [
-    ...baseCatalog.systems,
-    {
-      id: "anime",
-      name: "二次元姿势",
-      adult: false,
-      poseCount: animePoses.length,
-    },
-  ],
-  poses: [...baseCatalog.poses, ...animePoses],
-}
 
 const byPose = new Map()
 const byView = new Map()
-for (const pose of catalog.poses) {
+for (const pose of [...catalog.poses, ...animePoseCatalog.poses]) {
   byPose.set(pose.id, pose)
   for (const view of pose.views) byView.set(view.id, { pose, view })
 }
 
 export function getCatalog() {
   return catalog
+}
+
+export function getAnimePoseCatalog() {
+  return animePoseCatalog
 }
 
 export function getPose(id) {
@@ -51,6 +38,7 @@ export function resolveView(id) {
 export function searchPoses({
   query = "",
   systemId = "",
+  realm = "",
   category = "",
   includeAdult = false,
   limit = 20,
@@ -59,7 +47,8 @@ export function searchPoses({
   const parts = String(query).trim().toLowerCase().split(/\s+/).filter(Boolean)
   const cap = Math.max(1, Math.min(50, Number(limit) || 20))
   const matches = []
-  const wantCustom = !systemId || systemId === "custom"
+  const animeOnly = systemId === "anime" || realm === "anime"
+  const wantCustom = !animeOnly && (!systemId || systemId === "custom")
   if (wantCustom) {
     for (const asset of custom) {
       if (!asset || !isCustomPoseId(asset.id) || !asset.dataBase64) continue
@@ -75,7 +64,9 @@ export function searchPoses({
     }
   }
   if (systemId === "custom") return matches
-  for (const pose of catalog.poses) {
+  const pool = animeOnly ? animePoseCatalog.poses : catalog.poses
+  for (const pose of pool) {
+    if (animeOnly && systemId && systemId !== "anime" && pose.systemId !== systemId) continue
     if (!includeAdult && pose.adult) continue
     if (systemId && pose.systemId !== systemId) continue
     if (category && pose.category !== category) continue

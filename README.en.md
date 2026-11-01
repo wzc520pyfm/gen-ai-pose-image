@@ -89,9 +89,11 @@ After restarting that profile:
 
 Adult poses and adult costumes stay out of search results. Pass `include_adult: true` to `search_poses` or `search_costumes` only when that is explicitly requested.
 
-## Anime plates
+## Anime library
 
-Besides the line-art poses, costume gallery, and face library, the studio ships a smaller anime set for poses, clothing, and faces. Image files stay on their hosts. Public-domain illustrations are read from [publicdomainq.net](https://publicdomainq.net/). A few plates are read from [Wikimedia Commons](https://commons.wikimedia.org/) under CC0 or CC BY-SA, with the author stored on the entry. Cards and search results name the image host. These plates are visible by default and have no adult category.
+The studio header switches between live-action plates and a separate anime library. Anime poses, clothing, and faces are not mixed into the original galleries.
+
+The anime plates come from [charadb-2fi.pages.dev](https://charadb-2fi.pages.dev/), by [たき AI](https://x.com/taki_auto), published 2026-11-01. This repository stores ids and URLs only. Thumbnails, clothing images, and pose line art are fetched from that site on demand. The site allows reference use in creative work and does not allow redistributing the image files or using them to depict minors. Cards name that original site. Swimwear stays behind the adult switch.
 
 ## Checks
 

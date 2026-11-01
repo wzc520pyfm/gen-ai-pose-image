@@ -86,6 +86,12 @@ function StudioFrame({ embedded }: { embedded: boolean }) {
   const [settings, setSettings] = useState<StudioSettings>(DEFAULT_SETTINGS)
   const [settingsReady, setSettingsReady] = useState(false)
   const [library, setLibrary] = useState<Library>("poses")
+  const [realm, setRealm] = useState<"live" | "anime">("live")
+  const [animeCatalog, setAnimeCatalog] = useState<Catalog | null>(null)
+  const [animeCatalogError, setAnimeCatalogError] = useState("")
+  const [animeLoading, setAnimeLoading] = useState(true)
+  const [animeCostumes, setAnimeCostumes] = useState<Array<{ id: string; label: string; keywords: string; adult?: boolean; plate?: "worn" }>>([])
+  const [animeFaces, setAnimeFaces] = useState<FacePick[]>([])
   const [costume, setCostume] = useState<CostumePick | null>(null)
   const [face, setFace] = useState<FacePick | null>(null)
   const [costumeFocus, setCostumeFocus] = useState<string | null>(null)
@@ -138,6 +144,48 @@ function StudioFrame({ embedded }: { embedded: boolean }) {
   }, [basePath])
 
   useEffect(() => { loadCatalog() }, [loadCatalog])
+  useEffect(() => {
+    const controller = new AbortController()
+    fetch(studioUrl(basePath, "/api/anime/poses"), { signal: controller.signal })
+      .then(async (response) => {
+        if (!response.ok) throw new Error("二次元姿势没有加载出来")
+        return response.json() as Promise<Catalog>
+      })
+      .then((payload) => {
+        setAnimeCatalog(payload)
+        setAnimeCatalogError("")
+      })
+      .catch((error: unknown) => {
+        if (error instanceof DOMException && error.name === "AbortError") return
+        setAnimeCatalogError(error instanceof Error ? error.message : "二次元姿势没有加载出来")
+      })
+      .finally(() => setAnimeLoading(false))
+    return () => controller.abort()
+  }, [basePath])
+  useEffect(() => {
+    const controller = new AbortController()
+    fetch(studioUrl(basePath, "/api/anime/costumes"), { signal: controller.signal })
+      .then(async (response) => {
+        if (!response.ok) throw new Error("二次元服装没有加载出来")
+        return response.json() as Promise<{ costumes?: Array<{ id: string; label: string; keywords: string; adult?: boolean; plate?: "worn" }> }>
+      })
+      .then((payload) => setAnimeCostumes(Array.isArray(payload.costumes) ? payload.costumes : []))
+      .catch((error: unknown) => {
+        if (error instanceof DOMException && error.name === "AbortError") return
+        setAnimeCostumes([])
+      })
+    fetch(studioUrl(basePath, "/api/anime/faces"), { signal: controller.signal })
+      .then(async (response) => {
+        if (!response.ok) throw new Error("二次元脸部没有加载出来")
+        return response.json() as Promise<{ faces?: FacePick[] }>
+      })
+      .then((payload) => setAnimeFaces(Array.isArray(payload.faces) ? payload.faces : []))
+      .catch((error: unknown) => {
+        if (error instanceof DOMException && error.name === "AbortError") return
+        setAnimeFaces([])
+      })
+    return () => controller.abort()
+  }, [basePath])
   useEffect(() => {
     const controller = new AbortController()
     fetch(studioUrl(basePath, "/api/costumes"), { signal: controller.signal })
@@ -376,6 +424,7 @@ function StudioFrame({ embedded }: { embedded: boolean }) {
   const poseById = useMemo(() => {
     const map = new Map<string, Pose>()
     catalog?.poses.forEach((pose) => map.set(pose.id, pose))
+    animeCatalog?.poses.forEach((pose) => map.set(pose.id, pose))
     for (const asset of customPoses) {
       map.set(asset.id, {
         id: asset.id,
@@ -390,7 +439,7 @@ function StudioFrame({ embedded }: { embedded: boolean }) {
       })
     }
     return map
-  }, [catalog, customPoses])
+  }, [catalog, animeCatalog, customPoses])
 
   const chosen = useMemo(() => {
     return Object.entries(selected).flatMap(([poseId, viewId]) => {
@@ -488,8 +537,9 @@ function StudioFrame({ embedded }: { embedded: boolean }) {
   }
 
   function randomizeCombo() {
-    if (!catalog) {
-      setLimitNote(catalogError || "姿势目录还没加载出来。")
+    const poseSource = realm === "anime" ? animeCatalog : catalog
+    if (!poseSource) {
+      setLimitNote(realm === "anime" ? (animeCatalogError || "二次元姿势还没加载出来。") : (catalogError || "姿势目录还没加载出来。"))
       return
     }
     if (!costumeCatalogReady) {
@@ -509,7 +559,7 @@ function StudioFrame({ embedded }: { embedded: boolean }) {
       return
     }
     const poses = [
-      ...catalog.poses,
+      ...poseSource.poses,
       ...customPoses.map((asset) => ({
         id: asset.id,
         adult: asset.adult,
@@ -517,7 +567,7 @@ function StudioFrame({ embedded }: { embedded: boolean }) {
       })),
     ]
     const costumes = [
-      ...costumeCatalog,
+      ...(realm === "anime" ? animeCostumes : costumeCatalog),
       ...customCostumes.map((asset) => ({
         id: asset.id,
         label: asset.label,
@@ -525,7 +575,7 @@ function StudioFrame({ embedded }: { embedded: boolean }) {
         adult: asset.adult,
       })),
     ]
-    const pick = pickRandomCombo({ poses, costumes, faces: faceCatalog, showAdult: settings.showAdult })
+    const pick = pickRandomCombo({ poses, costumes, faces: realm === "anime" ? animeFaces : faceCatalog, showAdult: settings.showAdult })
     if (!pick.ok || !pick.pose || !pick.view || !pick.costume || !pick.face) {
       setLimitNote(pick.message)
       return
@@ -533,7 +583,7 @@ function StudioFrame({ embedded }: { embedded: boolean }) {
     setLimitNote("")
     const pickedCostume = pick.costume
     setSelected({ [pick.pose.id]: pick.view.id })
-    const wornPlate = costumeCatalog.find((item) => item.id === pickedCostume.id)?.plate === "worn"
+    const wornPlate = [...costumeCatalog, ...animeCostumes].find((item) => item.id === pickedCostume.id)?.plate === "worn"
     setCostume({ id: pickedCostume.id, label: pickedCostume.label, keywords: pickedCostume.keywords, ...(wornPlate ? { plate: "worn" as const } : {}) })
     setFace({
       id: pick.face.id,
@@ -558,7 +608,7 @@ function StudioFrame({ embedded }: { embedded: boolean }) {
     setRunning(true)
     setRunError("")
     setResults([])
-    const storedPlate = costume ? costumeCatalog.find((item) => item.id === costume.id)?.plate : undefined
+    const storedPlate = costume ? [...costumeCatalog, ...animeCostumes].find((item) => item.id === costume.id)?.plate : undefined
     const costumePick = costume ? { id: costume.id, label: costume.label, keywords: costume.keywords, ...((costume.plate || storedPlate) ? { plate: costume.plate || storedPlate } : {}) } : null
     const bodyBase = {
       engine: settings.engine,
@@ -805,6 +855,26 @@ function StudioFrame({ embedded }: { embedded: boolean }) {
       <header className="flex min-h-14 shrink-0 flex-wrap items-center gap-x-3 gap-y-2 border-b bg-white px-3 py-2 @min-[640px]/studio:px-4 @min-[768px]/studio:px-5">
         <WhaleMark className="size-8 shrink-0" />
         <h1 className="shrink-0 text-base font-semibold">澜姿</h1>
+        <div className="flex shrink-0 rounded-lg bg-muted p-1" role="tablist" aria-label="图像类型">
+          <button
+            type="button"
+            role="tab"
+            aria-selected={realm === "live"}
+            onClick={() => setRealm("live")}
+            className={`rounded-md px-3 py-1 text-sm whitespace-nowrap ${realm === "live" ? "bg-white font-medium shadow-sm" : "text-muted-foreground"}`}
+          >
+            真人
+          </button>
+          <button
+            type="button"
+            role="tab"
+            aria-selected={realm === "anime"}
+            onClick={() => setRealm("anime")}
+            className={`rounded-md px-3 py-1 text-sm whitespace-nowrap ${realm === "anime" ? "bg-white font-medium shadow-sm" : "text-muted-foreground"}`}
+          >
+            二次元
+          </button>
+        </div>
         <div className="flex shrink-0 rounded-lg bg-muted p-1" role="tablist" aria-label="图库">
           <button
             type="button"
@@ -896,6 +966,7 @@ function StudioFrame({ embedded }: { embedded: boolean }) {
         <main className="order-2 min-h-0 min-w-0 flex-1 overflow-y-auto @min-[1024px]/studio:order-none @min-[1024px]/studio:pb-8">
           {library === "faces" ? (
             <FaceBrowser
+              realm={realm}
               selectedId={face?.id ?? null}
               onSelect={(item: FaceItem) => setFace((current) => current?.id === item.id ? null : {
                 id: item.id,
@@ -907,9 +978,9 @@ function StudioFrame({ embedded }: { embedded: boolean }) {
             />
           ) : library === "poses" ? (
             <PoseBrowser
-              catalog={catalog}
-              loading={loading}
-              error={catalogError}
+              catalog={realm === "anime" ? animeCatalog : catalog}
+              loading={realm === "anime" ? animeLoading : loading}
+              error={realm === "anime" ? animeCatalogError : catalogError}
               onRetry={loadCatalog}
               showAdult={settings.showAdult}
               requestedSystem={requestedSystem}
@@ -926,6 +997,7 @@ function StudioFrame({ embedded }: { embedded: boolean }) {
             />
           ) : (
             <CostumeBrowser
+              realm={realm}
               showAdult={settings.showAdult}
               focusCategory={costumeFocus}
               onFocusApplied={clearCostumeFocus}

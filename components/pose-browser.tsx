@@ -476,7 +476,7 @@ function PoseCard({
       </div>
       {pose.credit ? (
         <p className="truncate px-2.5 pb-1 text-[10px] leading-4 text-muted-foreground" title={pose.sourceUrl}>
-          来源 {pose.author ? `${pose.credit} · ${pose.author}` : pose.credit}
+          原站 {pose.author ? `${pose.credit} · ${pose.author}` : pose.credit}
         </p>
       ) : null}
       <div role="group" aria-label={`${pose.name}的视角`} className={`grid gap-1 px-2 pb-2.5 ${columns}`}>

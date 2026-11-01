@@ -114,10 +114,11 @@ export function apply(ctx, config = {}) {
   const defineTool = loadDefineTool()
   ctx.tools.register(defineTool({
     name: "search_poses",
-    description: "Search pose references: the Chinese AI pose gallery (ai-pose-gallery-zh, 288 groups and 1439 views) plus Lanzi anime pose plates hosted on publicdomainq.net and Wikimedia Commons. Anime hits include credit and sourceUrl for the image host. Custom poses saved in the Lanpose studio have source custom. Use before generate_pose_images. Adult categories stay hidden unless include_adult is true.",
+    description: "Search pose references. Default realm is live: the Chinese AI pose gallery (ai-pose-gallery-zh), 288 groups and 1439 views, plus custom studio poses. Pass system_id anime or realm anime to search the separate 二次元姿势 library from https://charadb-2fi.pages.dev/ (author たき AI). Anime hits include credit and sourceUrl for that original host and are not mixed into live results. Use before generate_pose_images. Adult categories stay hidden unless include_adult is true.",
     parameters: {
-      query: { type: "string", description: "Pose name, code such as P001 or A01, category, or id. Use 二次元 to find the anime plates." },
-      system_id: { type: "string", enum: ["full", "sexy", "bust", "pair", "anime"], description: "full=标准全身, sexy=性感全身, bust=上半身, pair=双人, anime=二次元姿势. Omit to search all visible poses." },
+      query: { type: "string", description: "Pose name, code such as P001, category, or id." },
+      realm: { type: "string", enum: ["live", "anime"], description: "live=真人姿势. anime=二次元姿势, a separate catalog. Default live." },
+      system_id: { type: "string", enum: ["full", "sexy", "bust", "pair", "anime"], description: "full=标准全身, sexy=性感全身, bust=上半身, pair=双人. anime selects the separate 二次元姿势 catalog. Omit to search the live gallery." },
       category: { type: "string", description: "Exact category name, for example 站姿 or 坐姿." },
       include_adult: { type: "boolean", description: "Include sexy and couple poses. Default false." },
       limit: { type: "integer", description: "Max results, 1-30. Default 12." },
@@ -130,6 +131,7 @@ export function apply(ctx, config = {}) {
       return toPoseSearchResult(searchPoses({
         query: args.query ?? "",
         systemId: args.system_id ?? "",
+        realm: args.realm ?? "",
         category: args.category ?? "",
         includeAdult: args.include_adult === true,
         limit: args.limit ?? 12,
@@ -146,6 +148,7 @@ export function apply(ctx, config = {}) {
       section: { type: "string", enum: ["脸部特写", "造型"], description: "脸部特写 is a plain-background face close-up. 造型 includes styling. Omit to search both." },
       hair: { type: "string", enum: ["短发", "中发", "中长发", "长发"], description: "Hair length filter. Omit to search every length." },
       limit: { type: "integer", description: "Max results, 1-30. Default 12." },
+      realm: { type: "string", enum: ["live", "anime"], description: "live=真人脸部. anime=二次元脸部 from https://charadb-2fi.pages.dev/ (author たき AI). Default live. Anime sections are style, bangs, color, accessory, and eyes." },
     },
     output: {
       schema: { type: "object", additionalProperties: true },
@@ -157,6 +160,7 @@ export function apply(ctx, config = {}) {
         query: args.query ?? "",
         section: args.section ?? "",
         hair: args.hair ?? "",
+        realm: args.realm ?? "",
         limit,
       }))
     },
@@ -164,10 +168,11 @@ export function apply(ctx, config = {}) {
 
   ctx.tools.register(defineTool({
     name: "search_costumes",
-    description: "Search clothing references from the costume gallery at ai-costume-gallery.pages.dev, plus Lanzi anime outfit plates and custom costumes saved in the Lanpose studio. Custom hits have source custom. Gallery images contain garments, not people. Anime plates include credit and sourceUrl for the image host and may show a wearer; generation copies the outfit only. Use a returned id as costume_id in generate_pose_images. Lingerie, swimwear, and sexy categories stay hidden unless include_adult is true.",
+    description: "Search clothing references. Default realm is live: garment plates from ai-costume-gallery.pages.dev plus custom studio costumes. Pass realm anime, or an anime category such as uniform or kimono, to search the separate 二次元服装 library from https://charadb-2fi.pages.dev/ (author たき AI). Those plates may show a wearer; generation copies the outfit only. Hits include credit and sourceUrl for the original host. Use a returned id as costume_id in generate_pose_images. Lingerie, swimwear, and sexy categories stay hidden unless include_adult is true.",
     parameters: {
-      query: { type: "string", description: "Costume id such as SPR-0001 or ANM-0001, or English keywords such as denim coat or kimono. Use 二次元 to find the anime plates." },
-      category: { type: "string", enum: ["春", "夏", "秋", "冬", "パーティ", "ランジェリー", "水着", "セクシー", "casual", "kimono", "outerwear"], description: "春=spring, 夏=summer, 秋=autumn, 冬=winter, パーティ=party, ランジェリー=lingerie, 水着=swimwear, セクシー=sexy, casual=日常, kimono=和风, outerwear=外套." },
+      query: { type: "string", description: "Costume id such as SPR-0001 or O001, or English keywords such as denim coat or serafuku." },
+      realm: { type: "string", enum: ["live", "anime"], description: "live=真人服装. anime=二次元服装, a separate catalog. Default live." },
+      category: { type: "string", enum: ["春", "夏", "秋", "冬", "パーティ", "ランジェリー", "水着", "セクシー", "uniform", "casual-warm", "casual-cool", "tailored", "formal", "kimono", "swim", "sport", "role", "fantasy", "lounge", "seasonal", "stage", "gothic", "tech"], description: "Live categories: 春=spring, 夏=summer, 秋=autumn, 冬=winter, パーティ=party, ランジェリー=lingerie, 水着=swimwear, セクシー=sexy. Anime categories are a separate catalog: uniform, casual-warm, casual-cool, tailored, formal, kimono, swim, sport, role, fantasy, lounge, seasonal, stage, gothic, tech." },
       include_adult: { type: "boolean", description: "Include lingerie, swimwear, and sexy outfits. Default false." },
       limit: { type: "integer", description: "Max results, 1-30. Default 12." },
     },
@@ -180,6 +185,7 @@ export function apply(ctx, config = {}) {
       return toCostumeSearchResult(searchCostumes({
         query: args.query ?? "",
         category: args.category ?? "",
+        realm: args.realm ?? "",
         includeAdult: args.include_adult === true,
         limit,
         custom: listCustomCostumeAssets(),

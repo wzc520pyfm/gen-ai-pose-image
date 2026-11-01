@@ -3,12 +3,14 @@ import type { Catalog, Pose, PoseView } from "../lib/types"
 export type ResolvedView = { pose: Pose; view: PoseView }
 
 export function getCatalog(): Catalog
+export function getAnimePoseCatalog(): Catalog
 export function getPose(id: string): Pose | undefined
 export function getView(id: string): ResolvedView | undefined
 export function resolveView(id: string): ResolvedView | undefined
 export function searchPoses(query?: {
   query?: string
   systemId?: string
+  realm?: string
   category?: string
   includeAdult?: boolean
   limit?: number

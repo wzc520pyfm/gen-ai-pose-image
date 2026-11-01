@@ -38,9 +38,11 @@ type FaceCatalog = {
 }
 
 export function FaceBrowser({
+  realm = "live",
   selectedId,
   onSelect,
 }: {
+  realm?: "live" | "anime"
   selectedId: string | null
   onSelect: (face: FaceItem) => void
 }) {
@@ -54,7 +56,7 @@ export function FaceBrowser({
 
   useEffect(() => {
     const controller = new AbortController()
-    fetch(studioUrl(basePath, "/api/faces"), { signal: controller.signal })
+    fetch(studioUrl(basePath, realm === "anime" ? "/api/anime/faces" : "/api/faces"), { signal: controller.signal })
       .then(async (response) => {
         if (!response.ok) throw new Error("脸部目录没有加载出来")
         return response.json() as Promise<FaceCatalog>
@@ -65,7 +67,13 @@ export function FaceBrowser({
         setError(cause instanceof Error ? cause.message : "脸部目录没有加载出来")
       })
     return () => controller.abort()
-  }, [basePath])
+  }, [basePath, realm])
+
+  useEffect(() => {
+    setSection("")
+    setHair("")
+    setShown(80)
+  }, [realm])
 
   const hairCounts = useMemo(() => {
     const counts = new Map<string, number>()
@@ -109,7 +117,9 @@ export function FaceBrowser({
     <section>
       <div className="px-4 pt-3 pb-2 @min-[768px]/studio:px-6">
         <p className="mb-2 text-sm leading-5 text-muted-foreground">
-          选一张脸部参考。生图会把这张图的五官、表情、脸型和发型用到角色上，姿势和服装仍按各自的参考。鲸耳和鲸尾保留。
+          {realm === "anime"
+            ? "这是二次元脸部，和真人脸库分开。原站是 charadb-2fi.pages.dev，作者たき AI。生图取发型、发色或眼睛，鲸耳和鲸尾仍保留。"
+            : "选一张脸部参考。生图会把这张图的五官、表情、脸型和发型用到角色上，姿势和服装仍按各自的参考。鲸耳和鲸尾保留。"}
         </p>
         <div className="flex gap-1.5 overflow-x-auto pb-1">
           <SectionPill active={section === ""} count={catalog?.total} onClick={() => setSection("")}>全部</SectionPill>
@@ -196,7 +206,7 @@ export function FaceBrowser({
                   <div className="space-y-1 px-3 py-2.5">
                     <p className="truncate text-sm font-medium">{face.id}</p>
                     <p className="line-clamp-2 text-xs text-muted-foreground">{caption}</p>
-                    {face.credit ? <p className="truncate text-[10px] leading-4 text-muted-foreground" title={face.sourceUrl}>来源 {face.author ? `${face.credit} · ${face.author}` : face.credit}</p> : null}
+                    {face.credit ? <p className="truncate text-[10px] leading-4 text-muted-foreground" title={face.sourceUrl}>原站 {face.author ? `${face.credit} · ${face.author}` : face.credit}</p> : null}
                   </div>
                 </button>
               )

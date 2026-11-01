@@ -1529,505 +1529,6 @@ function getBuiltinModel(id) {
   return BUILTIN_MODELS.find((model) => model.id === id) || null;
 }
 
-// data/anime-library.json
-var anime_library_default = {
-  version: 1,
-  poses: [
-    {
-      id: "anime_single_A01",
-      system: "二次元姿势",
-      systemId: "anime",
-      code: "A01",
-      category: "站姿",
-      name: "侧身站立・单臂放松",
-      keywords: "二次元 standing three-quarter sleeveless blouse",
-      adult: false,
-      people: 1,
-      plate: "illustration",
-      credit: "publicdomainq.net",
-      sourceUrl: "https://publicdomainq.net/ai-generated-woman-anime-0088903/",
-      license: "Public domain",
-      views: [
-        {
-          id: "anime_single_A01_front",
-          angle: "正面",
-          angleId: "front",
-          thumb: "https://publicdomainq.net/pictures/2025s/2025-07s/2025-07-08s/publicdomainq-0088903ukd.jpg",
-          full: "https://publicdomainq.net/pictures/2025s/2025-07s/2025-07-08s/publicdomainq-0088903ukd.jpg"
-        }
-      ]
-    },
-    {
-      id: "anime_single_A02",
-      system: "二次元姿势",
-      systemId: "anime",
-      code: "A02",
-      category: "站姿",
-      name: "室内放松站立",
-      keywords: "二次元 standing indoors yellow blouse",
-      adult: false,
-      people: 1,
-      plate: "illustration",
-      credit: "publicdomainq.net",
-      sourceUrl: "https://publicdomainq.net/ai-generated-woman-anime-0085824/",
-      license: "Public domain",
-      views: [
-        {
-          id: "anime_single_A02_front",
-          angle: "正面",
-          angleId: "front",
-          thumb: "https://publicdomainq.net/pictures/2025s/2025-02s/2025-02-04s/publicdomainq-0085824fvh.jpg",
-          full: "https://publicdomainq.net/pictures/2025s/2025-02s/2025-02-04s/publicdomainq-0085824fvh.jpg"
-        }
-      ]
-    },
-    {
-      id: "anime_single_A03",
-      system: "二次元姿势",
-      systemId: "anime",
-      code: "A03",
-      category: "行走",
-      name: "街头行走・双马尾",
-      keywords: "二次元 walking twin tails street",
-      adult: false,
-      people: 1,
-      plate: "illustration",
-      credit: "publicdomainq.net",
-      sourceUrl: "https://publicdomainq.net/ai-generated-anime-woman-0085664/",
-      license: "Public domain",
-      views: [
-        {
-          id: "anime_single_A03_front",
-          angle: "正面",
-          angleId: "front",
-          thumb: "https://publicdomainq.net/pictures/2025s/2025-01s/2025-01-27s/publicdomainq-0085664qql.jpg",
-          full: "https://publicdomainq.net/pictures/2025s/2025-01s/2025-01-27s/publicdomainq-0085664qql.jpg"
-        }
-      ]
-    },
-    {
-      id: "anime_single_A04",
-      system: "二次元姿势",
-      systemId: "anime",
-      code: "A04",
-      category: "站姿",
-      name: "双手插兜",
-      keywords: "二次元 hands in pockets standing blouse",
-      adult: false,
-      people: 1,
-      plate: "illustration",
-      credit: "publicdomainq.net",
-      sourceUrl: "https://publicdomainq.net/ai-generated-businesswoman-0083937/",
-      license: "Public domain",
-      views: [
-        {
-          id: "anime_single_A04_front",
-          angle: "正面",
-          angleId: "front",
-          thumb: "https://publicdomainq.net/pictures/2024s/2024-10s/2024-10-30s/publicdomainq-0083937fxs.jpg",
-          full: "https://publicdomainq.net/pictures/2024s/2024-10s/2024-10-30s/publicdomainq-0083937fxs.jpg"
-        }
-      ]
-    },
-    {
-      id: "anime_single_A05",
-      system: "二次元姿势",
-      systemId: "anime",
-      code: "A05",
-      category: "站姿",
-      name: "抱臂站立",
-      keywords: "二次元 arms crossed suit standing",
-      adult: false,
-      people: 1,
-      plate: "illustration",
-      credit: "publicdomainq.net",
-      sourceUrl: "https://publicdomainq.net/businesswoman-anime-ai-generated-0072594/",
-      license: "Public domain",
-      views: [
-        {
-          id: "anime_single_A05_front",
-          angle: "正面",
-          angleId: "front",
-          thumb: "https://publicdomainq.net/pictures/2023s/2023-06s/2023-06-21s/publicdomainq-0072594aon.jpg",
-          full: "https://publicdomainq.net/pictures/2023s/2023-06s/2023-06-21s/publicdomainq-0072594aon.jpg"
-        }
-      ]
-    },
-    {
-      id: "anime_single_A06",
-      system: "二次元姿势",
-      systemId: "anime",
-      code: "A06",
-      category: "双人",
-      name: "并排站立",
-      keywords: "二次元 two women standing side by side",
-      adult: false,
-      people: 2,
-      plate: "illustration",
-      credit: "publicdomainq.net",
-      sourceUrl: "https://publicdomainq.net/ai-generated-women-anime-0083793/",
-      license: "Public domain",
-      views: [
-        {
-          id: "anime_single_A06_front",
-          angle: "正面",
-          angleId: "front",
-          thumb: "https://publicdomainq.net/pictures/2024s/2024-10s/2024-10-23s/publicdomainq-0083793ebk.jpg",
-          full: "https://publicdomainq.net/pictures/2024s/2024-10s/2024-10-23s/publicdomainq-0083793ebk.jpg"
-        }
-      ]
-    },
-    {
-      id: "anime_single_A07",
-      system: "二次元姿势",
-      systemId: "anime",
-      code: "A07",
-      category: "动作",
-      name: "骑行前倾",
-      keywords: "二次元 riding motorcycle lean forward",
-      adult: false,
-      people: 1,
-      plate: "illustration",
-      credit: "publicdomainq.net",
-      sourceUrl: "https://publicdomainq.net/ai-generated-woman-motorcycle-0084984/",
-      license: "Public domain",
-      views: [
-        {
-          id: "anime_single_A07_side",
-          angle: "侧面",
-          angleId: "side",
-          thumb: "https://publicdomainq.net/pictures/2024s/2024-12s/2024-12-23s/publicdomainq-0084984sfl.jpg",
-          full: "https://publicdomainq.net/pictures/2024s/2024-12s/2024-12-23s/publicdomainq-0084984sfl.jpg"
-        }
-      ]
-    },
-    {
-      id: "anime_single_A08",
-      system: "二次元姿势",
-      systemId: "anime",
-      code: "A08",
-      category: "半身",
-      name: "抬手整领",
-      keywords: "二次元 hands at collar half body",
-      adult: false,
-      people: 1,
-      plate: "illustration",
-      credit: "publicdomainq.net",
-      sourceUrl: "https://publicdomainq.net/woman-girl-0070852/",
-      license: "Public domain",
-      views: [
-        {
-          id: "anime_single_A08_front",
-          angle: "正面",
-          angleId: "front",
-          thumb: "https://publicdomainq.net/pictures/2023s/2023-04s/2023-04-04s/publicdomainq-0070852kzj.jpg",
-          full: "https://publicdomainq.net/pictures/2023s/2023-04s/2023-04-04s/publicdomainq-0070852kzj.jpg"
-        }
-      ]
-    },
-    {
-      id: "anime_single_A09",
-      system: "二次元姿势",
-      systemId: "anime",
-      code: "A09",
-      category: "站姿",
-      name: "插兜羽绒站立",
-      keywords: "二次元 puffer jacket hands in pockets",
-      adult: false,
-      people: 1,
-      plate: "illustration",
-      credit: "publicdomainq.net",
-      sourceUrl: "https://publicdomainq.net/ai-generated-dirl-down-jacket-0083877/",
-      license: "Public domain",
-      views: [
-        {
-          id: "anime_single_A09_front",
-          angle: "正面",
-          angleId: "front",
-          thumb: "https://publicdomainq.net/pictures/2024s/2024-10s/2024-10-27s/publicdomainq-0083877ird.jpg",
-          full: "https://publicdomainq.net/pictures/2024s/2024-10s/2024-10-27s/publicdomainq-0083877ird.jpg"
-        }
-      ]
-    },
-    {
-      id: "anime_single_A10",
-      system: "二次元姿势",
-      systemId: "anime",
-      code: "A10",
-      category: "跪姿",
-      name: "低头跪坐",
-      keywords: "二次元 kneeling sitting back heels",
-      adult: false,
-      people: 1,
-      plate: "illustration",
-      credit: "commons.wikimedia.org",
-      author: "EdGoTru",
-      sourceUrl: "https://commons.wikimedia.org/wiki/File:Anime_Verdolaga.png",
-      license: "CC-BY-SA-4.0",
-      views: [
-        {
-          id: "anime_single_A10_front",
-          angle: "正面",
-          angleId: "front",
-          thumb: "https://upload.wikimedia.org/wikipedia/commons/a/a1/Anime_Verdolaga.png",
-          full: "https://upload.wikimedia.org/wikipedia/commons/a/a1/Anime_Verdolaga.png"
-        }
-      ]
-    },
-    {
-      id: "anime_single_A11",
-      system: "二次元姿势",
-      systemId: "anime",
-      code: "A11",
-      category: "半身",
-      name: "单手比划",
-      keywords: "二次元 pointing one hand half body",
-      adult: false,
-      people: 1,
-      plate: "illustration",
-      credit: "commons.wikimedia.org",
-      author: "oksmith",
-      sourceUrl: "https://commons.wikimedia.org/wiki/File:Anime_girl_publicdomainq.png",
-      license: "CC0-1.0",
-      views: [
-        {
-          id: "anime_single_A11_front",
-          angle: "正面",
-          angleId: "front",
-          thumb: "https://upload.wikimedia.org/wikipedia/commons/e/e7/Anime_girl_publicdomainq.png",
-          full: "https://upload.wikimedia.org/wikipedia/commons/e/e7/Anime_girl_publicdomainq.png"
-        }
-      ]
-    }
-  ],
-  costumes: [
-    {
-      id: "ANM-0001",
-      category: "kimono",
-      label: "和风",
-      keywords: "二次元 light blue floral kimono gold obi",
-      adult: false,
-      plate: "worn",
-      credit: "publicdomainq.net",
-      sourceUrl: "https://publicdomainq.net/ai-generated-woman-kimono-0092074/",
-      license: "Public domain",
-      thumb: "https://publicdomainq.net/pictures/2025s/2025-12s/2025-12-12s/publicdomainq-0092074mkh.jpg",
-      preview: "https://publicdomainq.net/pictures/2025s/2025-12s/2025-12-12s/publicdomainq-0092074mkh.jpg",
-      full: "https://publicdomainq.net/pictures/2025s/2025-12s/2025-12-12s/publicdomainq-0092074mkh.jpg"
-    },
-    {
-      id: "ANM-0002",
-      category: "kimono",
-      label: "和风",
-      keywords: "二次元 pale pink kimono flower hairpin",
-      adult: false,
-      plate: "worn",
-      credit: "publicdomainq.net",
-      sourceUrl: "https://publicdomainq.net/ai-generated-woman-kimono-0086661/",
-      license: "Public domain",
-      thumb: "https://publicdomainq.net/pictures/2025s/2025-03s/2025-03-18s/publicdomainq-0086661puc.jpg",
-      preview: "https://publicdomainq.net/pictures/2025s/2025-03s/2025-03-18s/publicdomainq-0086661puc.jpg",
-      full: "https://publicdomainq.net/pictures/2025s/2025-03s/2025-03-18s/publicdomainq-0086661puc.jpg"
-    },
-    {
-      id: "ANM-0003",
-      category: "kimono",
-      label: "和风",
-      keywords: "二次元 navy floral yukata pink obi",
-      adult: false,
-      plate: "worn",
-      credit: "publicdomainq.net",
-      sourceUrl: "https://publicdomainq.net/illustration-woman-yukata-0089673/",
-      license: "Public domain",
-      thumb: "https://publicdomainq.net/pictures/2025s/2025-08s/2025-08-15s/publicdomainq-0089673szm.jpg",
-      preview: "https://publicdomainq.net/pictures/2025s/2025-08s/2025-08-15s/publicdomainq-0089673szm.jpg",
-      full: "https://publicdomainq.net/pictures/2025s/2025-08s/2025-08-15s/publicdomainq-0089673szm.jpg"
-    },
-    {
-      id: "ANM-0004",
-      category: "kimono",
-      label: "和风",
-      keywords: "二次元 pink floral yukata yellow obi",
-      adult: false,
-      plate: "worn",
-      credit: "publicdomainq.net",
-      sourceUrl: "https://publicdomainq.net/illustration-woman-yukata-0088916/",
-      license: "Public domain",
-      thumb: "https://publicdomainq.net/pictures/2025s/2025-07s/2025-07-08s/publicdomainq-0088916zkc.jpg",
-      preview: "https://publicdomainq.net/pictures/2025s/2025-07s/2025-07-08s/publicdomainq-0088916zkc.jpg",
-      full: "https://publicdomainq.net/pictures/2025s/2025-07s/2025-07-08s/publicdomainq-0088916zkc.jpg"
-    },
-    {
-      id: "ANM-0005",
-      category: "casual",
-      label: "日常",
-      keywords: "二次元 green sleeveless shift dress",
-      adult: false,
-      plate: "worn",
-      credit: "publicdomainq.net",
-      sourceUrl: "https://publicdomainq.net/illustration-woman-dress-0084867/",
-      license: "Public domain",
-      thumb: "https://publicdomainq.net/pictures/2024s/2024-12s/2024-12-17s/publicdomainq-0084867vgu.jpg",
-      preview: "https://publicdomainq.net/pictures/2024s/2024-12s/2024-12-17s/publicdomainq-0084867vgu.jpg",
-      full: "https://publicdomainq.net/pictures/2024s/2024-12s/2024-12-17s/publicdomainq-0084867vgu.jpg"
-    },
-    {
-      id: "ANM-0006",
-      category: "casual",
-      label: "日常",
-      keywords: "二次元 orange striped mini dress",
-      adult: false,
-      plate: "worn",
-      credit: "publicdomainq.net",
-      sourceUrl: "https://publicdomainq.net/illustration-woman-dress-0084866/",
-      license: "Public domain",
-      thumb: "https://publicdomainq.net/pictures/2024s/2024-12s/2024-12-17s/publicdomainq-0084866zju.jpg",
-      preview: "https://publicdomainq.net/pictures/2024s/2024-12s/2024-12-17s/publicdomainq-0084866zju.jpg",
-      full: "https://publicdomainq.net/pictures/2024s/2024-12s/2024-12-17s/publicdomainq-0084866zju.jpg"
-    },
-    {
-      id: "ANM-0007",
-      category: "outerwear",
-      label: "外套",
-      keywords: "二次元 fur collar coat leopard print",
-      adult: false,
-      plate: "worn",
-      credit: "publicdomainq.net",
-      sourceUrl: "https://publicdomainq.net/illustration-woman-coat-0082514/",
-      license: "Public domain",
-      thumb: "https://publicdomainq.net/pictures/2024s/2024-08s/2024-08-27s/publicdomainq-0082514tzh.jpg",
-      preview: "https://publicdomainq.net/pictures/2024s/2024-08s/2024-08-27s/publicdomainq-0082514tzh.jpg",
-      full: "https://publicdomainq.net/pictures/2024s/2024-08s/2024-08-27s/publicdomainq-0082514tzh.jpg"
-    },
-    {
-      id: "ANM-0008",
-      category: "outerwear",
-      label: "外套",
-      keywords: "二次元 yellow raincoat hood boots",
-      adult: false,
-      plate: "worn",
-      credit: "publicdomainq.net",
-      sourceUrl: "https://publicdomainq.net/illustration-woman-raincoat-0080949/",
-      license: "Public domain",
-      thumb: "https://publicdomainq.net/pictures/2024s/2024-06s/2024-06-19s/publicdomainq-0080949qju.jpg",
-      preview: "https://publicdomainq.net/pictures/2024s/2024-06s/2024-06-19s/publicdomainq-0080949qju.jpg",
-      full: "https://publicdomainq.net/pictures/2024s/2024-06s/2024-06-19s/publicdomainq-0080949qju.jpg"
-    }
-  ],
-  faces: [
-    {
-      id: "anime_face_bob_smile",
-      section: "anime-closeup",
-      hair: "短发",
-      label: "齐肩波波・浅笑",
-      keywords: "二次元 short bob brown hair smile",
-      hot: false,
-      credit: "publicdomainq.net",
-      sourceUrl: "https://publicdomainq.net/ai-generated-woman-anime-0088902/",
-      license: "Public domain",
-      thumb: "https://publicdomainq.net/pictures/2025s/2025-07s/2025-07-08s/publicdomainq-0088902iie.jpg",
-      full: "https://publicdomainq.net/pictures/2025s/2025-07s/2025-07-08s/publicdomainq-0088902iie.jpg"
-    },
-    {
-      id: "anime_face_short_open",
-      section: "anime-closeup",
-      hair: "短发",
-      label: "短发・微张口",
-      keywords: "二次元 short black hair slight open mouth",
-      hot: false,
-      credit: "publicdomainq.net",
-      sourceUrl: "https://publicdomainq.net/ai-generated-woman-0083774/",
-      license: "Public domain",
-      thumb: "https://publicdomainq.net/pictures/2024s/2024-10s/2024-10-22s/publicdomainq-0083774lle.jpg",
-      full: "https://publicdomainq.net/pictures/2024s/2024-10s/2024-10-22s/publicdomainq-0083774lle.jpg"
-    },
-    {
-      id: "anime_face_long_calm",
-      section: "anime-closeup",
-      hair: "长发",
-      label: "长发・平静",
-      keywords: "二次元 long black hair calm",
-      hot: false,
-      credit: "publicdomainq.net",
-      sourceUrl: "https://publicdomainq.net/ai-generated-woman-twilight-0085305/",
-      license: "Public domain",
-      thumb: "https://publicdomainq.net/pictures/2025s/2025-01s/2025-01-08s/publicdomainq-0085305vna.jpg",
-      full: "https://publicdomainq.net/pictures/2025s/2025-01s/2025-01-08s/publicdomainq-0085305vna.jpg"
-    },
-    {
-      id: "anime_face_short_cool",
-      section: "anime-closeup",
-      hair: "短发",
-      label: "短发・冷淡",
-      keywords: "二次元 short hair cool expression headset",
-      hot: false,
-      credit: "publicdomainq.net",
-      sourceUrl: "https://publicdomainq.net/ai-generated-robot-woman-0083742/",
-      license: "Public domain",
-      thumb: "https://publicdomainq.net/pictures/2024s/2024-10s/2024-10-21s/publicdomainq-0083742kte.jpg",
-      full: "https://publicdomainq.net/pictures/2024s/2024-10s/2024-10-21s/publicdomainq-0083742kte.jpg"
-    },
-    {
-      id: "anime_face_long_smile",
-      section: "anime-closeup",
-      hair: "长发",
-      label: "长发・微笑",
-      keywords: "二次元 long black hair smile",
-      hot: false,
-      credit: "publicdomainq.net",
-      sourceUrl: "https://publicdomainq.net/ai-generated-young-woman-0088007/",
-      license: "Public domain",
-      thumb: "https://publicdomainq.net/pictures/2025s/2025-05s/2025-05-24s/publicdomainq-0088007rhp.jpg",
-      full: "https://publicdomainq.net/pictures/2025s/2025-05s/2025-05-24s/publicdomainq-0088007rhp.jpg"
-    },
-    {
-      id: "anime_face_profile_smile",
-      section: "anime-expression",
-      hair: "中发",
-      label: "侧颜浅笑",
-      keywords: "二次元 profile smile medium hair",
-      hot: false,
-      credit: "publicdomainq.net",
-      sourceUrl: "https://publicdomainq.net/illustration-woman-profile-0088768/",
-      license: "Public domain",
-      thumb: "https://publicdomainq.net/pictures/2025s/2025-07s/2025-07-01s/publicdomainq-0088768leg.jpg",
-      full: "https://publicdomainq.net/pictures/2025s/2025-07s/2025-07-01s/publicdomainq-0088768leg.jpg"
-    },
-    {
-      id: "anime_face_laugh",
-      section: "anime-expression",
-      hair: "长发",
-      label: "闭眼大笑",
-      keywords: "二次元 eyes closed laugh ponytail",
-      hot: false,
-      credit: "publicdomainq.net",
-      sourceUrl: "https://publicdomainq.net/woman-smile-illustration-0076401/",
-      license: "Public domain",
-      thumb: "https://publicdomainq.net/pictures/2023s/2023-12s/2023-12-13s/publicdomainq-0076401quh.jpg",
-      full: "https://publicdomainq.net/pictures/2023s/2023-12s/2023-12-13s/publicdomainq-0076401quh.jpg"
-    },
-    {
-      id: "anime_face_angry",
-      section: "anime-expression",
-      hair: "短发",
-      label: "怒视",
-      keywords: "二次元 angry shout short orange hair",
-      hot: false,
-      credit: "commons.wikimedia.org",
-      author: "snoopingasusual",
-      sourceUrl: "https://commons.wikimedia.org/wiki/File:Angry_anime_girl.png",
-      license: "CC0-1.0",
-      thumb: "https://upload.wikimedia.org/wikipedia/commons/c/c5/Angry_anime_girl.png",
-      full: "https://upload.wikimedia.org/wikipedia/commons/c/c5/Angry_anime_girl.png"
-    }
-  ]
-};
-
-// shared/anime-library.mjs
-var animePoses = anime_library_default.poses;
-var animeCostumes = anime_library_default.costumes;
-var animeFaces = anime_library_default.faces;
-
 // shared/costume-prompt.mjs
 var GARMENT_SOURCE = [
   "berets?",
@@ -12520,6 +12021,7 @@ function CustomReferencePanel({
 // components/costume-browser.tsx
 var import_jsx_runtime26 = require("react/jsx-runtime");
 function CostumeBrowser({
+  realm = "live",
   showAdult,
   focusCategory,
   onFocusApplied,
@@ -12544,7 +12046,7 @@ function CostumeBrowser({
   const [query, setQuery] = (0, import_react10.useState)("");
   (0, import_react10.useEffect)(() => {
     const controller = new AbortController();
-    fetch(studioUrl(basePath, "/api/costumes"), { signal: controller.signal }).then(async (response) => {
+    fetch(studioUrl(basePath, realm === "anime" ? "/api/anime/costumes" : "/api/costumes"), { signal: controller.signal }).then(async (response) => {
       if (!response.ok) throw new Error("服装目录没有加载出来");
       return response.json();
     }).then(setCatalog).catch((cause) => {
@@ -12552,7 +12054,14 @@ function CostumeBrowser({
       setError(cause instanceof Error ? cause.message : "服装目录没有加载出来");
     });
     return () => controller.abort();
-  }, [basePath]);
+  }, [basePath, realm]);
+  (0, import_react10.useEffect)(() => {
+    if (!catalog) return;
+    if (category === "custom") return;
+    if (catalog.categories.some((item) => item.id === category)) return;
+    const first = catalog.categories.find((item) => !item.adult) ?? catalog.categories[0];
+    if (first) setCategory(first.id);
+  }, [catalog, category]);
   (0, import_react10.useEffect)(() => {
     if (!focusCategory || !showAdult) return;
     setCategory(focusCategory);
@@ -12571,7 +12080,7 @@ function CostumeBrowser({
   }, [catalog, category, query, showAdult]);
   return /* @__PURE__ */ (0, import_jsx_runtime26.jsxs)("section", { children: [
     /* @__PURE__ */ (0, import_jsx_runtime26.jsxs)("div", { className: "px-4 pt-3 pb-2 @min-[768px]/studio:px-6", children: [
-      /* @__PURE__ */ (0, import_jsx_runtime26.jsx)("p", { className: "mb-2 text-sm text-muted-foreground", children: "这些图里没有人物。选一套之后，大肥鱼会换上这身衣服，脸、头发、鲸耳和鲸尾保持不变。" }),
+      /* @__PURE__ */ (0, import_jsx_runtime26.jsx)("p", { className: "mb-2 text-sm text-muted-foreground", children: realm === "anime" ? "这是二次元服装，和真人衣装集分开。图里有穿着者，生图只取衣服。原站是 charadb-2fi.pages.dev，作者たき AI。" : "这些图里没有人物。选一套之后，大肥鱼会换上这身衣服，脸、头发、鲸耳和鲸尾保持不变。" }),
       /* @__PURE__ */ (0, import_jsx_runtime26.jsxs)("div", { className: "mb-2 flex flex-wrap gap-2", children: [
         /* @__PURE__ */ (0, import_jsx_runtime26.jsxs)(
           "button",
@@ -12687,7 +12196,7 @@ function CostumeBrowser({
                   costume.keywords
                 ] }),
                 costume.credit ? /* @__PURE__ */ (0, import_jsx_runtime26.jsxs)("p", { className: "truncate text-[10px] leading-4 text-muted-foreground", title: costume.sourceUrl, children: [
-                  "来源 ",
+                  "原站 ",
                   costume.author ? `${costume.credit} · ${costume.author}` : costume.credit
                 ] }) : null
               ] })
@@ -12705,6 +12214,7 @@ function CostumeBrowser({
 var import_react11 = require("react");
 var import_jsx_runtime27 = require("react/jsx-runtime");
 function FaceBrowser({
+  realm = "live",
   selectedId,
   onSelect
 }) {
@@ -12717,7 +12227,7 @@ function FaceBrowser({
   const [shown, setShown] = (0, import_react11.useState)(80);
   (0, import_react11.useEffect)(() => {
     const controller = new AbortController();
-    fetch(studioUrl(basePath, "/api/faces"), { signal: controller.signal }).then(async (response) => {
+    fetch(studioUrl(basePath, realm === "anime" ? "/api/anime/faces" : "/api/faces"), { signal: controller.signal }).then(async (response) => {
       if (!response.ok) throw new Error("脸部目录没有加载出来");
       return response.json();
     }).then(setCatalog).catch((cause) => {
@@ -12725,7 +12235,12 @@ function FaceBrowser({
       setError(cause instanceof Error ? cause.message : "脸部目录没有加载出来");
     });
     return () => controller.abort();
-  }, [basePath]);
+  }, [basePath, realm]);
+  (0, import_react11.useEffect)(() => {
+    setSection("");
+    setHair("");
+    setShown(80);
+  }, [realm]);
   const hairCounts = (0, import_react11.useMemo)(() => {
     const counts = /* @__PURE__ */ new Map();
     if (!catalog) return counts;
@@ -12761,7 +12276,7 @@ function FaceBrowser({
   }
   return /* @__PURE__ */ (0, import_jsx_runtime27.jsxs)("section", { children: [
     /* @__PURE__ */ (0, import_jsx_runtime27.jsxs)("div", { className: "px-4 pt-3 pb-2 @min-[768px]/studio:px-6", children: [
-      /* @__PURE__ */ (0, import_jsx_runtime27.jsx)("p", { className: "mb-2 text-sm leading-5 text-muted-foreground", children: "选一张脸部参考。生图会把这张图的五官、表情、脸型和发型用到角色上，姿势和服装仍按各自的参考。鲸耳和鲸尾保留。" }),
+      /* @__PURE__ */ (0, import_jsx_runtime27.jsx)("p", { className: "mb-2 text-sm leading-5 text-muted-foreground", children: realm === "anime" ? "这是二次元脸部，和真人脸库分开。原站是 charadb-2fi.pages.dev，作者たき AI。生图取发型、发色或眼睛，鲸耳和鲸尾仍保留。" : "选一张脸部参考。生图会把这张图的五官、表情、脸型和发型用到角色上，姿势和服装仍按各自的参考。鲸耳和鲸尾保留。" }),
       /* @__PURE__ */ (0, import_jsx_runtime27.jsxs)("div", { className: "flex gap-1.5 overflow-x-auto pb-1", children: [
         /* @__PURE__ */ (0, import_jsx_runtime27.jsx)(SectionPill, { active: section === "", count: catalog?.total, onClick: () => setSection(""), children: "全部" }),
         catalog?.sections.map((item) => /* @__PURE__ */ (0, import_jsx_runtime27.jsx)(SectionPill, { active: section === item.id, count: item.count, onClick: () => setSection(item.id), children: item.label }, item.id))
@@ -12840,7 +12355,7 @@ function FaceBrowser({
                 /* @__PURE__ */ (0, import_jsx_runtime27.jsx)("p", { className: "truncate text-sm font-medium", children: face.id }),
                 /* @__PURE__ */ (0, import_jsx_runtime27.jsx)("p", { className: "line-clamp-2 text-xs text-muted-foreground", children: caption }),
                 face.credit ? /* @__PURE__ */ (0, import_jsx_runtime27.jsxs)("p", { className: "truncate text-[10px] leading-4 text-muted-foreground", title: face.sourceUrl, children: [
-                  "来源 ",
+                  "原站 ",
                   face.author ? `${face.credit} · ${face.author}` : face.credit
                 ] }) : null
               ] })
@@ -13290,7 +12805,7 @@ function PoseCard({
       /* @__PURE__ */ (0, import_jsx_runtime28.jsx)("span", { className: "max-w-[46%] shrink-0 truncate pt-0.5 text-right text-xs text-muted-foreground", title: pose.category, children: pose.category })
     ] }),
     pose.credit ? /* @__PURE__ */ (0, import_jsx_runtime28.jsxs)("p", { className: "truncate px-2.5 pb-1 text-[10px] leading-4 text-muted-foreground", title: pose.sourceUrl, children: [
-      "来源 ",
+      "原站 ",
       pose.author ? `${pose.credit} · ${pose.author}` : pose.credit
     ] }) : null,
     /* @__PURE__ */ (0, import_jsx_runtime28.jsx)("div", { role: "group", "aria-label": `${pose.name}的视角`, className: `grid gap-1 px-2 pb-2.5 ${columns}`, children: views.map((item) => {
@@ -13812,6 +13327,12 @@ function StudioFrame({ embedded }) {
   const [settings, setSettings] = (0, import_react14.useState)(DEFAULT_SETTINGS);
   const [settingsReady, setSettingsReady] = (0, import_react14.useState)(false);
   const [library, setLibrary] = (0, import_react14.useState)("poses");
+  const [realm, setRealm] = (0, import_react14.useState)("live");
+  const [animeCatalog, setAnimeCatalog] = (0, import_react14.useState)(null);
+  const [animeCatalogError, setAnimeCatalogError] = (0, import_react14.useState)("");
+  const [animeLoading, setAnimeLoading] = (0, import_react14.useState)(true);
+  const [animeCostumes, setAnimeCostumes] = (0, import_react14.useState)([]);
+  const [animeFaces, setAnimeFaces] = (0, import_react14.useState)([]);
   const [costume, setCostume] = (0, import_react14.useState)(null);
   const [face, setFace] = (0, import_react14.useState)(null);
   const [costumeFocus, setCostumeFocus] = (0, import_react14.useState)(null);
@@ -13860,6 +13381,38 @@ function StudioFrame({ embedded }) {
   (0, import_react14.useEffect)(() => {
     loadCatalog();
   }, [loadCatalog]);
+  (0, import_react14.useEffect)(() => {
+    const controller = new AbortController();
+    fetch(studioUrl(basePath, "/api/anime/poses"), { signal: controller.signal }).then(async (response) => {
+      if (!response.ok) throw new Error("二次元姿势没有加载出来");
+      return response.json();
+    }).then((payload) => {
+      setAnimeCatalog(payload);
+      setAnimeCatalogError("");
+    }).catch((error) => {
+      if (error instanceof DOMException && error.name === "AbortError") return;
+      setAnimeCatalogError(error instanceof Error ? error.message : "二次元姿势没有加载出来");
+    }).finally(() => setAnimeLoading(false));
+    return () => controller.abort();
+  }, [basePath]);
+  (0, import_react14.useEffect)(() => {
+    const controller = new AbortController();
+    fetch(studioUrl(basePath, "/api/anime/costumes"), { signal: controller.signal }).then(async (response) => {
+      if (!response.ok) throw new Error("二次元服装没有加载出来");
+      return response.json();
+    }).then((payload) => setAnimeCostumes(Array.isArray(payload.costumes) ? payload.costumes : [])).catch((error) => {
+      if (error instanceof DOMException && error.name === "AbortError") return;
+      setAnimeCostumes([]);
+    });
+    fetch(studioUrl(basePath, "/api/anime/faces"), { signal: controller.signal }).then(async (response) => {
+      if (!response.ok) throw new Error("二次元脸部没有加载出来");
+      return response.json();
+    }).then((payload) => setAnimeFaces(Array.isArray(payload.faces) ? payload.faces : [])).catch((error) => {
+      if (error instanceof DOMException && error.name === "AbortError") return;
+      setAnimeFaces([]);
+    });
+    return () => controller.abort();
+  }, [basePath]);
   (0, import_react14.useEffect)(() => {
     const controller = new AbortController();
     fetch(studioUrl(basePath, "/api/costumes"), { signal: controller.signal }).then(async (response) => {
@@ -14078,6 +13631,7 @@ function StudioFrame({ embedded }) {
   const poseById = (0, import_react14.useMemo)(() => {
     const map = /* @__PURE__ */ new Map();
     catalog?.poses.forEach((pose) => map.set(pose.id, pose));
+    animeCatalog?.poses.forEach((pose) => map.set(pose.id, pose));
     for (const asset of customPoses) {
       map.set(asset.id, {
         id: asset.id,
@@ -14092,7 +13646,7 @@ function StudioFrame({ embedded }) {
       });
     }
     return map;
-  }, [catalog, customPoses]);
+  }, [catalog, animeCatalog, customPoses]);
   const chosen = (0, import_react14.useMemo)(() => {
     return Object.entries(selected).flatMap(([poseId, viewId]) => {
       const pose = poseById.get(poseId);
@@ -14185,8 +13739,9 @@ function StudioFrame({ embedded }) {
     setSelected((current) => ({ ...current, [pose.id]: view.id }));
   }
   function randomizeCombo() {
-    if (!catalog) {
-      setLimitNote(catalogError || "姿势目录还没加载出来。");
+    const poseSource = realm === "anime" ? animeCatalog : catalog;
+    if (!poseSource) {
+      setLimitNote(realm === "anime" ? animeCatalogError || "二次元姿势还没加载出来。" : catalogError || "姿势目录还没加载出来。");
       return;
     }
     if (!costumeCatalogReady) {
@@ -14206,7 +13761,7 @@ function StudioFrame({ embedded }) {
       return;
     }
     const poses = [
-      ...catalog.poses,
+      ...poseSource.poses,
       ...customPoses.map((asset) => ({
         id: asset.id,
         adult: asset.adult,
@@ -14214,7 +13769,7 @@ function StudioFrame({ embedded }) {
       }))
     ];
     const costumes = [
-      ...costumeCatalog,
+      ...realm === "anime" ? animeCostumes : costumeCatalog,
       ...customCostumes.map((asset) => ({
         id: asset.id,
         label: asset.label,
@@ -14222,7 +13777,7 @@ function StudioFrame({ embedded }) {
         adult: asset.adult
       }))
     ];
-    const pick = pickRandomCombo({ poses, costumes, faces: faceCatalog, showAdult: settings.showAdult });
+    const pick = pickRandomCombo({ poses, costumes, faces: realm === "anime" ? animeFaces : faceCatalog, showAdult: settings.showAdult });
     if (!pick.ok || !pick.pose || !pick.view || !pick.costume || !pick.face) {
       setLimitNote(pick.message);
       return;
@@ -14230,7 +13785,7 @@ function StudioFrame({ embedded }) {
     setLimitNote("");
     const pickedCostume = pick.costume;
     setSelected({ [pick.pose.id]: pick.view.id });
-    const wornPlate = costumeCatalog.find((item) => item.id === pickedCostume.id)?.plate === "worn";
+    const wornPlate = [...costumeCatalog, ...animeCostumes].find((item) => item.id === pickedCostume.id)?.plate === "worn";
     setCostume({ id: pickedCostume.id, label: pickedCostume.label, keywords: pickedCostume.keywords, ...wornPlate ? { plate: "worn" } : {} });
     setFace({
       id: pick.face.id,
@@ -14254,7 +13809,7 @@ function StudioFrame({ embedded }) {
     setRunning(true);
     setRunError("");
     setResults([]);
-    const storedPlate = costume ? costumeCatalog.find((item) => item.id === costume.id)?.plate : void 0;
+    const storedPlate = costume ? [...costumeCatalog, ...animeCostumes].find((item) => item.id === costume.id)?.plate : void 0;
     const costumePick = costume ? { id: costume.id, label: costume.label, keywords: costume.keywords, ...costume.plate || storedPlate ? { plate: costume.plate || storedPlate } : {} } : null;
     const bodyBase = {
       engine: settings.engine,
@@ -14481,6 +14036,30 @@ function StudioFrame({ embedded }) {
     /* @__PURE__ */ (0, import_jsx_runtime33.jsxs)("header", { className: "flex min-h-14 shrink-0 flex-wrap items-center gap-x-3 gap-y-2 border-b bg-white px-3 py-2 @min-[640px]/studio:px-4 @min-[768px]/studio:px-5", children: [
       /* @__PURE__ */ (0, import_jsx_runtime33.jsx)(WhaleMark, { className: "size-8 shrink-0" }),
       /* @__PURE__ */ (0, import_jsx_runtime33.jsx)("h1", { className: "shrink-0 text-base font-semibold", children: "澜姿" }),
+      /* @__PURE__ */ (0, import_jsx_runtime33.jsxs)("div", { className: "flex shrink-0 rounded-lg bg-muted p-1", role: "tablist", "aria-label": "图像类型", children: [
+        /* @__PURE__ */ (0, import_jsx_runtime33.jsx)(
+          "button",
+          {
+            type: "button",
+            role: "tab",
+            "aria-selected": realm === "live",
+            onClick: () => setRealm("live"),
+            className: `rounded-md px-3 py-1 text-sm whitespace-nowrap ${realm === "live" ? "bg-white font-medium shadow-sm" : "text-muted-foreground"}`,
+            children: "真人"
+          }
+        ),
+        /* @__PURE__ */ (0, import_jsx_runtime33.jsx)(
+          "button",
+          {
+            type: "button",
+            role: "tab",
+            "aria-selected": realm === "anime",
+            onClick: () => setRealm("anime"),
+            className: `rounded-md px-3 py-1 text-sm whitespace-nowrap ${realm === "anime" ? "bg-white font-medium shadow-sm" : "text-muted-foreground"}`,
+            children: "二次元"
+          }
+        )
+      ] }),
       /* @__PURE__ */ (0, import_jsx_runtime33.jsxs)("div", { className: "flex shrink-0 rounded-lg bg-muted p-1", role: "tablist", "aria-label": "图库", children: [
         /* @__PURE__ */ (0, import_jsx_runtime33.jsx)(
           "button",
@@ -14575,6 +14154,7 @@ function StudioFrame({ embedded }) {
       /* @__PURE__ */ (0, import_jsx_runtime33.jsx)("main", { className: "order-2 min-h-0 min-w-0 flex-1 overflow-y-auto @min-[1024px]/studio:order-none @min-[1024px]/studio:pb-8", children: library === "faces" ? /* @__PURE__ */ (0, import_jsx_runtime33.jsx)(
         FaceBrowser,
         {
+          realm,
           selectedId: face?.id ?? null,
           onSelect: (item) => setFace((current) => current?.id === item.id ? null : {
             id: item.id,
@@ -14587,9 +14167,9 @@ function StudioFrame({ embedded }) {
       ) : library === "poses" ? /* @__PURE__ */ (0, import_jsx_runtime33.jsx)(
         PoseBrowser,
         {
-          catalog,
-          loading,
-          error: catalogError,
+          catalog: realm === "anime" ? animeCatalog : catalog,
+          loading: realm === "anime" ? animeLoading : loading,
+          error: realm === "anime" ? animeCatalogError : catalogError,
           onRetry: loadCatalog,
           showAdult: settings.showAdult,
           requestedSystem,
@@ -14607,6 +14187,7 @@ function StudioFrame({ embedded }) {
       ) : /* @__PURE__ */ (0, import_jsx_runtime33.jsx)(
         CostumeBrowser,
         {
+          realm,
           showAdult: settings.showAdult,
           focusCategory: costumeFocus,
           onFocusApplied: clearCostumeFocus,

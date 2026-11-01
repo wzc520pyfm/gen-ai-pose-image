@@ -20,6 +20,7 @@
     "data/catalog.json",
     "data/costumes.json",
     "data/faces.json",
+    "data/anime-library.json",
     "public/muse",
     "cordis.patch.yml",
     "README.md",

@@ -89,9 +89,11 @@ dsh plugin --profile web add gen-ai-pose-image
 
 成人向姿势和成人向服装默认不进搜索结果。只有明确要求时才给 `search_poses` 或 `search_costumes` 传 `include_adult: true`。
 
-## 二次元补充图库
+## 二次元图库
 
-在原有线稿、衣装集和脸库之外，工作室另有一组二次元姿势、服装和脸部。图片不放进仓库，按每条记录里的地址向图像所在站点读取。公有领域插画来自 [publicdomainq.net](https://publicdomainq.net/)。另有几张来自 [Wikimedia Commons](https://commons.wikimedia.org/)，许可是 CC0 或 CC BY-SA，条目里写了作者。卡片和搜索结果都注明图像站点。这些补充图默认可见，没有成人向分类。
+工作室顶部可以在「真人」和「二次元」之间切换。二次元姿势、服装和脸部是单独的一套，不会混进原来的线稿、衣装集和脸库。
+
+二次元图来自原站 [charadb-2fi.pages.dev](https://charadb-2fi.pages.dev/)，作者是 [たき AI](https://x.com/taki_auto)，2026-11-01 公开。本仓库只保存编号和地址，缩略图、服装图和姿势线稿按需从原站读取。原站允许把这些图用作创作参考，禁止再分发图像本身，也不许用来表现未成年人。卡片上写着原站。泳装默认收起，跟成人向开关放在一起。
 
 ## 检查
 
