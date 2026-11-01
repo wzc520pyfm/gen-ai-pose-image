@@ -36,10 +36,10 @@ export const THIRD_PARTY_NOTICES = [
   {
     id: "muse",
     title: "默认模特大肥鱼",
-    holder: "TreapGoGo",
+    holder: "上善无形、ZipZipPipe",
     source: "https://github.com/TreapGoGo/deepseek-whale-girl",
     included: "public/muse/dafeiyu-sheet.png 是该仓库的 dafeiyu-mature-character-sheet.png。public/muse/dafeiyu-portrait.jpg 是同一张设定图的界面裁切。",
-    terms: "设定图来自社区仓库 TreapGoGo/deepseek-whale-girl，版权所有 (c) 2026 TreapGoGo，按该仓库的 MIT 许可使用。这是非官方社区形象，不代表深度求索。",
+    terms: "大肥鱼的角色设计来自 上善无形 的原创角色和 ZipZipPipe 的女仆装鲸鱼娘，按 CC BY-NC-SA 4.0（https://creativecommons.org/licenses/by-nc-sa/4.0/）授权（署名、非商业、相同方式共享）。这张设定图收录于社区仓库 TreapGoGo/deepseek-whale-girl，由 ChatGPT 生成；该仓库的 MIT 只覆盖它的网站代码，不覆盖这张图。这是非官方社区形象，不代表深度求索。",
   },
   {
     id: "zipzippipe",

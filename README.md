@@ -105,5 +105,5 @@ npm run typecheck
 - 姿势线稿和原始数据的著作权归 [ギア](https://x.com/giaaibusi)。作品是 [AI Pose Gallery](https://ai-pose-gallery.pages.dev/)；中文译名由 [Anhao](https://github.com/anhao) 维护在 [ai-pose-gallery-zh](https://github.com/anhao/ai-pose-gallery-zh)，图床是 [ai-pose-gallery.anhao.app](https://ai-pose-gallery.anhao.app)。上游说明这些图不得用于商业用途。
 - 服装图同样来自 [ギア](https://x.com/giaaibusi) 的 [衣装集 COSTUME-DB-01](https://ai-costume-gallery.pages.dev/)。仓库里只有编号和关键词。
 - 脸部参考图来自 [ギア](https://x.com/giaaibusi) 的 [AI 模型脸数据库](https://ai-portrait-gallery.pages.dev/)，许可是 CC0。仓库里只有编号、分区、发长、造型名和公开图地址。中文目录参考 [sleepy-zone/ai-ref-library-cn](https://github.com/sleepy-zone/ai-ref-library-cn)，不表示图像作者改成了该仓库的维护者。
-- [大肥鱼](https://github.com/TreapGoGo/deepseek-whale-girl) 设定图的作者是 [TreapGoGo](https://github.com/TreapGoGo)，版权所有 (c) 2026 TreapGoGo，按该仓库的 MIT 许可使用。这是社区形象，不代表深度求索。
+- 大肥鱼的角色设计来自 上善无形 的原创角色和 ZipZipPipe 的女仆装鲸鱼娘，按 [CC BY-NC-SA 4.0](https://creativecommons.org/licenses/by-nc-sa/4.0/) 授权（署名、非商业、相同方式共享）。这张设定图收录于社区仓库 [TreapGoGo/deepseek-whale-girl](https://github.com/TreapGoGo/deepseek-whale-girl)，由 ChatGPT 生成；该仓库的 MIT 只覆盖它的网站代码，不覆盖这张图。这是非官方社区形象，不代表深度求索。
 - [DeepSeek](https://www.deepseek.com/) 是深度求索的商标。这份许可不授予该商标。
