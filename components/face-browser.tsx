@@ -15,6 +15,9 @@ export type FaceItem = {
   label: string
   keywords: string
   hot: boolean
+  credit?: string
+  author?: string
+  sourceUrl?: string
 }
 
 type FaceGroup = {
@@ -193,6 +196,7 @@ export function FaceBrowser({
                   <div className="space-y-1 px-3 py-2.5">
                     <p className="truncate text-sm font-medium">{face.id}</p>
                     <p className="line-clamp-2 text-xs text-muted-foreground">{caption}</p>
+                    {face.credit ? <p className="truncate text-[10px] leading-4 text-muted-foreground" title={face.sourceUrl}>来源 {face.author ? `${face.credit} · ${face.author}` : face.credit}</p> : null}
                   </div>
                 </button>
               )

@@ -89,6 +89,10 @@ After restarting that profile:
 
 Adult poses and adult costumes stay out of search results. Pass `include_adult: true` to `search_poses` or `search_costumes` only when that is explicitly requested.
 
+## Anime plates
+
+Besides the line-art poses, costume gallery, and face library, the studio ships a smaller anime set for poses, clothing, and faces. Image files stay on their hosts. Public-domain illustrations are read from [publicdomainq.net](https://publicdomainq.net/). A few plates are read from [Wikimedia Commons](https://commons.wikimedia.org/) under CC0 or CC BY-SA, with the author stored on the entry. Cards and search results name the image host. These plates are visible by default and have no adult category.
+
 ## Checks
 
 ```bash

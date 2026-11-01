@@ -1,5 +1,21 @@
-import catalog from "../data/costumes.json" with { type: "json" }
+import baseCatalog from "../data/costumes.json" with { type: "json" }
+import { ANIME_COSTUME_NOTE, animeCostumes } from "./anime-library.mjs"
 import { customCostumeRecord, isCustomCostumeId } from "./custom.mjs"
+import { fetchRemoteImage, isAbsoluteImageUrl, isAllowedRemoteImage } from "./remote-image.mjs"
+
+const animeCategories = [
+  { id: "casual", label: "日常", count: animeCostumes.filter((item) => item.category === "casual").length, adult: false },
+  { id: "kimono", label: "和风", count: animeCostumes.filter((item) => item.category === "kimono").length, adult: false },
+  { id: "outerwear", label: "外套", count: animeCostumes.filter((item) => item.category === "outerwear").length, adult: false },
+]
+
+const catalog = {
+  ...baseCatalog,
+  attribution: `${baseCatalog.attribution}${ANIME_COSTUME_NOTE}`,
+  total: baseCatalog.total + animeCostumes.length,
+  categories: [...baseCatalog.categories, ...animeCategories],
+  costumes: [...baseCatalog.costumes, ...animeCostumes],
+}
 
 const byId = new Map(catalog.costumes.map((costume) => [costume.id, costume]))
 const cache = new Map()
@@ -36,7 +52,7 @@ export function searchCostumes({ query = "", category = "", includeAdult = false
     if (!includeAdult && costume.adult) continue
     if (category && costume.category !== category) continue
     if (parts.length > 0) {
-      const hay = `${costume.id} ${costume.keywords} ${costume.label}`.toLowerCase()
+      const hay = `${costume.id} ${costume.keywords} ${costume.label} ${costume.credit ?? ""}`.toLowerCase()
       if (!parts.every((part) => hay.includes(part))) continue
     }
     matches.push(costume)
@@ -57,6 +73,15 @@ export function costumeFile(costume, size) {
 }
 
 export async function fetchCostumeBytes(relativePath, fetchImpl = fetch) {
+  if (isAbsoluteImageUrl(relativePath)) {
+    if (!isAllowedRemoteImage(relativePath)) throw new Error("图片地址无效")
+    const cached = cache.get(relativePath)
+    if (cached) return cached
+    const value = await fetchRemoteImage(relativePath, { role: "costume", fetchImpl, maxBytes: 12_000_000 })
+    if (cache.size > 80) cache.delete(cache.keys().next().value)
+    cache.set(relativePath, value)
+    return value
+  }
   if (!isSafeCostumePath(relativePath)) throw new Error("服装图路径无效")
   const cached = cache.get(relativePath)
   if (cached) return cached

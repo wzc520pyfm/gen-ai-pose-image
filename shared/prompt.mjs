@@ -6,6 +6,10 @@ const ANGLE_NOTE = {
   仰视: "low angle, camera looking up",
 }
 
+function wornCostume(costume) {
+  return costume?.plate === "worn"
+}
+
 function referenceOrder({ characterCount, costume }) {
   const count = Math.max(1, Number(characterCount) || 1)
   const parts = [count === 1 ? "第 1 张是角色" : `前 ${count} 张是同一角色`]
@@ -13,11 +17,20 @@ function referenceOrder({ characterCount, costume }) {
   parts.push(`第 ${index} 张是脸部参考，只取五官、表情、脸型和发型`)
   index += 1
   if (costume) {
-    parts.push(`第 ${index} 张是没有人物的服装图`)
+    parts.push(wornCostume(costume) ? `第 ${index} 张是穿着衣服的参考，只取衣服` : `第 ${index} 张是没有人物的服装图`)
     index += 1
   }
   parts.push(`从第 ${index} 张起是姿势结构线稿`)
   return `根据参考图重绘指定角色。${parts.join("，")}。`
+}
+
+function poseGuide(poses) {
+  const illustrated = poses.some((pose) => pose?.plate === "illustration")
+  const lined = poses.some((pose) => pose?.plate !== "illustration")
+  const lines = []
+  if (lined) lines.push("只从线稿提取身体姿态、重心、四肢位置和镜头角度。不要把线稿、关节圆、比例辅助线画进成图。")
+  if (illustrated) lines.push("标注为插画的姿势参考不是关节线稿。只提取身体姿态、重心、四肢位置和镜头角度，不要照抄那张图的脸、衣服、发色、画风或背景。")
+  return lines.join("\n")
 }
 
 function faceLines(face, character) {
@@ -42,10 +55,13 @@ function outfitLines({ character, costume, keepOutfit, face }) {
       : face
         ? "保留参考图里已有的耳朵、角或尾巴。角色描述里的原服装，以及第一张参考图上的衣服，这次都不要保留。"
         : "保留角色的脸、发型、发色，以及参考图里已有的耳朵、角或尾巴。角色描述里的原服装，以及第一张参考图上的衣服，这次都不要保留。"
-    return [
-      face
+    const clothing = wornCostume(costume)
+      ? "服装参考里可能有穿着者。只取衣服的颜色、层次、鞋袜和配饰，不要照抄穿着者的脸、发型或身体。"
+      : face
         ? "服装参考图只有衣服，没有人物。把角色换成这套衣服，包括颜色、层次、鞋袜和配饰。脸、表情、发色和发型以脸部参考为准。"
-        : "中间那张参考图只有衣服，没有人物。把角色换成这套衣服，包括颜色、层次、鞋袜和配饰。",
+        : "中间那张参考图只有衣服，没有人物。把角色换成这套衣服，包括颜色、层次、鞋袜和配饰。"
+    return [
+      clothing,
       `服装编号 ${costume.id}。描述：${costume.keywords}。`,
       identity,
       "不要画出服装图里的人台、假人或空白身体。",
@@ -71,9 +87,11 @@ export function composePrompt({ character, poses, extraPrompt = "", keepOutfit =
     face
       ? referenceOrder({ characterCount, costume })
       : costume
-        ? "根据参考图重绘指定角色。第一张是角色，接着是没有人物的服装图，最后是姿势结构线稿。"
+        ? wornCostume(costume)
+          ? "根据参考图重绘指定角色。第一张是角色，接着是穿着衣服的参考，只取衣服，最后是姿势结构线稿。"
+          : "根据参考图重绘指定角色。第一张是角色，接着是没有人物的服装图，最后是姿势结构线稿。"
         : "根据参考图重绘指定角色。排在前面的参考图是角色，后面的参考图是姿势结构线稿。",
-    "只从线稿提取身体姿态、重心、四肢位置和镜头角度。不要把线稿、关节圆、比例辅助线画进成图。",
+    poseGuide(poses),
     "",
     "角色（必须保持身份）：",
     character.prompt,

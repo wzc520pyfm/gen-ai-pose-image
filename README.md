@@ -89,6 +89,10 @@ dsh plugin --profile web add gen-ai-pose-image
 
 成人向姿势和成人向服装默认不进搜索结果。只有明确要求时才给 `search_poses` 或 `search_costumes` 传 `include_adult: true`。
 
+## 二次元补充图库
+
+在原有线稿、衣装集和脸库之外，工作室另有一组二次元姿势、服装和脸部。图片不放进仓库，按每条记录里的地址向图像所在站点读取。公有领域插画来自 [publicdomainq.net](https://publicdomainq.net/)。另有几张来自 [Wikimedia Commons](https://commons.wikimedia.org/)，许可是 CC0 或 CC BY-SA，条目里写了作者。卡片和搜索结果都注明图像站点。这些补充图默认可见，没有成人向分类。
+
 ## 检查
 
 ```bash

@@ -1,3 +1,4 @@
+import { hostCredit } from "./anime-library.mjs"
 import { costumeVisiblePrompt } from "./costume-prompt.mjs"
 
 export function createCustomId(kind, random = () => globalThis.crypto.randomUUID()) {
@@ -131,6 +132,7 @@ export function toPoseSearchResult(poses) {
       adult: pose.adult,
       people: pose.people,
       source: pose.source === "custom" ? "custom" : "catalog",
+      ...hostCredit(pose),
       views: (pose.views || []).map((view) => ({ id: view.id, angle: view.angle })),
     })),
   }
@@ -147,6 +149,7 @@ export function toCostumeSearchResult(costumes) {
       keywords: costume.keywords,
       adult: costume.adult,
       source: costume.source === "custom" ? "custom" : "catalog",
+      ...hostCredit(costume),
     })),
   }
 }

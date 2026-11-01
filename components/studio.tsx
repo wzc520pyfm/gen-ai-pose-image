@@ -51,7 +51,7 @@ import type { Catalog, GeneratedResult, Pose, PoseView, PromptCard } from "@/lib
 
 type Selection = Record<string, string>
 type Library = "poses" | "costumes" | "faces"
-type CostumePick = { id: string; label: string; keywords: string }
+type CostumePick = { id: string; label: string; keywords: string; plate?: "worn" }
 type FacePick = { id: string; section: string; hair: string; label: string; keywords: string }
 
 const REPOSITORY_URL = "https://github.com/wzc520pyfm/gen-ai-pose-image"
@@ -76,7 +76,7 @@ function StudioFrame({ embedded }: { embedded: boolean }) {
   const { basePath } = useStudioEnv()
   const [catalog, setCatalog] = useState<Catalog | null>(null)
   const [catalogError, setCatalogError] = useState("")
-  const [costumeCatalog, setCostumeCatalog] = useState<Array<{ id: string; label: string; keywords: string; adult?: boolean }>>([])
+  const [costumeCatalog, setCostumeCatalog] = useState<Array<{ id: string; label: string; keywords: string; adult?: boolean; plate?: "worn" }>>([])
   const [costumeCatalogReady, setCostumeCatalogReady] = useState(false)
   const [costumeCatalogError, setCostumeCatalogError] = useState("")
   const [faceCatalog, setFaceCatalog] = useState<FacePick[]>([])
@@ -143,7 +143,7 @@ function StudioFrame({ embedded }: { embedded: boolean }) {
     fetch(studioUrl(basePath, "/api/costumes"), { signal: controller.signal })
       .then(async (response) => {
         if (!response.ok) throw new Error("服装目录没有加载出来")
-        return response.json() as Promise<{ costumes?: Array<{ id: string; label: string; keywords: string; adult?: boolean }> }>
+        return response.json() as Promise<{ costumes?: Array<{ id: string; label: string; keywords: string; adult?: boolean; plate?: "worn" }> }>
       })
       .then((payload) => {
         setCostumeCatalog(Array.isArray(payload.costumes) ? payload.costumes : [])
@@ -531,8 +531,10 @@ function StudioFrame({ embedded }: { embedded: boolean }) {
       return
     }
     setLimitNote("")
+    const pickedCostume = pick.costume
     setSelected({ [pick.pose.id]: pick.view.id })
-    setCostume({ id: pick.costume.id, label: pick.costume.label, keywords: pick.costume.keywords })
+    const wornPlate = costumeCatalog.find((item) => item.id === pickedCostume.id)?.plate === "worn"
+    setCostume({ id: pickedCostume.id, label: pickedCostume.label, keywords: pickedCostume.keywords, ...(wornPlate ? { plate: "worn" as const } : {}) })
     setFace({
       id: pick.face.id,
       section: pick.face.section ?? "",
@@ -556,7 +558,8 @@ function StudioFrame({ embedded }: { embedded: boolean }) {
     setRunning(true)
     setRunError("")
     setResults([])
-    const costumePick = costume ? { id: costume.id, label: costume.label, keywords: costume.keywords } : null
+    const storedPlate = costume ? costumeCatalog.find((item) => item.id === costume.id)?.plate : undefined
+    const costumePick = costume ? { id: costume.id, label: costume.label, keywords: costume.keywords, ...((costume.plate || storedPlate) ? { plate: costume.plate || storedPlate } : {}) } : null
     const bodyBase = {
       engine: settings.engine,
       provider: settings.provider,
@@ -574,7 +577,7 @@ function StudioFrame({ embedded }: { embedded: boolean }) {
     const generateRequest = async (ids: string[], mode: StudioSettings["mode"]) => {
       const customReferences = await customReferenceBody(ids, costume?.id ?? "", customPoses, customCostumes)
       if (settings.engine === "comfyui") {
-        return resultCards(await requestComfyGenerate(basePath, settings, { ...bodyBase, mode, items: comfyItems(ids), costume, face, customReferences }, controller.signal))
+        return resultCards(await requestComfyGenerate(basePath, settings, { ...bodyBase, mode, items: comfyItems(ids), costume: costumePick, face, customReferences }, controller.signal))
       }
       return requestGenerate(basePath, { ...bodyBase, mode, viewIds: ids, customReferences }, controller.signal)
     }
@@ -928,7 +931,7 @@ function StudioFrame({ embedded }: { embedded: boolean }) {
               onFocusApplied={clearCostumeFocus}
               onRequestAdult={(categoryId) => setAdultAsk(`costume:${categoryId}`)}
               selectedId={costume?.id ?? null}
-              onSelect={(item) => setCostume((current) => current?.id === item.id ? null : { id: item.id, label: item.label, keywords: item.keywords })}
+              onSelect={(item) => setCostume((current) => current?.id === item.id ? null : { id: item.id, label: item.label, keywords: item.keywords, ...(item.plate ? { plate: item.plate } : {}) })}
               customCostumes={customCostumeCards}
               onSaveCustom={(draft) => saveCustom("costume", draft)}
               onDeleteCustom={(id) => void removeCustomCostume(id)}

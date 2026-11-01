@@ -12,13 +12,13 @@ const FACE_ID = "f009cba9893"
 
 test("face catalog keeps the public portrait sections and hair lengths", () => {
   const catalog = getFaceCatalog()
-  assert.equal(catalog.total, 1499)
-  assert.equal(catalog.faces.length, 1499)
+  assert.equal(catalog.total, 1507)
+  assert.equal(catalog.faces.length, 1507)
   assert.equal(catalog.license, "CC0-1.0")
   assert.equal(catalog.origin, "https://ai-portrait-gallery.pages.dev")
   assert.equal(catalog.author, "https://x.com/giaaibusi")
-  assert.deepEqual(catalog.sections.map((item) => [item.id, item.count]), [["脸部特写", 893], ["造型", 606]])
-  assert.deepEqual(catalog.hairs.map((item) => item.count), [727, 376, 260, 136])
+  assert.deepEqual(catalog.sections.map((item) => [item.id, item.count]), [["脸部特写", 893], ["造型", 606], ["anime-closeup", 5], ["anime-expression", 3]])
+  assert.deepEqual(catalog.hairs.map((item) => item.count), [731, 377, 260, 139])
   const face = getFace(FACE_ID)
   assert.equal(face.section, "脸部特写")
   assert.equal(face.hair, "短发")

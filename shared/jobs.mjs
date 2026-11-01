@@ -147,6 +147,7 @@ function planPose(id, input) {
       system: found.pose.system,
       angle: found.view.angle,
       people: found.pose.people,
+      ...(found.pose.plate ? { plate: found.pose.plate } : {}),
     },
   }
 }
@@ -220,7 +221,7 @@ export function planRequest(input = {}) {
   const keepOutfit = costume ? false : input.keepOutfit !== false
   const extraPrompt = typeof input.extraPrompt === "string" ? input.extraPrompt.replace(/[^\S\n]+/g, " ").trim().slice(0, 2000) : ""
   const aspectRatio = ASPECTS.has(input.aspectRatio) ? input.aspectRatio : "3:4"
-  const costumePrompt = costume ? { id: costume.id, keywords: costume.keywords } : null
+  const costumePrompt = costume ? { id: costume.id, keywords: costume.keywords, ...(costume.plate ? { plate: costume.plate } : {}) } : null
   const facePrompt = face ? { id: face.id, section: face.section, hair: face.hair, label: face.label, keywords: face.keywords } : null
   const promptInput = { character, extraPrompt, keepOutfit, costume: costumePrompt, face: facePrompt, characterCount: characterCount || 1 }
   const sheetPrompt = composePrompt({ ...promptInput, poses: items.map((item) => item.pose).filter(Boolean), mode: "sheet" })

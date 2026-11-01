@@ -17,6 +17,10 @@ type Costume = {
   keywords: string
   adult: boolean
   thumb: string
+  credit?: string
+  author?: string
+  sourceUrl?: string
+  plate?: "worn"
 }
 
 type CostumeCategory = {
@@ -216,6 +220,7 @@ export function CostumeBrowser({
                 <div className="space-y-1 px-3 py-2.5">
                   <p className="text-sm font-medium">{costume.id}</p>
                   <p className="line-clamp-1 text-xs text-muted-foreground @min-[640px]/studio:line-clamp-2">{costume.label} · {costume.keywords}</p>
+                  {costume.credit ? <p className="truncate text-[10px] leading-4 text-muted-foreground" title={costume.sourceUrl}>来源 {costume.author ? `${costume.credit} · ${costume.author}` : costume.credit}</p> : null}
                 </div>
               </button>
             )

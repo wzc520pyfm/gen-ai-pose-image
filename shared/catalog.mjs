@@ -1,5 +1,23 @@
-import catalog from "../data/catalog.json" with { type: "json" }
+import baseCatalog from "../data/catalog.json" with { type: "json" }
+import { ANIME_POSE_NOTE, animePoses } from "./anime-library.mjs"
 import { customPoseRecord, isCustomPoseId } from "./custom.mjs"
+
+const catalog = {
+  ...baseCatalog,
+  attribution: `${baseCatalog.attribution}${ANIME_POSE_NOTE}`,
+  poseCount: baseCatalog.poseCount + animePoses.length,
+  viewCount: baseCatalog.viewCount + animePoses.reduce((sum, pose) => sum + pose.views.length, 0),
+  systems: [
+    ...baseCatalog.systems,
+    {
+      id: "anime",
+      name: "二次元姿势",
+      adult: false,
+      poseCount: animePoses.length,
+    },
+  ],
+  poses: [...baseCatalog.poses, ...animePoses],
+}
 
 const byPose = new Map()
 const byView = new Map()
@@ -62,7 +80,7 @@ export function searchPoses({
     if (systemId && pose.systemId !== systemId) continue
     if (category && pose.category !== category) continue
     if (parts.length > 0) {
-      const hay = `${pose.name} ${pose.code} ${pose.category} ${pose.system} ${pose.id}`.toLowerCase()
+      const hay = `${pose.name} ${pose.code} ${pose.category} ${pose.system} ${pose.id} ${pose.keywords ?? ""} ${pose.credit ?? ""}`.toLowerCase()
       if (!parts.every((part) => hay.includes(part))) continue
     }
     matches.push(pose)

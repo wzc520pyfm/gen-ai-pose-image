@@ -467,13 +467,18 @@ function PoseCard({
           className="absolute right-2 bottom-2 rounded-full bg-black/60 px-2 py-0.5 text-[11px] text-white"
           onClick={onPreview}
         >
-          看线稿
+          {pose.plate === "illustration" ? "看参考" : "看线稿"}
         </button>
       </div>
       <div className="flex items-center justify-between gap-2 px-2.5 py-2">
         <h3 className="min-w-0 flex-1 truncate text-sm leading-5 font-medium" title={pose.name}>{pose.name}</h3>
         <span className="max-w-[46%] shrink-0 truncate pt-0.5 text-right text-xs text-muted-foreground" title={pose.category}>{pose.category}</span>
       </div>
+      {pose.credit ? (
+        <p className="truncate px-2.5 pb-1 text-[10px] leading-4 text-muted-foreground" title={pose.sourceUrl}>
+          来源 {pose.author ? `${pose.credit} · ${pose.author}` : pose.credit}
+        </p>
+      ) : null}
       <div role="group" aria-label={`${pose.name}的视角`} className={`grid gap-1 px-2 pb-2.5 ${columns}`}>
         {views.map((item) => {
           const active = item.id === view.id

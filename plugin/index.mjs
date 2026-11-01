@@ -114,10 +114,10 @@ export function apply(ctx, config = {}) {
   const defineTool = loadDefineTool()
   ctx.tools.register(defineTool({
     name: "search_poses",
-    description: "Search the Chinese AI pose gallery (ai-pose-gallery-zh): 288 pose groups and 1439 angle views, plus custom poses saved in the Lanpose studio on this machine. Custom hits have source custom. Use before generate_pose_images. Adult categories stay hidden unless include_adult is true.",
+    description: "Search pose references: the Chinese AI pose gallery (ai-pose-gallery-zh, 288 groups and 1439 views) plus Lanzi anime pose plates hosted on publicdomainq.net and Wikimedia Commons. Anime hits include credit and sourceUrl for the image host. Custom poses saved in the Lanpose studio have source custom. Use before generate_pose_images. Adult categories stay hidden unless include_adult is true.",
     parameters: {
-      query: { type: "string", description: "Pose name, code such as P001, category, or id." },
-      system_id: { type: "string", enum: ["full", "sexy", "bust", "pair"], description: "full=标准全身, sexy=性感全身, bust=上半身, pair=双人. Omit to search all visible poses." },
+      query: { type: "string", description: "Pose name, code such as P001 or A01, category, or id. Use 二次元 to find the anime plates." },
+      system_id: { type: "string", enum: ["full", "sexy", "bust", "pair", "anime"], description: "full=标准全身, sexy=性感全身, bust=上半身, pair=双人, anime=二次元姿势. Omit to search all visible poses." },
       category: { type: "string", description: "Exact category name, for example 站姿 or 坐姿." },
       include_adult: { type: "boolean", description: "Include sexy and couple poses. Default false." },
       limit: { type: "integer", description: "Max results, 1-30. Default 12." },
@@ -164,10 +164,10 @@ export function apply(ctx, config = {}) {
 
   ctx.tools.register(defineTool({
     name: "search_costumes",
-    description: "Search clothing-only references from the costume gallery at ai-costume-gallery.pages.dev, plus custom costumes saved in the Lanpose studio on this machine. Custom hits have source custom. Images contain garments, not people. Use a returned id as costume_id in generate_pose_images. Lingerie, swimwear, and sexy categories stay hidden unless include_adult is true.",
+    description: "Search clothing references from the costume gallery at ai-costume-gallery.pages.dev, plus Lanzi anime outfit plates and custom costumes saved in the Lanpose studio. Custom hits have source custom. Gallery images contain garments, not people. Anime plates include credit and sourceUrl for the image host and may show a wearer; generation copies the outfit only. Use a returned id as costume_id in generate_pose_images. Lingerie, swimwear, and sexy categories stay hidden unless include_adult is true.",
     parameters: {
-      query: { type: "string", description: "Costume id such as SPR-0001, or English keywords such as denim coat." },
-      category: { type: "string", enum: ["春", "夏", "秋", "冬", "パーティ", "ランジェリー", "水着", "セクシー"], description: "春=spring, 夏=summer, 秋=autumn, 冬=winter, パーティ=party, ランジェリー=lingerie, 水着=swimwear, セクシー=sexy." },
+      query: { type: "string", description: "Costume id such as SPR-0001 or ANM-0001, or English keywords such as denim coat or kimono. Use 二次元 to find the anime plates." },
+      category: { type: "string", enum: ["春", "夏", "秋", "冬", "パーティ", "ランジェリー", "水着", "セクシー", "casual", "kimono", "outerwear"], description: "春=spring, 夏=summer, 秋=autumn, 冬=winter, パーティ=party, ランジェリー=lingerie, 水着=swimwear, セクシー=sexy, casual=日常, kimono=和风, outerwear=外套." },
       include_adult: { type: "boolean", description: "Include lingerie, swimwear, and sexy outfits. Default false." },
       limit: { type: "integer", description: "Max results, 1-30. Default 12." },
     },

@@ -1,3 +1,5 @@
+import { fetchRemoteImage, isAbsoluteImageUrl, isAllowedRemoteImage } from "./remote-image.mjs"
+
 const poseCache = new Map()
 
 export function poseFileFor(view, size) {
@@ -9,6 +11,15 @@ export function isSafePosePath(relativePath) {
 }
 
 export async function fetchPoseBytes(relativePath, fetchImpl = fetch) {
+  if (isAbsoluteImageUrl(relativePath)) {
+    if (!isAllowedRemoteImage(relativePath)) throw new Error("图片地址无效")
+    const cached = poseCache.get(relativePath)
+    if (cached) return cached
+    const value = await fetchRemoteImage(relativePath, { role: "pose", fetchImpl, maxBytes: 8_000_000 })
+    if (poseCache.size > 512) poseCache.delete(poseCache.keys().next().value)
+    poseCache.set(relativePath, value)
+    return value
+  }
   if (!isSafePosePath(relativePath)) throw new Error("姿势图路径无效")
   const cached = poseCache.get(relativePath)
   if (cached) return cached
