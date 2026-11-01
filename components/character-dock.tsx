@@ -308,7 +308,7 @@ export function CharacterDock({
       ) : null}
       {sheetError ? <p className="text-sm text-[#fecaca]">{sheetError}</p> : null}
       {error ? <p className="text-sm text-[#fecaca]">{error}</p> : null}
-      <label className="mt-auto flex items-center justify-between gap-3 rounded-xl bg-white/10 px-3 py-2.5 text-sm @min-[1024px]/studio:py-3">
+      <div className="mt-auto flex items-center justify-between gap-3 rounded-xl bg-white/10 px-3 py-2.5 text-sm @min-[1024px]/studio:py-3">
         <span className="min-w-0">
           <span className="block text-white">保持服装</span>
           <span className="mt-1 block text-xs leading-5 text-[#cbd5e1] @min-[640px]/studio:hidden">
@@ -326,11 +326,13 @@ export function CharacterDock({
           isDisabled={outfitLocked}
           aria-label="保持服装"
         >
-          <Switch.Control>
-            <Switch.Thumb />
-          </Switch.Control>
+          <Switch.Content>
+            <Switch.Control>
+              <Switch.Thumb />
+            </Switch.Control>
+          </Switch.Content>
         </Switch>
-      </label>
+      </div>
     </aside>
   )
 }

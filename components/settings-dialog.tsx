@@ -150,7 +150,7 @@ export function SettingsDialog({
             <Button variant={settings.mode === "each" ? "primary" : "outline"} onPress={() => patch({ mode: "each" })}>逐张</Button>
             <Button variant={settings.mode === "sheet" ? "primary" : "outline"} onPress={() => patch({ mode: "sheet" })}>拼成一张</Button>
           </div>
-          <label className="flex items-center justify-between gap-3 rounded-xl bg-muted px-3 py-3 text-sm">
+          <div className="flex items-center justify-between gap-3 rounded-xl bg-muted px-3 py-3 text-sm">
             <span>
               <span className="block font-medium">违禁词优化</span>
               <span className="mt-1 block text-xs leading-5 text-muted-foreground">关闭时直接写不要头、不要腿、不要皮肤。打开后改成委婉说法，避开审核敏感词。</span>
@@ -160,12 +160,14 @@ export function SettingsDialog({
               onChange={(value) => patch({ sensitivePromptOptimize: value })}
               aria-label="违禁词优化"
             >
-              <Switch.Control>
-                <Switch.Thumb />
-              </Switch.Control>
+              <Switch.Content>
+                <Switch.Control>
+                  <Switch.Thumb />
+                </Switch.Control>
+              </Switch.Content>
             </Switch>
-          </label>
-          <label className="flex items-center justify-between gap-3 rounded-xl bg-muted px-3 py-3 text-sm">
+          </div>
+          <div className="flex items-center justify-between gap-3 rounded-xl bg-muted px-3 py-3 text-sm">
             <span>
               <span className="block font-medium">显示成人向姿势</span>
               <span className="mt-1 block text-xs leading-5 text-muted-foreground">性感系、双人缠绵，以及上半身里的大胆分类。参考图仍是结构线稿，默认继续保持服装。</span>
@@ -175,11 +177,13 @@ export function SettingsDialog({
               onChange={(value) => patch({ showAdult: value })}
               aria-label="显示成人向姿势"
             >
-              <Switch.Control>
-                <Switch.Thumb />
-              </Switch.Control>
+              <Switch.Content>
+                <Switch.Control>
+                  <Switch.Thumb />
+                </Switch.Control>
+              </Switch.Content>
             </Switch>
-          </label>
+          </div>
           </Modal.Body>
         </Modal.Dialog>
       </Modal.Container>

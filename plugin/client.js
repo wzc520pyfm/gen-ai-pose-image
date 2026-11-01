@@ -23708,7 +23708,7 @@ function CharacterDock({
     ) : null,
     sheetError ? /* @__PURE__ */ (0, import_jsx_runtime22.jsx)("p", { className: "text-sm text-[#fecaca]", children: sheetError }) : null,
     error ? /* @__PURE__ */ (0, import_jsx_runtime22.jsx)("p", { className: "text-sm text-[#fecaca]", children: error }) : null,
-    /* @__PURE__ */ (0, import_jsx_runtime22.jsxs)("label", { className: "mt-auto flex items-center justify-between gap-3 rounded-xl bg-white/10 px-3 py-2.5 text-sm @min-[1024px]/studio:py-3", children: [
+    /* @__PURE__ */ (0, import_jsx_runtime22.jsxs)("div", { className: "mt-auto flex items-center justify-between gap-3 rounded-xl bg-white/10 px-3 py-2.5 text-sm @min-[1024px]/studio:py-3", children: [
       /* @__PURE__ */ (0, import_jsx_runtime22.jsxs)("span", { className: "min-w-0", children: [
         /* @__PURE__ */ (0, import_jsx_runtime22.jsx)("span", { className: "block text-white", children: "保持服装" }),
         /* @__PURE__ */ (0, import_jsx_runtime22.jsx)("span", { className: "mt-1 block text-xs leading-5 text-[#cbd5e1] @min-[640px]/studio:hidden", children: outfitLocked ? "已选服装优先，这个开关先让位。" : "只借姿势，不借线稿里的身体。" }),
@@ -23721,7 +23721,7 @@ function CharacterDock({
           onChange: onKeepOutfit,
           isDisabled: outfitLocked,
           "aria-label": "保持服装",
-          children: /* @__PURE__ */ (0, import_jsx_runtime22.jsx)(Switch2.Control, { children: /* @__PURE__ */ (0, import_jsx_runtime22.jsx)(Switch2.Thumb, {}) })
+          children: /* @__PURE__ */ (0, import_jsx_runtime22.jsx)(Switch2.Content, { children: /* @__PURE__ */ (0, import_jsx_runtime22.jsx)(Switch2.Control, { children: /* @__PURE__ */ (0, import_jsx_runtime22.jsx)(Switch2.Thumb, {}) }) })
         }
       )
     ] })
@@ -24450,7 +24450,7 @@ function CustomReferencePanel({
           )
         ] }) : null,
         notice ? /* @__PURE__ */ (0, import_jsx_runtime25.jsx)("p", { className: "text-xs leading-5 text-muted-foreground", children: notice }) : null,
-        kind === "costume" && onChangeSettings ? /* @__PURE__ */ (0, import_jsx_runtime25.jsxs)("label", { className: "flex items-center justify-between gap-3 rounded-xl bg-muted px-3 py-3 text-sm", children: [
+        kind === "costume" && onChangeSettings ? /* @__PURE__ */ (0, import_jsx_runtime25.jsxs)("div", { className: "flex items-center justify-between gap-3 rounded-xl bg-muted px-3 py-3 text-sm", children: [
           /* @__PURE__ */ (0, import_jsx_runtime25.jsxs)("span", { children: [
             /* @__PURE__ */ (0, import_jsx_runtime25.jsx)("span", { className: "block font-medium", children: "违禁词优化" }),
             /* @__PURE__ */ (0, import_jsx_runtime25.jsx)("span", { className: "mt-1 block text-xs leading-5 text-muted-foreground", children: "关闭时直接写不要头、不要腿、不要皮肤。打开后改成委婉说法，避开审核敏感词。切换后会按当前描述重新扩写。" })
@@ -24464,11 +24464,11 @@ function CustomReferencePanel({
                 if (mode !== "upload" && !editedRef.current) void fillPrompt(description, showAdult && adult, value);
               },
               "aria-label": "违禁词优化",
-              children: /* @__PURE__ */ (0, import_jsx_runtime25.jsx)(Switch2.Control, { children: /* @__PURE__ */ (0, import_jsx_runtime25.jsx)(Switch2.Thumb, {}) })
+              children: /* @__PURE__ */ (0, import_jsx_runtime25.jsx)(Switch2.Content, { children: /* @__PURE__ */ (0, import_jsx_runtime25.jsx)(Switch2.Control, { children: /* @__PURE__ */ (0, import_jsx_runtime25.jsx)(Switch2.Thumb, {}) }) })
             }
           )
         ] }) : null,
-        showAdult ? /* @__PURE__ */ (0, import_jsx_runtime25.jsxs)("label", { className: "flex items-center justify-between gap-3 rounded-xl bg-muted px-3 py-3 text-sm", children: [
+        showAdult ? /* @__PURE__ */ (0, import_jsx_runtime25.jsxs)("div", { className: "flex items-center justify-between gap-3 rounded-xl bg-muted px-3 py-3 text-sm", children: [
           /* @__PURE__ */ (0, import_jsx_runtime25.jsx)("span", { children: "标成成人向参考。默认关闭，未打开成人向时不会用来出图。" }),
           /* @__PURE__ */ (0, import_jsx_runtime25.jsx)(
             Switch2,
@@ -24479,7 +24479,7 @@ function CustomReferencePanel({
                 if (mode !== "upload" && !editedRef.current) void fillPrompt(description, value);
               },
               "aria-label": "标成成人向参考",
-              children: /* @__PURE__ */ (0, import_jsx_runtime25.jsx)(Switch2.Control, { children: /* @__PURE__ */ (0, import_jsx_runtime25.jsx)(Switch2.Thumb, {}) })
+              children: /* @__PURE__ */ (0, import_jsx_runtime25.jsx)(Switch2.Content, { children: /* @__PURE__ */ (0, import_jsx_runtime25.jsx)(Switch2.Control, { children: /* @__PURE__ */ (0, import_jsx_runtime25.jsx)(Switch2.Thumb, {}) }) })
             }
           )
         ] }) : null,
@@ -25486,7 +25486,7 @@ function SettingsDialog({
         /* @__PURE__ */ (0, import_jsx_runtime29.jsx)(Button2, { variant: settings.mode === "each" ? "primary" : "outline", onPress: () => patch({ mode: "each" }), children: "逐张" }),
         /* @__PURE__ */ (0, import_jsx_runtime29.jsx)(Button2, { variant: settings.mode === "sheet" ? "primary" : "outline", onPress: () => patch({ mode: "sheet" }), children: "拼成一张" })
       ] }),
-      /* @__PURE__ */ (0, import_jsx_runtime29.jsxs)("label", { className: "flex items-center justify-between gap-3 rounded-xl bg-muted px-3 py-3 text-sm", children: [
+      /* @__PURE__ */ (0, import_jsx_runtime29.jsxs)("div", { className: "flex items-center justify-between gap-3 rounded-xl bg-muted px-3 py-3 text-sm", children: [
         /* @__PURE__ */ (0, import_jsx_runtime29.jsxs)("span", { children: [
           /* @__PURE__ */ (0, import_jsx_runtime29.jsx)("span", { className: "block font-medium", children: "违禁词优化" }),
           /* @__PURE__ */ (0, import_jsx_runtime29.jsx)("span", { className: "mt-1 block text-xs leading-5 text-muted-foreground", children: "关闭时直接写不要头、不要腿、不要皮肤。打开后改成委婉说法，避开审核敏感词。" })
@@ -25497,11 +25497,11 @@ function SettingsDialog({
             isSelected: settings.sensitivePromptOptimize,
             onChange: (value) => patch({ sensitivePromptOptimize: value }),
             "aria-label": "违禁词优化",
-            children: /* @__PURE__ */ (0, import_jsx_runtime29.jsx)(Switch2.Control, { children: /* @__PURE__ */ (0, import_jsx_runtime29.jsx)(Switch2.Thumb, {}) })
+            children: /* @__PURE__ */ (0, import_jsx_runtime29.jsx)(Switch2.Content, { children: /* @__PURE__ */ (0, import_jsx_runtime29.jsx)(Switch2.Control, { children: /* @__PURE__ */ (0, import_jsx_runtime29.jsx)(Switch2.Thumb, {}) }) })
           }
         )
       ] }),
-      /* @__PURE__ */ (0, import_jsx_runtime29.jsxs)("label", { className: "flex items-center justify-between gap-3 rounded-xl bg-muted px-3 py-3 text-sm", children: [
+      /* @__PURE__ */ (0, import_jsx_runtime29.jsxs)("div", { className: "flex items-center justify-between gap-3 rounded-xl bg-muted px-3 py-3 text-sm", children: [
         /* @__PURE__ */ (0, import_jsx_runtime29.jsxs)("span", { children: [
           /* @__PURE__ */ (0, import_jsx_runtime29.jsx)("span", { className: "block font-medium", children: "显示成人向姿势" }),
           /* @__PURE__ */ (0, import_jsx_runtime29.jsx)("span", { className: "mt-1 block text-xs leading-5 text-muted-foreground", children: "性感系、双人缠绵，以及上半身里的大胆分类。参考图仍是结构线稿，默认继续保持服装。" })
@@ -25512,7 +25512,7 @@ function SettingsDialog({
             isSelected: settings.showAdult,
             onChange: (value) => patch({ showAdult: value }),
             "aria-label": "显示成人向姿势",
-            children: /* @__PURE__ */ (0, import_jsx_runtime29.jsx)(Switch2.Control, { children: /* @__PURE__ */ (0, import_jsx_runtime29.jsx)(Switch2.Thumb, {}) })
+            children: /* @__PURE__ */ (0, import_jsx_runtime29.jsx)(Switch2.Content, { children: /* @__PURE__ */ (0, import_jsx_runtime29.jsx)(Switch2.Control, { children: /* @__PURE__ */ (0, import_jsx_runtime29.jsx)(Switch2.Thumb, {}) }) })
           }
         )
       ] })
@@ -26891,7 +26891,6 @@ function PoseStudio() {
 @layer theme {
   :host, :host {
     --font-sans: var(--font-outfit), "WenQuanYi Micro Hei", "Droid Sans Fallback", "PingFang SC", "Noto Sans SC", sans-serif;
-    --font-mono: "JetBrains Mono", "Cascadia Mono", ui-monospace, monospace;
     --color-amber-50: oklch(98.7% 0.022 95.277);
     --color-amber-700: oklch(55.5% 0.163 48.998);
     --color-amber-800: oklch(47.3% 0.137 46.201);
@@ -26899,7 +26898,6 @@ function PoseStudio() {
     --color-slate-100: oklch(96.8% 0.007 247.896);
     --color-slate-300: oklch(86.9% 0.022 252.894);
     --color-slate-500: oklch(55.4% 0.046 257.417);
-    --color-slate-600: oklch(44.6% 0.043 257.281);
     --color-slate-800: oklch(27.9% 0.041 260.031);
     --color-slate-950: oklch(12.9% 0.042 264.695);
     --color-black: #000;
@@ -26936,7 +26934,6 @@ function PoseStudio() {
     --radius-2xl: calc(var(--radius) * 1.8);
     --radius-3xl: calc(var(--radius) * 2.2);
     --ease-out: cubic-bezier(0, 0, 0.2, 1);
-    --animate-spin: spin 1s linear infinite;
     --animate-pulse: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
     --blur-sm: 8px;
     --blur-md: 12px;
@@ -26944,9 +26941,6 @@ function PoseStudio() {
     --default-transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
     --default-font-family: var(--font-outfit), "WenQuanYi Micro Hei", "Droid Sans Fallback", "PingFang SC", "Noto Sans SC", sans-serif;
     --default-mono-font-family: "JetBrains Mono", "Cascadia Mono", ui-monospace, monospace;
-    --color-background: var(--background);
-    --color-foreground: var(--foreground);
-    --color-accent: var(--accent);
     --color-field: var(--field-background, var(--default));
     --color-field-hover: var(--field-hover);
     --radius-field: var(--field-radius, calc(var(--radius) * 1.5));
@@ -26957,7 +26951,6 @@ function PoseStudio() {
     --ease-out-fluid: cubic-bezier(0.32, 0.72, 0, 1);
     --ease-linear: linear;
     --font-display: var(--font-outfit), "WenQuanYi Micro Hei", "Droid Sans Fallback", "PingFang SC", "Noto Sans SC", sans-serif;
-    --color-sidebar-ring: var(--sidebar-ring);
   }
 }
 @layer base {
@@ -27451,9 +27444,6 @@ function PoseStudio() {
   .animate-pulse {
     animation: var(--animate-pulse);
   }
-  .animate-spin {
-    animation: var(--animate-spin);
-  }
   .cursor-pointer {
     cursor: pointer;
   }
@@ -27629,9 +27619,6 @@ function PoseStudio() {
       border-color: color-mix(in oklab, var(--primary) 40%, transparent);
     }
   }
-  .border-slate-600 {
-    border-color: var(--color-slate-600);
-  }
   .border-white\\/20 {
     border-color: color-mix(in srgb, #fff 20%, transparent);
     @supports (color: color-mix(in lab, red, red)) {
@@ -27646,9 +27633,6 @@ function PoseStudio() {
   }
   .bg-\\[\\#fff1f2\\] {
     background-color: #fff1f2;
-  }
-  .bg-accent {
-    background-color: var(--accent);
   }
   .bg-amber-50 {
     background-color: var(--color-amber-50);
@@ -27685,9 +27669,6 @@ function PoseStudio() {
   }
   .bg-slate-950 {
     background-color: var(--color-slate-950);
-  }
-  .bg-transparent {
-    background-color: transparent;
   }
   .bg-white {
     background-color: var(--color-white);
@@ -27820,9 +27801,6 @@ function PoseStudio() {
   }
   .text-right {
     text-align: right;
-  }
-  .font-display {
-    font-family: var(--font-outfit), "WenQuanYi Micro Hei", "Droid Sans Fallback", "PingFang SC", "Noto Sans SC", sans-serif;
   }
   .text-base {
     font-size: var(--text-base);
@@ -28109,14 +28087,8 @@ function PoseStudio() {
     .\\@min-\\[640px\\]\\/studio\\:grid-cols-3 {
       grid-template-columns: repeat(3, minmax(0, 1fr));
     }
-    .\\@min-\\[640px\\]\\/studio\\:px-4 {
-      padding-inline: calc(var(--spacing) * 4);
-    }
   }
   @container studio (width >= 768px) {
-    .\\@min-\\[768px\\]\\/studio\\:px-5 {
-      padding-inline: calc(var(--spacing) * 5);
-    }
     .\\@min-\\[768px\\]\\/studio\\:px-6 {
       padding-inline: calc(var(--spacing) * 6);
     }
@@ -28157,9 +28129,6 @@ function PoseStudio() {
     .\\@min-\\[1024px\\]\\/studio\\:grid-cols-\\[300px_minmax\\(0\\,1fr\\)_340px\\] {
       grid-template-columns: 300px minmax(0,1fr) 340px;
     }
-    .\\@min-\\[1024px\\]\\/studio\\:grid-rows-\\[minmax\\(0\\,1fr\\)\\] {
-      grid-template-rows: minmax(0,1fr);
-    }
     .\\@min-\\[1024px\\]\\/studio\\:gap-4 {
       gap: calc(var(--spacing) * 4);
     }
@@ -28174,9 +28143,6 @@ function PoseStudio() {
     }
     .\\@min-\\[1024px\\]\\/studio\\:py-5 {
       padding-block: calc(var(--spacing) * 5);
-    }
-    .\\@min-\\[1024px\\]\\/studio\\:pb-8 {
-      padding-bottom: calc(var(--spacing) * 8);
     }
     .\\@min-\\[1024px\\]\\/studio\\:text-2xl {
       font-size: var(--text-2xl);
