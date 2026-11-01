@@ -2,8 +2,6 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react"
 import { useElapsedSeconds, withElapsed } from "@/lib/elapsed"
-import { Settings } from "lucide-react"
-import { Button as HeroButton } from "@heroui/react"
 import { comfyPromptCards, requestComfyGenerate, type ComfyItem } from "@/lib/comfyui-client"
 import { CharacterDock } from "@/components/character-dock"
 import { Composer, type ResultCard } from "@/components/composer"
@@ -13,10 +11,13 @@ import type { CustomDraft } from "@/components/custom-reference-panel"
 import type { HistoryView } from "@/components/history-panel"
 import { PoseBrowser } from "@/components/pose-browser"
 import { SettingsDialog } from "@/components/settings-dialog"
+import { LayoutARail, PreviewPane } from "@/components/studio-preview"
+import { StudioShell } from "@/components/studio-shell"
+import { TimelineBar } from "@/components/studio-timeline"
 import { Button, buttonVariants } from "@/components/ui/button"
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet"
-import { WhaleMark } from "@/components/whale-mark"
+import { loadStudioLayout, normalizeStudioLayout, saveStudioLayout, type StudioLayoutId } from "@/lib/studio-layout"
 import { requestCharacterSheet } from "@/lib/character-client"
 import { readStoredCharacters, writeStoredCharacters, type StoredCharacter } from "@/lib/characters"
 import {
@@ -87,6 +88,7 @@ function StudioFrame({ embedded }: { embedded: boolean }) {
   const [settings, setSettings] = useState<StudioSettings>(DEFAULT_SETTINGS)
   const [settingsReady, setSettingsReady] = useState(false)
   const [library, setLibrary] = useState<Library>("poses")
+  const [layout, setLayout] = useState<StudioLayoutId>(() => loadStudioLayout())
   const [costume, setCostume] = useState<CostumePick | null>(null)
   const [face, setFace] = useState<FacePick | null>(null)
   const [costumeFocus, setCostumeFocus] = useState<string | null>(null)
@@ -747,6 +749,12 @@ function StudioFrame({ embedded }: { embedded: boolean }) {
     thumbUrl: costumeUrls[asset.id] || "",
   }))
 
+  function changeLayout(next: StudioLayoutId) {
+    const id = normalizeStudioLayout(next) as StudioLayoutId
+    setLayout(id)
+    saveStudioLayout(id)
+  }
+
   const composer = (
     <Composer
       selected={chosen}
@@ -798,153 +806,144 @@ function StudioFrame({ embedded }: { embedded: boolean }) {
     />
   )
 
-  return (
-    <div className={`@container/studio flex min-h-0 flex-col overflow-hidden bg-background text-foreground ${embedded ? "h-full" : "h-dvh"}`}>
-      <header className="flex min-h-14 shrink-0 flex-wrap items-center gap-x-3 gap-y-2 border-b bg-white px-3 py-2 @min-[640px]/studio:px-4 @min-[768px]/studio:px-5">
-        <WhaleMark className="size-8 shrink-0" />
-        <h1 className="shrink-0 text-base font-semibold">澜姿</h1>
-        <div className="flex shrink-0 rounded-lg bg-muted p-1" role="tablist" aria-label="图库">
-          <button
-            type="button"
-            role="tab"
-            aria-selected={library === "poses"}
-            onClick={() => setLibrary("poses")}
-            className={`rounded-md px-3 py-1 text-sm whitespace-nowrap ${library === "poses" ? "bg-white font-medium shadow-sm" : "text-muted-foreground"}`}
-          >
-            姿势
-          </button>
-          <button
-            type="button"
-            role="tab"
-            aria-selected={library === "costumes"}
-            onClick={() => setLibrary("costumes")}
-            className={`rounded-md px-3 py-1 text-sm whitespace-nowrap ${library === "costumes" ? "bg-white font-medium shadow-sm" : "text-muted-foreground"}`}
-          >
-            服装
-          </button>
-          <button
-            type="button"
-            role="tab"
-            aria-selected={library === "faces"}
-            onClick={() => setLibrary("faces")}
-            className={`rounded-md px-3 py-1 text-sm whitespace-nowrap ${library === "faces" ? "bg-white font-medium shadow-sm" : "text-muted-foreground"}`}
-          >
-            脸部
-          </button>
-        </div>
-        {face ? <span className="hidden min-w-0 truncate text-sm text-primary @min-[640px]/studio:inline">{face.id}</span> : null}
-        {costume ? <span className="hidden min-w-0 truncate text-sm text-primary @min-[640px]/studio:inline">{costume.id}</span> : null}
-        <div className="ml-auto flex shrink-0 items-center gap-2">
-          <HeroButton size="sm" variant="secondary" onPress={() => {}}>HeroUI</HeroButton>
-          <Button variant="outline" size="sm" className="@max-[640px]/studio:hidden" onClick={() => setInstallOpen(true)}>装进 Harness</Button>
-          <a
-            href={REPOSITORY_URL}
-            target="_blank"
-            rel="noopener noreferrer"
-            aria-label="打开 GitHub 仓库"
-            className={buttonVariants({ variant: "outline", size: "icon" })}
-          >
-            <GithubMark />
-          </a>
-          <Button variant="outline" size="icon" aria-label="生图设置" onClick={() => setSettingsOpen(true)}>
-            <Settings />
-          </Button>
-        </div>
-      </header>
-      {storageHigh ? (
-        <p className="shrink-0 border-b bg-amber-50 px-4 py-2 text-sm text-amber-950">
-          本机存储快满了。可以删除历史或自定义参考图。
-          <button type="button" className="ml-2 underline" onClick={() => void clearHistory().then(() => setHistory([])).then(() => readStoragePressure()).then((pressure) => setStorageHigh(pressure.high))}>清空历史</button>
-        </p>
-      ) : null}
-      <div className="flex min-h-0 flex-1 flex-col @min-[1024px]/studio:grid @min-[1024px]/studio:grid-cols-[300px_minmax(0,1fr)_340px] @min-[1024px]/studio:grid-rows-[minmax(0,1fr)]">
-        <CharacterDock
-          images={characters}
-          onChange={updateCharacters}
-          keepOutfit={settings.keepOutfit}
-          onKeepOutfit={(keepOutfit) => updateSettings({ ...settings, keepOutfit })}
-          outfitLocked={Boolean(costume)}
-          switchItems={switcherEntries({ models }).map((item) => {
-            const saved = models.find((model) => model.id === item.id)
-            const thumb = saved?.images[0]
-            return {
-              id: item.id,
-              label: item.label,
-              builtin: item.builtin,
-              thumbSrc: thumb
-                ? `data:${thumb.mediaType};base64,${thumb.dataBase64}`
-                : studioUrl(basePath, item.portrait || "/muse/dafeiyu-portrait.jpg"),
-            }
-          })}
-          activeModelId={activeModelId}
-          activeLabel={models.find((model) => model.id === activeModelId)?.label ?? ""}
-          onSelectModel={selectSavedModel}
-          onRenameModel={renameSavedModel}
-          onDeleteModel={removeSavedModel}
-          onGenerateSheet={() => void generateModelSheet()}
-          sheetBusy={sheetBusy}
-          sheetError={sheetError}
-          hasKey={Boolean(settings.apiKey.trim()) || serverKey}
-          onOpenSettings={() => {
-            setSheetError(settings.engine === "comfyui"
-              ? "多视角 sheet 要用云端生图。请先选 Seedream、Gemini 或 OpenAI，并填写 API Key。"
-              : "先在设置里填写 API Key。")
-            setSettingsOpen(true)
-          }}
-        />
-        <main className="order-2 min-h-0 min-w-0 flex-1 overflow-y-auto @min-[1024px]/studio:order-none @min-[1024px]/studio:pb-8">
-          {library === "faces" ? (
-            <FaceBrowser
-              selectedId={face?.id ?? null}
-              onSelect={(item: FaceItem) => setFace((current) => current?.id === item.id ? null : {
-                id: item.id,
-                section: item.section,
-                hair: item.hair,
-                label: item.label,
-                keywords: item.keywords,
-              })}
-            />
-          ) : library === "poses" ? (
-            <PoseBrowser
-              catalog={catalog}
-              loading={loading}
-              error={catalogError}
-              onRetry={loadCatalog}
-              showAdult={settings.showAdult}
-              requestedSystem={requestedSystem}
-              onRequestedSystemApplied={clearRequestedSystem}
-              onRequestAdult={(systemId) => setAdultAsk(systemId)}
-              selected={selected}
-              onToggle={togglePose}
-              customPoses={customPoseCards}
-              onSaveCustom={(draft) => saveCustom("pose", draft)}
-              onDeleteCustom={(id) => void removeCustomPose(id)}
-              settings={settings}
-              hasKey={Boolean(settings.apiKey.trim()) || serverKey}
-              syncWarning={syncWarning}
-            />
-          ) : (
-            <CostumeBrowser
-              showAdult={settings.showAdult}
-              focusCategory={costumeFocus}
-              onFocusApplied={clearCostumeFocus}
-              onRequestAdult={(categoryId) => setAdultAsk(`costume:${categoryId}`)}
-              selectedId={costume?.id ?? null}
-              onSelect={(item) => setCostume((current) => current?.id === item.id ? null : { id: item.id, label: item.label, keywords: item.keywords })}
-              customCostumes={customCostumeCards}
-              onSaveCustom={(draft) => saveCustom("costume", draft)}
-              onDeleteCustom={(id) => void removeCustomCostume(id)}
-              settings={settings}
-              hasKey={Boolean(settings.apiKey.trim()) || serverKey}
-              syncWarning={syncWarning}
-              onChangeSettings={updateSettings}
-            />
-          )}
-        </main>
-        <aside className="hidden min-h-0 border-l bg-white px-4 py-5 @min-[1024px]/studio:block @min-[1024px]/studio:overflow-y-auto">
-          {composer}
-        </aside>
+  const libraryTabs = (
+    <>
+      <div className="flex shrink-0 rounded-lg bg-muted p-1" role="tablist" aria-label="图库">
+        <button
+          type="button"
+          role="tab"
+          aria-selected={library === "poses"}
+          onClick={() => setLibrary("poses")}
+          className={`rounded-md px-3 py-1 text-sm whitespace-nowrap ${library === "poses" ? "bg-white font-medium shadow-sm" : "text-muted-foreground"}`}
+        >
+          姿势
+        </button>
+        <button
+          type="button"
+          role="tab"
+          aria-selected={library === "costumes"}
+          onClick={() => setLibrary("costumes")}
+          className={`rounded-md px-3 py-1 text-sm whitespace-nowrap ${library === "costumes" ? "bg-white font-medium shadow-sm" : "text-muted-foreground"}`}
+        >
+          服装
+        </button>
+        <button
+          type="button"
+          role="tab"
+          aria-selected={library === "faces"}
+          onClick={() => setLibrary("faces")}
+          className={`rounded-md px-3 py-1 text-sm whitespace-nowrap ${library === "faces" ? "bg-white font-medium shadow-sm" : "text-muted-foreground"}`}
+        >
+          脸部
+        </button>
       </div>
+      {face ? <span className="hidden min-w-0 truncate text-sm text-primary @min-[640px]/studio:inline">{face.id}</span> : null}
+      {costume ? <span className="hidden min-w-0 truncate text-sm text-primary @min-[640px]/studio:inline">{costume.id}</span> : null}
+    </>
+  )
+
+  const libraryPane = library === "faces" ? (
+    <FaceBrowser
+      selectedId={face?.id ?? null}
+      onSelect={(item: FaceItem) => setFace((current) => current?.id === item.id ? null : {
+        id: item.id,
+        section: item.section,
+        hair: item.hair,
+        label: item.label,
+        keywords: item.keywords,
+      })}
+    />
+  ) : library === "poses" ? (
+    <PoseBrowser
+      catalog={catalog}
+      loading={loading}
+      error={catalogError}
+      onRetry={loadCatalog}
+      showAdult={settings.showAdult}
+      requestedSystem={requestedSystem}
+      onRequestedSystemApplied={clearRequestedSystem}
+      onRequestAdult={(systemId) => setAdultAsk(systemId)}
+      selected={selected}
+      onToggle={togglePose}
+      customPoses={customPoseCards}
+      onSaveCustom={(draft) => saveCustom("pose", draft)}
+      onDeleteCustom={(id) => void removeCustomPose(id)}
+      settings={settings}
+      hasKey={Boolean(settings.apiKey.trim()) || serverKey}
+      syncWarning={syncWarning}
+    />
+  ) : (
+    <CostumeBrowser
+      showAdult={settings.showAdult}
+      focusCategory={costumeFocus}
+      onFocusApplied={clearCostumeFocus}
+      onRequestAdult={(categoryId) => setAdultAsk(`costume:${categoryId}`)}
+      selectedId={costume?.id ?? null}
+      onSelect={(item) => setCostume((current) => current?.id === item.id ? null : { id: item.id, label: item.label, keywords: item.keywords })}
+      customCostumes={customCostumeCards}
+      onSaveCustom={(draft) => saveCustom("costume", draft)}
+      onDeleteCustom={(id) => void removeCustomCostume(id)}
+      settings={settings}
+      hasKey={Boolean(settings.apiKey.trim()) || serverKey}
+      syncWarning={syncWarning}
+      onChangeSettings={updateSettings}
+    />
+  )
+
+  const characterDock = (
+    <CharacterDock
+      images={characters}
+      onChange={updateCharacters}
+      keepOutfit={settings.keepOutfit}
+      onKeepOutfit={(keepOutfit) => updateSettings({ ...settings, keepOutfit })}
+      outfitLocked={Boolean(costume)}
+      switchItems={switcherEntries({ models }).map((item) => {
+        const saved = models.find((model) => model.id === item.id)
+        const thumb = saved?.images[0]
+        return {
+          id: item.id,
+          label: item.label,
+          builtin: item.builtin,
+          thumbSrc: thumb
+            ? `data:${thumb.mediaType};base64,${thumb.dataBase64}`
+            : studioUrl(basePath, item.portrait || "/muse/dafeiyu-portrait.jpg"),
+        }
+      })}
+      activeModelId={activeModelId}
+      activeLabel={models.find((model) => model.id === activeModelId)?.label ?? ""}
+      onSelectModel={selectSavedModel}
+      onRenameModel={renameSavedModel}
+      onDeleteModel={removeSavedModel}
+      onGenerateSheet={() => void generateModelSheet()}
+      sheetBusy={sheetBusy}
+      sheetError={sheetError}
+      hasKey={Boolean(settings.apiKey.trim()) || serverKey}
+      onOpenSettings={() => {
+        setSheetError(settings.engine === "comfyui"
+          ? "多视角 sheet 要用云端生图。请先选 Seedream、Gemini 或 OpenAI，并填写 API Key。"
+          : "先在设置里填写 API Key。")
+        setSettingsOpen(true)
+      }}
+    />
+  )
+
+  const headerTrailing = (
+    <>
+      <Button variant="outline" size="sm" className="@max-[640px]/studio:hidden" onClick={() => setInstallOpen(true)}>装进 Harness</Button>
+      <a
+        href={REPOSITORY_URL}
+        target="_blank"
+        rel="noopener noreferrer"
+        aria-label="打开 GitHub 仓库"
+        className={buttonVariants({ variant: "outline", size: "icon" })}
+      >
+        <GithubMark />
+      </a>
+    </>
+  )
+
+  const mobileWorkOrderTrigger = (
+    <>
       <div className="shrink-0 border-t bg-white p-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] @min-[1024px]/studio:hidden">
         <Button className="h-11 w-full" onClick={() => setSheetOpen(true)}>
           已选 {chosen.length} 个姿势{face ? ` · ${face.id}` : ""}{costume ? ` · ${costume.id}` : ""} · 去生图
@@ -958,6 +957,46 @@ function StudioFrame({ embedded }: { embedded: boolean }) {
           <div className="px-4 pb-6">{composer}</div>
         </SheetContent>
       </Sheet>
+    </>
+  )
+
+  return (
+    <div className={`flex min-h-0 flex-col overflow-hidden ${embedded ? "h-full" : "h-dvh"}`}>
+      {storageHigh ? (
+        <p className="shrink-0 border-b bg-amber-50 px-4 py-2 text-sm text-amber-950">
+          本机存储快满了。可以删除历史或自定义参考图。
+          <button type="button" className="ml-2 underline" onClick={() => void clearHistory().then(() => setHistory([])).then(() => readStoragePressure()).then((pressure) => setStorageHigh(pressure.high))}>清空历史</button>
+        </p>
+      ) : null}
+      <div className="min-h-0 flex-1 overflow-hidden">
+        <StudioShell
+          embedded
+          layout={layout}
+          onLayoutChange={changeLayout}
+          onOpenSettings={() => setSettingsOpen(true)}
+          libraryTabs={libraryTabs}
+          headerTrailing={headerTrailing}
+          mobileWorkOrderTrigger={mobileWorkOrderTrigger}
+          regions={{
+            characterDock,
+            library: libraryPane,
+            workOrder: composer,
+            preview: <PreviewPane results={results} />,
+            timeline: (
+              <TimelineBar
+                poseCount={chosen.length}
+                costumeLabel={costume?.id ?? null}
+                faceLabel={face?.id ?? null}
+                running={running}
+                progress={withElapsed(progress, waited)}
+                onGenerate={() => void generate()}
+                onStop={() => abortRef.current?.abort()}
+              />
+            ),
+            libraryRail: <LayoutARail library={library} onLibrary={setLibrary} />,
+          }}
+        />
+      </div>
       <SettingsDialog open={settingsOpen} onOpenChange={setSettingsOpen} settings={settings} onChange={updateSettings} />
       <Dialog open={installOpen} onOpenChange={setInstallOpen}>
         <DialogContent className="max-w-[min(32rem,calc(100%-2rem))]">
@@ -998,6 +1037,7 @@ function StudioFrame({ embedded }: { embedded: boolean }) {
       </Dialog>
     </div>
   )
+
 }
 
 function GithubMark() {
