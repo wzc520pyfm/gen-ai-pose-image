@@ -37,6 +37,7 @@ export function CharacterDock({
   sheetError,
   hasKey,
   onOpenSettings,
+  embedded = false,
 }: {
   images: StoredCharacter[]
   onChange: (images: StoredCharacter[]) => void
@@ -54,6 +55,7 @@ export function CharacterDock({
   sheetError: string
   hasKey: boolean
   onOpenSettings: () => void
+  embedded?: boolean
 }) {
   const inputRef = useRef<HTMLInputElement>(null)
   const sheetInputRef = useRef<HTMLInputElement>(null)
@@ -121,7 +123,10 @@ export function CharacterDock({
   }
 
   return (
-    <aside className="dock order-1 flex shrink-0 flex-col gap-3 px-3 py-3 text-[#e2e8f0] @min-[1024px]/studio:order-none @min-[1024px]/studio:h-full @min-[1024px]/studio:min-h-0 @min-[1024px]/studio:shrink @min-[1024px]/studio:gap-4 @min-[1024px]/studio:overflow-y-auto @min-[1024px]/studio:px-4 @min-[1024px]/studio:py-5">
+    <aside className={embedded
+      ? "dock flex flex-col gap-3 rounded-xl px-3 py-3 text-[#e2e8f0]"
+      : "dock order-1 flex shrink-0 flex-col gap-3 px-3 py-3 text-[#e2e8f0] @min-[1024px]/studio:order-none @min-[1024px]/studio:h-full @min-[1024px]/studio:min-h-0 @min-[1024px]/studio:shrink @min-[1024px]/studio:gap-4 @min-[1024px]/studio:overflow-y-auto @min-[1024px]/studio:px-4 @min-[1024px]/studio:py-5"
+    }>
       <div className="flex items-start gap-1">
         <ModelFigure
           src={portrait}
@@ -308,7 +313,7 @@ export function CharacterDock({
       ) : null}
       {sheetError ? <p className="text-sm text-[#fecaca]">{sheetError}</p> : null}
       {error ? <p className="text-sm text-[#fecaca]">{error}</p> : null}
-      <div className="mt-auto flex items-center justify-between gap-3 rounded-xl bg-white/10 px-3 py-2.5 text-sm @min-[1024px]/studio:py-3">
+      <div className={`${embedded ? "" : "mt-auto"} flex items-center justify-between gap-3 rounded-xl bg-white/10 px-3 py-2.5 text-sm @min-[1024px]/studio:py-3`}>
         <span className="min-w-0">
           <span className="block text-white">保持服装</span>
           <span className="mt-1 block text-xs leading-5 text-[#cbd5e1] @min-[640px]/studio:hidden">

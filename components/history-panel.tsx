@@ -5,6 +5,7 @@
 import { useState } from "react"
 import { Button, Modal } from "@heroui/react"
 import type { HistoryEntry } from "@/lib/library"
+import { useOverlayPortal } from "@/lib/studio-env"
 
 export type HistoryView = Pick<HistoryEntry, "id" | "createdAt" | "title" | "prompt" | "extraPrompt" | "provider" | "model" | "aspectRatio" | "mode" | "keepOutfit" | "costume" | "face" | "selection"> & {
   thumbUrl: string
@@ -21,6 +22,7 @@ export function HistoryPanel({
   onDelete: (id: string) => void
   onClear: () => void
 }) {
+  const portal = useOverlayPortal()
   const [openId, setOpenId] = useState<string | null>(null)
   const [confirmClear, setConfirmClear] = useState(false)
   const current = entries.find((entry) => entry.id === openId) ?? null
@@ -45,7 +47,7 @@ export function HistoryPanel({
           ))}
         </div>
       )}
-      <Modal.Backdrop isOpen={current !== null} onOpenChange={(open) => { if (!open) setOpenId(null) }}>
+      <Modal.Backdrop isOpen={current !== null} onOpenChange={(open) => { if (!open) setOpenId(null) }} {...portal}>
         <Modal.Container size="lg" scroll="inside">
           <Modal.Dialog className="max-h-[min(85dvh,85%)] max-w-[min(32rem,calc(100%-2rem))]">
             <Modal.CloseTrigger />
@@ -78,7 +80,7 @@ export function HistoryPanel({
           </Modal.Dialog>
         </Modal.Container>
       </Modal.Backdrop>
-      <Modal.Backdrop isOpen={confirmClear} onOpenChange={setConfirmClear}>
+      <Modal.Backdrop isOpen={confirmClear} onOpenChange={setConfirmClear} {...portal}>
         <Modal.Container>
           <Modal.Dialog className="max-w-[min(28rem,calc(100%-2rem))]">
             <Modal.CloseTrigger />

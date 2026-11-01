@@ -1,6 +1,7 @@
 "use client"
 
 import type { ReactNode } from "react"
+import { ScrollShadow } from "@heroui/react"
 import type { StudioLayoutId } from "@/lib/studio-layout"
 
 export type StudioRegions = {
@@ -8,8 +9,13 @@ export type StudioRegions = {
   library: ReactNode
   workOrder: ReactNode
   preview: ReactNode
-  timeline?: ReactNode
-  libraryRail?: ReactNode // layout A vertical pose/costume/face entries
+  recipe?: ReactNode
+  libraryRail?: ReactNode
+  modelStrip?: ReactNode
+  previewOverlay?: ReactNode
+  workbenchDrawer?: ReactNode
+  libraryHeading?: ReactNode
+  librarySwitch?: ReactNode
 }
 
 export function StudioLayoutGrid({
@@ -21,41 +27,54 @@ export function StudioLayoutGrid({
 }) {
   if (layout === "A") {
     return (
-      <div className="grid min-h-0 flex-1 grid-cols-[72px_minmax(0,1fr)_300px] gap-3 p-3">
-        <div className="min-h-0 overflow-y-auto">{regions.libraryRail ?? regions.library}</div>
-        <div className="min-h-0 overflow-hidden rounded-xl border border-primary/40 bg-white">{regions.preview}</div>
-        <div className="flex min-h-0 flex-col gap-3 overflow-y-auto">
-          {regions.characterDock}
-          {regions.workOrder}
+      <div className="relative flex min-h-0 flex-1 flex-col" data-layout="A">
+        <div className="grid min-h-0 flex-1 grid-cols-[72px_minmax(0,1fr)] overflow-hidden">
+          <div className="min-h-0 overflow-hidden">{regions.libraryRail}</div>
+          <ScrollShadow className="h-full min-h-0 overflow-y-auto">{regions.library}</ScrollShadow>
         </div>
+        {regions.recipe}
+        {regions.previewOverlay}
+        {regions.workbenchDrawer}
       </div>
     )
   }
   if (layout === "B") {
     return (
-      <div className="grid min-h-0 flex-1 grid-cols-[minmax(0,1.2fr)_minmax(280px,0.9fr)] gap-3 p-3">
-        <div className="min-h-0 overflow-y-auto rounded-xl border bg-white">{regions.library}</div>
-        <div className="flex min-h-0 flex-col gap-3 overflow-y-auto">
-          <div className="min-h-0 flex-1 overflow-hidden rounded-xl border bg-white">{regions.preview}</div>
-          {regions.workOrder}
+      <div
+        className="relative flex min-h-0 flex-1 flex-col @min-[1024px]/studio:grid @min-[1024px]/studio:grid-cols-[minmax(0,1.4fr)_minmax(300px,0.8fr)]"
+        data-layout="B"
+      >
+        <div className="flex min-h-0 min-w-0 flex-1 flex-col">
+          <div className="shrink-0 px-3 pt-3">{regions.librarySwitch}</div>
+          <ScrollShadow className="min-h-0 flex-1 overflow-y-auto">{regions.library}</ScrollShadow>
+          <div className="shrink-0">{regions.modelStrip}</div>
         </div>
+        <div className="flex min-h-[240px] w-full shrink-0 flex-col bg-[#f7f4ee] @min-[1024px]/studio:min-h-0">
+          <div className="min-h-0 flex-1 overflow-hidden">{regions.preview}</div>
+          <div className="shrink-0">{regions.recipe}</div>
+        </div>
+        {regions.workbenchDrawer}
       </div>
     )
   }
   if (layout === "D") {
     return (
-      <div className="flex min-h-0 flex-1 flex-col gap-3 p-3">
-        <div className="grid min-h-0 flex-1 grid-cols-[minmax(0,1fr)_minmax(0,1.4fr)] gap-3">
-          <div className="min-h-0 overflow-y-auto rounded-xl border bg-white">{regions.library}</div>
-          <div className="min-h-0 overflow-hidden rounded-xl border border-primary/40 bg-white">{regions.preview}</div>
+      <div className="relative flex min-h-0 flex-1 flex-col" data-layout="D">
+        <div className="shrink-0 px-4 pt-3">{regions.librarySwitch}</div>
+        <div className="shrink-0 px-4 pt-2">{regions.libraryHeading}</div>
+        <ScrollShadow className="min-h-0 flex-1 overflow-y-auto">
+          <div className="pb-28">{regions.library}</div>
+        </ScrollShadow>
+        <div className="pointer-events-none absolute inset-x-0 bottom-0 z-20 flex justify-center px-3 pb-[max(0.75rem,env(safe-area-inset-bottom))]">
+          <div className="pointer-events-auto max-w-[calc(100%-1.5rem)]">{regions.recipe}</div>
         </div>
-        <div className="shrink-0 rounded-xl bg-slate-950 text-slate-100">{regions.timeline ?? regions.workOrder}</div>
+        {regions.previewOverlay}
+        {regions.workbenchDrawer}
       </div>
     )
   }
-  // C default — near current: dock | library | work order
   return (
-    <div className="flex min-h-0 flex-1 flex-col @min-[1024px]/studio:grid @min-[1024px]/studio:grid-cols-[300px_minmax(0,1fr)_340px]">
+    <div className="flex min-h-0 flex-1 flex-col @min-[1024px]/studio:grid @min-[1024px]/studio:grid-cols-[300px_minmax(0,1fr)_340px]" data-layout="C">
       {regions.characterDock}
       <main className="order-2 min-h-0 min-w-0 flex-1 overflow-y-auto @min-[1024px]/studio:order-none">
         {regions.library}

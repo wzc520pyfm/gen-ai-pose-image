@@ -4,6 +4,7 @@
 
 import { Download, Sparkles } from "lucide-react"
 import { Button, Spinner, TextArea } from "@heroui/react"
+import { generateBlocked } from "@/shared/studio-recipe.mjs"
 import { HistoryPanel, type HistoryView } from "@/components/history-panel"
 import type { StoredCharacter } from "@/lib/characters"
 import type { AspectRatio, GenerateMode, PromptCard } from "@/lib/types"
@@ -57,6 +58,7 @@ export function Composer({
   reuseNote,
   builtinName,
   builtinSheet,
+  showRandom = true,
 }: {
   localMode?: boolean
   selected: Array<{ poseId: string; viewId: string; title: string; angle: string; thumbSrc?: string }>
@@ -93,6 +95,7 @@ export function Composer({
   reuseNote: string
   builtinName: string
   builtinSheet: string
+  showRandom?: boolean
 }) {
   const { basePath } = useStudioEnv()
   const characterSrc = characters[0]
@@ -109,16 +112,18 @@ export function Composer({
       <div className="flex flex-wrap items-center justify-between gap-2">
         <div className="flex min-w-0 flex-wrap items-center gap-2">
           <h2 className="text-lg font-semibold">已选 {selected.length} 个姿势</h2>
-          <Button
-            type="button"
-            size="sm"
-            variant="outline"
-            isDisabled={running}
-            onPress={onRandom}
-            className="border-[#fb7185]/50 bg-[#fff1f2] text-[#be123c] hover:bg-[#ffe4e6]"
-          >
-            随机组合
-          </Button>
+          {showRandom ? (
+            <Button
+              type="button"
+              size="sm"
+              variant="outline"
+              isDisabled={running}
+              onPress={onRandom}
+              className="border-[#fb7185]/50 bg-[#fff1f2] text-[#be123c] hover:bg-[#ffe4e6]"
+            >
+              随机组合
+            </Button>
+          ) : null}
         </div>
         {selected.length > 0 ? (
           <button type="button" className="text-xs text-muted-foreground underline-offset-2 hover:underline" onClick={onClear}>清空</button>
@@ -244,7 +249,12 @@ export function Composer({
         <Button
           className="h-11 flex-1"
           variant="primary"
-          isDisabled={(selected.length === 0 && !(localMode && costume)) || selected.length > limit}
+          isDisabled={generateBlocked({
+            poseCount: selected.length,
+            localMode,
+            hasCostume: Boolean(costume),
+            mode,
+          })}
           onPress={onGenerate}
         >
           <Sparkles />

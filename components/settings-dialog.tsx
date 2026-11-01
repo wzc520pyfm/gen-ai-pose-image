@@ -8,6 +8,7 @@ import { textModelFor } from "@/shared/beautify.mjs"
 import { baseURLFor, modelFor, type StudioSettings } from "@/lib/settings"
 import { ASPECT_LABEL, ASPECT_RATIOS, type AspectRatio, type ProviderId } from "@/lib/types"
 import { checkComfyConnection } from "@/shared/comfyui-client.mjs"
+import { useOverlayPortal } from "@/lib/studio-env"
 
 export function SettingsDialog({
   open,
@@ -20,6 +21,7 @@ export function SettingsDialog({
   settings: StudioSettings
   onChange: (settings: StudioSettings) => void
 }) {
+  const portal = useOverlayPortal()
   const [connection, setConnection] = useState("")
   const [checking, setChecking] = useState(false)
   const checkRef = useRef<AbortController | null>(null)
@@ -61,7 +63,7 @@ export function SettingsDialog({
   const local = settings.engine === "comfyui"
 
   return (
-    <Modal.Backdrop isOpen={open} onOpenChange={onOpenChange}>
+    <Modal.Backdrop isOpen={open} onOpenChange={onOpenChange} {...portal}>
       <Modal.Container size="lg" scroll="inside">
         <Modal.Dialog className="max-h-[min(85dvh,85%)] max-w-[min(32rem,calc(100%-2rem))]">
           <Modal.CloseTrigger />

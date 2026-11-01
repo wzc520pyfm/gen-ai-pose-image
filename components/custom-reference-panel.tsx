@@ -7,7 +7,7 @@ import { useElapsedSeconds, withElapsed } from "@/lib/elapsed"
 import { base64ToBlob, fileToJpegBlob } from "@/lib/library"
 import { requestBeautify, requestReferenceImage } from "@/lib/reference-client"
 import type { StudioSettings } from "@/lib/settings"
-import { useStudioEnv } from "@/lib/studio-env"
+import { useOverlayPortal, useStudioEnv } from "@/lib/studio-env"
 import { Button, Input, Modal, Switch, TextArea } from "@heroui/react"
 
 export type CustomCard = {
@@ -61,6 +61,7 @@ export function CustomReferencePanel({
   onChangeSettings?: (settings: StudioSettings) => void
 }) {
   const { basePath } = useStudioEnv()
+  const portal = useOverlayPortal()
   const fileRef = useRef<HTMLInputElement>(null)
   const editedRef = useRef(false)
   const [open, setOpen] = useState(false)
@@ -256,7 +257,7 @@ export function CustomReferencePanel({
         <Button className="mt-3" variant="outline" onPress={onRequestAdult}>还有 {hiddenAdult} 张成人向参考被收着</Button>
       ) : null}
 
-      <Modal.Backdrop isOpen={open} onOpenChange={setOpen}>
+      <Modal.Backdrop isOpen={open} onOpenChange={setOpen} {...portal}>
         <Modal.Container size="lg" scroll="inside">
           <Modal.Dialog className="max-h-[min(85dvh,85%)] max-w-[min(32rem,calc(100%-2rem))]">
             <Modal.CloseTrigger />

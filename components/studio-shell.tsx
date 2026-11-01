@@ -1,10 +1,11 @@
 "use client"
 
-import type { ReactNode } from "react"
+import type { ReactNode, Ref } from "react"
 import { Button, Dropdown, Label } from "@heroui/react"
 import { LayoutGrid, Settings } from "lucide-react"
 import { WhaleMark } from "@/components/whale-mark"
 import { StudioLayoutGrid, type StudioRegions } from "@/components/studio-layouts"
+import { useOverlayPortal } from "@/lib/studio-env"
 import type { StudioLayoutId } from "@/lib/studio-layout"
 
 const LAYOUT_OPTIONS: { id: StudioLayoutId; label: string }[] = [
@@ -23,18 +24,23 @@ export function StudioShell({
   headerTrailing,
   mobileWorkOrderTrigger,
   regions,
+  showSettings = true,
+  containerRef,
 }: {
   layout: StudioLayoutId
   embedded?: boolean
   onLayoutChange: (id: StudioLayoutId) => void
   onOpenSettings: () => void
-  libraryTabs: ReactNode
+  libraryTabs?: ReactNode
   headerTrailing?: ReactNode
   mobileWorkOrderTrigger?: ReactNode
   regions: StudioRegions
+  showSettings?: boolean
+  containerRef?: Ref<HTMLDivElement>
 }) {
+  const portal = useOverlayPortal()
   return (
-    <div className={`@container/studio flex min-h-0 flex-col overflow-hidden bg-background text-foreground ${embedded ? "h-full" : "h-dvh"}`}>
+    <div ref={containerRef} className={`@container/studio flex min-h-0 flex-col overflow-hidden bg-background text-foreground ${embedded ? "h-full" : "h-dvh"}`}>
       <header className="flex min-h-14 shrink-0 flex-wrap items-center gap-x-3 gap-y-2 border-b bg-white px-3 py-2">
         <WhaleMark className="size-8 shrink-0" />
         <h1 className="shrink-0 text-base font-semibold">澜姿</h1>
@@ -52,7 +58,7 @@ export function StudioShell({
               <LayoutGrid className="size-4" />
               布局 {layout}
             </Button>
-            <Dropdown.Popover>
+            <Dropdown.Popover {...portal}>
               <Dropdown.Menu
                 aria-label="布局"
                 onAction={(key) => onLayoutChange(String(key) as StudioLayoutId)}
@@ -65,9 +71,11 @@ export function StudioShell({
               </Dropdown.Menu>
             </Dropdown.Popover>
           </Dropdown>
-          <Button variant="secondary" isIconOnly aria-label="生图设置" onPress={onOpenSettings}>
-            <Settings className="size-4" />
-          </Button>
+          {showSettings ? (
+            <Button variant="secondary" isIconOnly aria-label="生图设置" onPress={onOpenSettings}>
+              <Settings className="size-4" />
+            </Button>
+          ) : null}
         </div>
       </header>
       <StudioLayoutGrid layout={layout} regions={regions} />

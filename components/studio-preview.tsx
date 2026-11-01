@@ -2,12 +2,15 @@
 
 /* eslint-disable @next/next/no-img-element -- preview shows result data URLs */
 
-import { useState } from "react"
+import { useEffect, useState } from "react"
+import { Button, Card, CloseButton, Drawer, Modal, Tabs } from "@heroui/react"
 import type { ResultCard } from "@/components/composer"
-import { Modal } from "@heroui/react"
+import { useOverlayPortal } from "@/lib/studio-env"
+import type { StudioLibrary } from "@/components/studio-library-tabs"
 
 export function PreviewPane({ results }: { results: ResultCard[] }) {
   const [zoomSrc, setZoomSrc] = useState<string | null>(null)
+  const portal = useOverlayPortal()
   const latest = [...results].reverse().find((item) => item.ok && item.src)
 
   return (
@@ -22,9 +25,9 @@ export function PreviewPane({ results }: { results: ResultCard[] }) {
           <img src={latest.src} alt={latest.title} className="max-h-full max-w-full object-contain" />
         </button>
       ) : (
-        <p className="text-sm text-muted-foreground">成图预览</p>
+        <p className="text-sm text-muted-foreground">还没有成图。选好配方后点生图。</p>
       )}
-      <Modal.Backdrop isOpen={zoomSrc !== null} onOpenChange={(open) => { if (!open) setZoomSrc(null) }}>
+      <Modal.Backdrop isOpen={zoomSrc !== null} onOpenChange={(open) => { if (!open) setZoomSrc(null) }} {...portal}>
         <Modal.Container size="cover">
           <Modal.Dialog className="max-w-[min(48rem,calc(100%-2rem))] p-2">
             <Modal.CloseTrigger />
@@ -41,32 +44,120 @@ export function PreviewPane({ results }: { results: ResultCard[] }) {
   )
 }
 
+export function PreviewFocus({
+  open,
+  onClose,
+  results,
+}: {
+  open: boolean
+  onClose: () => void
+  results: ResultCard[]
+}) {
+  useEffect(() => {
+    if (!open) return
+    const onKey = (event: KeyboardEvent) => {
+      if (event.key === "Escape") onClose()
+    }
+    window.addEventListener("keydown", onKey)
+    return () => window.removeEventListener("keydown", onKey)
+  }, [open, onClose])
+  if (!open) return null
+  return (
+    <div
+      className="absolute inset-0 z-30 flex items-center justify-center bg-white/70 p-3"
+      onClick={onClose}
+      role="presentation"
+    >
+      <Card
+        className="relative max-h-[min(70dvh,40rem)] w-[min(56rem,70%)] overflow-hidden @max-[1023px]/studio:w-[calc(100%-24px)]"
+        onClick={(event) => event.stopPropagation()}
+      >
+        <CloseButton aria-label="关闭成图" className="absolute top-2 right-2 z-10" onPress={onClose} />
+        <Card.Header className="sr-only">
+          <Card.Title>成图</Card.Title>
+        </Card.Header>
+        <Card.Content className="h-[min(64dvh,36rem)] p-0">
+          <PreviewPane results={results} />
+        </Card.Content>
+      </Card>
+    </div>
+  )
+}
+
+export function PreviewDrawer({
+  open,
+  onOpenChange,
+  placement,
+  results,
+}: {
+  open: boolean
+  onOpenChange: (open: boolean) => void
+  placement: "bottom" | "right"
+  results: ResultCard[]
+}) {
+  const portal = useOverlayPortal()
+  if (!open) return null
+  return (
+    <Drawer isOpen onOpenChange={onOpenChange}>
+      <Drawer.Backdrop {...portal}>
+        <Drawer.Content placement={placement}>
+          <Drawer.Dialog className={placement === "bottom" ? "max-h-[70dvh]" : "w-[min(440px,100%)] max-w-full"}>
+            {placement === "bottom" ? <Drawer.Handle /> : null}
+            <Drawer.CloseTrigger />
+            <Drawer.Header>
+              <Drawer.Heading>成图</Drawer.Heading>
+            </Drawer.Header>
+            <Drawer.Body className="min-h-48">
+              <PreviewPane results={results} />
+            </Drawer.Body>
+          </Drawer.Dialog>
+        </Drawer.Content>
+      </Drawer.Backdrop>
+    </Drawer>
+  )
+}
+
+const RAIL_TABS: Array<{ id: StudioLibrary; label: string }> = [
+  { id: "poses", label: "姿" },
+  { id: "costumes", label: "服" },
+  { id: "faces", label: "脸" },
+]
+
 export function LayoutARail({
   library,
   onLibrary,
+  onOpenSettings,
 }: {
-  library: "poses" | "costumes" | "faces"
-  onLibrary: (next: "poses" | "costumes" | "faces") => void
+  library: StudioLibrary
+  onLibrary: (next: StudioLibrary) => void
+  onOpenSettings: () => void
 }) {
-  const tabs: Array<{ id: "poses" | "costumes" | "faces"; label: string }> = [
-    { id: "poses", label: "姿势" },
-    { id: "costumes", label: "服装" },
-    { id: "faces", label: "脸部" },
-  ]
   return (
-    <div className="flex h-full flex-col gap-2 rounded-xl border bg-slate-950 p-2 text-slate-100" role="tablist" aria-label="图库">
-      {tabs.map((tab) => (
-        <button
-          key={tab.id}
-          type="button"
-          role="tab"
-          aria-selected={library === tab.id}
-          onClick={() => onLibrary(tab.id)}
-          className={`rounded-lg px-2 py-3 text-xs font-medium ${library === tab.id ? "bg-white text-slate-950" : "text-slate-300 hover:bg-slate-800"}`}
-        >
-          {tab.label}
-        </button>
-      ))}
+    <div className="flex h-full flex-col bg-[#0f172a] text-slate-100">
+      <Tabs
+        orientation="vertical"
+        align="start"
+        selectedKey={library}
+        onSelectionChange={(key) => {
+          if (key == null) return
+          onLibrary(String(key) as StudioLibrary)
+        }}
+        className="min-h-0 flex-1"
+      >
+        <Tabs.ListContainer className="h-full">
+          <Tabs.List aria-label="图库" className="flex h-full flex-col items-stretch gap-1 p-1">
+            {RAIL_TABS.map((tab) => (
+              <Tabs.Tab key={tab.id} id={tab.id} className="justify-center px-0 text-slate-100 [writing-mode:horizontal-tb]">
+                {tab.label}
+                <Tabs.Indicator />
+              </Tabs.Tab>
+            ))}
+          </Tabs.List>
+        </Tabs.ListContainer>
+      </Tabs>
+      <Button variant="secondary" size="sm" className="m-1" aria-label="生图设置" onPress={onOpenSettings}>
+        设
+      </Button>
     </div>
   )
 }

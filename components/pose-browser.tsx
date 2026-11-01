@@ -2,13 +2,13 @@
 
 /* eslint-disable @next/next/no-img-element -- pose sketches are proxied bytes with an onError fallback */
 
-import { useEffect, useMemo, useRef, useState, type ReactNode } from "react"
-import { ChevronDown, RotateCcw, Search, X } from "lucide-react"
+import { useEffect, useMemo, useRef, useState } from "react"
+import { RotateCcw } from "lucide-react"
 import { CustomReferencePanel, type CustomCard, type CustomDraft } from "@/components/custom-reference-panel"
-import { Button, Input, Modal } from "@heroui/react"
+import { Alert, Button, Card, Chip, ListBox, Modal, SearchField, Select, Skeleton, ToggleButton, ToggleButtonGroup } from "@heroui/react"
 import type { StudioSettings } from "@/lib/settings"
 import type { Catalog, Pose, PoseView } from "@/lib/types"
-import { studioUrl, useStudioEnv } from "@/lib/studio-env"
+import { studioUrl, useOverlayPortal, useStudioEnv } from "@/lib/studio-env"
 
 const ANGLES = ["正面", "俯视", "仰视", "侧面", "斜侧"]
 
@@ -104,6 +104,7 @@ export function PoseBrowser({
   const [cardViews, setCardViews] = useState<Record<string, string>>({})
   const [preview, setPreview] = useState<{ pose: Pose; view: PoseView } | null>(null)
   const searchRef = useRef<HTMLInputElement>(null)
+  const portal = useOverlayPortal()
 
   useEffect(() => {
     const onKey = (event: KeyboardEvent) => {
@@ -121,6 +122,7 @@ export function PoseBrowser({
   const system = !customSection && !allSeries
     ? catalog?.systems.find((item) => item.id === systemId) ?? catalog?.systems[0]
     : undefined
+  const seriesKey = customSection ? "custom" : allSeries ? "all" : (system?.id ?? "all")
   const visibleCustom = customPoses.filter((item) => showAdult || !item.adult)
   const hiddenCustomAdult = customPoses.length - visibleCustom.length
   const visiblePoseCount = useMemo(() => {
@@ -200,85 +202,95 @@ export function PoseBrowser({
     onToggle(pose, view)
   }
 
+  function chooseSeries(keys: Iterable<unknown> | "all") {
+    const id = firstKey(keys)
+    if (!id) return
+    if (id === "all") {
+      setSystemId("all")
+      setCategory("全部")
+      return
+    }
+    if (id === "custom") {
+      setSystemId("custom")
+      return
+    }
+    const item = catalog?.systems.find((entry) => entry.id === id)
+    if (item?.adult && !showAdult) {
+      onRequestAdult(item.id)
+      return
+    }
+    setSystemId(id)
+    setCategory("全部")
+  }
+
   return (
     <section className="@container/poses flex min-h-0 flex-col">
       <div className="px-4 pt-5 pb-2 @min-[768px]/studio:px-6">
-        <div className="flex gap-1.5 overflow-x-auto pb-1">
-          <SeriesPill active={allSeries} count={visiblePoseCount} onClick={() => { setSystemId("all"); setCategory("全部") }}>
-            全部
-          </SeriesPill>
-          {catalog?.systems.map((item) => {
-            const active = !customSection && !allSeries && item.id === system?.id
-            return (
-              <SeriesPill
-                key={item.id}
-                active={active}
-                count={item.poseCount}
-                adult={item.adult}
-                title={item.name}
-                onClick={() => {
-                  if (item.adult && !showAdult) {
-                    onRequestAdult(item.id)
-                    return
-                  }
-                  setSystemId(item.id)
-                  setCategory("全部")
-                }}
-              >
-                {item.name}
-              </SeriesPill>
-            )
-          })}
-          <SeriesPill active={customSection} count={visibleCustom.length} onClick={() => setSystemId("custom")}>
-            自定义
-          </SeriesPill>
-        </div>
+        <ToggleButtonGroup
+          aria-label="姿势体系"
+          selectionMode="single"
+          disallowEmptySelection
+          selectedKeys={[seriesKey]}
+          onSelectionChange={chooseSeries}
+          className="flex flex-wrap gap-1.5"
+        >
+          <ToggleButton id="all">全部 {visiblePoseCount}</ToggleButton>
+          {catalog?.systems.map((item) => (
+            <ToggleButton key={item.id} id={item.id}>
+              {item.name} {item.poseCount}{item.adult ? " 成人向" : ""}
+            </ToggleButton>
+          ))}
+          <ToggleButton id="custom">自定义 {visibleCustom.length}</ToggleButton>
+        </ToggleButtonGroup>
         {customSection ? null : (
           <div className="mt-2 flex flex-wrap items-center gap-2">
-            <div className="relative min-w-[8.5rem] flex-1">
-              <Search className="pointer-events-none absolute top-1/2 left-2.5 size-3.5 -translate-y-1/2 text-muted-foreground" />
-              <Input
-                ref={searchRef}
-                value={query}
-                onChange={(event) => setQuery(event.target.value)}
-                placeholder="搜索姿势名称、编号（如 P001）"
-                aria-label="搜索姿势"
-                className="h-8 bg-card pr-8 pl-8 text-sm"
-              />
-              {query ? (
-                <button type="button" className="absolute top-1/2 right-2 -translate-y-1/2 text-muted-foreground" onClick={() => setQuery("")} aria-label="清空搜索">
-                  <X className="size-3.5" />
-                </button>
-              ) : null}
-            </div>
-            <div className="relative shrink-0">
-              <select
-                className="h-8 appearance-none rounded-lg border border-input bg-card py-0 pr-8 pl-2.5 text-sm leading-8 text-foreground outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50"
-                value={category}
-                aria-label="动作分类"
-                onChange={(event) => setCategory(event.target.value)}
-              >
-                {categories.map((item) => (
-                  <option key={item} value={item}>{item === "全部" ? "全部动作分类" : item}</option>
-                ))}
-              </select>
-              <ChevronDown className="pointer-events-none absolute top-1/2 right-2.5 size-3.5 -translate-y-1/2 text-muted-foreground" />
-            </div>
+            <SearchField aria-label="搜索姿势" value={query} onChange={setQuery} className="min-w-[8.5rem] flex-1">
+              <SearchField.Group>
+                <SearchField.SearchIcon />
+                <SearchField.Input ref={searchRef} placeholder="搜索姿势名称、编号（如 P001）" />
+                <SearchField.ClearButton />
+              </SearchField.Group>
+            </SearchField>
+            <Select
+              aria-label="动作分类"
+              selectedKey={category}
+              onSelectionChange={(key) => { if (key != null) setCategory(String(key)) }}
+              className="shrink-0"
+            >
+              <Select.Trigger>
+                <Select.Value />
+                <Select.Indicator />
+              </Select.Trigger>
+              <Select.Popover {...portal}>
+                <ListBox>
+                  {categories.map((item) => (
+                    <ListBox.Item key={item} id={item} textValue={item === "全部" ? "全部动作分类" : item}>
+                      {item === "全部" ? "全部动作分类" : item}
+                    </ListBox.Item>
+                  ))}
+                </ListBox>
+              </Select.Popover>
+            </Select>
             <div className="flex max-w-full items-center gap-1.5 @min-[640px]/poses:ml-auto">
-              <div role="radiogroup" aria-label="视角" className="inline-flex h-8 min-w-0 items-center overflow-x-auto rounded-full bg-secondary p-0.5">
-                <AngleSegment active={angle === ""} onClick={() => setPerspective("")}>全部视角</AngleSegment>
-                {ANGLES.map((item) => (
-                  <AngleSegment key={item} active={angle === item} onClick={() => setPerspective(item)}>{item}</AngleSegment>
-                ))}
-              </div>
-              <button
-                type="button"
-                onClick={resetFilters}
-                className="inline-flex h-8 shrink-0 items-center gap-1 rounded-full px-2.5 text-xs text-muted-foreground ring-1 ring-border hover:bg-card hover:text-foreground"
+              <ToggleButtonGroup
+                aria-label="视角"
+                selectionMode="single"
+                disallowEmptySelection
+                selectedKeys={[angle || "all"]}
+                onSelectionChange={(keys) => {
+                  const id = firstKey(keys)
+                  if (id == null) return
+                  setPerspective(id === "all" ? "" : id)
+                }}
+                className="max-w-full overflow-x-auto"
               >
+                <ToggleButton id="all">全部视角</ToggleButton>
+                {ANGLES.map((item) => <ToggleButton key={item} id={item}>{item}</ToggleButton>)}
+              </ToggleButtonGroup>
+              <Button variant="outline" size="sm" onPress={resetFilters}>
                 <RotateCcw className="size-3.5" />
                 重置
-              </button>
+              </Button>
             </div>
           </div>
         )}
@@ -318,10 +330,15 @@ export function PoseBrowser({
         ) : null}
         {!customSection && loading ? <PoseSkeleton /> : null}
         {!customSection && error ? (
-          <div className="rounded-2xl border border-dashed border-border bg-card px-4 py-10 text-center">
-            <p className="text-sm">{error}</p>
-            <Button className="mt-3" variant="outline" onPress={onRetry}>重新加载</Button>
-          </div>
+          <Alert status="danger">
+            <Alert.Indicator />
+            <Alert.Content>
+              <Alert.Title>{error}</Alert.Title>
+              <Alert.Description>
+                <Button className="mt-2" variant="outline" onPress={onRetry}>重新加载</Button>
+              </Alert.Description>
+            </Alert.Content>
+          </Alert>
         ) : null}
         {!customSection && !loading && !error && poses.length === 0 ? (
           <div className="rounded-2xl border border-dashed border-border bg-card px-4 py-12 text-center">
@@ -358,7 +375,7 @@ export function PoseBrowser({
         ) : null}
       </div>
 
-      <Modal.Backdrop isOpen={preview !== null} onOpenChange={(open) => { if (!open) setPreview(null) }}>
+      <Modal.Backdrop isOpen={preview !== null} onOpenChange={(open) => { if (!open) setPreview(null) }} {...portal}>
         <Modal.Container size="lg">
           <Modal.Dialog className="max-w-[min(36rem,calc(100%-2rem))]">
             <Modal.CloseTrigger />
@@ -398,47 +415,10 @@ export function PoseBrowser({
   )
 }
 
-function SeriesPill({
-  active,
-  count,
-  adult = false,
-  title,
-  onClick,
-  children,
-}: {
-  active: boolean
-  count: number
-  adult?: boolean
-  title?: string
-  onClick: () => void
-  children: ReactNode
-}) {
-  return (
-    <button
-      type="button"
-      title={title}
-      onClick={onClick}
-      className={`inline-flex h-8 shrink-0 items-center gap-1.5 rounded-full px-3 text-sm whitespace-nowrap ${active ? "bg-primary text-primary-foreground" : "bg-card text-foreground ring-1 ring-border"}`}
-    >
-      <span>{children}</span>
-      <span className={`text-xs ${active ? "text-primary-foreground/80" : "text-muted-foreground"}`}>{count}</span>
-      {adult ? <span className={`text-[10px] ${active ? "text-primary-foreground/80" : "text-amber-700"}`}>成人向</span> : null}
-    </button>
-  )
-}
-
-function AngleSegment({ active, onClick, children }: { active: boolean; onClick: () => void; children: ReactNode }) {
-  return (
-    <button
-      type="button"
-      role="radio"
-      aria-checked={active}
-      onClick={onClick}
-      className={`inline-flex h-7 shrink-0 items-center rounded-full px-2.5 text-xs whitespace-nowrap ${active ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:text-foreground"}`}
-    >
-      {children}
-    </button>
-  )
+function firstKey(keys: Iterable<unknown> | "all") {
+  if (keys === "all") return null
+  for (const key of keys) return String(key)
+  return null
 }
 
 function PoseCard({
@@ -459,27 +439,20 @@ function PoseCard({
   const views = orderedViews(pose)
   const columns = THUMB_COLS[Math.min(views.length, 5)] ?? "grid-cols-5"
   return (
-    <article className={`min-w-0 rounded-xl border bg-card shadow-sm transition ${selected ? "border-primary ring-2 ring-primary/25" : "border-border hover:border-primary/40"}`}>
-      <div className="relative aspect-[3/4] overflow-hidden rounded-t-xl bg-white">
+    <Card className={`min-w-0 shadow-sm ${selected ? "border-primary ring-2 ring-primary/25" : "border-border"}`}>
+      <Card.Header className="relative aspect-[3/4] overflow-hidden bg-white p-0">
         <button type="button" className="block h-full w-full" onClick={onActivate} aria-pressed={selected}>
           <PoseFigure key={view.id} view={view} alt={`${pose.name}，${view.angle}`} />
         </button>
-        {selected ? (
-          <span className="pointer-events-none absolute top-2 left-2 rounded-full bg-primary px-2 py-0.5 text-[11px] text-primary-foreground">已选</span>
-        ) : null}
-        <button
-          type="button"
-          className="absolute right-2 bottom-2 rounded-full bg-black/60 px-2 py-0.5 text-[11px] text-white"
-          onClick={onPreview}
-        >
-          看线稿
-        </button>
-      </div>
+        {selected ? <Chip color="accent" size="sm" className="pointer-events-none absolute top-2 left-2">已选</Chip> : null}
+        <Button size="sm" className="absolute right-2 bottom-2" onPress={onPreview}>看线稿</Button>
+      </Card.Header>
       <div className="flex items-center justify-between gap-2 px-2.5 py-2">
-        <h3 className="min-w-0 flex-1 truncate text-sm leading-5 font-medium" title={pose.name}>{pose.name}</h3>
-        <span className="max-w-[46%] shrink-0 truncate pt-0.5 text-right text-xs text-muted-foreground" title={pose.category}>{pose.category}</span>
+        <Card.Title className="min-w-0 flex-1 truncate text-sm leading-5 font-medium" title={pose.name}>{pose.name}</Card.Title>
+        <Card.Description className="max-w-[46%] shrink-0 truncate text-right text-xs">{pose.category}</Card.Description>
       </div>
-      <div role="group" aria-label={`${pose.name}的视角`} className={`grid gap-1 px-2 pb-2.5 ${columns}`}>
+      <Card.Footer>
+      <div role="group" aria-label={`${pose.name}的视角`} className={`grid w-full gap-1 ${columns}`}>
         {views.map((item) => {
           const active = item.id === view.id
           return (
@@ -500,7 +473,8 @@ function PoseCard({
           )
         })}
       </div>
-    </article>
+      </Card.Footer>
+    </Card>
   )
 }
 
@@ -508,7 +482,7 @@ function PoseSkeleton() {
   return (
     <div className={`mb-4 ${POSE_GRID}`}>
       {Array.from({ length: 8 }, (_, index) => (
-        <div key={index} className="aspect-[3/4] animate-pulse rounded-2xl bg-muted" />
+        <Skeleton key={index} className="block aspect-[3/4] w-full rounded-2xl" />
       ))}
     </div>
   )
