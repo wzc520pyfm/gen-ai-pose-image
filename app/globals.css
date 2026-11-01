@@ -1,6 +1,6 @@
 @import "tailwindcss";
+@import "@heroui/styles";
 @import "tw-animate-css";
-@import "shadcn/tailwind.css";
 
 @custom-variant dark (&:is(.dark *));
 
@@ -81,6 +81,13 @@
   --sidebar-accent-foreground: oklch(0.205 0 0);
   --sidebar-border: oklch(0.922 0 0);
   --sidebar-ring: oklch(0.708 0 0);
+  --lanzi-rail: #0f172a;
+}
+
+/* Brand blue fine-tune — align with DESIGN.md primary #2563eb (HeroUI --accent) */
+:root {
+  --accent: #2563eb;
+  --accent-foreground: #f8fafc;
 }
 
 .dark {
@@ -135,6 +142,6 @@
     font-family: var(--font-display), "WenQuanYi Micro Hei", "Droid Sans Fallback", sans-serif;
   }
   .dock {
-    background: #0f172a;
+    background: var(--lanzi-rail, #0f172a);
   }
 }

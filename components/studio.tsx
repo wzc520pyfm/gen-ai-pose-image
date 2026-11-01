@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react"
 import { useElapsedSeconds, withElapsed } from "@/lib/elapsed"
 import { Settings } from "lucide-react"
+import { Button as HeroButton } from "@heroui/react"
 import { comfyPromptCards, requestComfyGenerate, type ComfyItem } from "@/lib/comfyui-client"
 import { CharacterDock } from "@/components/character-dock"
 import { Composer, type ResultCard } from "@/components/composer"
@@ -834,6 +835,7 @@ function StudioFrame({ embedded }: { embedded: boolean }) {
         {face ? <span className="hidden min-w-0 truncate text-sm text-primary @min-[640px]/studio:inline">{face.id}</span> : null}
         {costume ? <span className="hidden min-w-0 truncate text-sm text-primary @min-[640px]/studio:inline">{costume.id}</span> : null}
         <div className="ml-auto flex shrink-0 items-center gap-2">
+          <HeroButton size="sm" variant="secondary" onPress={() => {}}>HeroUI</HeroButton>
           <Button variant="outline" size="sm" className="@max-[640px]/studio:hidden" onClick={() => setInstallOpen(true)}>装进 Harness</Button>
           <a
             href={REPOSITORY_URL}
