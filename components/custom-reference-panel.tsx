@@ -3,7 +3,7 @@
 /* eslint-disable @next/next/no-img-element -- custom references are local object URLs */
 
 import { useEffect, useRef, useState } from "react"
-import { useElapsedSeconds, withElapsed } from "@/lib/elapsed"
+import { compactElapsed, useElapsedSeconds } from "@/lib/elapsed"
 import { base64ToBlob, fileToJpegBlob } from "@/lib/library"
 import { requestBeautify, requestReferenceImage } from "@/lib/reference-client"
 import type { StudioSettings } from "@/lib/settings"
@@ -302,7 +302,7 @@ export function CustomReferencePanel({
                   void fillPrompt(description, showAdult && adult)
                 }}
               >
-                {busy === "正在扩写提示词" ? withElapsed(busy, waited) : "扩写提示词"}
+                {busy === "正在扩写提示词" ? compactElapsed(busy, waited) : "扩写提示词"}
               </Button>
             </label>
           ) : null}
@@ -372,12 +372,12 @@ export function CustomReferencePanel({
             {mode !== "upload" ? (
               <>
                 <Button type="button" variant="outline" isDisabled={!prompt.trim()} onPress={() => void navigator.clipboard.writeText(prompt)}>复制提示词</Button>
-                <Button type="button" variant="outline" isDisabled={Boolean(busy)} onPress={() => void generateImage()}>{busy === generateBusy ? withElapsed(busy, waited) : "生成参考图"}</Button>
+                <Button type="button" variant="outline" isDisabled={Boolean(busy)} onPress={() => void generateImage()}>{busy === generateBusy ? compactElapsed(busy, waited) : "生成参考图"}</Button>
               </>
             ) : null}
             <Button type="button" isDisabled={Boolean(busy) || !previewBlob} onPress={() => void save()}>{busy === "正在保存" ? busy : "保存到自定义"}</Button>
           </div>
-          {busy === "正在扩写提示词" && mode === "freeform" ? <p className="text-xs text-muted-foreground">{withElapsed(busy, waited)}</p> : null}
+          {busy === "正在扩写提示词" && mode === "freeform" ? <p className="text-xs text-muted-foreground">{compactElapsed(busy, waited)}</p> : null}
           {busy === "正在读取图片" ? <p className="text-xs text-muted-foreground">{busy}</p> : null}
             </Modal.Body>
           </Modal.Dialog>

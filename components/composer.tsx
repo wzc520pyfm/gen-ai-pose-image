@@ -6,6 +6,7 @@ import { Download, Sparkles } from "lucide-react"
 import { Button, Spinner, TextArea } from "@heroui/react"
 import { HistoryPanel, type HistoryView } from "@/components/history-panel"
 import type { StoredCharacter } from "@/lib/characters"
+import { compactElapsed, useElapsedSeconds } from "@/lib/elapsed"
 import type { AspectRatio, GenerateMode, PromptCard } from "@/lib/types"
 import { ASPECT_LABEL } from "@/lib/types"
 import { studioUrl, useStudioEnv } from "@/lib/studio-env"
@@ -40,8 +41,6 @@ export function Composer({
   onClearFace,
   hasKey,
   running,
-  progress,
-  elapsed = 0,
   runError,
   prompts,
   promptError,
@@ -77,8 +76,6 @@ export function Composer({
   onClearFace: () => void
   hasKey: boolean
   running: boolean
-  progress: string
-  elapsed?: number
   runError: string
   prompts: PromptCard[]
   promptError: string
@@ -97,6 +94,7 @@ export function Composer({
   showRandom?: boolean
 }) {
   const { basePath } = useStudioEnv()
+  const waited = useElapsedSeconds(running)
   const characterSrc = characters[0]
     ? `data:${characters[0].mediaType};base64,${characters[0].dataBase64}`
     : studioUrl(basePath, builtinSheet)
@@ -239,10 +237,10 @@ export function Composer({
       {selected.length > limit ? <p className="text-sm text-amber-800">当前方式一次最多 {limit} 个姿势。</p> : null}
 
       {running ? (
-        <div className="flex items-center gap-2">
+        <div className="flex min-w-0 items-center gap-2">
           <Spinner size="sm" />
-          <span className="text-sm" title={progress || undefined}>正在生成 · {elapsed}s</span>
-          <Button variant="danger" size="sm" onPress={onStop}>停止</Button>
+          <span className="min-w-0 truncate text-sm">{compactElapsed("正在生成", waited)}</span>
+          <Button variant="danger" size="sm" className="shrink-0" onPress={onStop}>停止</Button>
         </div>
       ) : (
         <Button

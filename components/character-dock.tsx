@@ -3,7 +3,7 @@
 /* eslint-disable @next/next/no-img-element -- model photos are data URLs or the bundled muse file */
 
 import { useRef, useState } from "react"
-import { useElapsedSeconds, withElapsed } from "@/lib/elapsed"
+import { compactElapsed, useElapsedSeconds } from "@/lib/elapsed"
 import { ChevronLeft, ChevronRight, ImagePlus } from "lucide-react"
 import { Button, Input, Spinner, Switch } from "@heroui/react"
 import { fileToCharacter, type StoredCharacter } from "@/lib/characters"
@@ -308,7 +308,7 @@ export function CharacterDock({
             onGenerateSheet()
           }}
         >
-          {sheetBusy ? withElapsed("正在生成", sheetWaited) : "生成多视角 sheet"}
+          {sheetBusy ? compactElapsed("正在生成", sheetWaited) : "生成多视角 sheet"}
         </Button>
       ) : null}
       {sheetError ? <p className="text-sm text-[#fecaca]">{sheetError}</p> : null}

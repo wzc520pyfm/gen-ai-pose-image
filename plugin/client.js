@@ -117,27 +117,6 @@ var import_react_dom8 = require("react-dom");
 // components/studio.tsx
 var import_react177 = require("react");
 
-// lib/elapsed.ts
-var import_react = require("react");
-function useElapsedSeconds(active) {
-  const [waited, setWaited] = (0, import_react.useState)(0);
-  (0, import_react.useEffect)(() => {
-    if (!active) {
-      setWaited(0);
-      return;
-    }
-    const started = Date.now();
-    const timer = window.setInterval(() => {
-      setWaited(Math.max(1, Math.round((Date.now() - started) / 1e3)));
-    }, 1e3);
-    return () => window.clearInterval(timer);
-  }, [active]);
-  return waited;
-}
-function withElapsed(label, waited) {
-  return waited > 0 ? `${label}（已等待 ${waited} 秒）` : label;
-}
-
 // shared/workflows/local-tryon.api.json
 var local_tryon_api_default = {
   graph: {
@@ -1579,6 +1558,27 @@ async function requestComfyGenerate(basePath, settings, input, signal) {
 
 // components/character-dock.tsx
 var import_react157 = require("react");
+
+// lib/elapsed.ts
+var import_react = require("react");
+function useElapsedSeconds(active) {
+  const [waited, setWaited] = (0, import_react.useState)(0);
+  (0, import_react.useEffect)(() => {
+    if (!active) {
+      setWaited(0);
+      return;
+    }
+    const started = Date.now();
+    const timer = window.setInterval(() => {
+      setWaited(Math.max(1, Math.round((Date.now() - started) / 1e3)));
+    }, 1e3);
+    return () => window.clearInterval(timer);
+  }, [active]);
+  return waited;
+}
+function compactElapsed(label, waited) {
+  return waited > 0 ? `${label} · ${waited}s` : label;
+}
 
 // node_modules/lucide-react/dist/esm/createLucideIcon.mjs
 var import_react4 = require("react");
@@ -27038,7 +27038,7 @@ function CharacterDock({
           }
           onGenerateSheet();
         },
-        children: sheetBusy ? withElapsed("正在生成", sheetWaited) : "生成多视角 sheet"
+        children: sheetBusy ? compactElapsed("正在生成", sheetWaited) : "生成多视角 sheet"
       }
     ) : null,
     sheetError ? /* @__PURE__ */ (0, import_jsx_runtime32.jsx)("p", { className: "text-sm text-[#fecaca]", children: sheetError }) : null,
@@ -27221,8 +27221,6 @@ function Composer({
   onClearFace,
   hasKey,
   running,
-  progress,
-  elapsed = 0,
   runError,
   prompts,
   promptError,
@@ -27241,6 +27239,7 @@ function Composer({
   showRandom = true
 }) {
   const { basePath } = useStudioEnv();
+  const waited = useElapsedSeconds(running);
   const characterSrc = characters[0] ? `data:${characters[0].mediaType};base64,${characters[0].dataBase64}` : studioUrl(basePath, builtinSheet);
   const limit = mode === "sheet" ? 4 : 8;
   const poseThumb = (viewId, thumbSrc) => thumbSrc || studioUrl(basePath, `/api/pose-image?id=${encodeURIComponent(viewId)}&size=thumb`);
@@ -27380,14 +27379,10 @@ ${item.prompt}`).join("\n\n")),
       limit,
       " 个姿势。"
     ] }) : null,
-    running ? /* @__PURE__ */ (0, import_jsx_runtime34.jsxs)("div", { className: "flex items-center gap-2", children: [
+    running ? /* @__PURE__ */ (0, import_jsx_runtime34.jsxs)("div", { className: "flex min-w-0 items-center gap-2", children: [
       /* @__PURE__ */ (0, import_jsx_runtime34.jsx)(Spinner, { size: "sm" }),
-      /* @__PURE__ */ (0, import_jsx_runtime34.jsxs)("span", { className: "text-sm", title: progress || void 0, children: [
-        "正在生成 · ",
-        elapsed,
-        "s"
-      ] }),
-      /* @__PURE__ */ (0, import_jsx_runtime34.jsx)(Button2, { variant: "danger", size: "sm", onPress: onStop, children: "停止" })
+      /* @__PURE__ */ (0, import_jsx_runtime34.jsx)("span", { className: "min-w-0 truncate text-sm", children: compactElapsed("正在生成", waited) }),
+      /* @__PURE__ */ (0, import_jsx_runtime34.jsx)(Button2, { variant: "danger", size: "sm", className: "shrink-0", onPress: onStop, children: "停止" })
     ] }) : /* @__PURE__ */ (0, import_jsx_runtime34.jsxs)(
       Button2,
       {
@@ -27768,7 +27763,7 @@ function CustomReferencePanel({
                 editedRef.current = false;
                 void fillPrompt(description, showAdult && adult);
               },
-              children: busy === "正在扩写提示词" ? withElapsed(busy, waited) : "扩写提示词"
+              children: busy === "正在扩写提示词" ? compactElapsed(busy, waited) : "扩写提示词"
             }
           )
         ] }) : null,
@@ -27830,11 +27825,11 @@ function CustomReferencePanel({
         /* @__PURE__ */ (0, import_jsx_runtime35.jsxs)("div", { className: "flex flex-wrap gap-2", children: [
           mode !== "upload" ? /* @__PURE__ */ (0, import_jsx_runtime35.jsxs)(import_jsx_runtime35.Fragment, { children: [
             /* @__PURE__ */ (0, import_jsx_runtime35.jsx)(Button2, { type: "button", variant: "outline", isDisabled: !prompt.trim(), onPress: () => void navigator.clipboard.writeText(prompt), children: "复制提示词" }),
-            /* @__PURE__ */ (0, import_jsx_runtime35.jsx)(Button2, { type: "button", variant: "outline", isDisabled: Boolean(busy), onPress: () => void generateImage(), children: busy === generateBusy ? withElapsed(busy, waited) : "生成参考图" })
+            /* @__PURE__ */ (0, import_jsx_runtime35.jsx)(Button2, { type: "button", variant: "outline", isDisabled: Boolean(busy), onPress: () => void generateImage(), children: busy === generateBusy ? compactElapsed(busy, waited) : "生成参考图" })
           ] }) : null,
           /* @__PURE__ */ (0, import_jsx_runtime35.jsx)(Button2, { type: "button", isDisabled: Boolean(busy) || !previewBlob, onPress: () => void save(), children: busy === "正在保存" ? busy : "保存到自定义" })
         ] }),
-        busy === "正在扩写提示词" && mode === "freeform" ? /* @__PURE__ */ (0, import_jsx_runtime35.jsx)("p", { className: "text-xs text-muted-foreground", children: withElapsed(busy, waited) }) : null,
+        busy === "正在扩写提示词" && mode === "freeform" ? /* @__PURE__ */ (0, import_jsx_runtime35.jsx)("p", { className: "text-xs text-muted-foreground", children: compactElapsed(busy, waited) }) : null,
         busy === "正在读取图片" ? /* @__PURE__ */ (0, import_jsx_runtime35.jsx)("p", { className: "text-xs text-muted-foreground", children: busy }) : null
       ] })
     ] }) }) })
@@ -29208,8 +29203,6 @@ function StudioFrame({ embedded }) {
   const [promptError, setPromptError] = (0, import_react177.useState)("");
   const [results, setResults] = (0, import_react177.useState)([]);
   const [running, setRunning] = (0, import_react177.useState)(false);
-  const [progress, setProgress] = (0, import_react177.useState)("");
-  const waited = useElapsedSeconds(running);
   const [runError, setRunError] = (0, import_react177.useState)("");
   const [limitNote, setLimitNote] = (0, import_react177.useState)("");
   const [serverKey, setServerKey] = (0, import_react177.useState)(false);
@@ -29663,15 +29656,12 @@ function StudioFrame({ embedded }) {
     };
     try {
       if (settings.mode === "sheet" || chosen.length === 0) {
-        setProgress(chosen.length === 0 ? "正在通过 ComfyUI 换装" : settings.engine === "comfyui" ? "正在逐格生成姿势拼图" : "正在画姿势拼图");
         const batch = await generateRequest(viewIds, settings.mode);
         setResults(batch);
         await rememberResults(batch, { ...snapshotBase, selection: chosen });
       } else {
         const collected = [];
-        for (let index = 0; index < chosen.length; index += 1) {
-          const item = chosen[index];
-          setProgress(`正在画第 ${index + 1} 张，共 ${chosen.length} 张`);
+        for (const item of chosen) {
           const batch = await generateRequest([item.viewId], "each");
           const stamped = batch.map((result, resultIndex) => ({ ...result, key: `${item.viewId}-${resultIndex}` }));
           collected.push(...stamped);
@@ -29684,7 +29674,6 @@ function StudioFrame({ embedded }) {
       else setRunError(error instanceof Error ? error.message : "生图失败");
     } finally {
       setRunning(false);
-      setProgress("");
       abortRef.current = null;
     }
   }
@@ -29825,8 +29814,6 @@ function StudioFrame({ embedded }) {
       onClearFace: () => setFace(null),
       hasKey: settings.engine === "comfyui" || Boolean(settings.apiKey.trim()) || serverKey,
       running,
-      progress: withElapsed(progress, waited),
-      elapsed: waited,
       runError,
       prompts,
       promptError,
