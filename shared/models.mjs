@@ -4,6 +4,11 @@ export { BUILTIN_MODELS, isBuiltinModelId }
 
 export const DEFAULT_MODEL_ID = "dafeiyu"
 
+/** Explicit "no character sheet" selection. Omitted ids still default to 大肥鱼. */
+export const NO_MODEL_ID = "none"
+
+export const IDENTITY_REQUIRED = "先选择一位模特，或选一张脸部参考。"
+
 export function createModelId(random = () => globalThis.crypto.randomUUID()) {
   return `model-${random()}`
 }
@@ -35,6 +40,9 @@ export function withUploadedSheet(images, sheet) {
 export function syncLibrary(models, activeId, images, now = Date.now(), random = () => globalThis.crypto.randomUUID()) {
   const list = Array.isArray(models) ? models.slice() : []
   if (!images?.length) {
+    if (activeId === NO_MODEL_ID) {
+      return { models: list, activeId: NO_MODEL_ID, removedId: null, entry: null }
+    }
     if (!activeId || isBuiltinModelId(activeId)) {
       return { models: list, activeId: isBuiltinModelId(activeId) ? activeId : DEFAULT_MODEL_ID, removedId: null, entry: null }
     }
@@ -65,6 +73,7 @@ export function syncLibrary(models, activeId, images, now = Date.now(), random =
 
 export function adoptCurrent(models, images, activeId, now = Date.now(), random = () => globalThis.crypto.randomUUID()) {
   const list = Array.isArray(models) ? models.slice() : []
+  if (activeId === NO_MODEL_ID) return { models: list, activeId: NO_MODEL_ID, adopted: false, entry: null }
   if (isBuiltinModelId(activeId)) return { models: list, activeId, adopted: false, entry: null }
   const known = activeId && list.some((model) => model.id === activeId) ? activeId : null
   if (!images?.length) return { models: list, activeId: known || DEFAULT_MODEL_ID, adopted: false, entry: null }

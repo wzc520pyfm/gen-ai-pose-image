@@ -4,6 +4,7 @@ import { BUILTIN_MODELS } from "./builtin-models.mjs"
 import { CHARACTER_SHEET_PROMPT, LAYOUT_SHEET_FILE, generateCharacterSheet } from "./character-sheet.mjs"
 import {
   activateModel,
+  NO_MODEL_ID,
   adoptCurrent,
   deleteFromLibrary,
   identityImage,
@@ -171,4 +172,12 @@ test("the switcher lists built-ins first, then saved models in creation order", 
   const stayed = adoptCurrent([], [photo], "dafeiyu", 90)
   assert.equal(stayed.adopted, false)
   assert.equal(stayed.models.length, 0)
+  const kept = adoptCurrent([{ id: "model-a", images: [photo] }], [photo], NO_MODEL_ID, 10)
+  assert.equal(kept.activeId, NO_MODEL_ID)
+  assert.equal(kept.adopted, false)
+  assert.equal(kept.models.length, 1)
+  const cleared = syncLibrary([], NO_MODEL_ID, [], 10)
+  assert.equal(cleared.activeId, NO_MODEL_ID)
+  const imported = syncLibrary([], NO_MODEL_ID, [photo], 11, () => "new")
+  assert.equal(imported.activeId, "model-new")
 })

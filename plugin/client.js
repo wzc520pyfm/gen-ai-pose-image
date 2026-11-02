@@ -47,12 +47,12 @@ var require_use_sync_external_store_shim_production = __commonJS({
       return x === y && (0 !== x || 1 / x === 1 / y) || x !== x && y !== y;
     }
     var objectIs = "function" === typeof Object.is ? Object.is : is;
-    var useState22 = React67.useState;
+    var useState23 = React67.useState;
     var useEffect18 = React67.useEffect;
     var useLayoutEffect2 = React67.useLayoutEffect;
     var useDebugValue2 = React67.useDebugValue;
     function useSyncExternalStore$2(subscribe, getSnapshot) {
-      var value = getSnapshot(), _useState = useState22({ inst: { value, getSnapshot } }), inst = _useState[0].inst, forceUpdate = _useState[1];
+      var value = getSnapshot(), _useState = useState23({ inst: { value, getSnapshot } }), inst = _useState[0].inst, forceUpdate = _useState[1];
       useLayoutEffect2(
         function() {
           inst.value = value;
@@ -192,11 +192,11 @@ __export(harness_entry_exports, {
   name: () => name
 });
 module.exports = __toCommonJS(harness_entry_exports);
-var import_react15 = require("react");
+var import_react16 = require("react");
 var import_react_dom = require("react-dom");
 
 // components/studio.tsx
-var import_react14 = require("react");
+var import_react15 = require("react");
 
 // node_modules/lucide-react/dist/esm/createLucideIcon.mjs
 var import_react3 = require("react");
@@ -1193,6 +1193,15 @@ function localPrompts({ pose, costume, face = null, extraPrompt = "", characterC
   const action = pose ? `${pose.name}; ${pose.angle}; ${pose.category}` : "keep the original pose and framing";
   const half = pose?.system?.includes("半身");
   const framing = half ? "an upper-body portrait from head to waist, with head and both arms visible" : "a full-body portrait with head and feet visible";
+  if (face && !(Number(characterCount) > 0)) {
+    const label = [face.section, face.hair, face.label].filter(Boolean).join(", ");
+    const identity2 = `There is no character sheet. The person image is only a face, expression, bone structure and hairstyle reference${face.id ? ` (${face.id}${label ? `, ${label}` : ""})` : ""}. Do not copy clothes, body, or background from it. Do not add whale ears, a whale tail, horns, or any trait that is not in that face reference. The person is an adult.`;
+    return {
+      outfit: `Edit the person image: replace the outfit with the complete outfit in the garment image. Match its colors, fabric, patterns, silhouette and accessories. ${identity2} Keep a natural adult body. One image, no collage. ${extraPrompt}`,
+      scaffold: `A studio image of ${people}, ${framing}, wearing a loose opaque long-sleeved neutral gray shirt and full-length opaque trousers, fully dressed. Pose and camera: ${action}. Follow the depth map for body positions and composition, natural anatomy, simple neutral background. ${identity2} ${extraPrompt}`,
+      final: costume ? `Create one image of ${people}, ${framing}. Use the pose reference only for pose and framing: ${action}. ${identity2} Dress the person in the complete outfit from the clothing reference, accurately matching its colors, fabric, patterns, sleeves, neckline and silhouette. No collage, no text. ${extraPrompt}` : `Create one image of ${people}, ${framing}. Use the pose reference only for body pose and framing: ${action}. ${identity2} ${keepOutfit ? "Dress them in a complete everyday outfit, fully clothed." : "You may change the clothes according to the following description, keeping every person fully clothed in opaque clothing."} Do not copy clothes from the face reference. No collage, no text. ${extraPrompt}`
+    };
+  }
   const identity = characterCount > 1 ? "All additional identity images show the same main person from different views. Preserve that person's identity, face, hair, body type and visual style." : "Preserve the main person's identity, face, hair, body type and visual style.";
   const prompts = {
     outfit: `Edit <image1>: replace the main person's outfit with the complete outfit in <image2>. Match its colors, fabric, patterns, silhouette and accessories. Keep the original pose, face, hair, framing and background. ${identity} One image, no collage. ${extraPrompt}`,
@@ -1262,17 +1271,20 @@ function activeGraph(source, output) {
 }
 async function buildLocalGraph({ files, pose, costume, face = null, aspectRatio, seed = 42, extraPrompt = "", keepOutfit = true, prefix = "tryon/lanpose" }) {
   if (!pose && !costume) throw new Error("至少启用换装或姿势。");
+  const faceOnly = files.characters.length === 0 && Boolean(files.face);
+  const characterFiles = files.characters.length > 0 ? files.characters : files.face ? [files.face] : [];
+  if (!characterFiles[0]) throw new Error("先选择一位模特，或选一张脸部参考。");
   const { graph, mapping: m } = structuredClone(local_tryon_api_default);
   const set = (slot, value) => {
     const [id, key] = slot;
     graph[id].inputs[key] = value;
   };
-  set(m.person, files.characters[0]);
-  set(m.garment, files.garment || files.characters[0]);
-  set(m.pose, files.pose || files.characters[0]);
+  set(m.person, characterFiles[0]);
+  set(m.garment, files.garment || characterFiles[0]);
+  set(m.pose, files.pose || characterFiles[0]);
   for (const slot of m.outfitSwitches) set(slot, Boolean(costume));
   set(m.poseSwitch, Boolean(pose));
-  const prompts = localPrompts({ pose, costume, face, extraPrompt, characterCount: files.characters.length, keepOutfit });
+  const prompts = localPrompts({ pose, costume, face, extraPrompt, characterCount: faceOnly ? 0 : characterFiles.length, keepOutfit });
   set(m.outfitPrompt, prompts.outfit);
   set(m.posePrompt, prompts.scaffold);
   set(m.finalPrompt, prompts.final);
@@ -1289,14 +1301,14 @@ async function buildLocalGraph({ files, pose, costume, face = null, aspectRatio,
   const [width, height] = dimensions(aspectRatio);
   for (const slot of m.widths) set(slot, width);
   for (const slot of m.heights) set(slot, height);
-  for (let i = 1; i < files.characters.length; i++) {
+  for (let i = 1; i < characterFiles.length; i++) {
     const id = String(500 + i);
-    graph[id] = { class_type: "LoadImage", inputs: { image: files.characters[i] } };
+    graph[id] = { class_type: "LoadImage", inputs: { image: characterFiles[i] } };
     graph[m.outfitPrompt[0]].inputs[`images.image_${i + 2}`] = [id, 0];
     graph[m.finalPrompt[0]].inputs[`images.image_${i + (costume ? 4 : 3)}`] = [id, 0];
   }
-  if (files.face) {
-    const slot = faceSlot(files.characters.length, costume);
+  if (files.face && !faceOnly) {
+    const slot = faceSlot(characterFiles.length, costume);
     graph["510"] = { class_type: "LoadImage", inputs: { image: files.face } };
     graph[m.finalPrompt[0]].inputs[`images.image_${slot}`] = ["510", 0];
   }
@@ -1367,8 +1379,9 @@ function pause(signal) {
     if (signal.aborted) abort();
   });
 }
-async function generateComfyTask({ url, token, characters, garment, poseImage, faceImage, face = null, pose, costume, aspectRatio, extraPrompt, keepOutfit = true, seed = 42, signal, fetchImpl = fetch }) {
-  if (!characters?.length || characters.length > 4) throw new Error("模特参考图需要 1 到 4 张。");
+async function generateComfyTask({ url, token, characters = [], garment, poseImage, faceImage, face = null, pose, costume, aspectRatio, extraPrompt, keepOutfit = true, seed = 42, signal, fetchImpl = fetch }) {
+  const faceOnly = characters.length === 0 && Boolean(faceImage);
+  if (characters.length > 4 || !faceOnly && characters.length === 0) throw new Error("模特参考图需要 1 到 4 张。");
   const linked = AbortSignal.any([signal || new AbortController().signal, AbortSignal.timeout(6e5)]);
   const client = createComfyClient({ url, token, signal: linked, fetchImpl });
   const id = crypto.randomUUID();
@@ -1380,7 +1393,7 @@ async function generateComfyTask({ url, token, characters, garment, poseImage, f
     if (typeof body.name !== "string" || !body.name || /[\\/]/.test(body.name) || body.name === ".." || body.subfolder && !/^[\w/-]+$/.test(body.subfolder) || body.subfolder?.split("/").includes("..")) throw new Error("ComfyUI 返回的图片路径无效。");
     return body.subfolder ? `${body.subfolder}/${body.name}` : body.name;
   };
-  const graphInput = { files: { characters: characters.map(() => "person.png"), garment: garment ? "garment.png" : void 0, pose: poseImage ? "pose.png" : void 0, face: faceImage ? "face.png" : void 0 }, pose, costume, face, aspectRatio, extraPrompt, keepOutfit, seed, prefix: `tryon/lanpose-${id}` };
+  const graphInput = { files: { characters: faceOnly ? [] : characters.map(() => "person.png"), garment: garment ? "garment.png" : void 0, pose: poseImage ? "pose.png" : void 0, face: faceImage ? "face.png" : void 0 }, pose, costume, face, aspectRatio, extraPrompt, keepOutfit, seed, prefix: `tryon/lanpose-${id}` };
   const planned = await buildLocalGraph(graphInput);
   const info = await (await client.request("/object_info")).json();
   for (const node of Object.values(planned.graph)) {
@@ -1391,7 +1404,9 @@ async function generateComfyTask({ url, token, characters, garment, poseImage, f
     }
   }
   const files = { characters: [] };
-  for (const [i, image] of characters.entries()) files.characters.push(await upload(image, "person", i));
+  if (!faceOnly) {
+    for (const [i, image] of characters.entries()) files.characters.push(await upload(image, "person", i));
+  }
   if (garment) files.garment = await upload(garment, "garment");
   if (poseImage) files.pose = await upload(poseImage, "pose");
   if (faceImage) files.face = await upload(faceImage, "face");
@@ -1503,6 +1518,140 @@ function isBuiltinModelId(id) {
 }
 function getBuiltinModel(id) {
   return BUILTIN_MODELS.find((model) => model.id === id) || null;
+}
+
+// shared/models.mjs
+var DEFAULT_MODEL_ID = "dafeiyu";
+var NO_MODEL_ID = "none";
+var IDENTITY_REQUIRED = "先选择一位模特，或选一张脸部参考。";
+function createModelId(random = () => globalThis.crypto.randomUUID()) {
+  return `model-${random()}`;
+}
+function defaultModelLabel(existingCustomCount = 0) {
+  const saved = Math.max(0, Number(existingCustomCount) || 0);
+  return `模特 ${BUILTIN_MODELS.length + saved + 1}`;
+}
+function photosOnly(images) {
+  return (Array.isArray(images) ? images : []).filter((image) => image && image.dataBase64 && image.role !== "sheet");
+}
+function identityImage(images) {
+  return photosOnly(images)[0] || (Array.isArray(images) ? images.find((image) => image?.dataBase64) : null) || null;
+}
+function withGeneratedSheet(images, sheet) {
+  if (!sheet?.dataBase64) throw new Error("多视角 sheet 是空的");
+  const photos = photosOnly(images).map((image) => ({ ...image, role: "photo" }));
+  return [{ ...sheet, role: "sheet" }, ...photos];
+}
+function withUploadedSheet(images, sheet) {
+  return withGeneratedSheet(images, sheet);
+}
+function syncLibrary(models, activeId, images, now = Date.now(), random = () => globalThis.crypto.randomUUID()) {
+  const list = Array.isArray(models) ? models.slice() : [];
+  if (!images?.length) {
+    if (activeId === NO_MODEL_ID) {
+      return { models: list, activeId: NO_MODEL_ID, removedId: null, entry: null };
+    }
+    if (!activeId || isBuiltinModelId(activeId)) {
+      return { models: list, activeId: isBuiltinModelId(activeId) ? activeId : DEFAULT_MODEL_ID, removedId: null, entry: null };
+    }
+    return {
+      models: list.filter((model) => model.id !== activeId),
+      activeId: DEFAULT_MODEL_ID,
+      removedId: activeId,
+      entry: null
+    };
+  }
+  const index = list.findIndex((model) => model.id === activeId);
+  if (index >= 0) {
+    const entry2 = { ...list[index], images, updatedAt: now, lastUsedAt: list[index].lastUsedAt || now };
+    const next = list.slice();
+    next[index] = entry2;
+    return { models: next, activeId, removedId: null, entry: entry2 };
+  }
+  const entry = {
+    id: createModelId(random),
+    label: defaultModelLabel(list.length),
+    createdAt: now,
+    updatedAt: now,
+    lastUsedAt: now,
+    images
+  };
+  return { models: [...list, entry], activeId: entry.id, removedId: null, entry };
+}
+function adoptCurrent(models, images, activeId, now = Date.now(), random = () => globalThis.crypto.randomUUID()) {
+  const list = Array.isArray(models) ? models.slice() : [];
+  if (activeId === NO_MODEL_ID) return { models: list, activeId: NO_MODEL_ID, adopted: false, entry: null };
+  if (isBuiltinModelId(activeId)) return { models: list, activeId, adopted: false, entry: null };
+  const known = activeId && list.some((model) => model.id === activeId) ? activeId : null;
+  if (!images?.length) return { models: list, activeId: known || DEFAULT_MODEL_ID, adopted: false, entry: null };
+  if (known) return { models: list, activeId: known, adopted: false, entry: null };
+  const entry = {
+    id: createModelId(random),
+    label: defaultModelLabel(list.length),
+    createdAt: now,
+    updatedAt: now,
+    lastUsedAt: now,
+    images
+  };
+  return { models: [...list, entry], activeId: entry.id, adopted: true, entry };
+}
+function activateModel(models, id) {
+  const found = (Array.isArray(models) ? models : []).find((model) => model.id === id);
+  if (!found) throw new Error("找不到这个模特");
+  return found;
+}
+function renameModel(models, id, label) {
+  if (isBuiltinModelId(id)) throw new Error("内置模特不能改名");
+  const text = String(label || "").trim().slice(0, 40);
+  if (!text) throw new Error("模特名称不能为空");
+  const list = Array.isArray(models) ? models.slice() : [];
+  const index = list.findIndex((model) => model.id === id);
+  if (index < 0) throw new Error("找不到这个模特");
+  list[index] = { ...list[index], label: text };
+  return list;
+}
+function deleteFromLibrary(models, id, activeId) {
+  if (isBuiltinModelId(id)) throw new Error("内置模特不能删除");
+  const list = (Array.isArray(models) ? models : []).filter((model) => model.id !== id);
+  return {
+    models: list,
+    activeId: activeId === id ? DEFAULT_MODEL_ID : activeId,
+    cleared: activeId === id
+  };
+}
+function cycleModelId(entries, activeId, direction) {
+  const list = Array.isArray(entries) ? entries : [];
+  if (list.length === 0) return activeId || "";
+  const index = list.findIndex((item) => item.id === activeId);
+  const start = index < 0 ? 0 : index;
+  const delta = direction === "prev" ? -1 : 1;
+  return list[(start + delta + list.length) % list.length].id;
+}
+function modelIndicator(entries, activeId) {
+  const list = Array.isArray(entries) ? entries : [];
+  const found = list.findIndex((item) => item.id === activeId);
+  return { index: found < 0 ? 1 : found + 1, total: list.length };
+}
+function switcherEntries({ models = [] } = {}) {
+  const builtins = BUILTIN_MODELS.map((model) => ({
+    id: model.id,
+    label: model.name,
+    builtin: true,
+    portrait: model.portrait,
+    sheet: model.sheet
+  }));
+  const custom = [...Array.isArray(models) ? models : []].sort((a, b) => {
+    const created = (Number(a.createdAt) || 0) - (Number(b.createdAt) || 0);
+    if (created !== 0) return created;
+    return String(a.id).localeCompare(String(b.id));
+  }).map((model) => ({
+    id: model.id,
+    label: model.label,
+    builtin: false,
+    portrait: "",
+    sheet: ""
+  }));
+  return [...builtins, ...custom];
 }
 
 // shared/costume-prompt.mjs
@@ -1980,7 +2129,9 @@ async function requestComfyGenerate(basePath, settings, input, signal) {
     return base64ToBlob(image.dataBase64, image.mediaType);
   };
   signal.throwIfAborted();
-  const sources = input.characterImages.length ? input.characterImages.map(wireImage) : [await publicImage(getBuiltinModel(input.builtinModelId)?.sheet || "/muse/dafeiyu-sheet.png")];
+  const omitModel = input.characterImages.length === 0 && input.builtinModelId === NO_MODEL_ID;
+  if (omitModel && !input.face) throw new Error("先选择一位模特，或选一张脸部参考。");
+  const sources = input.characterImages.length ? input.characterImages.map(wireImage) : omitModel ? [] : [await publicImage(getBuiltinModel(input.builtinModelId)?.sheet || "/muse/dafeiyu-sheet.png")];
   const characters = await Promise.all(sources.map((blob) => prepareComfyImage(blob, input.aspectRatio)));
   const customGarment = input.customReferences.costumes.find((c) => c.id === input.costume?.id);
   const garment = input.costume ? await prepareComfyImage(customGarment ? wireImage(customGarment) : await publicImage(`/api/costume-image?id=${encodeURIComponent(input.costume.id)}&size=preview`)) : void 0;
@@ -6978,134 +7129,6 @@ function studioUrl(basePath, path) {
   return `${base}${path}`;
 }
 
-// shared/models.mjs
-var DEFAULT_MODEL_ID = "dafeiyu";
-function createModelId(random = () => globalThis.crypto.randomUUID()) {
-  return `model-${random()}`;
-}
-function defaultModelLabel(existingCustomCount = 0) {
-  const saved = Math.max(0, Number(existingCustomCount) || 0);
-  return `模特 ${BUILTIN_MODELS.length + saved + 1}`;
-}
-function photosOnly(images) {
-  return (Array.isArray(images) ? images : []).filter((image) => image && image.dataBase64 && image.role !== "sheet");
-}
-function identityImage(images) {
-  return photosOnly(images)[0] || (Array.isArray(images) ? images.find((image) => image?.dataBase64) : null) || null;
-}
-function withGeneratedSheet(images, sheet) {
-  if (!sheet?.dataBase64) throw new Error("多视角 sheet 是空的");
-  const photos = photosOnly(images).map((image) => ({ ...image, role: "photo" }));
-  return [{ ...sheet, role: "sheet" }, ...photos];
-}
-function withUploadedSheet(images, sheet) {
-  return withGeneratedSheet(images, sheet);
-}
-function syncLibrary(models, activeId, images, now = Date.now(), random = () => globalThis.crypto.randomUUID()) {
-  const list = Array.isArray(models) ? models.slice() : [];
-  if (!images?.length) {
-    if (!activeId || isBuiltinModelId(activeId)) {
-      return { models: list, activeId: isBuiltinModelId(activeId) ? activeId : DEFAULT_MODEL_ID, removedId: null, entry: null };
-    }
-    return {
-      models: list.filter((model) => model.id !== activeId),
-      activeId: DEFAULT_MODEL_ID,
-      removedId: activeId,
-      entry: null
-    };
-  }
-  const index = list.findIndex((model) => model.id === activeId);
-  if (index >= 0) {
-    const entry2 = { ...list[index], images, updatedAt: now, lastUsedAt: list[index].lastUsedAt || now };
-    const next = list.slice();
-    next[index] = entry2;
-    return { models: next, activeId, removedId: null, entry: entry2 };
-  }
-  const entry = {
-    id: createModelId(random),
-    label: defaultModelLabel(list.length),
-    createdAt: now,
-    updatedAt: now,
-    lastUsedAt: now,
-    images
-  };
-  return { models: [...list, entry], activeId: entry.id, removedId: null, entry };
-}
-function adoptCurrent(models, images, activeId, now = Date.now(), random = () => globalThis.crypto.randomUUID()) {
-  const list = Array.isArray(models) ? models.slice() : [];
-  if (isBuiltinModelId(activeId)) return { models: list, activeId, adopted: false, entry: null };
-  const known = activeId && list.some((model) => model.id === activeId) ? activeId : null;
-  if (!images?.length) return { models: list, activeId: known || DEFAULT_MODEL_ID, adopted: false, entry: null };
-  if (known) return { models: list, activeId: known, adopted: false, entry: null };
-  const entry = {
-    id: createModelId(random),
-    label: defaultModelLabel(list.length),
-    createdAt: now,
-    updatedAt: now,
-    lastUsedAt: now,
-    images
-  };
-  return { models: [...list, entry], activeId: entry.id, adopted: true, entry };
-}
-function activateModel(models, id) {
-  const found = (Array.isArray(models) ? models : []).find((model) => model.id === id);
-  if (!found) throw new Error("找不到这个模特");
-  return found;
-}
-function renameModel(models, id, label) {
-  if (isBuiltinModelId(id)) throw new Error("内置模特不能改名");
-  const text = String(label || "").trim().slice(0, 40);
-  if (!text) throw new Error("模特名称不能为空");
-  const list = Array.isArray(models) ? models.slice() : [];
-  const index = list.findIndex((model) => model.id === id);
-  if (index < 0) throw new Error("找不到这个模特");
-  list[index] = { ...list[index], label: text };
-  return list;
-}
-function deleteFromLibrary(models, id, activeId) {
-  if (isBuiltinModelId(id)) throw new Error("内置模特不能删除");
-  const list = (Array.isArray(models) ? models : []).filter((model) => model.id !== id);
-  return {
-    models: list,
-    activeId: activeId === id ? DEFAULT_MODEL_ID : activeId,
-    cleared: activeId === id
-  };
-}
-function cycleModelId(entries, activeId, direction) {
-  const list = Array.isArray(entries) ? entries : [];
-  if (list.length === 0) return activeId || "";
-  const index = list.findIndex((item) => item.id === activeId);
-  const start = index < 0 ? 0 : index;
-  const delta = direction === "prev" ? -1 : 1;
-  return list[(start + delta + list.length) % list.length].id;
-}
-function modelIndicator(entries, activeId) {
-  const list = Array.isArray(entries) ? entries : [];
-  const found = list.findIndex((item) => item.id === activeId);
-  return { index: found < 0 ? 1 : found + 1, total: list.length };
-}
-function switcherEntries({ models = [] } = {}) {
-  const builtins = BUILTIN_MODELS.map((model) => ({
-    id: model.id,
-    label: model.name,
-    builtin: true,
-    portrait: model.portrait,
-    sheet: model.sheet
-  }));
-  const custom = [...Array.isArray(models) ? models : []].sort((a, b) => {
-    const created = (Number(a.createdAt) || 0) - (Number(b.createdAt) || 0);
-    if (created !== 0) return created;
-    return String(a.id).localeCompare(String(b.id));
-  }).map((model) => ({
-    id: model.id,
-    label: model.label,
-    builtin: false,
-    portrait: "",
-    sheet: ""
-  }));
-  return [...builtins, ...custom];
-}
-
 // components/character-dock.tsx
 var import_jsx_runtime12 = require("react/jsx-runtime");
 var AUTHOR_URL = "https://www.bilibili.com/opus/1233069202138464289";
@@ -7137,19 +7160,24 @@ function CharacterDock({
   const [pendingDelete, setPendingDelete] = (0, import_react7.useState)(null);
   const sheetWaited = useElapsedSeconds(sheetBusy);
   const custom = images.length > 0;
+  const noModel = activeModelId === NO_MODEL_ID;
   const photoCount = images.filter((image) => image.role !== "sheet").length;
   const hasSheet = images.some((image) => image.role === "sheet");
   const sheetAction = hasSheet ? "替换设定图" : "导入设定图";
   const position = modelIndicator(switchItems, activeModelId);
   const currentIndex = Math.max(0, position.index - 1);
-  const currentItem = switchItems.find((item) => item.id === activeModelId) ?? switchItems[currentIndex];
+  const currentItem = switchItems.find((item) => item.id === activeModelId) ?? (noModel ? null : switchItems[currentIndex]);
   const canCycle = position.total > 1;
-  const title = custom ? activeLabel || "导入的模特" : currentItem?.label || "大肥鱼";
+  const title = noModel ? "未选模特" : custom ? activeLabel || "导入的模特" : currentItem?.label || "大肥鱼";
   function stepModel(direction) {
     if (!canCycle) return;
+    if (noModel) {
+      onSelectModel(direction === "next" ? switchItems[0].id : switchItems[switchItems.length - 1].id);
+      return;
+    }
     onSelectModel(cycleModelId(switchItems, activeModelId, direction));
   }
-  const builtin = custom ? null : getBuiltinModel(activeModelId) || getBuiltinModel("dafeiyu");
+  const builtin = custom || noModel ? null : getBuiltinModel(activeModelId) || getBuiltinModel("dafeiyu");
   const portrait = custom ? `data:${images[0].mediaType};base64,${images[0].dataBase64}` : studioUrl(basePath, builtin?.portrait || "/muse/dafeiyu-portrait.jpg");
   const full = custom ? portrait : studioUrl(basePath, builtin?.sheet || "/muse/dafeiyu-sheet.png");
   async function addFiles(list) {
@@ -7190,7 +7218,7 @@ function CharacterDock({
   }
   return /* @__PURE__ */ (0, import_jsx_runtime12.jsxs)("aside", { className: "dock order-1 flex shrink-0 flex-col gap-3 px-3 py-3 text-[#e2e8f0] @min-[1024px]/studio:order-none @min-[1024px]/studio:h-full @min-[1024px]/studio:min-h-0 @min-[1024px]/studio:shrink @min-[1024px]/studio:gap-4 @min-[1024px]/studio:overflow-y-auto @min-[1024px]/studio:px-4 @min-[1024px]/studio:py-5", children: [
     /* @__PURE__ */ (0, import_jsx_runtime12.jsxs)("div", { className: "flex items-start gap-1", children: [
-      /* @__PURE__ */ (0, import_jsx_runtime12.jsx)(
+      noModel ? /* @__PURE__ */ (0, import_jsx_runtime12.jsx)("div", { className: "relative mt-1 grid size-14 shrink-0 place-items-center rounded-xl bg-white/10 text-[10px] text-[#cbd5e1] @min-[1024px]/studio:hidden", children: "未选" }) : /* @__PURE__ */ (0, import_jsx_runtime12.jsx)(
         ModelFigure,
         {
           src: portrait,
@@ -7230,13 +7258,13 @@ function CharacterDock({
           }
         ) : /* @__PURE__ */ (0, import_jsx_runtime12.jsxs)("h2", { className: "flex items-baseline gap-2 text-lg font-semibold text-white @min-[1024px]/studio:text-2xl", children: [
           /* @__PURE__ */ (0, import_jsx_runtime12.jsx)("span", { className: "truncate", children: title }),
-          canCycle ? /* @__PURE__ */ (0, import_jsx_runtime12.jsxs)("span", { className: "shrink-0 text-xs font-normal text-[#cbd5e1]", children: [
+          canCycle && !noModel ? /* @__PURE__ */ (0, import_jsx_runtime12.jsxs)("span", { className: "shrink-0 text-xs font-normal text-[#cbd5e1]", children: [
             position.index,
             "/",
             position.total
           ] }) : null
         ] }),
-        /* @__PURE__ */ (0, import_jsx_runtime12.jsx)("p", { className: "mt-0.5 text-xs leading-5 text-[#cbd5e1] @min-[1024px]/studio:mt-2 @min-[1024px]/studio:text-sm @min-[1024px]/studio:leading-6", children: custom ? "生图时改用你导入的参考图。" : /* @__PURE__ */ (0, import_jsx_runtime12.jsxs)(import_jsx_runtime12.Fragment, { children: [
+        /* @__PURE__ */ (0, import_jsx_runtime12.jsx)("p", { className: "mt-0.5 text-xs leading-5 text-[#cbd5e1] @min-[1024px]/studio:mt-2 @min-[1024px]/studio:text-sm @min-[1024px]/studio:leading-6", children: noModel ? "选了脸部之后可以不带模特出图。没选脸时，仍要选一位模特。" : custom ? "生图时改用你导入的参考图。" : /* @__PURE__ */ (0, import_jsx_runtime12.jsxs)(import_jsx_runtime12.Fragment, { children: [
           /* @__PURE__ */ (0, import_jsx_runtime12.jsx)("span", { className: "block", children: builtin?.blurb || "社区鲸鱼娘的成年形象。" }),
           /* @__PURE__ */ (0, import_jsx_runtime12.jsxs)("span", { className: "block", children: [
             "原创作者",
@@ -7293,43 +7321,55 @@ function CharacterDock({
         }
       )
     ] }),
+    noModel ? /* @__PURE__ */ (0, import_jsx_runtime12.jsx)("div", { className: "rounded-xl bg-white/10 px-3 py-3 text-sm leading-6 text-[#cbd5e1]", children: "这次不带模特。选了脸部之后，参考图是脸、可选的衣服和姿势。没选脸时不能出图。" }) : /* @__PURE__ */ (0, import_jsx_runtime12.jsxs)(import_jsx_runtime12.Fragment, { children: [
+      /* @__PURE__ */ (0, import_jsx_runtime12.jsx)(
+        ModelFigure,
+        {
+          src: portrait,
+          alt: custom ? images[0]?.role === "sheet" ? "多视角设定图" : "导入的模特头像" : `${builtin?.name || "大肥鱼"}的正面全身像`,
+          label: "正在加载立绘",
+          boxClassName: "relative hidden w-full shrink-0 overflow-hidden rounded-xl bg-white @min-[1024px]/studio:block",
+          imgClassName: `w-full ${images[0]?.role === "sheet" ? "max-h-56 object-contain" : "aspect-[3/4] object-cover object-top"}`,
+          spinnerClassName: "text-slate-500"
+        }
+      ),
+      /* @__PURE__ */ (0, import_jsx_runtime12.jsx)("p", { className: "hidden text-sm leading-6 text-[#cbd5e1] @min-[1024px]/studio:block", children: custom ? "参考图会和姿势线稿一起交给模型。请使用成年人物的图片。" : builtin?.id === "dafeiyu" ? "长波浪蓝发、鲸耳和蓝鲸尾。三视图锁住脸和鲸尾，衣服可以换成衣装集里的一套。" : "三视图锁住脸和服装。衣服可以换成衣装集里的一套。" }),
+      !custom ? /* @__PURE__ */ (0, import_jsx_runtime12.jsx)(
+        ModelFigure,
+        {
+          src: full,
+          alt: `${builtin?.name || "大肥鱼"}的多视角设定图`,
+          label: "正在加载设定图",
+          boxClassName: "relative hidden w-full shrink-0 overflow-hidden rounded-xl bg-white @min-[1024px]/studio:block",
+          imgClassName: "max-h-56 w-full rounded-xl bg-white object-contain",
+          width: builtin?.id === "dafeiyu" ? 1448 : 1536,
+          height: builtin?.id === "dafeiyu" ? 1086 : 1024,
+          spinnerClassName: "text-slate-500"
+        }
+      ) : /* @__PURE__ */ (0, import_jsx_runtime12.jsx)("div", { className: "grid grid-cols-3 gap-2", children: images.map((image) => /* @__PURE__ */ (0, import_jsx_runtime12.jsxs)("div", { className: "relative", children: [
+        /* @__PURE__ */ (0, import_jsx_runtime12.jsx)("img", { src: `data:${image.mediaType};base64,${image.dataBase64}`, alt: image.role === "sheet" ? "多视角设定图" : "导入的模特参考", className: `aspect-[3/4] w-full rounded-lg ${image.role === "sheet" ? "bg-white object-contain" : "object-cover"}` }),
+        image.role === "sheet" ? /* @__PURE__ */ (0, import_jsx_runtime12.jsx)("span", { className: "absolute bottom-1 left-1 rounded-full bg-black/60 px-1.5 text-[10px] text-white", children: "设定图" }) : null,
+        /* @__PURE__ */ (0, import_jsx_runtime12.jsx)(
+          "button",
+          {
+            type: "button",
+            className: "absolute top-1 right-1 rounded-full bg-black/60 px-1.5 text-[10px] text-white",
+            onClick: () => onChange(images.filter((item) => item.id !== image.id)),
+            children: "移除"
+          }
+        )
+      ] }, image.id)) })
+    ] }),
     /* @__PURE__ */ (0, import_jsx_runtime12.jsx)(
-      ModelFigure,
+      Button3,
       {
-        src: portrait,
-        alt: custom ? images[0]?.role === "sheet" ? "多视角设定图" : "导入的模特头像" : `${builtin?.name || "大肥鱼"}的正面全身像`,
-        label: "正在加载立绘",
-        boxClassName: "relative hidden w-full shrink-0 overflow-hidden rounded-xl bg-white @min-[1024px]/studio:block",
-        imgClassName: `w-full ${images[0]?.role === "sheet" ? "max-h-56 object-contain" : "aspect-[3/4] object-cover object-top"}`,
-        spinnerClassName: "text-slate-500"
+        type: "button",
+        variant: "outline",
+        className: "border-white/20 bg-white/10 text-white hover:bg-white/15 hover:text-white",
+        onClick: () => onSelectModel(noModel ? DEFAULT_MODEL_ID : NO_MODEL_ID),
+        children: noModel ? "改回大肥鱼" : "这次不带模特"
       }
     ),
-    /* @__PURE__ */ (0, import_jsx_runtime12.jsx)("p", { className: "hidden text-sm leading-6 text-[#cbd5e1] @min-[1024px]/studio:block", children: custom ? "参考图会和姿势线稿一起交给模型。请使用成年人物的图片。" : builtin?.id === "dafeiyu" ? "长波浪蓝发、鲸耳和蓝鲸尾。三视图锁住脸和鲸尾，衣服可以换成衣装集里的一套。" : "三视图锁住脸和服装。衣服可以换成衣装集里的一套。" }),
-    !custom ? /* @__PURE__ */ (0, import_jsx_runtime12.jsx)(
-      ModelFigure,
-      {
-        src: full,
-        alt: `${builtin?.name || "大肥鱼"}的多视角设定图`,
-        label: "正在加载设定图",
-        boxClassName: "relative hidden w-full shrink-0 overflow-hidden rounded-xl bg-white @min-[1024px]/studio:block",
-        imgClassName: "max-h-56 w-full rounded-xl bg-white object-contain",
-        width: builtin?.id === "dafeiyu" ? 1448 : 1536,
-        height: builtin?.id === "dafeiyu" ? 1086 : 1024,
-        spinnerClassName: "text-slate-500"
-      }
-    ) : /* @__PURE__ */ (0, import_jsx_runtime12.jsx)("div", { className: "grid grid-cols-3 gap-2", children: images.map((image) => /* @__PURE__ */ (0, import_jsx_runtime12.jsxs)("div", { className: "relative", children: [
-      /* @__PURE__ */ (0, import_jsx_runtime12.jsx)("img", { src: `data:${image.mediaType};base64,${image.dataBase64}`, alt: image.role === "sheet" ? "多视角设定图" : "导入的模特参考", className: `aspect-[3/4] w-full rounded-lg ${image.role === "sheet" ? "bg-white object-contain" : "object-cover"}` }),
-      image.role === "sheet" ? /* @__PURE__ */ (0, import_jsx_runtime12.jsx)("span", { className: "absolute bottom-1 left-1 rounded-full bg-black/60 px-1.5 text-[10px] text-white", children: "设定图" }) : null,
-      /* @__PURE__ */ (0, import_jsx_runtime12.jsx)(
-        "button",
-        {
-          type: "button",
-          className: "absolute top-1 right-1 rounded-full bg-black/60 px-1.5 text-[10px] text-white",
-          onClick: () => onChange(images.filter((item) => item.id !== image.id)),
-          children: "移除"
-        }
-      )
-    ] }, image.id)) }),
     /* @__PURE__ */ (0, import_jsx_runtime12.jsx)(
       "input",
       {
@@ -7448,8 +7488,8 @@ function ModelFigure({
   ] });
 }
 
-// components/history-panel.tsx
-var import_react8 = require("react");
+// components/composer.tsx
+var import_react9 = require("react");
 
 // node_modules/@base-ui/react/dialog/index.parts.mjs
 var index_parts_exports3 = {};
@@ -11308,6 +11348,7 @@ function DialogDescription3({
 }
 
 // components/history-panel.tsx
+var import_react8 = require("react");
 var import_jsx_runtime22 = require("react/jsx-runtime");
 function HistoryPanel({
   entries,
@@ -11445,9 +11486,11 @@ function Composer({
   onClearHistory,
   reuseNote,
   builtinName,
-  builtinSheet
+  builtinSheet,
+  modelSelected = true
 }) {
   const { basePath } = useStudioEnv();
+  const [zoom, setZoom] = (0, import_react9.useState)(null);
   const waited = useElapsedSeconds(running);
   const characterSrc = characters[0] ? `data:${characters[0].mediaType};base64,${characters[0].dataBase64}` : studioUrl(basePath, builtinSheet);
   const limit = mode === "sheet" ? 4 : 8;
@@ -11455,6 +11498,9 @@ function Composer({
   const costumeThumb = costume?.thumbSrc || (costume ? studioUrl(basePath, `/api/costume-image?id=${encodeURIComponent(costume.id)}&size=thumb`) : "");
   const faceThumb = face ? studioUrl(basePath, `/api/face-image?id=${encodeURIComponent(face.id)}&size=thumb`) : "";
   const faceCaption = face ? [face.section, face.hair, face.label].filter(Boolean).join(" · ") : "";
+  const hasIdentity = modelSelected || Boolean(face);
+  const missingPose = selected.length === 0 && !(localMode && costume);
+  const openZoom = (src, alt) => setZoom({ src, alt });
   return /* @__PURE__ */ (0, import_jsx_runtime24.jsxs)("div", { className: "flex flex-col gap-4", children: [
     /* @__PURE__ */ (0, import_jsx_runtime24.jsxs)("div", { className: "flex flex-wrap items-center justify-between gap-2", children: [
       /* @__PURE__ */ (0, import_jsx_runtime24.jsxs)("div", { className: "flex min-w-0 flex-wrap items-center gap-2", children: [
@@ -11494,9 +11540,9 @@ function Composer({
       /* @__PURE__ */ (0, import_jsx_runtime24.jsx)("button", { type: "button", className: "px-1 text-xs text-muted-foreground", onClick: onClearCostume, "aria-label": `取消服装 ${costume.id}`, children: "取消" })
     ] }) : null,
     selected.length === 0 && !(localMode && costume) ? /* @__PURE__ */ (0, import_jsx_runtime24.jsxs)("p", { className: "rounded-xl bg-muted px-3 py-4 text-sm leading-6 text-muted-foreground", children: [
-      "从中间点选一个或多个姿势。每一张成图都会带上",
-      characters.length ? "你导入的模特" : builtinName,
-      "，只把身体换成对应的线稿姿势。要换衣服，先到「服装」里点一套。要换脸或表情，先到「脸部」里点一张。"
+      "从中间点选一个或多个姿势。",
+      modelSelected ? `每一张成图都会带上${characters.length ? "你导入的模特" : builtinName}，只把身体换成对应的线稿姿势。` : "这次没有选模特。选一张脸部参考后，可以只按这张脸、服装和姿势出图。",
+      "要换衣服，先到「服装」里点一套。要换脸或表情，先到「脸部」里点一张。"
     ] }) : /* @__PURE__ */ (0, import_jsx_runtime24.jsx)("ul", { className: "flex max-h-40 flex-col gap-2 overflow-auto", children: selected.map((item) => /* @__PURE__ */ (0, import_jsx_runtime24.jsxs)("li", { className: "flex items-center gap-2 rounded-xl border bg-card px-2 py-1.5", children: [
       /* @__PURE__ */ (0, import_jsx_runtime24.jsx)("img", { src: poseThumb(item.viewId, item.thumbSrc), alt: "", className: "h-12 w-9 rounded-md bg-white object-contain" }),
       /* @__PURE__ */ (0, import_jsx_runtime24.jsxs)("span", { className: "min-w-0 flex-1", children: [
@@ -11510,20 +11556,20 @@ function Composer({
         "参考对照 · ",
         selected[0].title
       ] }),
-      /* @__PURE__ */ (0, import_jsx_runtime24.jsxs)("div", { className: `mt-2 grid items-center gap-2 ${face || costume ? face && costume ? "grid-cols-4" : "grid-cols-3" : "grid-cols-[1fr_auto_1fr]"}`, children: [
-        /* @__PURE__ */ (0, import_jsx_runtime24.jsx)("img", { src: characterSrc, alt: characters.length ? "导入的模特" : `${builtinName}的多视角设定图`, className: "aspect-[3/4] rounded-lg bg-[#f8fafc] object-contain" }),
-        face ? /* @__PURE__ */ (0, import_jsx_runtime24.jsx)("img", { src: faceThumb, alt: `${face.id} 的脸部参考，只取五官、表情和发型`, className: "aspect-[3/4] rounded-lg bg-white object-cover" }) : null,
-        costume ? /* @__PURE__ */ (0, import_jsx_runtime24.jsx)("img", { src: costumeThumb, alt: `${costume.id} 的服装参考，图中没有人物`, className: "aspect-[3/4] rounded-lg bg-white object-contain" }) : face ? null : /* @__PURE__ */ (0, import_jsx_runtime24.jsx)("span", { className: "text-lg text-muted-foreground", "aria-hidden": "true", children: "→" }),
-        /* @__PURE__ */ (0, import_jsx_runtime24.jsx)("img", { src: poseThumb(selected[0].viewId, selected[0].thumbSrc), alt: `${selected[0].title} 的姿势线稿`, className: "aspect-[3/4] rounded-lg bg-white object-contain" })
+      /* @__PURE__ */ (0, import_jsx_runtime24.jsxs)("div", { className: `mt-2 grid items-center gap-2 ${referenceColumns(modelSelected, Boolean(face), Boolean(costume))}`, children: [
+        modelSelected ? /* @__PURE__ */ (0, import_jsx_runtime24.jsx)(ZoomThumb, { src: characterSrc, alt: characters.length ? "导入的模特" : `${builtinName}的多视角设定图`, className: "aspect-[3/4] rounded-lg bg-[#f8fafc] object-contain", onZoom: openZoom }) : null,
+        face ? /* @__PURE__ */ (0, import_jsx_runtime24.jsx)(ZoomThumb, { src: faceThumb, alt: `${face.id} 的脸部参考，只取五官、表情和发型`, className: "aspect-[3/4] rounded-lg bg-white object-cover", onZoom: openZoom }) : null,
+        costume ? /* @__PURE__ */ (0, import_jsx_runtime24.jsx)(ZoomThumb, { src: costumeThumb, alt: `${costume.id} 的服装参考，图中没有人物`, className: "aspect-[3/4] rounded-lg bg-white object-contain", onZoom: openZoom }) : modelSelected && !face ? /* @__PURE__ */ (0, import_jsx_runtime24.jsx)("span", { className: "text-lg text-muted-foreground", "aria-hidden": "true", children: "→" }) : null,
+        /* @__PURE__ */ (0, import_jsx_runtime24.jsx)(ZoomThumb, { src: poseThumb(selected[0].viewId, selected[0].thumbSrc), alt: `${selected[0].title} 的姿势线稿`, className: "aspect-[3/4] rounded-lg bg-white object-contain", onZoom: openZoom })
       ] }),
-      /* @__PURE__ */ (0, import_jsx_runtime24.jsx)("p", { className: "mt-2 text-xs leading-5 text-muted-foreground", children: referenceCaption(Boolean(face), Boolean(costume)) })
+      /* @__PURE__ */ (0, import_jsx_runtime24.jsx)("p", { className: "mt-2 text-xs leading-5 text-muted-foreground", children: referenceCaption(Boolean(face), Boolean(costume), modelSelected) })
     ] }) : costume ? /* @__PURE__ */ (0, import_jsx_runtime24.jsxs)("div", { className: "rounded-xl border bg-card p-3", children: [
       /* @__PURE__ */ (0, import_jsx_runtime24.jsxs)("p", { className: "text-xs text-muted-foreground", children: [
         "已选服装 · ",
         costume.id
       ] }),
-      /* @__PURE__ */ (0, import_jsx_runtime24.jsx)("img", { src: costumeThumb, alt: `${costume.id}，${costume.keywords}`, className: "mt-2 aspect-[2/3] max-h-48 rounded-lg bg-white object-contain" }),
-      /* @__PURE__ */ (0, import_jsx_runtime24.jsx)("p", { className: "mt-2 text-xs leading-5 text-muted-foreground", children: localMode ? "未选择姿势，将保留人物原姿势，只更换服装。" : "还没选姿势。选好姿势后，角色会穿上这套衣服出图。" })
+      /* @__PURE__ */ (0, import_jsx_runtime24.jsx)(ZoomThumb, { src: costumeThumb, alt: `${costume.id}，${costume.keywords}`, className: "mt-2 aspect-[2/3] max-h-48 rounded-lg bg-white object-contain", onZoom: openZoom }),
+      /* @__PURE__ */ (0, import_jsx_runtime24.jsx)("p", { className: "mt-2 text-xs leading-5 text-muted-foreground", children: !modelSelected && !face ? "还没选模特。选一张脸部参考后，可以不带模特换衣服出图。" : localMode ? "未选择姿势，将保留人物原姿势，只更换服装。" : "还没选姿势。选好姿势后，角色会穿上这套衣服出图。" })
     ] }) : null,
     prompts.length > 0 ? /* @__PURE__ */ (0, import_jsx_runtime24.jsxs)("div", { className: "grid gap-2", children: [
       /* @__PURE__ */ (0, import_jsx_runtime24.jsxs)("div", { className: "flex items-center justify-between", children: [
@@ -11577,8 +11623,9 @@ ${item.prompt}`).join("\n\n")),
       limit,
       " 个姿势。"
     ] }) : null,
+    !hasIdentity ? /* @__PURE__ */ (0, import_jsx_runtime24.jsx)("p", { className: "text-sm text-amber-800", children: IDENTITY_REQUIRED }) : null,
     /* @__PURE__ */ (0, import_jsx_runtime24.jsxs)("div", { className: "flex min-w-0 gap-2", children: [
-      /* @__PURE__ */ (0, import_jsx_runtime24.jsxs)(Button3, { className: "h-11 min-w-0 flex-1 shrink overflow-hidden px-3", disabled: running || selected.length === 0 && !(localMode && costume) || selected.length > limit, onClick: onGenerate, children: [
+      /* @__PURE__ */ (0, import_jsx_runtime24.jsxs)(Button3, { className: "h-11 min-w-0 flex-1 shrink overflow-hidden px-3", disabled: running || !hasIdentity || missingPose || selected.length > limit, onClick: onGenerate, children: [
         running ? /* @__PURE__ */ (0, import_jsx_runtime24.jsx)(LoaderCircle, { className: "animate-spin" }) : /* @__PURE__ */ (0, import_jsx_runtime24.jsx)(Sparkles, {}),
         /* @__PURE__ */ (0, import_jsx_runtime24.jsx)("span", { className: "min-w-0 truncate", children: running ? compactElapsed("正在生成", waited) : hasKey ? localMode && selected.length === 0 ? "仅换装生图" : "按所选姿势生图" : "填写密钥后生图" })
       ] }),
@@ -11590,7 +11637,10 @@ ${item.prompt}`).join("\n\n")),
     results.length > 0 ? /* @__PURE__ */ (0, import_jsx_runtime24.jsxs)("div", { className: "grid gap-3", children: [
       /* @__PURE__ */ (0, import_jsx_runtime24.jsx)("h3", { className: "text-sm font-medium", children: "成图" }),
       results.map((item) => /* @__PURE__ */ (0, import_jsx_runtime24.jsxs)("article", { className: "overflow-hidden rounded-xl border bg-card", children: [
-        item.ok && item.src ? /* @__PURE__ */ (0, import_jsx_runtime24.jsx)("img", { src: item.src, alt: item.title, className: "w-full bg-[#f7f4ee] object-contain" }) : null,
+        item.ok && item.src ? /* @__PURE__ */ (0, import_jsx_runtime24.jsxs)("button", { type: "button", className: "relative block w-full cursor-zoom-in", onClick: () => openZoom(item.src || "", item.title), "aria-label": `放大成图 ${item.title}`, children: [
+          /* @__PURE__ */ (0, import_jsx_runtime24.jsx)("img", { src: item.src, alt: item.title, className: "w-full bg-[#f7f4ee] object-contain" }),
+          /* @__PURE__ */ (0, import_jsx_runtime24.jsx)("span", { className: "pointer-events-none absolute right-2 bottom-2 rounded-full bg-black/60 px-2 py-0.5 text-[11px] text-white", children: "放大" })
+        ] }) : null,
         /* @__PURE__ */ (0, import_jsx_runtime24.jsxs)("div", { className: "space-y-2 px-3 py-3", children: [
           /* @__PURE__ */ (0, import_jsx_runtime24.jsx)("p", { className: "text-sm font-medium", children: item.title }),
           item.error ? /* @__PURE__ */ (0, import_jsx_runtime24.jsx)("p", { className: "text-sm text-destructive", children: item.error }) : null,
@@ -11602,10 +11652,38 @@ ${item.prompt}`).join("\n\n")),
         ] })
       ] }, item.key))
     ] }) : null,
-    /* @__PURE__ */ (0, import_jsx_runtime24.jsx)(HistoryPanel, { entries: history, onReuse: onReuseHistory, onDelete: onDeleteHistory, onClear: onClearHistory })
+    /* @__PURE__ */ (0, import_jsx_runtime24.jsx)(HistoryPanel, { entries: history, onReuse: onReuseHistory, onDelete: onDeleteHistory, onClear: onClearHistory }),
+    /* @__PURE__ */ (0, import_jsx_runtime24.jsx)(Dialog, { open: zoom !== null, onOpenChange: (open3) => {
+      if (!open3) setZoom(null);
+    }, children: /* @__PURE__ */ (0, import_jsx_runtime24.jsx)(DialogContent, { className: "max-h-[min(92dvh,92%)] max-w-[min(72rem,calc(100%-2rem))] overflow-y-auto", children: zoom ? /* @__PURE__ */ (0, import_jsx_runtime24.jsxs)(import_jsx_runtime24.Fragment, { children: [
+      /* @__PURE__ */ (0, import_jsx_runtime24.jsxs)(DialogHeader, { children: [
+        /* @__PURE__ */ (0, import_jsx_runtime24.jsx)(DialogTitle3, { children: zoom.alt }),
+        /* @__PURE__ */ (0, import_jsx_runtime24.jsx)(DialogDescription3, { children: "点击外面或按 Esc 关闭。" })
+      ] }),
+      /* @__PURE__ */ (0, import_jsx_runtime24.jsx)("img", { src: zoom.src, alt: zoom.alt, className: "max-h-[78dvh] w-full rounded-xl bg-[#f7f4ee] object-contain" })
+    ] }) : null }) })
   ] });
 }
-function referenceCaption(hasFace, hasCostume) {
+function ZoomThumb({
+  src,
+  alt,
+  className,
+  onZoom
+}) {
+  return /* @__PURE__ */ (0, import_jsx_runtime24.jsx)("button", { type: "button", className: "block w-full cursor-zoom-in", onClick: () => onZoom(src, alt), "aria-label": `放大 ${alt}`, children: /* @__PURE__ */ (0, import_jsx_runtime24.jsx)("img", { src, alt, className }) });
+}
+function referenceColumns(hasCharacter, hasFace, hasCostume) {
+  if (hasCharacter && !hasFace && !hasCostume) return "grid-cols-[1fr_auto_1fr]";
+  const count = Number(hasCharacter) + Number(hasFace) + Number(hasCostume) + 1;
+  if (count >= 4) return "grid-cols-4";
+  if (count === 3) return "grid-cols-3";
+  if (count === 2) return "grid-cols-2";
+  return "grid-cols-1";
+}
+function referenceCaption(hasFace, hasCostume, hasCharacter) {
+  if (!hasCharacter && hasFace && hasCostume) return "顺序是脸部参考、没有人物的衣服、姿势线稿。没有角色设定图，身份以这张脸为准。这还不是成图。";
+  if (!hasCharacter && hasFace) return "左边是脸部参考，右边只提供姿势。没有角色设定图，身份以这张脸为准。这还不是成图。";
+  if (!hasCharacter) return "还没选模特。选一张脸部参考后可以出图，也可以改回一位模特。这还不是成图。";
   if (hasFace && hasCostume) return "顺序是角色、脸部参考、没有人物的衣服、姿势线稿。脸部图只提供五官、表情和发型。这还不是成图。";
   if (hasFace) return "左边是角色，中间这张脸提供五官、表情和发型，右边只提供姿势。衣服仍按角色参考。这还不是成图。";
   if (hasCostume) return "左边锁脸和鲸尾，中间是没有人物的衣服，右边只提供姿势。这还不是成图。";
@@ -11613,10 +11691,10 @@ function referenceCaption(hasFace, hasCostume) {
 }
 
 // components/costume-browser.tsx
-var import_react10 = require("react");
+var import_react11 = require("react");
 
 // components/custom-reference-panel.tsx
-var import_react9 = require("react");
+var import_react10 = require("react");
 
 // shared/http-status.mjs
 function messageForStatus(status, bodyText, fallback2) {
@@ -11724,24 +11802,24 @@ function CustomReferencePanel({
   onChangeSettings
 }) {
   const { basePath } = useStudioEnv();
-  const fileRef = (0, import_react9.useRef)(null);
-  const editedRef = (0, import_react9.useRef)(false);
-  const [open3, setOpen] = (0, import_react9.useState)(false);
-  const [mode, setMode] = (0, import_react9.useState)("upload");
-  const [description, setDescription] = (0, import_react9.useState)("");
-  const [prompt, setPrompt] = (0, import_react9.useState)("");
-  const [notice, setNotice] = (0, import_react9.useState)("");
-  const [adult, setAdult] = (0, import_react9.useState)(false);
-  const [label, setLabel] = (0, import_react9.useState)("");
-  const [previewBlob, setPreviewBlob] = (0, import_react9.useState)(null);
-  const [previewUrl, setPreviewUrl] = (0, import_react9.useState)("");
-  const [busy, setBusy] = (0, import_react9.useState)("");
+  const fileRef = (0, import_react10.useRef)(null);
+  const editedRef = (0, import_react10.useRef)(false);
+  const [open3, setOpen] = (0, import_react10.useState)(false);
+  const [mode, setMode] = (0, import_react10.useState)("upload");
+  const [description, setDescription] = (0, import_react10.useState)("");
+  const [prompt, setPrompt] = (0, import_react10.useState)("");
+  const [notice, setNotice] = (0, import_react10.useState)("");
+  const [adult, setAdult] = (0, import_react10.useState)(false);
+  const [label, setLabel] = (0, import_react10.useState)("");
+  const [previewBlob, setPreviewBlob] = (0, import_react10.useState)(null);
+  const [previewUrl, setPreviewUrl] = (0, import_react10.useState)("");
+  const [busy, setBusy] = (0, import_react10.useState)("");
   const generateBusy = "正在生成";
   const waited = useElapsedSeconds(busy === generateBusy || busy === "正在扩写提示词");
-  const [error, setError] = (0, import_react9.useState)("");
-  const [pendingDelete, setPendingDelete] = (0, import_react9.useState)(null);
+  const [error, setError] = (0, import_react10.useState)("");
+  const [pendingDelete, setPendingDelete] = (0, import_react10.useState)(null);
   const noun = kind === "pose" ? "姿势" : "服装";
-  (0, import_react9.useEffect)(() => {
+  (0, import_react10.useEffect)(() => {
     if (!previewBlob) {
       setPreviewUrl("");
       return;
@@ -12036,14 +12114,14 @@ function CostumeBrowser({
   onChangeSettings
 }) {
   const { basePath } = useStudioEnv();
-  const [catalog, setCatalog] = (0, import_react10.useState)(null);
-  const [error, setError] = (0, import_react10.useState)("");
-  const [category, setCategory] = (0, import_react10.useState)("春");
+  const [catalog, setCatalog] = (0, import_react11.useState)(null);
+  const [error, setError] = (0, import_react11.useState)("");
+  const [category, setCategory] = (0, import_react11.useState)("春");
   const customSection = category === "custom";
   const visibleCustom = customCostumes.filter((item) => showAdult || !item.adult);
   const hiddenCustomAdult = customCostumes.length - visibleCustom.length;
-  const [query, setQuery] = (0, import_react10.useState)("");
-  (0, import_react10.useEffect)(() => {
+  const [query, setQuery] = (0, import_react11.useState)("");
+  (0, import_react11.useEffect)(() => {
     const controller = new AbortController();
     fetch(studioUrl(basePath, "/api/costumes"), { signal: controller.signal }).then(async (response) => {
       if (!response.ok) throw new Error("服装目录没有加载出来");
@@ -12054,12 +12132,12 @@ function CostumeBrowser({
     });
     return () => controller.abort();
   }, [basePath]);
-  (0, import_react10.useEffect)(() => {
+  (0, import_react11.useEffect)(() => {
     if (!focusCategory || !showAdult) return;
     setCategory(focusCategory);
     onFocusApplied();
   }, [focusCategory, showAdult, onFocusApplied]);
-  const costumes = (0, import_react10.useMemo)(() => {
+  const costumes = (0, import_react11.useMemo)(() => {
     if (!catalog) return [];
     const parts = query.trim().toLowerCase().split(/\s+/).filter(Boolean);
     return catalog.costumes.filter((costume) => {
@@ -12199,20 +12277,20 @@ function CostumeBrowser({
 }
 
 // components/face-browser.tsx
-var import_react11 = require("react");
+var import_react12 = require("react");
 var import_jsx_runtime27 = require("react/jsx-runtime");
 function FaceBrowser({
   selectedId,
   onSelect
 }) {
   const { basePath } = useStudioEnv();
-  const [catalog, setCatalog] = (0, import_react11.useState)(null);
-  const [error, setError] = (0, import_react11.useState)("");
-  const [section, setSection] = (0, import_react11.useState)("");
-  const [hair, setHair] = (0, import_react11.useState)("");
-  const [query, setQuery] = (0, import_react11.useState)("");
-  const [shown, setShown] = (0, import_react11.useState)(80);
-  (0, import_react11.useEffect)(() => {
+  const [catalog, setCatalog] = (0, import_react12.useState)(null);
+  const [error, setError] = (0, import_react12.useState)("");
+  const [section, setSection] = (0, import_react12.useState)("");
+  const [hair, setHair] = (0, import_react12.useState)("");
+  const [query, setQuery] = (0, import_react12.useState)("");
+  const [shown, setShown] = (0, import_react12.useState)(80);
+  (0, import_react12.useEffect)(() => {
     const controller = new AbortController();
     fetch(studioUrl(basePath, "/api/faces"), { signal: controller.signal }).then(async (response) => {
       if (!response.ok) throw new Error("脸部目录没有加载出来");
@@ -12223,7 +12301,7 @@ function FaceBrowser({
     });
     return () => controller.abort();
   }, [basePath]);
-  const hairCounts = (0, import_react11.useMemo)(() => {
+  const hairCounts = (0, import_react12.useMemo)(() => {
     const counts = /* @__PURE__ */ new Map();
     if (!catalog) return counts;
     for (const face of catalog.faces) {
@@ -12232,7 +12310,7 @@ function FaceBrowser({
     }
     return counts;
   }, [catalog, section]);
-  const faces = (0, import_react11.useMemo)(() => {
+  const faces = (0, import_react12.useMemo)(() => {
     if (!catalog) return [];
     const parts = query.trim().toLowerCase().split(/\s+/).filter(Boolean);
     return catalog.faces.filter((face) => {
@@ -12243,7 +12321,7 @@ function FaceBrowser({
       return parts.every((part) => hay.includes(part));
     });
   }, [catalog, section, hair, query]);
-  (0, import_react11.useEffect)(() => {
+  (0, import_react12.useEffect)(() => {
     setShown(80);
   }, [section, hair, query]);
   const visible2 = faces.slice(0, shown);
@@ -12258,7 +12336,7 @@ function FaceBrowser({
   }
   return /* @__PURE__ */ (0, import_jsx_runtime27.jsxs)("section", { children: [
     /* @__PURE__ */ (0, import_jsx_runtime27.jsxs)("div", { className: "px-4 pt-3 pb-2 @min-[768px]/studio:px-6", children: [
-      /* @__PURE__ */ (0, import_jsx_runtime27.jsx)("p", { className: "mb-2 text-sm leading-5 text-muted-foreground", children: "选一张脸部参考。生图会把这张图的五官、表情、脸型和发型用到角色上，姿势和服装仍按各自的参考。鲸耳和鲸尾保留。" }),
+      /* @__PURE__ */ (0, import_jsx_runtime27.jsx)("p", { className: "mb-2 text-sm leading-5 text-muted-foreground", children: "选一张脸部参考。生图会把这张图的五官、表情、脸型和发型用上，姿势和服装仍按各自的参考。选了模特时，鲸耳和鲸尾按该角色保留；没选模特时，身份以这张脸为准，不另加鲸耳或鲸尾。" }),
       /* @__PURE__ */ (0, import_jsx_runtime27.jsxs)("div", { className: "flex gap-1.5 overflow-x-auto pb-1", children: [
         /* @__PURE__ */ (0, import_jsx_runtime27.jsx)(SectionPill, { active: section === "", count: catalog?.total, onClick: () => setSection(""), children: "全部" }),
         catalog?.sections.map((item) => /* @__PURE__ */ (0, import_jsx_runtime27.jsx)(SectionPill, { active: section === item.id, count: item.count, onClick: () => setSection(item.id), children: item.label }, item.id))
@@ -12393,7 +12471,7 @@ function HairSegment({
 }
 
 // components/pose-browser.tsx
-var import_react12 = require("react");
+var import_react13 = require("react");
 var import_jsx_runtime28 = require("react/jsx-runtime");
 var ANGLES = ["正面", "俯视", "仰视", "侧面", "斜侧"];
 var THUMB_COLS = ["", "grid-cols-1", "grid-cols-2", "grid-cols-3", "grid-cols-4", "grid-cols-5"];
@@ -12422,7 +12500,7 @@ function shownView(pose, selectedViewId, cardViewId, angle) {
 }
 function PoseFigure({ view, alt, size = "thumb", compact = false }) {
   const { basePath } = useStudioEnv();
-  const [failed, setFailed] = (0, import_react12.useState)(false);
+  const [failed, setFailed] = (0, import_react13.useState)(false);
   if (failed) {
     return /* @__PURE__ */ (0, import_jsx_runtime28.jsx)("div", { className: `grid h-full place-items-center text-center text-muted-foreground ${compact ? "px-0.5 text-[10px] leading-3" : "px-3 text-xs"}`, children: compact ? "无图" : "线稿暂时加载不到" });
   }
@@ -12455,16 +12533,16 @@ function PoseBrowser({
   hasKey,
   syncWarning
 }) {
-  const [systemId, setSystemId] = (0, import_react12.useState)("full");
+  const [systemId, setSystemId] = (0, import_react13.useState)("full");
   const customSection = systemId === "custom";
   const allSeries = systemId === "all";
-  const [category, setCategory] = (0, import_react12.useState)("全部");
-  const [angle, setAngle] = (0, import_react12.useState)("");
-  const [query, setQuery] = (0, import_react12.useState)("");
-  const [cardViews, setCardViews] = (0, import_react12.useState)({});
-  const [preview, setPreview] = (0, import_react12.useState)(null);
-  const searchRef = (0, import_react12.useRef)(null);
-  (0, import_react12.useEffect)(() => {
+  const [category, setCategory] = (0, import_react13.useState)("全部");
+  const [angle, setAngle] = (0, import_react13.useState)("");
+  const [query, setQuery] = (0, import_react13.useState)("");
+  const [cardViews, setCardViews] = (0, import_react13.useState)({});
+  const [preview, setPreview] = (0, import_react13.useState)(null);
+  const searchRef = (0, import_react13.useRef)(null);
+  (0, import_react13.useEffect)(() => {
     const onKey = (event) => {
       const target = event.target;
       const typing = target instanceof HTMLElement && (target.tagName === "INPUT" || target.tagName === "TEXTAREA" || target.tagName === "SELECT");
@@ -12479,11 +12557,11 @@ function PoseBrowser({
   const system = !customSection && !allSeries ? catalog?.systems.find((item) => item.id === systemId) ?? catalog?.systems[0] : void 0;
   const visibleCustom = customPoses.filter((item) => showAdult || !item.adult);
   const hiddenCustomAdult = customPoses.length - visibleCustom.length;
-  const visiblePoseCount = (0, import_react12.useMemo)(() => {
+  const visiblePoseCount = (0, import_react13.useMemo)(() => {
     if (!catalog) return 0;
     return catalog.poses.filter((pose) => showAdult || !pose.adult).length;
   }, [catalog, showAdult]);
-  const categories = (0, import_react12.useMemo)(() => {
+  const categories = (0, import_react13.useMemo)(() => {
     if (!catalog || !allSeries && !system) return ["全部"];
     const names = /* @__PURE__ */ new Set();
     for (const pose of catalog.poses) {
@@ -12493,10 +12571,10 @@ function PoseBrowser({
     }
     return ["全部", ...names];
   }, [catalog, system, allSeries, showAdult]);
-  (0, import_react12.useEffect)(() => {
+  (0, import_react13.useEffect)(() => {
     if (!categories.includes(category)) setCategory("全部");
   }, [categories, category]);
-  (0, import_react12.useEffect)(() => {
+  (0, import_react13.useEffect)(() => {
     if (!requestedSystem || !showAdult) return;
     if (requestedSystem === "custom") {
       setSystemId("custom");
@@ -12508,7 +12586,7 @@ function PoseBrowser({
     setCategory("全部");
     onRequestedSystemApplied();
   }, [requestedSystem, showAdult, catalog, onRequestedSystemApplied]);
-  const poses = (0, import_react12.useMemo)(() => {
+  const poses = (0, import_react13.useMemo)(() => {
     if (!catalog || !allSeries && !system) return [];
     const parts = query.trim().toLowerCase().split(/\s+/).filter(Boolean);
     return catalog.poses.filter((pose) => {
@@ -12808,7 +12886,7 @@ function PoseSkeleton() {
 }
 
 // components/settings-dialog.tsx
-var import_react13 = require("react");
+var import_react14 = require("react");
 
 // components/ui/label.tsx
 var import_jsx_runtime29 = require("react/jsx-runtime");
@@ -12903,10 +12981,10 @@ function SettingsDialog({
   settings,
   onChange
 }) {
-  const [connection, setConnection] = (0, import_react13.useState)("");
-  const [checking, setChecking] = (0, import_react13.useState)(false);
-  const checkRef = (0, import_react13.useRef)(null);
-  (0, import_react13.useEffect)(() => {
+  const [connection, setConnection] = (0, import_react14.useState)("");
+  const [checking, setChecking] = (0, import_react14.useState)(false);
+  const checkRef = (0, import_react14.useRef)(null);
+  (0, import_react14.useEffect)(() => {
     setConnection("");
     setChecking(false);
     checkRef.current?.abort();
@@ -13289,54 +13367,54 @@ function Studio({
 }
 function StudioFrame({ embedded }) {
   const { basePath } = useStudioEnv();
-  const [catalog, setCatalog] = (0, import_react14.useState)(null);
-  const [catalogError, setCatalogError] = (0, import_react14.useState)("");
-  const [costumeCatalog, setCostumeCatalog] = (0, import_react14.useState)([]);
-  const [costumeCatalogReady, setCostumeCatalogReady] = (0, import_react14.useState)(false);
-  const [costumeCatalogError, setCostumeCatalogError] = (0, import_react14.useState)("");
-  const [faceCatalog, setFaceCatalog] = (0, import_react14.useState)([]);
-  const [faceCatalogReady, setFaceCatalogReady] = (0, import_react14.useState)(false);
-  const [faceCatalogError, setFaceCatalogError] = (0, import_react14.useState)("");
-  const [loading, setLoading] = (0, import_react14.useState)(true);
-  const [settings, setSettings] = (0, import_react14.useState)(DEFAULT_SETTINGS);
-  const [settingsReady, setSettingsReady] = (0, import_react14.useState)(false);
-  const [library, setLibrary] = (0, import_react14.useState)("poses");
-  const [costume, setCostume] = (0, import_react14.useState)(null);
-  const [face, setFace] = (0, import_react14.useState)(null);
-  const [costumeFocus, setCostumeFocus] = (0, import_react14.useState)(null);
-  const [requestedSystem, setRequestedSystem] = (0, import_react14.useState)(null);
-  const [settingsOpen, setSettingsOpen] = (0, import_react14.useState)(false);
-  const [installOpen, setInstallOpen] = (0, import_react14.useState)(false);
-  const [adultAsk, setAdultAsk] = (0, import_react14.useState)(null);
-  const [characters, setCharacters] = (0, import_react14.useState)([]);
-  const [models, setModels] = (0, import_react14.useState)([]);
-  const [activeModelId, setActiveModelId] = (0, import_react14.useState)(DEFAULT_MODEL_ID);
-  const [builtinUsed, setBuiltinUsed] = (0, import_react14.useState)({});
-  const [sheetBusy, setSheetBusy] = (0, import_react14.useState)(false);
-  const [sheetError, setSheetError] = (0, import_react14.useState)("");
-  const [selected, setSelected] = (0, import_react14.useState)({});
-  const [extraPrompt, setExtraPrompt] = (0, import_react14.useState)("");
-  const [prompts, setPrompts] = (0, import_react14.useState)([]);
-  const [promptError, setPromptError] = (0, import_react14.useState)("");
-  const [results, setResults] = (0, import_react14.useState)([]);
-  const [running, setRunning] = (0, import_react14.useState)(false);
-  const [runError, setRunError] = (0, import_react14.useState)("");
-  const [limitNote, setLimitNote] = (0, import_react14.useState)("");
-  const [serverKey, setServerKey] = (0, import_react14.useState)(false);
-  const [sheetOpen, setSheetOpen] = (0, import_react14.useState)(false);
-  const [customPoses, setCustomPoses] = (0, import_react14.useState)([]);
-  const [customCostumes, setCustomCostumes] = (0, import_react14.useState)([]);
-  const [history, setHistory] = (0, import_react14.useState)([]);
-  const [storageHigh, setStorageHigh] = (0, import_react14.useState)(false);
-  const [syncWarning, setSyncWarning] = (0, import_react14.useState)("");
-  const [reuseNote, setReuseNote] = (0, import_react14.useState)("");
-  const libraryReady = (0, import_react14.useRef)(false);
-  const modelLoadGen = (0, import_react14.useRef)(0);
-  const clearRequestedSystem = (0, import_react14.useCallback)(() => setRequestedSystem(null), []);
-  const clearCostumeFocus = (0, import_react14.useCallback)(() => setCostumeFocus(null), []);
-  const abortRef = (0, import_react14.useRef)(null);
-  const settingsRevision = (0, import_react14.useRef)(0);
-  const loadCatalog = (0, import_react14.useCallback)(() => {
+  const [catalog, setCatalog] = (0, import_react15.useState)(null);
+  const [catalogError, setCatalogError] = (0, import_react15.useState)("");
+  const [costumeCatalog, setCostumeCatalog] = (0, import_react15.useState)([]);
+  const [costumeCatalogReady, setCostumeCatalogReady] = (0, import_react15.useState)(false);
+  const [costumeCatalogError, setCostumeCatalogError] = (0, import_react15.useState)("");
+  const [faceCatalog, setFaceCatalog] = (0, import_react15.useState)([]);
+  const [faceCatalogReady, setFaceCatalogReady] = (0, import_react15.useState)(false);
+  const [faceCatalogError, setFaceCatalogError] = (0, import_react15.useState)("");
+  const [loading, setLoading] = (0, import_react15.useState)(true);
+  const [settings, setSettings] = (0, import_react15.useState)(DEFAULT_SETTINGS);
+  const [settingsReady, setSettingsReady] = (0, import_react15.useState)(false);
+  const [library, setLibrary] = (0, import_react15.useState)("poses");
+  const [costume, setCostume] = (0, import_react15.useState)(null);
+  const [face, setFace] = (0, import_react15.useState)(null);
+  const [costumeFocus, setCostumeFocus] = (0, import_react15.useState)(null);
+  const [requestedSystem, setRequestedSystem] = (0, import_react15.useState)(null);
+  const [settingsOpen, setSettingsOpen] = (0, import_react15.useState)(false);
+  const [installOpen, setInstallOpen] = (0, import_react15.useState)(false);
+  const [adultAsk, setAdultAsk] = (0, import_react15.useState)(null);
+  const [characters, setCharacters] = (0, import_react15.useState)([]);
+  const [models, setModels] = (0, import_react15.useState)([]);
+  const [activeModelId, setActiveModelId] = (0, import_react15.useState)(DEFAULT_MODEL_ID);
+  const [builtinUsed, setBuiltinUsed] = (0, import_react15.useState)({});
+  const [sheetBusy, setSheetBusy] = (0, import_react15.useState)(false);
+  const [sheetError, setSheetError] = (0, import_react15.useState)("");
+  const [selected, setSelected] = (0, import_react15.useState)({});
+  const [extraPrompt, setExtraPrompt] = (0, import_react15.useState)("");
+  const [prompts, setPrompts] = (0, import_react15.useState)([]);
+  const [promptError, setPromptError] = (0, import_react15.useState)("");
+  const [results, setResults] = (0, import_react15.useState)([]);
+  const [running, setRunning] = (0, import_react15.useState)(false);
+  const [runError, setRunError] = (0, import_react15.useState)("");
+  const [limitNote, setLimitNote] = (0, import_react15.useState)("");
+  const [serverKey, setServerKey] = (0, import_react15.useState)(false);
+  const [sheetOpen, setSheetOpen] = (0, import_react15.useState)(false);
+  const [customPoses, setCustomPoses] = (0, import_react15.useState)([]);
+  const [customCostumes, setCustomCostumes] = (0, import_react15.useState)([]);
+  const [history, setHistory] = (0, import_react15.useState)([]);
+  const [storageHigh, setStorageHigh] = (0, import_react15.useState)(false);
+  const [syncWarning, setSyncWarning] = (0, import_react15.useState)("");
+  const [reuseNote, setReuseNote] = (0, import_react15.useState)("");
+  const libraryReady = (0, import_react15.useRef)(false);
+  const modelLoadGen = (0, import_react15.useRef)(0);
+  const clearRequestedSystem = (0, import_react15.useCallback)(() => setRequestedSystem(null), []);
+  const clearCostumeFocus = (0, import_react15.useCallback)(() => setCostumeFocus(null), []);
+  const abortRef = (0, import_react15.useRef)(null);
+  const settingsRevision = (0, import_react15.useRef)(0);
+  const loadCatalog = (0, import_react15.useCallback)(() => {
     setLoading(true);
     setCatalogError("");
     fetch(studioUrl(basePath, "/api/catalog")).then(async (response) => {
@@ -13344,10 +13422,10 @@ function StudioFrame({ embedded }) {
       return response.json();
     }).then(setCatalog).catch((error) => setCatalogError(error instanceof Error ? error.message : "姿势目录没有加载出来")).finally(() => setLoading(false));
   }, [basePath]);
-  (0, import_react14.useEffect)(() => {
+  (0, import_react15.useEffect)(() => {
     loadCatalog();
   }, [loadCatalog]);
-  (0, import_react14.useEffect)(() => {
+  (0, import_react15.useEffect)(() => {
     const controller = new AbortController();
     fetch(studioUrl(basePath, "/api/costumes"), { signal: controller.signal }).then(async (response) => {
       if (!response.ok) throw new Error("服装目录没有加载出来");
@@ -13363,7 +13441,7 @@ function StudioFrame({ embedded }) {
     });
     return () => controller.abort();
   }, [basePath]);
-  (0, import_react14.useEffect)(() => {
+  (0, import_react15.useEffect)(() => {
     const controller = new AbortController();
     fetch(studioUrl(basePath, "/api/faces"), { signal: controller.signal }).then(async (response) => {
       if (!response.ok) throw new Error("脸部目录没有加载出来");
@@ -13379,7 +13457,7 @@ function StudioFrame({ embedded }) {
     });
     return () => controller.abort();
   }, [basePath]);
-  (0, import_react14.useEffect)(() => {
+  (0, import_react15.useEffect)(() => {
     const local = loadSettings();
     setSettings(local);
     setSettingsReady(true);
@@ -13401,10 +13479,18 @@ function StudioFrame({ embedded }) {
     }).catch(() => {
     });
   }, [basePath]);
-  (0, import_react14.useEffect)(() => {
+  (0, import_react15.useEffect)(() => {
     const gen = ++modelLoadGen.current;
     Promise.all([readStoredCharacters(), listSavedModels(), readActiveModelId()]).then(([images, saved, activeId]) => {
       if (modelLoadGen.current !== gen) return;
+      if (activeId === NO_MODEL_ID) {
+        setModels(saved);
+        setActiveModelId(NO_MODEL_ID);
+        setCharacters([]);
+        setBuiltinUsed(readBuiltinUsed());
+        if (images.length) void writeStoredCharacters([]);
+        return;
+      }
       const adopted = adoptCurrent(saved, images, activeId || DEFAULT_MODEL_ID, Date.now());
       const active = adopted.activeId || DEFAULT_MODEL_ID;
       const builtin = isBuiltinModelId(active);
@@ -13422,7 +13508,7 @@ function StudioFrame({ embedded }) {
     }).catch(() => {
     });
   }, []);
-  (0, import_react14.useEffect)(() => {
+  (0, import_react15.useEffect)(() => {
     let cancelled = false;
     Promise.all([listCustomPoses(), listCustomCostumes(), listHistory(), readStoragePressure()]).then(([poses, costumes, entries, pressure]) => {
       if (cancelled) return;
@@ -13438,7 +13524,7 @@ function StudioFrame({ embedded }) {
       cancelled = true;
     };
   }, []);
-  (0, import_react14.useEffect)(() => {
+  (0, import_react15.useEffect)(() => {
     if (!libraryReady.current || !settingsReady || settings.engine === "comfyui") {
       setSyncWarning("");
       return;
@@ -13481,6 +13567,13 @@ function StudioFrame({ embedded }) {
   function selectSavedModel(id) {
     modelLoadGen.current += 1;
     setSheetError("");
+    if (id === NO_MODEL_ID) {
+      setCharacters([]);
+      setActiveModelId(NO_MODEL_ID);
+      void writeStoredCharacters([]);
+      void writeActiveModelId(NO_MODEL_ID);
+      return;
+    }
     if (isBuiltinModelId(id)) {
       setCharacters([]);
       setActiveModelId(id);
@@ -13562,7 +13655,7 @@ function StudioFrame({ embedded }) {
   const poseUrls = useBlobUrls(customPoses);
   const costumeUrls = useBlobUrls(customCostumes);
   const historyUrls = useBlobUrls(history);
-  const poseById = (0, import_react14.useMemo)(() => {
+  const poseById = (0, import_react15.useMemo)(() => {
     const map = /* @__PURE__ */ new Map();
     catalog?.poses.forEach((pose) => map.set(pose.id, pose));
     for (const asset of customPoses) {
@@ -13580,7 +13673,7 @@ function StudioFrame({ embedded }) {
     }
     return map;
   }, [catalog, customPoses]);
-  const chosen = (0, import_react14.useMemo)(() => {
+  const chosen = (0, import_react15.useMemo)(() => {
     return Object.entries(selected).flatMap(([poseId, viewId]) => {
       const pose = poseById.get(poseId);
       const view = pose?.views.find((item) => item.id === viewId);
@@ -13588,7 +13681,7 @@ function StudioFrame({ embedded }) {
       return [{ poseId, viewId, title: pose.name, angle: view.angle, thumbSrc: poseUrls[poseId] }];
     });
   }, [selected, poseById, poseUrls]);
-  const comfyItems = (0, import_react14.useCallback)((viewIds) => {
+  const comfyItems = (0, import_react15.useCallback)((viewIds) => {
     if (!viewIds.length && costume) return [{ viewId: "outfit", title: "仅换装", pose: null }];
     return viewIds.map((id) => {
       for (const pose of poseById.values()) {
@@ -13599,15 +13692,16 @@ function StudioFrame({ embedded }) {
     });
   }, [poseById, costume]);
   const selectionKey = chosen.map((item) => item.viewId).join("|");
-  (0, import_react14.useEffect)(() => {
-    if (!selectionKey && !(settings.engine === "comfyui" && costume?.id)) {
+  (0, import_react15.useEffect)(() => {
+    const hasIdentity = activeModelId !== NO_MODEL_ID || Boolean(face?.id);
+    if (!selectionKey && !(settings.engine === "comfyui" && costume?.id) || !hasIdentity) {
       setPrompts([]);
       setPromptError("");
       return;
     }
     if (settings.engine === "comfyui") {
       try {
-        setPrompts(comfyPromptCards({ items: comfyItems(selectionKey ? selectionKey.split("|") : []), costume, face, extraPrompt, characterCount: characters.length || 1, keepOutfit: costume ? false : settings.keepOutfit, mode: settings.mode }));
+        setPrompts(comfyPromptCards({ items: comfyItems(selectionKey ? selectionKey.split("|") : []), costume, face, extraPrompt, characterCount: characters.length || (activeModelId === NO_MODEL_ID ? 0 : 1), keepOutfit: costume ? false : settings.keepOutfit, mode: settings.mode }));
         setPromptError("");
       } catch (error) {
         setPromptError(error instanceof Error ? error.message : "提示词没有生成");
@@ -13726,6 +13820,10 @@ function StudioFrame({ embedded }) {
     });
   }
   async function generate() {
+    if (activeModelId === NO_MODEL_ID && !face) {
+      setRunError(IDENTITY_REQUIRED);
+      return;
+    }
     if (settings.engine !== "comfyui" && !settings.apiKey.trim() && !serverKey) {
       setSettingsOpen(true);
       setRunError("先在设置里填写 API Key。");
@@ -13952,8 +14050,9 @@ function StudioFrame({ embedded }) {
         });
       },
       reuseNote,
-      builtinName: getBuiltinModel(activeModelId)?.name || "大肥鱼",
-      builtinSheet: getBuiltinModel(activeModelId)?.sheet || "/muse/dafeiyu-sheet.png"
+      builtinName: activeModelId === NO_MODEL_ID ? "" : getBuiltinModel(activeModelId)?.name || "大肥鱼",
+      builtinSheet: activeModelId === NO_MODEL_ID ? "" : getBuiltinModel(activeModelId)?.sheet || "/muse/dafeiyu-sheet.png",
+      modelSelected: activeModelId !== NO_MODEL_ID
     }
   );
   return /* @__PURE__ */ (0, import_jsx_runtime33.jsxs)("div", { className: `@container/studio flex min-h-0 flex-col overflow-hidden bg-background text-foreground ${embedded ? "h-full" : "h-dvh"}`, children: [
@@ -14154,8 +14253,8 @@ function GithubMark() {
   ] });
 }
 function useBlobUrls(items) {
-  const [urls, setUrls] = (0, import_react14.useState)({});
-  (0, import_react14.useEffect)(() => {
+  const [urls, setUrls] = (0, import_react15.useState)({});
+  (0, import_react15.useEffect)(() => {
     const created = {};
     for (const item of items) created[item.id] = URL.createObjectURL(item.image);
     setUrls(created);
@@ -14224,10 +14323,10 @@ function PosePanelIcon({ size = 16 }) {
   ] });
 }
 function PoseStudio() {
-  const hostRef = (0, import_react15.useRef)(null);
-  const [mount, setMount] = (0, import_react15.useState)(null);
-  const [portalContainer, setPortalContainer] = (0, import_react15.useState)(null);
-  (0, import_react15.useEffect)(() => {
+  const hostRef = (0, import_react16.useRef)(null);
+  const [mount, setMount] = (0, import_react16.useState)(null);
+  const [portalContainer, setPortalContainer] = (0, import_react16.useState)(null);
+  (0, import_react16.useEffect)(() => {
     const host = hostRef.current;
     if (!host) return;
     const shadow = host.shadowRoot ?? host.attachShadow({ mode: "open" });
@@ -14728,8 +14827,14 @@ function PoseStudio() {
   .max-h-72 {
     max-height: calc(var(--spacing) * 72);
   }
+  .max-h-\\[78dvh\\] {
+    max-height: 78dvh;
+  }
   .max-h-\\[min\\(85dvh\\,85\\%\\)\\] {
     max-height: min(85dvh, 85%);
+  }
+  .max-h-\\[min\\(92dvh\\,92\\%\\)\\] {
+    max-height: min(92dvh, 92%);
   }
   .min-h-0 {
     min-height: 0px;
@@ -14779,6 +14884,9 @@ function PoseStudio() {
   .max-w-\\[min\\(36rem\\,calc\\(100\\%-2rem\\)\\)\\] {
     max-width: min(36rem, calc(100% - 2rem));
   }
+  .max-w-\\[min\\(72rem\\,calc\\(100\\%-2rem\\)\\)\\] {
+    max-width: min(72rem, calc(100% - 2rem));
+  }
   .max-w-full {
     max-width: 100%;
   }
@@ -14816,6 +14924,9 @@ function PoseStudio() {
   }
   .cursor-pointer {
     cursor: pointer;
+  }
+  .cursor-zoom-in {
+    cursor: zoom-in;
   }
   .touch-none {
     touch-action: none;

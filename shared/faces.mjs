@@ -38,11 +38,20 @@ export function isSafeFacePath(relativePath) {
     || /^img\/full\/f[0-9a-f]{10}\.png$/.test(relativePath)
 }
 
-export async function fetchFaceBytes(relativePath, fetchImpl = fetch) {
+export async function fetchFaceBytes(relativePath, fetchImpl = fetch, signal) {
   if (!isSafeFacePath(relativePath)) throw new Error("脸部图路径无效")
   const cached = cache.get(relativePath)
   if (cached) return cached
-  const response = await fetchImpl(`${ORIGIN}/${relativePath}`, { signal: AbortSignal.timeout(20000) })
+  const timeout = AbortSignal.timeout(20000)
+  const linked = signal && typeof AbortSignal.any === "function" ? AbortSignal.any([signal, timeout]) : timeout
+  let response
+  try {
+    response = await fetchImpl(`${ORIGIN}/${relativePath}`, { signal: linked })
+  } catch (error) {
+    if (signal?.aborted) throw error
+    if (error?.name === "TimeoutError") throw new Error("脸部图读取超时，请再试一次。")
+    throw error
+  }
   if (!response.ok) throw new Error(`脸部图暂时读不到（${response.status}）`)
   const buffer = Buffer.from(await response.arrayBuffer())
   if (buffer.byteLength < 32 || buffer.byteLength > 12_000_000) throw new Error("脸部图大小异常")

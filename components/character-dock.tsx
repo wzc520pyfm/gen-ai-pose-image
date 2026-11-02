@@ -11,7 +11,7 @@ import { Switch } from "@/components/ui/switch"
 import { fileToCharacter, type StoredCharacter } from "@/lib/characters"
 import { studioUrl, useStudioEnv } from "@/lib/studio-env"
 import { getBuiltinModel } from "@/shared/builtin-models.mjs"
-import { cycleModelId, modelIndicator, withUploadedSheet } from "@/shared/models.mjs"
+import { cycleModelId, DEFAULT_MODEL_ID, modelIndicator, NO_MODEL_ID, withUploadedSheet } from "@/shared/models.mjs"
 
 const AUTHOR_URL = "https://www.bilibili.com/opus/1233069202138464289"
 
@@ -67,20 +67,25 @@ export function CharacterDock({
   const [pendingDelete, setPendingDelete] = useState<string | null>(null)
   const sheetWaited = useElapsedSeconds(sheetBusy)
   const custom = images.length > 0
+  const noModel = activeModelId === NO_MODEL_ID
   const photoCount = images.filter((image) => image.role !== "sheet").length
   const hasSheet = images.some((image) => image.role === "sheet")
   const sheetAction = hasSheet ? "替换设定图" : "导入设定图"
   const position = modelIndicator(switchItems, activeModelId)
   const currentIndex = Math.max(0, position.index - 1)
-  const currentItem = switchItems.find((item) => item.id === activeModelId) ?? switchItems[currentIndex]
+  const currentItem = switchItems.find((item) => item.id === activeModelId) ?? (noModel ? null : switchItems[currentIndex])
   const canCycle = position.total > 1
-  const title = custom ? (activeLabel || "导入的模特") : (currentItem?.label || "大肥鱼")
+  const title = noModel ? "未选模特" : custom ? (activeLabel || "导入的模特") : (currentItem?.label || "大肥鱼")
 
   function stepModel(direction: "prev" | "next") {
     if (!canCycle) return
+    if (noModel) {
+      onSelectModel(direction === "next" ? switchItems[0].id : switchItems[switchItems.length - 1].id)
+      return
+    }
     onSelectModel(cycleModelId(switchItems, activeModelId, direction))
   }
-  const builtin = custom ? null : (getBuiltinModel(activeModelId) || getBuiltinModel("dafeiyu"))
+  const builtin = custom || noModel ? null : (getBuiltinModel(activeModelId) || getBuiltinModel("dafeiyu"))
   const portrait = custom ? `data:${images[0].mediaType};base64,${images[0].dataBase64}` : studioUrl(basePath, builtin?.portrait || "/muse/dafeiyu-portrait.jpg")
   const full = custom ? portrait : studioUrl(basePath, builtin?.sheet || "/muse/dafeiyu-sheet.png")
 
@@ -125,13 +130,17 @@ export function CharacterDock({
   return (
     <aside className="dock order-1 flex shrink-0 flex-col gap-3 px-3 py-3 text-[#e2e8f0] @min-[1024px]/studio:order-none @min-[1024px]/studio:h-full @min-[1024px]/studio:min-h-0 @min-[1024px]/studio:shrink @min-[1024px]/studio:gap-4 @min-[1024px]/studio:overflow-y-auto @min-[1024px]/studio:px-4 @min-[1024px]/studio:py-5">
       <div className="flex items-start gap-1">
-        <ModelFigure
-          src={portrait}
-          alt=""
-          label="正在加载立绘"
-          boxClassName="relative mt-1 size-14 shrink-0 overflow-hidden rounded-xl @min-[1024px]/studio:hidden"
-          imgClassName="size-full object-cover object-top"
-        />
+        {noModel ? (
+          <div className="relative mt-1 grid size-14 shrink-0 place-items-center rounded-xl bg-white/10 text-[10px] text-[#cbd5e1] @min-[1024px]/studio:hidden">未选</div>
+        ) : (
+          <ModelFigure
+            src={portrait}
+            alt=""
+            label="正在加载立绘"
+            boxClassName="relative mt-1 size-14 shrink-0 overflow-hidden rounded-xl @min-[1024px]/studio:hidden"
+            imgClassName="size-full object-cover object-top"
+          />
+        )}
         <button
           type="button"
           className="mt-1 grid size-7 shrink-0 place-items-center rounded-full text-white hover:bg-white/10 disabled:opacity-30"
@@ -160,11 +169,11 @@ export function CharacterDock({
           ) : (
             <h2 className="flex items-baseline gap-2 text-lg font-semibold text-white @min-[1024px]/studio:text-2xl">
               <span className="truncate">{title}</span>
-              {canCycle ? <span className="shrink-0 text-xs font-normal text-[#cbd5e1]">{position.index}/{position.total}</span> : null}
+              {canCycle && !noModel ? <span className="shrink-0 text-xs font-normal text-[#cbd5e1]">{position.index}/{position.total}</span> : null}
             </h2>
           )}
           <p className="mt-0.5 text-xs leading-5 text-[#cbd5e1] @min-[1024px]/studio:mt-2 @min-[1024px]/studio:text-sm @min-[1024px]/studio:leading-6">
-            {custom ? "生图时改用你导入的参考图。" : (
+            {noModel ? "选了脸部之后可以不带模特出图。没选脸时，仍要选一位模特。" : custom ? "生图时改用你导入的参考图。" : (
               <>
                 <span className="block">{builtin?.blurb || "社区鲸鱼娘的成年形象。"}</span>
                 <span className="block">
@@ -214,6 +223,12 @@ export function CharacterDock({
           {busy ? "读图" : "导入"}
         </Button>
       </div>
+      {noModel ? (
+        <div className="rounded-xl bg-white/10 px-3 py-3 text-sm leading-6 text-[#cbd5e1]">
+          这次不带模特。选了脸部之后，参考图是脸、可选的衣服和姿势。没选脸时不能出图。
+        </div>
+      ) : (
+      <>
       <ModelFigure
         src={portrait}
         alt={custom ? (images[0]?.role === "sheet" ? "多视角设定图" : "导入的模特头像") : `${builtin?.name || "大肥鱼"}的正面全身像`}
@@ -257,6 +272,16 @@ export function CharacterDock({
           ))}
         </div>
       )}
+      </>
+      )}
+      <Button
+        type="button"
+        variant="outline"
+        className="border-white/20 bg-white/10 text-white hover:bg-white/15 hover:text-white"
+        onClick={() => onSelectModel(noModel ? DEFAULT_MODEL_ID : NO_MODEL_ID)}
+      >
+        {noModel ? "改回大肥鱼" : "这次不带模特"}
+      </Button>
       <input
         ref={inputRef}
         type="file"

@@ -57,8 +57,9 @@ function pause(signal) {
   })
 }
 
-export async function generateComfyTask({ url, token, characters, garment, poseImage, faceImage, face = null, pose, costume, aspectRatio, extraPrompt, keepOutfit = true, seed = 42, signal, fetchImpl = fetch }) {
-  if (!characters?.length || characters.length > 4) throw new Error("模特参考图需要 1 到 4 张。")
+export async function generateComfyTask({ url, token, characters = [], garment, poseImage, faceImage, face = null, pose, costume, aspectRatio, extraPrompt, keepOutfit = true, seed = 42, signal, fetchImpl = fetch }) {
+  const faceOnly = characters.length === 0 && Boolean(faceImage)
+  if (characters.length > 4 || (!faceOnly && characters.length === 0)) throw new Error("模特参考图需要 1 到 4 张。")
   const linked = AbortSignal.any([signal || new AbortController().signal, AbortSignal.timeout(600000)])
   const client = createComfyClient({ url, token, signal: linked, fetchImpl })
   const id = crypto.randomUUID()
@@ -71,7 +72,7 @@ export async function generateComfyTask({ url, token, characters, garment, poseI
     return body.subfolder ? `${body.subfolder}/${body.name}` : body.name
   }
   // Check dependencies before uploading private images or adding a GPU job.
-  const graphInput = { files: { characters: characters.map(() => "person.png"), garment: garment ? "garment.png" : undefined, pose: poseImage ? "pose.png" : undefined, face: faceImage ? "face.png" : undefined }, pose, costume, face, aspectRatio, extraPrompt, keepOutfit, seed, prefix: `tryon/lanpose-${id}` }
+  const graphInput = { files: { characters: faceOnly ? [] : characters.map(() => "person.png"), garment: garment ? "garment.png" : undefined, pose: poseImage ? "pose.png" : undefined, face: faceImage ? "face.png" : undefined }, pose, costume, face, aspectRatio, extraPrompt, keepOutfit, seed, prefix: `tryon/lanpose-${id}` }
   const planned = await buildLocalGraph(graphInput)
   const info = await (await client.request("/object_info")).json()
   for (const node of Object.values(planned.graph)) {
@@ -82,7 +83,9 @@ export async function generateComfyTask({ url, token, characters, garment, poseI
     }
   }
   const files = { characters: [] }
-  for (const [i, image] of characters.entries()) files.characters.push(await upload(image, "person", i))
+  if (!faceOnly) {
+    for (const [i, image] of characters.entries()) files.characters.push(await upload(image, "person", i))
+  }
   if (garment) files.garment = await upload(garment, "garment")
   if (poseImage) files.pose = await upload(poseImage, "pose")
   if (faceImage) files.face = await upload(faceImage, "face")

@@ -1,6 +1,7 @@
 import { dimensions, localPrompts, type ComfyPose } from "@/shared/comfyui.mjs"
 import { connectionURL, generateComfyTask } from "@/shared/comfyui-client.mjs"
 import { getBuiltinModel } from "@/shared/builtin-models.mjs"
+import { NO_MODEL_ID } from "@/shared/models.mjs"
 import { base64ToBlob, blobToBase64, type CustomWire } from "@/lib/library"
 import type { StudioSettings } from "@/lib/settings"
 import type { AspectRatio, CharacterImageInput, GeneratedResult, GenerateMode } from "@/lib/types"
@@ -93,7 +94,13 @@ export async function requestComfyGenerate(basePath: string, settings: StudioSet
     return base64ToBlob(image.dataBase64, image.mediaType)
   }
   signal.throwIfAborted()
-  const sources = input.characterImages.length ? input.characterImages.map(wireImage) : [await publicImage(getBuiltinModel(input.builtinModelId)?.sheet || "/muse/dafeiyu-sheet.png")]
+  const omitModel = input.characterImages.length === 0 && input.builtinModelId === NO_MODEL_ID
+  if (omitModel && !input.face) throw new Error("先选择一位模特，或选一张脸部参考。")
+  const sources = input.characterImages.length
+    ? input.characterImages.map(wireImage)
+    : omitModel
+      ? []
+      : [await publicImage(getBuiltinModel(input.builtinModelId)?.sheet || "/muse/dafeiyu-sheet.png")]
   const characters = await Promise.all(sources.map((blob) => prepareComfyImage(blob, input.aspectRatio)))
   const customGarment = input.customReferences.costumes.find((c) => c.id === input.costume?.id)
   const garment = input.costume ? await prepareComfyImage(customGarment ? wireImage(customGarment) : await publicImage(`/api/costume-image?id=${encodeURIComponent(input.costume.id)}&size=preview`)) : undefined

@@ -67,6 +67,22 @@ test("browser task follows preflight, upload, queue, history and output using on
   assert.equal(calls.find(([p]) => p === "/upload/image")[1].body.get("type"), "input")
 })
 
+test("a face without a character sheet is the only person image", async () => {
+  let submission
+  const pose = { name: "站立", angle: "正面", category: "站姿", people: 1 }
+  const face = { id: "face-only" }
+  const { graph } = await buildLocalGraph({ files: { characters: [], garment: "garment.png", pose: "pose.png", face: "face.png" }, costume: true, pose, face })
+  const { options, calls } = await fixture({ "/object_info": () => Response.json(Object.fromEntries(Object.values(graph).map((n) => [n.class_type, {}]))), "/prompt": (init) => {
+    submission = JSON.parse(init.body)
+    return Response.json({ prompt_id: "our-prompt" })
+  } })
+  await generateComfyTask({ ...options, characters: [], poseImage: new Blob(["pose"]), pose, faceImage: new Blob(["face"]), face })
+  assert.equal(calls.filter(([path]) => path === "/upload/image").length, 3)
+  assert.equal(submission.prompt["510"], undefined)
+  assert.match(submission.prompt["207"].inputs.prompt, /no character sheet/i)
+  await assert.rejects(generateComfyTask({ ...options, characters: [] }), /1 到 4 张/)
+})
+
 test("browser uploads an upstream face reference and preserves the graph's face slot", async () => {
   let submission
   const { graph } = await buildLocalGraph({ files: { characters: ["one.png", "two.png"], garment: "garment.png", pose: "pose.png", face: "face.png" }, costume: true, pose: { name: "站立", angle: "正面", category: "站姿", people: 1 }, face: { id: "face-test" } })

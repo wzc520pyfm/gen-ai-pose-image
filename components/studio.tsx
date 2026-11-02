@@ -45,7 +45,7 @@ import { StudioEnvProvider, studioUrl, useStudioEnv, type StudioPortal } from "@
 import { createCustomId, isCustomCostumeId, reuseFromHistory } from "@/shared/custom.mjs"
 import { messageForStatus } from "@/shared/http-status.mjs"
 import { isBuiltinModelId } from "@/shared/builtin-models.mjs"
-import { DEFAULT_MODEL_ID, activateModel, adoptCurrent, deleteFromLibrary, identityImage, renameModel, switcherEntries, syncLibrary, withGeneratedSheet } from "@/shared/models.mjs"
+import { DEFAULT_MODEL_ID, IDENTITY_REQUIRED, NO_MODEL_ID, activateModel, adoptCurrent, deleteFromLibrary, identityImage, renameModel, switcherEntries, syncLibrary, withGeneratedSheet } from "@/shared/models.mjs"
 import type { Catalog, GeneratedResult, Pose, PoseView, PromptCard } from "@/lib/types"
 
 type Selection = Record<string, string>
@@ -202,6 +202,14 @@ function StudioFrame({ embedded }: { embedded: boolean }) {
     Promise.all([readStoredCharacters(), listSavedModels(), readActiveModelId()])
       .then(([images, saved, activeId]) => {
         if (modelLoadGen.current !== gen) return
+        if (activeId === NO_MODEL_ID) {
+          setModels(saved)
+          setActiveModelId(NO_MODEL_ID)
+          setCharacters([])
+          setBuiltinUsed(readBuiltinUsed())
+          if (images.length) void writeStoredCharacters([])
+          return
+        }
         const adopted = adoptCurrent(saved, images, activeId || DEFAULT_MODEL_ID, Date.now())
         const active = adopted.activeId || DEFAULT_MODEL_ID
         const builtin = isBuiltinModelId(active)
@@ -284,6 +292,13 @@ function StudioFrame({ embedded }: { embedded: boolean }) {
   function selectSavedModel(id: string) {
     modelLoadGen.current += 1
     setSheetError("")
+    if (id === NO_MODEL_ID) {
+      setCharacters([])
+      setActiveModelId(NO_MODEL_ID)
+      void writeStoredCharacters([])
+      void writeActiveModelId(NO_MODEL_ID)
+      return
+    }
     if (isBuiltinModelId(id)) {
       setCharacters([])
       setActiveModelId(id)
@@ -412,14 +427,15 @@ function StudioFrame({ embedded }: { embedded: boolean }) {
   const selectionKey = chosen.map((item) => item.viewId).join("|")
 
   useEffect(() => {
-    if (!selectionKey && !(settings.engine === "comfyui" && costume?.id)) {
+    const hasIdentity = activeModelId !== NO_MODEL_ID || Boolean(face?.id)
+    if ((!selectionKey && !(settings.engine === "comfyui" && costume?.id)) || !hasIdentity) {
       setPrompts([])
       setPromptError("")
       return
     }
     if (settings.engine === "comfyui") {
       try {
-        setPrompts(comfyPromptCards({ items: comfyItems(selectionKey ? selectionKey.split("|") : []), costume, face, extraPrompt, characterCount: characters.length || 1, keepOutfit: costume ? false : settings.keepOutfit, mode: settings.mode }))
+        setPrompts(comfyPromptCards({ items: comfyItems(selectionKey ? selectionKey.split("|") : []), costume, face, extraPrompt, characterCount: characters.length || (activeModelId === NO_MODEL_ID ? 0 : 1), keepOutfit: costume ? false : settings.keepOutfit, mode: settings.mode }))
         setPromptError("")
       } catch (error) { setPromptError(error instanceof Error ? error.message : "提示词没有生成") }
       return
@@ -540,6 +556,10 @@ function StudioFrame({ embedded }: { embedded: boolean }) {
   }
 
   async function generate() {
+    if (activeModelId === NO_MODEL_ID && !face) {
+      setRunError(IDENTITY_REQUIRED)
+      return
+    }
     if (settings.engine !== "comfyui" && !settings.apiKey.trim() && !serverKey) {
       setSettingsOpen(true)
       setRunError("先在设置里填写 API Key。")
@@ -784,8 +804,9 @@ function StudioFrame({ embedded }: { embedded: boolean }) {
         })
       }}
       reuseNote={reuseNote}
-      builtinName={getBuiltinModel(activeModelId)?.name || "大肥鱼"}
-      builtinSheet={getBuiltinModel(activeModelId)?.sheet || "/muse/dafeiyu-sheet.png"}
+      builtinName={activeModelId === NO_MODEL_ID ? "" : (getBuiltinModel(activeModelId)?.name || "大肥鱼")}
+      builtinSheet={activeModelId === NO_MODEL_ID ? "" : (getBuiltinModel(activeModelId)?.sheet || "/muse/dafeiyu-sheet.png")}
+      modelSelected={activeModelId !== NO_MODEL_ID}
     />
   )
 
