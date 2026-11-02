@@ -2,7 +2,7 @@
 
 # Lanpose
 
-Optional **local ComfyUI generation** preserves the existing studio and cloud providers. A unified workflow supports outfit edits, poses, combined edits, two-person poses, and sequential contact sheets. Run the studio server and ComfyUI on the same computer; see the [setup and workflow guide (Chinese)](docs/comfyui-local.md).
+Optional **direct browser-to-ComfyUI generation** preserves the studio and cloud providers. Enter a loopback or remote HTTPS endpoint in the deployed website; no studio server is needed on the GPU computer. The unified workflow supports outfit edits, poses, combined edits, and sequential contact sheets. See the [connection and workflow guide (Chinese)](docs/comfyui-local.md).
 
 A DeepSeek Harness plugin, and a pose studio you can open on its own. Pick one or more sketches from the 288 groups and 1,439 views in [ai-pose-gallery-zh](https://github.com/anhao/ai-pose-gallery-zh), then generate images of the same model.
 
@@ -105,5 +105,5 @@ This MIT license covers the program only. The authors and works below are marked
 - Pose sketches and the original data are copyrighted by [ギア](https://x.com/giaaibusi). The work is [AI Pose Gallery](https://ai-pose-gallery.pages.dev/). Chinese names are maintained by [Anhao](https://github.com/anhao) in [ai-pose-gallery-zh](https://github.com/anhao/ai-pose-gallery-zh). The image host is [ai-pose-gallery.anhao.app](https://ai-pose-gallery.anhao.app). Upstream says these images are not for commercial use.
 - Costume images are also from [ギア](https://x.com/giaaibusi)'s [COSTUME-DB-01](https://ai-costume-gallery.pages.dev/). The repository stores only ids and keywords.
 - Face references are from [ギア](https://x.com/giaaibusi)'s [AI portrait gallery](https://ai-portrait-gallery.pages.dev/) under CC0. The repository stores only ids, sections, hair lengths, style labels, and public URLs. Chinese labels follow [sleepy-zone/ai-ref-library-cn](https://github.com/sleepy-zone/ai-ref-library-cn). That catalog does not become the image author.
-- The [Dafeiyu](https://github.com/TreapGoGo/deepseek-whale-girl) character sheet is by [TreapGoGo](https://github.com/TreapGoGo), copyright (c) 2026 TreapGoGo, used under that repository's MIT license. It is a community character and does not represent DeepSeek.
+- The Dafeiyu character design comes from 上善无形's original character and ZipZipPipe's maid whale-girl, licensed under [CC BY-NC-SA 4.0](https://creativecommons.org/licenses/by-nc-sa/4.0/). This sheet is from the community repo [TreapGoGo/deepseek-whale-girl](https://github.com/TreapGoGo/deepseek-whale-girl) and was generated with ChatGPT; that repo's MIT license covers its website code only, not the sheet. It is an unofficial community character and does not represent DeepSeek.
 - [DeepSeek](https://www.deepseek.com/) is a trademark of DeepSeek. This license does not grant that trademark.

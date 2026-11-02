@@ -9,6 +9,7 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } f
 import { HistoryPanel, type HistoryView } from "@/components/history-panel"
 import { Textarea } from "@/components/ui/textarea"
 import type { StoredCharacter } from "@/lib/characters"
+import { compactElapsed, useElapsedSeconds } from "@/lib/elapsed"
 import type { AspectRatio, GenerateMode, PromptCard } from "@/lib/types"
 import { ASPECT_LABEL } from "@/lib/types"
 import { studioUrl, useStudioEnv } from "@/lib/studio-env"
@@ -44,7 +45,6 @@ export function Composer({
   onClearFace,
   hasKey,
   running,
-  progress,
   runError,
   prompts,
   promptError,
@@ -80,7 +80,6 @@ export function Composer({
   onClearFace: () => void
   hasKey: boolean
   running: boolean
-  progress: string
   runError: string
   prompts: PromptCard[]
   promptError: string
@@ -100,6 +99,7 @@ export function Composer({
 }) {
   const { basePath } = useStudioEnv()
   const [zoom, setZoom] = useState<{ src: string; alt: string } | null>(null)
+  const waited = useElapsedSeconds(running)
   const characterSrc = characters[0]
     ? `data:${characters[0].mediaType};base64,${characters[0].dataBase64}`
     : studioUrl(basePath, builtinSheet)
@@ -238,12 +238,12 @@ export function Composer({
       {selected.length > limit ? <p className="text-sm text-amber-800">当前方式一次最多 {limit} 个姿势。</p> : null}
 
       {!hasIdentity ? <p className="text-sm text-amber-800">{IDENTITY_REQUIRED}</p> : null}
-      <div className="flex gap-2">
-        <Button className="h-11 flex-1" disabled={running || !hasIdentity || missingPose || selected.length > limit} onClick={onGenerate}>
+      <div className="flex min-w-0 gap-2">
+        <Button className="h-11 min-w-0 flex-1 shrink overflow-hidden px-3" disabled={running || !hasIdentity || missingPose || selected.length > limit} onClick={onGenerate}>
           {running ? <Loader2 className="animate-spin" /> : <Sparkles />}
-          {running ? progress || "正在生图" : hasKey ? (localMode && selected.length === 0 ? "仅换装生图" : "按所选姿势生图") : "填写密钥后生图"}
+          <span className="min-w-0 truncate">{running ? compactElapsed("正在生成", waited) : hasKey ? (localMode && selected.length === 0 ? "仅换装生图" : "按所选姿势生图") : "填写密钥后生图"}</span>
         </Button>
-        {running ? <Button variant="outline" className="h-11" onClick={onStop}>停止</Button> : null}
+        {running ? <Button variant="outline" className="h-11 shrink-0 px-3" onClick={onStop}>停止</Button> : null}
       </div>
       {!hasKey ? <p className="text-xs leading-5 text-muted-foreground">密钥只留在这台浏览器里。没有密钥时，下面的提示词仍然可以复制到 dsh-image-gen 里用。</p> : null}
       {reuseNote ? <p className="text-sm text-primary">{reuseNote}</p> : null}
