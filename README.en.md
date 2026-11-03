@@ -54,7 +54,7 @@ Open [http://127.0.0.1:43123](http://127.0.0.1:43123).
 2. Switch to Costumes to pick one outfit. Spring, summer, autumn, winter, and party are visible by default. Lingerie, swimwear, and sexy need “成人向”.
 3. Switch to 脸部 to pick one face reference. Filter by section and hair length, search ids and style names, or use 随机一张. Leave it empty to keep the character's own face.
 4. Import another model on the left, or keep Dafeiyu. After a costume is selected, “保持服装” steps aside for that outfit. After a face is selected, features, expression, and hairstyle follow that reference.
-5. Fill in a Gemini or OpenAI-compatible key under Image settings at the top right. The key stays in this browser.
+5. Fill in a Gemini or OpenAI-compatible key under Image settings at the top right. In the standalone web app the key stays in this browser. Inside DeepSeek Harness, a key sent with a studio generation request is also written into process-readable plugin config so the agent tool path can use it.
 6. Without a key, the right side still writes a prompt for each image. Copy it into an installed `dsh-image-gen`. Reference order is character, optional face, optional outfit with no person, then pose sketch.
 7. Both the pose and costume pages have a Custom section. Upload a reference, or write a short description and let the current provider expand it into an image prompt before generating a reference. Pose references lean toward line art. Costume references are made by first generating a model wearing the outfit, then removing the person so only the clothes remain. With no key, or when the text API is unavailable, the prompt is expanded locally and can still be copied. Custom items stay in this browser.
 8. Successful images show up under History on the right and remain after refresh. Open one to see the parameters. Use again restores the poses, costume, face, and extra prompt so you can generate again. Delete one entry or clear them all. A warning appears when browser storage is nearly full.
@@ -85,7 +85,7 @@ After restarting that profile:
 
 - The left sidebar gains 「澜姿 / 工作室」, next to Plugins and Automation tasks. Opening it shows the full studio: poses, costumes, face references, the model, and image generation.
 - The agent can call `search_poses`, `search_costumes`, `search_faces`, and `generate_pose_images`. Pass a costume id as `costume_id` to change clothes. Pass a face id as `face_id` to apply a face and expression reference. After the studio has been opened, custom poses and costumes are included in search and marked `source: custom`. `generate_pose_images` accepts those ids. If the reference image is not on this machine, the tool says to upload or generate it in the studio first and does not substitute another catalog item. Face references have no custom items; generation loads the public original.
-- With `POSE_MUSE_API_KEY` set on the process, the tools generate images and attach them to the session. Without a key, they return the written prompts for `generate_image` / `edit_image` in `dsh-image-gen`.
+- With `POSE_MUSE_API_KEY` on the process, or after the Lanpose studio has sent a key in a generation request, the tools generate images and attach them to the session. Without a usable key, they return the written prompts for `generate_image` / `edit_image` in `dsh-image-gen`.
 
 Adult poses and adult costumes stay out of search results. Pass `include_adult: true` to `search_poses` or `search_costumes` only when that is explicitly requested.
 
