@@ -41,6 +41,33 @@ function apiKey(config) {
   return process.env.POSE_MUSE_API_KEY || config.apiKey || ""
 }
 
+export function dropUndefined(value) {
+  if (Array.isArray(value)) return value.map(dropUndefined)
+  if (value && typeof value === "object") {
+    const out = {}
+    for (const key of Object.keys(value)) {
+      if (value[key] === undefined) continue
+      out[key] = dropUndefined(value[key])
+    }
+    return out
+  }
+  return value
+}
+
+export function plainAttachment(attachment) {
+  if (!attachment || typeof attachment !== "object") return undefined
+  const out = {}
+  for (const key of Object.keys(attachment)) {
+    const value = attachment[key]
+    if (value === undefined) continue
+    const type = typeof value
+    if (type === "string" || type === "number" || type === "boolean" || value === null) {
+      out[key] = value
+    }
+  }
+  return Object.keys(out).length ? out : undefined
+}
+
 function imageSize(buffer) {
   if (buffer.length > 24 && buffer[0] === 0x89 && buffer[1] === 0x50) {
     return { width: buffer.readUInt32BE(16), height: buffer.readUInt32BE(20) }
@@ -63,14 +90,22 @@ function imageSize(buffer) {
 
 async function persistImage(ctx, buffer, mediaType, title) {
   const size = imageSize(buffer)
-  if (ctx.attachments && typeof ctx.attachments.saveImage === "function") {
+  const attachments = typeof ctx.get === "function" ? ctx.get("attachments") : undefined
+  if (attachments && typeof attachments.saveImage === "function") {
     try {
-      const attachment = await ctx.attachments.saveImage({
+      const attachment = await attachments.saveImage({
         data: buffer,
         mediaType,
         name: title.slice(0, 80),
       })
-      return { attachment, width: size.width, height: size.height, bytes: buffer.byteLength, mediaType }
+      const plain = plainAttachment(attachment)
+      return dropUndefined({
+        ...(plain ? { attachment: plain } : {}),
+        width: size.width,
+        height: size.height,
+        bytes: buffer.byteLength,
+        mediaType,
+      })
     } catch (error) {
       const message = error instanceof Error ? error.message : "附件保存失败"
       return { saveError: message, width: size.width, height: size.height, bytes: buffer.byteLength, mediaType }
@@ -85,10 +120,56 @@ async function persistImage(ctx, buffer, mediaType, title) {
 }
 
 export function apply(ctx, config = {}) {
-  const current = () => ({ ...DEFAULTS, ...config })
+  const remembered = { apiKey: "", provider: "", model: "", baseURL: "" }
+  const current = () => ({
+    ...DEFAULTS,
+    ...config,
+    ...(remembered.apiKey ? { apiKey: remembered.apiKey } : {}),
+    ...(remembered.provider ? { provider: remembered.provider } : {}),
+    ...(remembered.model ? { model: remembered.model } : {}),
+    ...(remembered.baseURL ? { baseURL: remembered.baseURL } : {}),
+  })
+
+  function rememberStudioCredentials(body) {
+    if (!body || typeof body !== "object") return
+    const key = typeof body.apiKey === "string" ? body.apiKey.trim() : ""
+    if (key) {
+      remembered.apiKey = key
+      try {
+        if (config && typeof config === "object") config.apiKey = key
+      } catch {
+        // Profile config may be read-only; runtime remembered key still feeds tools.
+      }
+    }
+    if (body.provider === "seedream" || body.provider === "gemini" || body.provider === "openai") {
+      remembered.provider = body.provider
+      try {
+        if (config && typeof config === "object") config.provider = body.provider
+      } catch {
+        // ignore
+      }
+    }
+    if (typeof body.model === "string" && body.model.trim()) {
+      remembered.model = body.model.trim()
+      try {
+        if (config && typeof config === "object") config.model = remembered.model
+      } catch {
+        // ignore
+      }
+    }
+    if (typeof body.baseURL === "string" && body.baseURL.trim()) {
+      remembered.baseURL = body.baseURL.trim()
+      try {
+        if (config && typeof config === "object") config.baseURL = remembered.baseURL
+      } catch {
+        // ignore
+      }
+    }
+  }
+
   if (typeof ctx.inject === "function") {
     ctx.inject(["webServer"], (webCtx) => {
-      const handle = createPoseHandler(current)
+      const handle = createPoseHandler(current, { rememberStudioCredentials })
       webCtx.effect(() => webCtx.webServer.register({
         kind: "prefix",
         path: "/dsh-pose-muse",
@@ -105,7 +186,7 @@ export function apply(ctx, config = {}) {
           "要换衣服时，先用 search_costumes 找没有人物的服装图，再把返回的 id 作为 costume_id 传给 generate_pose_images。换装仍保留脸、发型、鲸耳和鲸尾。内衣、泳装和性感分类默认隐藏。",
           "要换脸或表情时，先用 search_faces 找脸部参考，再把返回的 id 作为 face_id 传给 generate_pose_images。脸部参考只提供五官、表情、脸型和发型；姿势和服装仍按各自的参考图。角色原有的鲸耳和鲸尾保留。脸库作者是ギア，许可是 CC0。",
           "工作室里上传或生成的自定义姿势和服装会带 source 为 custom。这些 id 可以直接交给 generate_pose_images。如果工具说找不到自定义参考图，请让用户先在澜姿工作室上传或生成，不要改用图库里的其他姿势或服装。",
-          "没有 POSE_MUSE_API_KEY 时，generate_pose_images 会返回提示词；若 dsh-image-gen 可用，把提示词原样交给 edit_image 或 generate_image，并附上角色参考与姿势线稿。",
+          "没有可用 API Key（进程环境变量 POSE_MUSE_API_KEY、插件配置，或工作室生图时已写入的密钥）时，generate_pose_images 会返回提示词；若 dsh-image-gen 可用，把提示词原样交给 edit_image 或 generate_image，并附上角色参考与姿势线稿。",
         ].join("\n"),
       }), "dsh-pose-muse prompt")
     })
@@ -235,30 +316,30 @@ export function apply(ctx, config = {}) {
         const usesCustom = plan.items.some((item) => item.source === "custom") || plan.costume?.source === "custom"
         const customNote = usesCustom ? "这次用了工作室里的自定义参考。交给 dsh-image-gen 时请附上这些本地图片，不要换成图库里的其他姿势或服装。" : ""
         const faceNote = input.faceId ? "参考图顺序是角色、脸部参考、可选的没有人物的服装图、姿势线稿。脸部参考只用于五官、表情、脸型和发型。" : ""
-        return {
+        return dropUndefined({
           generated: false,
           message: input.costumeId
-            ? `没有 POSE_MUSE_API_KEY。提示词已经按大肥鱼的成年形象、所选服装和姿势写好。若安装了 dsh-image-gen，请把每段提示词交给 edit_image 或 generate_image，并按顺序附上角色参考、没有人物的服装图和姿势线稿。${faceNote}不要把角色改成未成年人或 Q 版。${customNote}`
-            : `没有 POSE_MUSE_API_KEY。提示词已经按大肥鱼的成年形象和所选姿势写好。若安装了 dsh-image-gen，请把每段提示词交给 edit_image 或 generate_image，并附上角色参考图与姿势线稿。${faceNote}不要把角色改成未成年人或 Q 版。${customNote}`,
+            ? `没有可用的 API Key。提示词已经按大肥鱼的成年形象、所选服装和姿势写好。若安装了 dsh-image-gen，请把每段提示词交给 edit_image 或 generate_image，并按顺序附上角色参考、没有人物的服装图和姿势线稿。${faceNote}不要把角色改成未成年人或 Q 版。${customNote}`
+            : `没有可用的 API Key。提示词已经按大肥鱼的成年形象和所选姿势写好。若安装了 dsh-image-gen，请把每段提示词交给 edit_image 或 generate_image，并附上角色参考图与姿势线稿。${faceNote}不要把角色改成未成年人或 Q 版。${customNote}`,
           prompts: promptCards(plan),
-        }
+        })
       }
       const { results } = await runGeneration(input)
       const images = []
       for (const result of results) {
         if (!result.ok || !result.imageBase64) {
-          images.push({ ok: false, title: result.title, error: result.error || "没有返回图片" })
+          images.push(dropUndefined({ ok: false, title: result.title, error: result.error || "没有返回图片" }))
           continue
         }
         const buffer = Buffer.from(result.imageBase64, "base64")
         const saved = await persistImage(ctx, buffer, result.mediaType || "image/png", result.title)
-        images.push({ ok: true, title: result.title, warning: result.warning, referencesSent: result.referencesSent, ...saved })
+        images.push(dropUndefined({ ok: true, title: result.title, warning: result.warning, referencesSent: result.referencesSent, ...saved }))
       }
-      return {
+      return dropUndefined({
         generated: true,
         message: `已按 ${images.length} 个姿势处理。角色是成年形象。`,
         images,
-      }
+      })
     },
   }))
 }

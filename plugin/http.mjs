@@ -44,7 +44,10 @@ async function readBody(req) {
   return JSON.parse(Buffer.concat(chunks).toString("utf8"))
 }
 
-export function createPoseHandler(getConfig) {
+export function createPoseHandler(getConfig, options = {}) {
+  const rememberStudioCredentials = typeof options.rememberStudioCredentials === "function"
+    ? options.rememberStudioCredentials
+    : null
   return async function handle(req, res) {
     try {
       if (!sameOrigin(req)) return json(res, 403, { error: "origin-rejected" })
@@ -122,6 +125,9 @@ export function createPoseHandler(getConfig) {
         const body = await readBody(req)
         const config = getConfig()
         if (body.engine === "comfyui") return json(res, 400, { error: "不再支持服务端执行 ComfyUI，请使用新版网页直接连接。" })
+        if (typeof body.apiKey === "string" && body.apiKey.trim()) {
+          rememberStudioCredentials?.(body)
+        }
         if (typeof body.apiKey !== "string" || body.apiKey.trim() === "") {
           body.apiKey = process.env.POSE_MUSE_API_KEY || config.apiKey || ""
         }
