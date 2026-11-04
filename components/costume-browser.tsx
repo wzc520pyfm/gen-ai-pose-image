@@ -3,10 +3,9 @@
 /* eslint-disable @next/next/no-img-element -- costume references are proxied webp files */
 
 import { useEffect, useMemo, useState } from "react"
-import { Search, X } from "lucide-react"
 import { CustomReferencePanel, type CustomCard, type CustomDraft } from "@/components/custom-reference-panel"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
+import { Alert, Button, Card, Chip, SearchField, Skeleton, ToggleButton } from "@heroui/react"
+import { SegmentRow } from "@/components/studio-segment"
 import type { StudioSettings } from "@/lib/settings"
 import { studioUrl, useStudioEnv } from "@/lib/studio-env"
 
@@ -108,49 +107,41 @@ export function CostumeBrowser({
     <section>
       <div className="px-4 pt-3 pb-2 @min-[768px]/studio:px-6">
         <p className="mb-2 text-sm text-muted-foreground">这些图里没有人物。选一套之后，大肥鱼会换上这身衣服，脸、头发、鲸耳和鲸尾保持不变。</p>
-        <div className="mb-2 flex flex-wrap gap-2">
-          <button
-            type="button"
-            onClick={() => setCategory("custom")}
-            className={`inline-flex items-center whitespace-nowrap rounded-full px-3 py-1.5 text-sm ${customSection ? "bg-primary text-primary-foreground" : "bg-white ring-1 ring-border"}`}
-          >
-            自定义
-            <span className={`ml-1.5 text-xs ${customSection ? "text-primary-foreground/80" : "text-muted-foreground"}`}>{visibleCustom.length}</span>
-          </button>
+        <SegmentRow
+          className="mb-2"
+          ariaLabel="服装分类"
+          selectedKey={category}
+          onSelectionChange={(keys) => {
+            const id = firstKey(keys)
+            if (!id) return
+            if (id === "custom") {
+              setCategory("custom")
+              return
+            }
+            const item = catalog?.categories.find((entry) => entry.id === id)
+            if (item?.adult && !showAdult) {
+              onRequestAdult(item.id)
+              return
+            }
+            setCategory(id)
+          }}
+        >
+          <ToggleButton id="custom">自定义 {visibleCustom.length}</ToggleButton>
           {catalog?.categories.map((item) => (
-            <button
-              key={item.id}
-              type="button"
-              onClick={() => {
-                if (item.adult && !showAdult) {
-                  onRequestAdult(item.id)
-                  return
-                }
-                setCategory(item.id)
-              }}
-              className={`inline-flex items-center whitespace-nowrap rounded-full px-3 py-1.5 text-sm ${!customSection && category === item.id ? "bg-primary text-primary-foreground" : "bg-white ring-1 ring-border"}`}
-            >
-              {item.label}
-              <span className={`ml-1.5 text-xs ${!customSection && category === item.id ? "text-primary-foreground/80" : "text-muted-foreground"}`}>{item.count}</span>
-              {item.adult ? <span className="ml-1 text-[10px]">成人向</span> : null}
-            </button>
+            <ToggleButton key={item.id} id={item.id}>
+              {item.label} {item.count}
+            </ToggleButton>
           ))}
-        </div>
-        {customSection ? null : <div className="relative">
-          <Search className="pointer-events-none absolute top-1/2 left-2.5 size-4 -translate-y-1/2 text-muted-foreground" />
-          <Input
-            value={query}
-            onChange={(event) => setQuery(event.target.value)}
-            placeholder="搜索编号或关键词"
-            aria-label="搜索服装"
-            className="h-10 bg-card pr-9 pl-8"
-          />
-          {query ? (
-            <button type="button" className="absolute top-1/2 right-2 -translate-y-1/2 text-muted-foreground" onClick={() => setQuery("")} aria-label="清空服装搜索">
-              <X className="size-4" />
-            </button>
-          ) : null}
-        </div>}
+        </SegmentRow>
+        {customSection ? null : (
+          <SearchField aria-label="搜索服装" value={query} onChange={setQuery}>
+            <SearchField.Group>
+              <SearchField.SearchIcon />
+              <SearchField.Input placeholder="搜索编号或关键词" />
+              <SearchField.ClearButton />
+            </SearchField.Group>
+          </SearchField>
+        )}
       </div>
       <div className="px-4 py-4 @min-[768px]/studio:px-6">
         {customSection ? (
@@ -183,41 +174,42 @@ export function CostumeBrowser({
         ) : null}
         {!customSection && !catalog && !error ? (
           <div className="grid grid-cols-2 gap-3 @min-[640px]/studio:grid-cols-3 @min-[1280px]/studio:grid-cols-4 @min-[1536px]/studio:grid-cols-5">
-            {Array.from({ length: 8 }, (_, index) => <div key={index} className="aspect-[2/3] animate-pulse rounded-2xl bg-muted" />)}
+            {Array.from({ length: 8 }, (_, index) => <Skeleton key={index} className="block aspect-[2/3] w-full rounded-2xl" />)}
           </div>
         ) : null}
         {!customSection && error ? (
-          <div className="rounded-2xl border border-dashed px-4 py-10 text-center text-sm">
-            {error}
-            <div className="mt-3"><Button variant="outline" onClick={() => window.location.reload()}>重新加载</Button></div>
-          </div>
+          <Alert status="danger">
+            <Alert.Indicator />
+            <Alert.Content>
+              <Alert.Title>{error}</Alert.Title>
+              <Alert.Description>
+                <Button className="mt-2" variant="outline" onPress={() => window.location.reload()}>重新加载</Button>
+              </Alert.Description>
+            </Alert.Content>
+          </Alert>
         ) : null}
         {!customSection && catalog && costumes.length === 0 ? <p className="py-10 text-center text-sm text-muted-foreground">没有对上的服装。</p> : null}
         {customSection ? null : <div className="grid grid-cols-2 gap-3 @min-[640px]/studio:grid-cols-3 @min-[1280px]/studio:grid-cols-4 @min-[1536px]/studio:grid-cols-5">
           {costumes.map((costume) => {
             const selected = selectedId === costume.id
             return (
-              <button
-                key={costume.id}
-                type="button"
-                onClick={() => onSelect(costume)}
-                aria-pressed={selected}
-                className={`overflow-hidden rounded-xl border bg-card text-left shadow-sm ${selected ? "border-primary ring-2 ring-primary/25" : "border-border hover:border-primary/40"}`}
-              >
-                <div className="relative aspect-[3/4] bg-white @min-[640px]/studio:aspect-[2/3]">
-                  <img
-                    src={studioUrl(basePath, `/api/costume-image?id=${encodeURIComponent(costume.id)}&size=thumb`)}
-                    alt={`${costume.id}，${costume.keywords}`}
-                    loading="lazy"
-                    className="h-full w-full object-contain"
-                  />
-                  {selected ? <span className="absolute top-2 left-2 rounded-full bg-primary px-2 py-0.5 text-[11px] text-primary-foreground">换这套</span> : null}
-                </div>
-                <div className="space-y-1 px-3 py-2.5">
-                  <p className="text-sm font-medium">{costume.id}</p>
-                  <p className="line-clamp-1 text-xs text-muted-foreground @min-[640px]/studio:line-clamp-2">{costume.label} · {costume.keywords}</p>
-                </div>
-              </button>
+              <Card key={costume.id} className={`overflow-hidden text-left shadow-sm ${selected ? "border-primary ring-2 ring-primary/25" : "border-border"}`}>
+                <Card.Header className="relative aspect-[3/4] lanzi-paper p-0 @min-[640px]/studio:aspect-[2/3]">
+                  <button type="button" className="block h-full w-full" onClick={() => onSelect(costume)} aria-pressed={selected}>
+                    <img
+                      src={studioUrl(basePath, `/api/costume-image?id=${encodeURIComponent(costume.id)}&size=thumb`)}
+                      alt={`${costume.id}，${costume.keywords}`}
+                      loading="lazy"
+                      className="h-full w-full object-contain"
+                    />
+                  </button>
+                  {selected ? <Chip color="accent" size="sm" className="pointer-events-none absolute top-2 left-2">已选</Chip> : null}
+                </Card.Header>
+                <Card.Footer className="block space-y-1 px-3 py-2.5">
+                  <Card.Title className="text-sm font-medium">{costume.id}</Card.Title>
+                  <Card.Description className="line-clamp-1 text-xs @min-[640px]/studio:line-clamp-2">{costume.label} · {costume.keywords}</Card.Description>
+                </Card.Footer>
+              </Card>
             )
           })}
         </div>}
@@ -225,4 +217,10 @@ export function CostumeBrowser({
       </div>
     </section>
   )
+}
+
+function firstKey(keys: Iterable<unknown> | "all") {
+  if (keys === "all") return null
+  for (const key of keys) return String(key)
+  return null
 }

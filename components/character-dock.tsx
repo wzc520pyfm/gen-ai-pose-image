@@ -3,11 +3,9 @@
 /* eslint-disable @next/next/no-img-element -- model photos are data URLs or the bundled muse file */
 
 import { useRef, useState } from "react"
-import { useElapsedSeconds, withElapsed } from "@/lib/elapsed"
-import { ChevronLeft, ChevronRight, ImagePlus, Loader2 } from "lucide-react"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Switch } from "@/components/ui/switch"
+import { compactElapsed, useElapsedSeconds } from "@/lib/elapsed"
+import { ChevronLeft, ChevronRight, ImagePlus } from "lucide-react"
+import { Button, Input, Spinner, Switch } from "@heroui/react"
 import { fileToCharacter, type StoredCharacter } from "@/lib/characters"
 import { studioUrl, useStudioEnv } from "@/lib/studio-env"
 import { getBuiltinModel } from "@/shared/builtin-models.mjs"
@@ -39,6 +37,7 @@ export function CharacterDock({
   sheetError,
   hasKey,
   onOpenSettings,
+  embedded = false,
 }: {
   images: StoredCharacter[]
   onChange: (images: StoredCharacter[]) => void
@@ -56,6 +55,7 @@ export function CharacterDock({
   sheetError: string
   hasKey: boolean
   onOpenSettings: () => void
+  embedded?: boolean
 }) {
   const inputRef = useRef<HTMLInputElement>(null)
   const sheetInputRef = useRef<HTMLInputElement>(null)
@@ -123,7 +123,10 @@ export function CharacterDock({
   }
 
   return (
-    <aside className="dock order-1 flex shrink-0 flex-col gap-3 px-3 py-3 text-[#e2e8f0] @min-[1024px]/studio:order-none @min-[1024px]/studio:h-full @min-[1024px]/studio:min-h-0 @min-[1024px]/studio:shrink @min-[1024px]/studio:gap-4 @min-[1024px]/studio:overflow-y-auto @min-[1024px]/studio:px-4 @min-[1024px]/studio:py-5">
+    <aside className={embedded
+      ? "dock flex flex-col gap-3 rounded-xl px-3 py-3 text-[#e2e8f0]"
+      : "dock order-1 flex shrink-0 flex-col gap-3 px-3 py-3 text-[#e2e8f0] @min-[1024px]/studio:order-none @min-[1024px]/studio:h-full @min-[1024px]/studio:min-h-0 @min-[1024px]/studio:shrink @min-[1024px]/studio:gap-4 @min-[1024px]/studio:overflow-y-auto @min-[1024px]/studio:px-4 @min-[1024px]/studio:py-5"
+    }>
       <div className="flex items-start gap-1">
         <ModelFigure
           src={portrait}
@@ -207,8 +210,8 @@ export function CharacterDock({
           variant="outline"
           size="sm"
           className="mt-1 shrink border-white/20 bg-white/10 text-white hover:bg-white/15 hover:text-white @min-[1024px]/studio:hidden"
-          disabled={busy || sheetBusy || photoCount >= 3}
-          onClick={() => inputRef.current?.click()}
+          isDisabled={busy || sheetBusy || photoCount >= 3}
+          onPress={() => inputRef.current?.click()}
         >
           <ImagePlus />
           {busy ? "读图" : "导入"}
@@ -218,7 +221,7 @@ export function CharacterDock({
         src={portrait}
         alt={custom ? (images[0]?.role === "sheet" ? "多视角设定图" : "导入的模特头像") : `${builtin?.name || "大肥鱼"}的正面全身像`}
         label="正在加载立绘"
-        boxClassName="relative hidden w-full shrink-0 overflow-hidden rounded-xl bg-white @min-[1024px]/studio:block"
+        boxClassName="relative hidden w-full shrink-0 overflow-hidden rounded-xl lanzi-paper @min-[1024px]/studio:block"
         imgClassName={`w-full ${images[0]?.role === "sheet" ? "max-h-56 object-contain" : "aspect-[3/4] object-cover object-top"}`}
         spinnerClassName="text-slate-500"
       />
@@ -234,8 +237,8 @@ export function CharacterDock({
           src={full}
           alt={`${builtin?.name || "大肥鱼"}的多视角设定图`}
           label="正在加载设定图"
-          boxClassName="relative hidden w-full shrink-0 overflow-hidden rounded-xl bg-white @min-[1024px]/studio:block"
-          imgClassName="max-h-56 w-full rounded-xl bg-white object-contain"
+          boxClassName="relative hidden w-full shrink-0 overflow-hidden rounded-xl lanzi-paper @min-[1024px]/studio:block"
+          imgClassName="max-h-56 w-full rounded-xl lanzi-paper object-contain"
           width={builtin?.id === "dafeiyu" ? 1448 : 1536}
           height={builtin?.id === "dafeiyu" ? 1086 : 1024}
           spinnerClassName="text-slate-500"
@@ -244,7 +247,7 @@ export function CharacterDock({
         <div className="grid grid-cols-3 gap-2">
           {images.map((image) => (
             <div key={image.id} className="relative">
-              <img src={`data:${image.mediaType};base64,${image.dataBase64}`} alt={image.role === "sheet" ? "多视角设定图" : "导入的模特参考"} className={`aspect-[3/4] w-full rounded-lg ${image.role === "sheet" ? "bg-white object-contain" : "object-cover"}`} />
+              <img src={`data:${image.mediaType};base64,${image.dataBase64}`} alt={image.role === "sheet" ? "多视角设定图" : "导入的模特参考"} className={`aspect-[3/4] w-full rounded-lg ${image.role === "sheet" ? "lanzi-paper object-contain" : "object-cover"}`} />
               {image.role === "sheet" ? <span className="absolute bottom-1 left-1 rounded-full bg-black/60 px-1.5 text-[10px] text-white">设定图</span> : null}
               <button
                 type="button"
@@ -277,8 +280,8 @@ export function CharacterDock({
       <Button
         variant="outline"
         className="hidden border-white/20 bg-white/10 text-white hover:bg-white/15 hover:text-white @min-[1024px]/studio:inline-flex"
-        disabled={busy || sheetBusy || photoCount >= 3}
-        onClick={() => inputRef.current?.click()}
+        isDisabled={busy || sheetBusy || photoCount >= 3}
+        onPress={() => inputRef.current?.click()}
       >
         <ImagePlus />
         {busy ? "正在读图" : images.length ? "再加一张参考" : "导入其他模特"}
@@ -286,8 +289,8 @@ export function CharacterDock({
       <Button
         variant="outline"
         className="border-white/20 bg-white/10 text-white hover:bg-white/15 hover:text-white"
-        disabled={busy || sheetBusy}
-        onClick={() => sheetInputRef.current?.click()}
+        isDisabled={busy || sheetBusy}
+        onPress={() => sheetInputRef.current?.click()}
       >
         {busy ? "正在读图" : sheetAction}
       </Button>
@@ -296,8 +299,8 @@ export function CharacterDock({
         <Button
           variant="outline"
           className="border-white/20 bg-white/10 text-white hover:bg-white/15 hover:text-white"
-          disabled={sheetBusy}
-          onClick={() => {
+          isDisabled={sheetBusy}
+          onPress={() => {
             if (!hasKey) {
               onOpenSettings()
               return
@@ -305,12 +308,12 @@ export function CharacterDock({
             onGenerateSheet()
           }}
         >
-          {sheetBusy ? withElapsed("正在生成", sheetWaited) : "生成多视角 sheet"}
+          {sheetBusy ? compactElapsed("正在生成", sheetWaited) : "生成多视角 sheet"}
         </Button>
       ) : null}
       {sheetError ? <p className="text-sm text-[#fecaca]">{sheetError}</p> : null}
       {error ? <p className="text-sm text-[#fecaca]">{error}</p> : null}
-      <label className="mt-auto flex items-center justify-between gap-3 rounded-xl bg-white/10 px-3 py-2.5 text-sm @min-[1024px]/studio:py-3">
+      <div className={`${embedded ? "" : "mt-auto"} flex items-center justify-between gap-3 rounded-xl bg-white/10 px-3 py-2.5 text-sm @min-[1024px]/studio:py-3`}>
         <span className="min-w-0">
           <span className="block text-white">保持服装</span>
           <span className="mt-1 block text-xs leading-5 text-[#cbd5e1] @min-[640px]/studio:hidden">
@@ -322,8 +325,19 @@ export function CharacterDock({
               : "只借姿势，不借线稿里的身体。关掉后可在补充描述里换衣服。"}
           </span>
         </span>
-        <Switch checked={outfitLocked ? false : keepOutfit} onCheckedChange={onKeepOutfit} disabled={outfitLocked} aria-label="保持服装" />
-      </label>
+        <Switch
+          isSelected={outfitLocked ? false : keepOutfit}
+          onChange={onKeepOutfit}
+          isDisabled={outfitLocked}
+          aria-label="保持服装"
+        >
+          <Switch.Content>
+            <Switch.Control>
+              <Switch.Thumb />
+            </Switch.Control>
+          </Switch.Content>
+        </Switch>
+      </div>
     </aside>
   )
 }
@@ -374,7 +388,7 @@ function ModelFigure({
       />
       {pending ? (
         <div className="absolute inset-0 z-10 grid place-items-center" role="status" aria-live="polite">
-          <Loader2 className={`size-6 animate-spin ${spinnerClassName}`} />
+          <Spinner size="md" className={spinnerClassName} />
           <span className="sr-only">{label}</span>
         </div>
       ) : null}

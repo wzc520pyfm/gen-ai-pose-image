@@ -1,6 +1,7 @@
 "use client"
 
 import { createContext, useContext, type ReactNode } from "react"
+import { overlayPortalProps } from "@/shared/studio-portal.mjs"
 
 export type StudioPortal = HTMLElement | ShadowRoot | null
 
@@ -24,6 +25,11 @@ export function StudioEnvProvider({
 
 export function useStudioEnv() {
   return useContext(StudioEnvContext)
+}
+
+export function useOverlayPortal() {
+  const { portalContainer } = useStudioEnv()
+  return overlayPortalProps(portalContainer)
 }
 
 export function studioUrl(basePath: string, path: string) {

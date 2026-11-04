@@ -3,9 +3,9 @@
 /* eslint-disable @next/next/no-img-element -- history thumbs are local object URLs */
 
 import { useState } from "react"
-import { Button } from "@/components/ui/button"
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog"
+import { Button, Modal } from "@heroui/react"
 import type { HistoryEntry } from "@/lib/library"
+import { useOverlayPortal } from "@/lib/studio-env"
 
 export type HistoryView = Pick<HistoryEntry, "id" | "createdAt" | "title" | "prompt" | "extraPrompt" | "provider" | "model" | "aspectRatio" | "mode" | "keepOutfit" | "costume" | "face" | "selection"> & {
   thumbUrl: string
@@ -22,6 +22,7 @@ export function HistoryPanel({
   onDelete: (id: string) => void
   onClear: () => void
 }) {
+  const portal = useOverlayPortal()
   const [openId, setOpenId] = useState<string | null>(null)
   const [confirmClear, setConfirmClear] = useState(false)
   const current = entries.find((entry) => entry.id === openId) ?? null
@@ -40,52 +41,60 @@ export function HistoryPanel({
         <div className="grid grid-cols-3 gap-2">
           {entries.map((entry) => (
             <button key={entry.id} type="button" className="overflow-hidden rounded-lg border bg-card text-left" onClick={() => setOpenId(entry.id)}>
-              <img src={entry.thumbUrl} alt={entry.title} className="aspect-[3/4] w-full bg-[#f7f4ee] object-contain" />
+              <img src={entry.thumbUrl} alt={entry.title} className="aspect-[3/4] w-full lanzi-paper object-contain" />
               <span className="line-clamp-2 px-1.5 py-1 text-[11px] leading-4">{entry.title}</span>
             </button>
           ))}
         </div>
       )}
-      <Dialog open={current !== null} onOpenChange={(open) => { if (!open) setOpenId(null) }}>
-        <DialogContent className="max-h-[min(85dvh,85%)] max-w-[min(32rem,calc(100%-2rem))] overflow-y-auto">
-          {current ? (
-            <>
-              <DialogHeader>
-                <DialogTitle>{current.title}</DialogTitle>
-                <DialogDescription>{new Date(current.createdAt).toLocaleString("zh-CN", { hour12: false })}</DialogDescription>
-              </DialogHeader>
-              <img src={current.thumbUrl} alt={current.title} className="w-full rounded-xl bg-[#f7f4ee] object-contain" />
-              <p className="text-xs leading-5 text-muted-foreground">
-                {current.provider} · {current.aspectRatio} · {current.mode === "sheet" ? "拼图" : "逐张"} · {current.face ? `脸部 ${current.face.id}` : "保持原脸"} · {current.costume ? `换成 ${current.costume.id}` : current.keepOutfit ? "保持服装" : "允许换衣服"}
-                {current.model ? ` · ${current.model}` : ""}
-              </p>
-              {current.selection.length > 0 ? (
-                <ul className="text-sm leading-6">
-                  {current.selection.map((item) => <li key={`${item.poseId}-${item.viewId}`}>{item.title} · {item.angle}</li>)}
-                </ul>
-              ) : null}
-              {current.extraPrompt ? <p className="text-sm leading-6">补充描述：{current.extraPrompt}</p> : null}
-              <pre className="max-h-40 overflow-auto rounded-xl bg-muted px-3 py-2 text-xs leading-5 whitespace-pre-wrap">{current.prompt}</pre>
-              <div className="flex gap-2">
-                <Button type="button" onClick={() => { onReuse(current); setOpenId(null) }}>再用</Button>
-                <Button type="button" variant="outline" onClick={() => { onDelete(current.id); setOpenId(null) }}>删除</Button>
-              </div>
-            </>
-          ) : null}
-        </DialogContent>
-      </Dialog>
-      <Dialog open={confirmClear} onOpenChange={setConfirmClear}>
-        <DialogContent className="max-w-[min(28rem,calc(100%-2rem))]">
-          <DialogHeader>
-            <DialogTitle>清空全部历史</DialogTitle>
-            <DialogDescription>这些成图会从这台浏览器删除，不能恢复。</DialogDescription>
-          </DialogHeader>
-          <div className="flex justify-end gap-2">
-            <Button type="button" variant="outline" onClick={() => setConfirmClear(false)}>先留着</Button>
-            <Button type="button" onClick={() => { setConfirmClear(false); onClear() }}>清空</Button>
-          </div>
-        </DialogContent>
-      </Dialog>
+      <Modal.Backdrop isOpen={current !== null} onOpenChange={(open) => { if (!open) setOpenId(null) }} {...portal}>
+        <Modal.Container size="lg" scroll="inside">
+          <Modal.Dialog className="max-h-[min(85dvh,85%)] max-w-[min(32rem,calc(100%-2rem))]">
+            <Modal.CloseTrigger />
+            {current ? (
+              <>
+                <Modal.Header>
+                  <Modal.Heading>{current.title}</Modal.Heading>
+                  <p className="text-sm text-muted-foreground">{new Date(current.createdAt).toLocaleString("zh-CN", { hour12: false })}</p>
+                </Modal.Header>
+                <Modal.Body className="grid gap-3">
+                  <img src={current.thumbUrl} alt={current.title} className="w-full rounded-xl lanzi-paper object-contain" />
+                  <p className="text-xs leading-5 text-muted-foreground">
+                    {current.provider} · {current.aspectRatio} · {current.mode === "sheet" ? "拼图" : "逐张"} · {current.face ? `脸部 ${current.face.id}` : "保持原脸"} · {current.costume ? `换成 ${current.costume.id}` : current.keepOutfit ? "保持服装" : "允许换衣服"}
+                    {current.model ? ` · ${current.model}` : ""}
+                  </p>
+                  {current.selection.length > 0 ? (
+                    <ul className="text-sm leading-6">
+                      {current.selection.map((item) => <li key={`${item.poseId}-${item.viewId}`}>{item.title} · {item.angle}</li>)}
+                    </ul>
+                  ) : null}
+                  {current.extraPrompt ? <p className="text-sm leading-6">补充描述：{current.extraPrompt}</p> : null}
+                  <pre className="max-h-40 overflow-auto rounded-xl bg-secondary px-3 py-2 text-xs leading-5 whitespace-pre-wrap">{current.prompt}</pre>
+                </Modal.Body>
+                <Modal.Footer>
+                  <Button type="button" onPress={() => { onReuse(current); setOpenId(null) }}>再用</Button>
+                  <Button type="button" variant="outline" onPress={() => { onDelete(current.id); setOpenId(null) }}>删除</Button>
+                </Modal.Footer>
+              </>
+            ) : null}
+          </Modal.Dialog>
+        </Modal.Container>
+      </Modal.Backdrop>
+      <Modal.Backdrop isOpen={confirmClear} onOpenChange={setConfirmClear} {...portal}>
+        <Modal.Container>
+          <Modal.Dialog className="max-w-[min(28rem,calc(100%-2rem))]">
+            <Modal.CloseTrigger />
+            <Modal.Header>
+              <Modal.Heading>清空全部历史</Modal.Heading>
+              <p className="text-sm text-muted-foreground">这些成图会从这台浏览器删除，不能恢复。</p>
+            </Modal.Header>
+            <Modal.Footer>
+              <Button type="button" variant="outline" onPress={() => setConfirmClear(false)}>先留着</Button>
+              <Button type="button" onPress={() => { setConfirmClear(false); onClear() }}>清空</Button>
+            </Modal.Footer>
+          </Modal.Dialog>
+        </Modal.Container>
+      </Modal.Backdrop>
     </div>
   )
 }
