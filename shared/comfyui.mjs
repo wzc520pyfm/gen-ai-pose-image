@@ -110,9 +110,14 @@ export async function buildLocalGraph({ files, pose, costume, face = null, aspec
   if (!costume) {
     const finalInputs = graph[m.finalPrompt[0]].inputs
     delete finalInputs["images.image_4"]
-    if (pose?.system?.includes("半身")) {
-      finalInputs["images.image_1"] = [m.person[0], 0]
-      finalInputs["images.image_2"] = m.poseReference
+    // 只选姿势时，用原始线稿作为姿势参考，而不是 MOSS 脚手架生成的写实真人图。
+    // 否则成品会变成真人照片，且脚手架的双腿会与人物参考叠加成拼贴（#37）。
+    if (pose) {
+      finalInputs["images.image_1"] = [String(m.pose[0]), 0]
+      if (pose?.system?.includes("半身")) {
+        finalInputs["images.image_1"] = [m.person[0], 0]
+        finalInputs["images.image_2"] = [String(m.pose[0]), 0]
+      }
     }
   }
   for (const slot of m.seeds) set(slot, seed)
