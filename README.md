@@ -3,6 +3,7 @@
 # 澜姿
 
 [![npm version](https://img.shields.io/npm/v/gen-ai-pose-image.svg)](https://www.npmjs.com/package/gen-ai-pose-image)
+![star](https://atomgit.com/wzc520pyfm/gen-ai-pose-image/star/badge.svg)
 
 可选的 **ComfyUI 浏览器直连**：在在线网站填写本机或远程 HTTPS 地址，用一套带开关的工作流完成换装、姿势、组合生成及逐格拼图，无需在显卡电脑启动网站。原云端功能保留，详见[连接与工作流说明](docs/comfyui-local.md)。
 

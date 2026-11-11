@@ -3,6 +3,7 @@
 # Lanpose
 
 [![npm version](https://img.shields.io/npm/v/gen-ai-pose-image.svg)](https://www.npmjs.com/package/gen-ai-pose-image)
+![star](https://atomgit.com/wzc520pyfm/gen-ai-pose-image/star/badge.svg)
 
 Optional **direct browser-to-ComfyUI generation** preserves the studio and cloud providers. Enter a loopback or remote HTTPS endpoint in the deployed website; no studio server is needed on the GPU computer. The unified workflow supports outfit edits, poses, combined edits, and sequential contact sheets. See the [connection and workflow guide (Chinese)](docs/comfyui-local.md).
 
