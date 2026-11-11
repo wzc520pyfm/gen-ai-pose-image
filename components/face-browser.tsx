@@ -2,10 +2,9 @@
 
 /* eslint-disable @next/next/no-img-element -- face references are proxied remote images */
 
-import { useEffect, useMemo, useState, type ReactNode } from "react"
-import { Search, X } from "lucide-react"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
+import { useEffect, useMemo, useState } from "react"
+import { Alert, Button, Card, Chip, SearchField, Skeleton, ToggleButton } from "@heroui/react"
+import { SegmentRow } from "@/components/studio-segment"
 import { studioUrl, useStudioEnv } from "@/lib/studio-env"
 
 export type FaceItem = {
@@ -108,64 +107,69 @@ export function FaceBrowser({
         <p className="mb-2 text-sm leading-5 text-muted-foreground">
           选一张脸部参考。生图会把这张图的五官、表情、脸型和发型用到角色上，姿势和服装仍按各自的参考。鲸耳和鲸尾保留。
         </p>
-        <div className="flex gap-1.5 overflow-x-auto pb-1">
-          <SectionPill active={section === ""} count={catalog?.total} onClick={() => setSection("")}>全部</SectionPill>
+        <SegmentRow
+          ariaLabel="脸部分组"
+          selectedKey={section || "all"}
+          onSelectionChange={(keys) => {
+            const id = firstKey(keys)
+            if (id == null) return
+            setSection(id === "all" ? "" : id)
+          }}
+        >
+          <ToggleButton id="all">全部{catalog ? ` ${catalog.total}` : ""}</ToggleButton>
           {catalog?.sections.map((item) => (
-            <SectionPill key={item.id} active={section === item.id} count={item.count} onClick={() => setSection(item.id)}>
-              {item.label}
-            </SectionPill>
+            <ToggleButton key={item.id} id={item.id}>{item.label} {item.count}</ToggleButton>
           ))}
-        </div>
+        </SegmentRow>
         <div className="mt-2 flex flex-wrap items-center gap-2">
-          <div className="relative min-w-[8.5rem] flex-1">
-            <Search className="pointer-events-none absolute top-1/2 left-2.5 size-3.5 -translate-y-1/2 text-muted-foreground" />
-            <Input
-              value={query}
-              onChange={(event) => setQuery(event.target.value)}
-              placeholder="搜索编号、发长或造型"
-              aria-label="搜索脸部参考"
-              className="h-8 bg-card pr-8 pl-8 text-sm"
-            />
-            {query ? (
-              <button type="button" className="absolute top-1/2 right-2 -translate-y-1/2 text-muted-foreground" onClick={() => setQuery("")} aria-label="清空脸部搜索">
-                <X className="size-3.5" />
-              </button>
-            ) : null}
-          </div>
-          <div role="radiogroup" aria-label="发长" className="inline-flex h-8 min-w-0 items-center overflow-x-auto rounded-full bg-secondary p-0.5">
-            <HairSegment active={hair === ""} onClick={() => setHair("")}>全部发长</HairSegment>
+          <SearchField aria-label="搜索脸部参考" value={query} onChange={setQuery} className="min-w-[8.5rem] flex-1">
+            <SearchField.Group>
+              <SearchField.SearchIcon />
+              <SearchField.Input placeholder="搜索编号、发长或造型" />
+              <SearchField.ClearButton />
+            </SearchField.Group>
+          </SearchField>
+          <SegmentRow
+            ariaLabel="发长"
+            selectedKey={hair || "all"}
+            onSelectionChange={(keys) => {
+              const id = firstKey(keys)
+              if (id == null) return
+              setHair(id === "all" ? "" : id)
+            }}
+          >
+            <ToggleButton id="all">全部发长</ToggleButton>
             {catalog?.hairs.map((item) => (
-              <HairSegment
-                key={item.id}
-                active={hair === item.id}
-                count={hairCounts.get(item.id) ?? 0}
-                onClick={() => setHair(item.id)}
-              >
-                {item.label}
-              </HairSegment>
+              <ToggleButton key={item.id} id={item.id}>{item.label} {hairCounts.get(item.id) ?? 0}</ToggleButton>
             ))}
-          </div>
-          <button
-            type="button"
-            onClick={randomFace}
-            disabled={faces.length === 0}
-            className="inline-flex h-8 shrink-0 items-center rounded-full px-2.5 text-xs text-muted-foreground ring-1 ring-border hover:bg-card hover:text-foreground disabled:opacity-40"
+          </SegmentRow>
+          <Button
+            variant="outline"
+            size="sm"
+            onPress={randomFace}
+            isDisabled={faces.length === 0}
+            className="lanzi-coral"
           >
             随机一张
-          </button>
+          </Button>
         </div>
       </div>
       <div className="px-4 py-4 @min-[768px]/studio:px-6">
         {!catalog && !error ? (
           <div className="grid grid-cols-2 gap-3 @min-[640px]/studio:grid-cols-3 @min-[1280px]/studio:grid-cols-4 @min-[1536px]/studio:grid-cols-5">
-            {Array.from({ length: 8 }, (_, index) => <div key={index} className="aspect-[4/5] animate-pulse rounded-2xl bg-muted" />)}
+            {Array.from({ length: 8 }, (_, index) => <Skeleton key={index} className="block aspect-[4/5] w-full rounded-2xl" />)}
           </div>
         ) : null}
         {error ? (
-          <div className="rounded-2xl border border-dashed px-4 py-10 text-center text-sm">
-            {error}
-            <div className="mt-3"><Button variant="outline" onClick={() => window.location.reload()}>重新加载</Button></div>
-          </div>
+          <Alert status="danger">
+            <Alert.Indicator />
+            <Alert.Content>
+              <Alert.Title>{error}</Alert.Title>
+              <Alert.Description>
+                <Button className="mt-2" variant="outline" onPress={() => window.location.reload()}>重新加载</Button>
+              </Alert.Description>
+            </Alert.Content>
+          </Alert>
         ) : null}
         {catalog && faces.length === 0 ? <p className="py-10 text-center text-sm text-muted-foreground">没有对上的脸部参考。</p> : null}
         {catalog ? (
@@ -174,34 +178,30 @@ export function FaceBrowser({
               const selected = selectedId === face.id
               const caption = [face.section, face.hair, face.label].filter(Boolean).join(" · ")
               return (
-                <button
-                  key={face.id}
-                  type="button"
-                  onClick={() => onSelect(face)}
-                  aria-pressed={selected}
-                  className={`overflow-hidden rounded-xl border bg-card text-left shadow-sm ${selected ? "border-primary ring-2 ring-primary/25" : "border-border hover:border-primary/40"}`}
-                >
-                  <div className="relative aspect-[4/5] bg-white">
-                    <img
-                      src={studioUrl(basePath, `/api/face-image?id=${encodeURIComponent(face.id)}&size=thumb`)}
-                      alt={`${face.id}，${caption}`}
-                      loading="lazy"
-                      className="h-full w-full object-cover"
-                    />
-                    {selected ? <span className="absolute top-2 left-2 rounded-full bg-primary px-2 py-0.5 text-[11px] text-primary-foreground">用这张脸</span> : null}
-                  </div>
-                  <div className="space-y-1 px-3 py-2.5">
-                    <p className="truncate text-sm font-medium">{face.id}</p>
-                    <p className="line-clamp-2 text-xs text-muted-foreground">{caption}</p>
-                  </div>
-                </button>
+                <Card key={face.id} className={`overflow-hidden text-left shadow-sm ${selected ? "border-primary ring-2 ring-primary/25" : "border-border"}`}>
+                  <Card.Header className="relative aspect-[4/5] lanzi-paper p-0">
+                    <button type="button" className="block h-full w-full" onClick={() => onSelect(face)} aria-pressed={selected}>
+                      <img
+                        src={studioUrl(basePath, `/api/face-image?id=${encodeURIComponent(face.id)}&size=thumb`)}
+                        alt={`${face.id}，${caption}`}
+                        loading="lazy"
+                        className="h-full w-full object-cover"
+                      />
+                    </button>
+                    {selected ? <Chip color="accent" size="sm" className="pointer-events-none absolute top-2 left-2">已选</Chip> : null}
+                  </Card.Header>
+                  <Card.Footer className="block space-y-1 px-3 py-2.5">
+                    <Card.Title className="truncate text-sm font-medium">{face.id}</Card.Title>
+                    <Card.Description className="line-clamp-2 text-xs">{caption}</Card.Description>
+                  </Card.Footer>
+                </Card>
               )
             })}
           </div>
         ) : null}
         {catalog && shown < faces.length ? (
           <div className="mt-4 flex justify-center">
-            <Button variant="outline" onClick={() => setShown((count) => count + 80)}>继续显示（还有 {faces.length - shown}）</Button>
+            <Button variant="outline" onPress={() => setShown((count) => count + 80)}>继续显示（还有 {faces.length - shown}）</Button>
           </div>
         ) : null}
         {catalog ? <p className="mt-6 text-xs leading-5 text-muted-foreground">{catalog.attribution}</p> : null}
@@ -210,50 +210,8 @@ export function FaceBrowser({
   )
 }
 
-function SectionPill({
-  active,
-  count,
-  onClick,
-  children,
-}: {
-  active: boolean
-  count?: number
-  onClick: () => void
-  children: ReactNode
-}) {
-  return (
-    <button
-      type="button"
-      onClick={onClick}
-      className={`inline-flex h-8 shrink-0 items-center gap-1.5 rounded-full px-3 text-sm whitespace-nowrap ${active ? "bg-primary text-primary-foreground" : "bg-card text-foreground ring-1 ring-border"}`}
-    >
-      <span>{children}</span>
-      {count !== undefined ? <span className={`text-xs ${active ? "text-primary-foreground/80" : "text-muted-foreground"}`}>{count}</span> : null}
-    </button>
-  )
-}
-
-function HairSegment({
-  active,
-  count,
-  onClick,
-  children,
-}: {
-  active: boolean
-  count?: number
-  onClick: () => void
-  children: ReactNode
-}) {
-  return (
-    <button
-      type="button"
-      role="radio"
-      aria-checked={active}
-      onClick={onClick}
-      className={`inline-flex h-7 shrink-0 items-center gap-1 rounded-full px-2.5 text-xs whitespace-nowrap ${active ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:text-foreground"}`}
-    >
-      <span>{children}</span>
-      {count !== undefined ? <span className={active ? "text-primary-foreground/80" : "text-muted-foreground"}>{count}</span> : null}
-    </button>
-  )
+function firstKey(keys: Iterable<unknown> | "all") {
+  if (keys === "all") return null
+  for (const key of keys) return String(key)
+  return null
 }

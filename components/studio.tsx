@@ -1,7 +1,6 @@
 "use client"
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react"
-import { Settings } from "lucide-react"
 import { comfyPromptCards, requestComfyGenerate, type ComfyItem } from "@/lib/comfyui-client"
 import { CharacterDock } from "@/components/character-dock"
 import { Composer, type ResultCard } from "@/components/composer"
@@ -11,10 +10,13 @@ import type { CustomDraft } from "@/components/custom-reference-panel"
 import type { HistoryView } from "@/components/history-panel"
 import { PoseBrowser } from "@/components/pose-browser"
 import { SettingsDialog } from "@/components/settings-dialog"
-import { Button, buttonVariants } from "@/components/ui/button"
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog"
-import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet"
-import { WhaleMark } from "@/components/whale-mark"
+import { LibraryTabs } from "@/components/studio-library-tabs"
+import { StudioShell } from "@/components/studio-shell"
+import { Button, Modal, Sheet, buttonVariants } from "@heroui/react"
+import { retireStudioLayout } from "@/lib/studio-layout"
+import { useOverlayPortal } from "@/lib/studio-env"
+import { useStudioTheme } from "@/lib/use-studio-theme"
+import { useStudioWide } from "@/lib/use-studio-wide"
 import { requestCharacterSheet } from "@/lib/character-client"
 import { readStoredCharacters, writeStoredCharacters, type StoredCharacter } from "@/lib/characters"
 import {
@@ -73,6 +75,11 @@ export function Studio({
 
 function StudioFrame({ embedded }: { embedded: boolean }) {
   const { basePath } = useStudioEnv()
+  const portal = useOverlayPortal()
+  const studioRef = useRef<HTMLDivElement>(null)
+  const wide = useStudioWide(studioRef)
+  const { resolved: theme, toggle: toggleTheme } = useStudioTheme()
+  useEffect(() => { retireStudioLayout() }, [])
   const [catalog, setCatalog] = useState<Catalog | null>(null)
   const [catalogError, setCatalogError] = useState("")
   const [costumeCatalog, setCostumeCatalog] = useState<Array<{ id: string; label: string; keywords: string; adult?: boolean }>>([])
@@ -705,7 +712,7 @@ function StudioFrame({ embedded }: { embedded: boolean }) {
     setReuseNote(missingPose || missingCostume
       ? "已恢复还能找到的选择。有的自定义参考已经删除，请重新上传或生成后再出图。"
       : "已恢复那次的姿势和描述，可以再次生图。")
-    if (window.innerWidth < 1024) setSheetOpen(true)
+    if (!wide) setSheetOpen(true)
   }
 
   const historyViews: HistoryView[] = history.map((entry) => ({
@@ -789,205 +796,212 @@ function StudioFrame({ embedded }: { embedded: boolean }) {
     />
   )
 
+  const libraryTabs = (
+    <>
+      <LibraryTabs library={library} onLibrary={setLibrary} />
+      {face ? <span className="hidden min-w-0 truncate text-sm text-primary @min-[640px]/studio:inline">{face.id}</span> : null}
+      {costume ? <span className="hidden min-w-0 truncate text-sm text-primary @min-[640px]/studio:inline">{costume.id}</span> : null}
+    </>
+  )
+
+  const libraryPane = library === "faces" ? (
+    <FaceBrowser
+      selectedId={face?.id ?? null}
+      onSelect={(item: FaceItem) => setFace((current) => current?.id === item.id ? null : {
+        id: item.id,
+        section: item.section,
+        hair: item.hair,
+        label: item.label,
+        keywords: item.keywords,
+      })}
+    />
+  ) : library === "poses" ? (
+    <PoseBrowser
+      catalog={catalog}
+      loading={loading}
+      error={catalogError}
+      onRetry={loadCatalog}
+      showAdult={settings.showAdult}
+      requestedSystem={requestedSystem}
+      onRequestedSystemApplied={clearRequestedSystem}
+      onRequestAdult={(systemId) => setAdultAsk(systemId)}
+      selected={selected}
+      onToggle={togglePose}
+      customPoses={customPoseCards}
+      onSaveCustom={(draft) => saveCustom("pose", draft)}
+      onDeleteCustom={(id) => void removeCustomPose(id)}
+      settings={settings}
+      hasKey={Boolean(settings.apiKey.trim()) || serverKey}
+      syncWarning={syncWarning}
+    />
+  ) : (
+    <CostumeBrowser
+      showAdult={settings.showAdult}
+      focusCategory={costumeFocus}
+      onFocusApplied={clearCostumeFocus}
+      onRequestAdult={(categoryId) => setAdultAsk(`costume:${categoryId}`)}
+      selectedId={costume?.id ?? null}
+      onSelect={(item) => setCostume((current) => current?.id === item.id ? null : { id: item.id, label: item.label, keywords: item.keywords })}
+      customCostumes={customCostumeCards}
+      onSaveCustom={(draft) => saveCustom("costume", draft)}
+      onDeleteCustom={(id) => void removeCustomCostume(id)}
+      settings={settings}
+      hasKey={Boolean(settings.apiKey.trim()) || serverKey}
+      syncWarning={syncWarning}
+      onChangeSettings={updateSettings}
+    />
+  )
+
+  const characterDock = (
+    <CharacterDock
+      images={characters}
+      onChange={updateCharacters}
+      keepOutfit={settings.keepOutfit}
+      onKeepOutfit={(keepOutfit) => updateSettings({ ...settings, keepOutfit })}
+      outfitLocked={Boolean(costume)}
+      switchItems={switcherEntries({ models }).map((item) => {
+        const saved = models.find((model) => model.id === item.id)
+        const thumb = saved?.images[0]
+        return {
+          id: item.id,
+          label: item.label,
+          builtin: item.builtin,
+          thumbSrc: thumb
+            ? `data:${thumb.mediaType};base64,${thumb.dataBase64}`
+            : studioUrl(basePath, item.portrait || "/muse/dafeiyu-portrait.jpg"),
+        }
+      })}
+      activeModelId={activeModelId}
+      activeLabel={models.find((model) => model.id === activeModelId)?.label ?? ""}
+      onSelectModel={selectSavedModel}
+      onRenameModel={renameSavedModel}
+      onDeleteModel={removeSavedModel}
+      onGenerateSheet={() => void generateModelSheet()}
+      sheetBusy={sheetBusy}
+      sheetError={sheetError}
+      hasKey={Boolean(settings.apiKey.trim()) || serverKey}
+      onOpenSettings={() => {
+        setSheetError(settings.engine === "comfyui"
+          ? "多视角 sheet 要用云端生图。请先选 Seedream、Gemini 或 OpenAI，并填写 API Key。"
+          : "先在设置里填写 API Key。")
+        setSettingsOpen(true)
+      }}
+    />
+  )
+
+  const headerTrailing = (
+    <>
+      <Button variant="outline" size="sm" className="@max-[640px]/studio:hidden" onPress={() => setInstallOpen(true)}>装进 Harness</Button>
+      <a
+        href={REPOSITORY_URL}
+        target="_blank"
+        rel="noopener noreferrer"
+        aria-label="打开 GitHub 仓库"
+        className={buttonVariants({ variant: "outline", size: "sm", isIconOnly: true })}
+      >
+        <GithubMark />
+      </a>
+    </>
+  )
+
+  const mobileWorkOrderTrigger = (
+    <>
+      <div className="shrink-0 border-t border-border bg-card p-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] @min-[1024px]/studio:hidden">
+        <Button className="h-11 w-full" onPress={() => setSheetOpen(true)}>
+          已选 {chosen.length} 个姿势{face ? ` · ${face.id}` : ""}{costume ? ` · ${costume.id}` : ""} · 去生图
+        </Button>
+      </div>
+      <Sheet isOpen={sheetOpen} onOpenChange={setSheetOpen} placement="bottom">
+        <Sheet.Backdrop {...portal}>
+          <Sheet.Content className="max-h-[min(85dvh,85%)] rounded-t-3xl">
+            <Sheet.Dialog>
+              <Sheet.Handle />
+              <Sheet.CloseTrigger />
+              <Sheet.Header>
+                <Sheet.Heading>生图</Sheet.Heading>
+              </Sheet.Header>
+              <Sheet.Body className="overflow-y-auto px-4 pb-6">{composer}</Sheet.Body>
+            </Sheet.Dialog>
+          </Sheet.Content>
+        </Sheet.Backdrop>
+      </Sheet>
+    </>
+  )
+
   return (
-    <div className={`@container/studio flex min-h-0 flex-col overflow-hidden bg-background text-foreground ${embedded ? "h-full" : "h-dvh"}`}>
-      <header className="flex min-h-14 shrink-0 flex-wrap items-center gap-x-3 gap-y-2 border-b bg-white px-3 py-2 @min-[640px]/studio:px-4 @min-[768px]/studio:px-5">
-        <WhaleMark className="size-8 shrink-0" />
-        <h1 className="shrink-0 text-base font-semibold">澜姿</h1>
-        <div className="flex shrink-0 rounded-lg bg-muted p-1" role="tablist" aria-label="图库">
-          <button
-            type="button"
-            role="tab"
-            aria-selected={library === "poses"}
-            onClick={() => setLibrary("poses")}
-            className={`rounded-md px-3 py-1 text-sm whitespace-nowrap ${library === "poses" ? "bg-white font-medium shadow-sm" : "text-muted-foreground"}`}
-          >
-            姿势
-          </button>
-          <button
-            type="button"
-            role="tab"
-            aria-selected={library === "costumes"}
-            onClick={() => setLibrary("costumes")}
-            className={`rounded-md px-3 py-1 text-sm whitespace-nowrap ${library === "costumes" ? "bg-white font-medium shadow-sm" : "text-muted-foreground"}`}
-          >
-            服装
-          </button>
-          <button
-            type="button"
-            role="tab"
-            aria-selected={library === "faces"}
-            onClick={() => setLibrary("faces")}
-            className={`rounded-md px-3 py-1 text-sm whitespace-nowrap ${library === "faces" ? "bg-white font-medium shadow-sm" : "text-muted-foreground"}`}
-          >
-            脸部
-          </button>
-        </div>
-        {face ? <span className="hidden min-w-0 truncate text-sm text-primary @min-[640px]/studio:inline">{face.id}</span> : null}
-        {costume ? <span className="hidden min-w-0 truncate text-sm text-primary @min-[640px]/studio:inline">{costume.id}</span> : null}
-        <div className="ml-auto flex shrink-0 items-center gap-2">
-          <Button variant="outline" size="sm" className="@max-[640px]/studio:hidden" onClick={() => setInstallOpen(true)}>装进 Harness</Button>
-          <a
-            href={REPOSITORY_URL}
-            target="_blank"
-            rel="noopener noreferrer"
-            aria-label="打开 GitHub 仓库"
-            className={buttonVariants({ variant: "outline", size: "icon" })}
-          >
-            <GithubMark />
-          </a>
-          <Button variant="outline" size="icon" aria-label="生图设置" onClick={() => setSettingsOpen(true)}>
-            <Settings />
-          </Button>
-        </div>
-      </header>
+    <div className={`flex min-h-0 flex-col overflow-hidden bg-background text-foreground ${embedded ? "h-full" : "h-dvh"}`}>
       {storageHigh ? (
-        <p className="shrink-0 border-b bg-amber-50 px-4 py-2 text-sm text-amber-950">
+        <p className="shrink-0 border-b border-amber-200 bg-amber-50 px-4 py-2 text-sm text-amber-950 dark:border-amber-800/60 dark:bg-amber-950/40 dark:text-amber-100">
           本机存储快满了。可以删除历史或自定义参考图。
           <button type="button" className="ml-2 underline" onClick={() => void clearHistory().then(() => setHistory([])).then(() => readStoragePressure()).then((pressure) => setStorageHigh(pressure.high))}>清空历史</button>
         </p>
       ) : null}
-      <div className="flex min-h-0 flex-1 flex-col @min-[1024px]/studio:grid @min-[1024px]/studio:grid-cols-[300px_minmax(0,1fr)_340px] @min-[1024px]/studio:grid-rows-[minmax(0,1fr)]">
-        <CharacterDock
-          images={characters}
-          onChange={updateCharacters}
-          keepOutfit={settings.keepOutfit}
-          onKeepOutfit={(keepOutfit) => updateSettings({ ...settings, keepOutfit })}
-          outfitLocked={Boolean(costume)}
-          switchItems={switcherEntries({ models }).map((item) => {
-            const saved = models.find((model) => model.id === item.id)
-            const thumb = saved?.images[0]
-            return {
-              id: item.id,
-              label: item.label,
-              builtin: item.builtin,
-              thumbSrc: thumb
-                ? `data:${thumb.mediaType};base64,${thumb.dataBase64}`
-                : studioUrl(basePath, item.portrait || "/muse/dafeiyu-portrait.jpg"),
-            }
-          })}
-          activeModelId={activeModelId}
-          activeLabel={models.find((model) => model.id === activeModelId)?.label ?? ""}
-          onSelectModel={selectSavedModel}
-          onRenameModel={renameSavedModel}
-          onDeleteModel={removeSavedModel}
-          onGenerateSheet={() => void generateModelSheet()}
-          sheetBusy={sheetBusy}
-          sheetError={sheetError}
-          hasKey={Boolean(settings.apiKey.trim()) || serverKey}
-          onOpenSettings={() => {
-            setSheetError(settings.engine === "comfyui"
-              ? "多视角 sheet 要用云端生图。请先选 Seedream、Gemini 或 OpenAI，并填写 API Key。"
-              : "先在设置里填写 API Key。")
-            setSettingsOpen(true)
+      <div className="min-h-0 flex-1 overflow-hidden">
+        <StudioShell
+          embedded
+          containerRef={studioRef}
+          theme={theme}
+          onToggleTheme={toggleTheme}
+          onOpenSettings={() => setSettingsOpen(true)}
+          libraryTabs={libraryTabs}
+          headerTrailing={headerTrailing}
+          mobileWorkOrderTrigger={mobileWorkOrderTrigger}
+          regions={{
+            characterDock,
+            library: libraryPane,
+            workOrder: composer,
           }}
         />
-        <main className="order-2 min-h-0 min-w-0 flex-1 overflow-y-auto @min-[1024px]/studio:order-none @min-[1024px]/studio:pb-8">
-          {library === "faces" ? (
-            <FaceBrowser
-              selectedId={face?.id ?? null}
-              onSelect={(item: FaceItem) => setFace((current) => current?.id === item.id ? null : {
-                id: item.id,
-                section: item.section,
-                hair: item.hair,
-                label: item.label,
-                keywords: item.keywords,
-              })}
-            />
-          ) : library === "poses" ? (
-            <PoseBrowser
-              catalog={catalog}
-              loading={loading}
-              error={catalogError}
-              onRetry={loadCatalog}
-              showAdult={settings.showAdult}
-              requestedSystem={requestedSystem}
-              onRequestedSystemApplied={clearRequestedSystem}
-              onRequestAdult={(systemId) => setAdultAsk(systemId)}
-              selected={selected}
-              onToggle={togglePose}
-              customPoses={customPoseCards}
-              onSaveCustom={(draft) => saveCustom("pose", draft)}
-              onDeleteCustom={(id) => void removeCustomPose(id)}
-              settings={settings}
-              hasKey={Boolean(settings.apiKey.trim()) || serverKey}
-              syncWarning={syncWarning}
-            />
-          ) : (
-            <CostumeBrowser
-              showAdult={settings.showAdult}
-              focusCategory={costumeFocus}
-              onFocusApplied={clearCostumeFocus}
-              onRequestAdult={(categoryId) => setAdultAsk(`costume:${categoryId}`)}
-              selectedId={costume?.id ?? null}
-              onSelect={(item) => setCostume((current) => current?.id === item.id ? null : { id: item.id, label: item.label, keywords: item.keywords })}
-              customCostumes={customCostumeCards}
-              onSaveCustom={(draft) => saveCustom("costume", draft)}
-              onDeleteCustom={(id) => void removeCustomCostume(id)}
-              settings={settings}
-              hasKey={Boolean(settings.apiKey.trim()) || serverKey}
-              syncWarning={syncWarning}
-              onChangeSettings={updateSettings}
-            />
-          )}
-        </main>
-        <aside className="hidden min-h-0 border-l bg-white px-4 py-5 @min-[1024px]/studio:block @min-[1024px]/studio:overflow-y-auto">
-          {composer}
-        </aside>
       </div>
-      <div className="shrink-0 border-t bg-white p-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] @min-[1024px]/studio:hidden">
-        <Button className="h-11 w-full" onClick={() => setSheetOpen(true)}>
-          已选 {chosen.length} 个姿势{face ? ` · ${face.id}` : ""}{costume ? ` · ${costume.id}` : ""} · 去生图
-        </Button>
-      </div>
-      <Sheet open={sheetOpen} onOpenChange={setSheetOpen}>
-        <SheetContent side="bottom" className="max-h-[min(85dvh,85%)] overflow-y-auto rounded-t-3xl">
-          <SheetHeader>
-            <SheetTitle>生图</SheetTitle>
-          </SheetHeader>
-          <div className="px-4 pb-6">{composer}</div>
-        </SheetContent>
-      </Sheet>
       <SettingsDialog open={settingsOpen} onOpenChange={setSettingsOpen} settings={settings} onChange={updateSettings} />
-      <Dialog open={installOpen} onOpenChange={setInstallOpen}>
-        <DialogContent className="max-w-[min(32rem,calc(100%-2rem))]">
-          <DialogHeader>
-            <DialogTitle>装进 DeepSeek Harness</DialogTitle>
-            <DialogDescription>澜姿发布在 npm，包名是 gen-ai-pose-image。在已经装好 Harness 的机器上执行下面的命令，重启后左侧栏会出现「澜姿 / 工作室」，Agent 也能直接调用姿势生图。</DialogDescription>
-          </DialogHeader>
-          <pre className="overflow-auto rounded-xl bg-muted p-3 text-xs leading-5">dsh plugin --profile web add gen-ai-pose-image</pre>
-          <p className="text-xs leading-5 text-muted-foreground">网页工作室要在设置里填自己的 API Key。Harness 插件出图时，用启动环境里的 POSE_MUSE_API_KEY。</p>
-        </DialogContent>
-      </Dialog>
-      <Dialog open={adultAsk !== null} onOpenChange={(open) => { if (!open) setAdultAsk(null) }}>
-        <DialogContent className="max-w-[min(28rem,calc(100%-2rem))]">
-          <DialogHeader>
-            <DialogTitle>{adultAsk === "custom" || adultAsk === "costume:custom" ? "这些是成人向自定义参考" : adultAsk?.startsWith("costume:") ? "这些是成人向服装" : "这些是成人向姿势"}</DialogTitle>
-            <DialogDescription>
-              {adultAsk === "custom" || adultAsk === "costume:custom"
-                ? "自定义参考里标成成人向的图默认不显示。打开之后才能点选。生图仍要求角色是成年人。"
-                : adultAsk?.startsWith("costume:")
-                ? "内衣、泳装和性感分类里的图仍然没有人物，只是衣服本身更暴露。打开之后可以点选。生图会换成这套衣服，并保留角色的脸、头发、鲸耳和鲸尾。"
-                : "来自原图库的性感系、双人缠绵，以及上半身里的大胆分类。画面仍是结构线稿。打开之后，生图默认继续保持模特的服装，只借用姿势。"}
-            </DialogDescription>
-          </DialogHeader>
-          <div className="flex justify-end gap-2">
-            <Button variant="outline" onClick={() => setAdultAsk(null)}>先不看</Button>
-            <Button onClick={() => {
-              if (adultAsk?.startsWith("costume:")) {
-                setCostumeFocus(adultAsk.slice("costume:".length))
-                setLibrary("costumes")
-              } else if (adultAsk) {
-                setRequestedSystem(adultAsk)
-              }
-              updateSettings({ ...settings, showAdult: true })
-              setAdultAsk(null)
-            }}>{adultAsk?.startsWith("costume:") ? "显示成人向服装" : "显示成人向姿势"}</Button>
-          </div>
-        </DialogContent>
-      </Dialog>
+      <Modal.Backdrop isOpen={installOpen} onOpenChange={setInstallOpen} {...portal}>
+        <Modal.Container>
+          <Modal.Dialog className="max-w-[min(32rem,calc(100%-2rem))]">
+            <Modal.CloseTrigger />
+            <Modal.Header>
+              <Modal.Heading>装进 DeepSeek Harness</Modal.Heading>
+              <p className="text-sm text-muted-foreground">澜姿发布在 npm，包名是 gen-ai-pose-image。在已经装好 Harness 的机器上执行下面的命令，重启后左侧栏会出现「澜姿 / 工作室」，Agent 也能直接调用姿势生图。</p>
+            </Modal.Header>
+            <Modal.Body className="grid gap-3">
+              <pre className="overflow-auto rounded-xl bg-secondary p-3 text-xs leading-5">dsh plugin --profile web add gen-ai-pose-image</pre>
+              <p className="text-xs leading-5 text-muted-foreground">网页工作室要在设置里填自己的 API Key。Harness 插件出图时，用启动环境里的 POSE_MUSE_API_KEY。</p>
+            </Modal.Body>
+          </Modal.Dialog>
+        </Modal.Container>
+      </Modal.Backdrop>
+      <Modal.Backdrop isOpen={adultAsk !== null} onOpenChange={(open) => { if (!open) setAdultAsk(null) }} {...portal}>
+        <Modal.Container>
+          <Modal.Dialog className="max-w-[min(28rem,calc(100%-2rem))]">
+            <Modal.CloseTrigger />
+            <Modal.Header>
+              <Modal.Heading>{adultAsk === "custom" || adultAsk === "costume:custom" ? "这些是成人向自定义参考" : adultAsk?.startsWith("costume:") ? "这些是成人向服装" : "这些是成人向姿势"}</Modal.Heading>
+              <p className="text-sm text-muted-foreground">
+                {adultAsk === "custom" || adultAsk === "costume:custom"
+                  ? "自定义参考里标成成人向的图默认不显示。打开之后才能点选。生图仍要求角色是成年人。"
+                  : adultAsk?.startsWith("costume:")
+                  ? "内衣、泳装和性感分类里的图仍然没有人物，只是衣服本身更暴露。打开之后可以点选。生图会换成这套衣服，并保留角色的脸、头发、鲸耳和鲸尾。"
+                  : "来自原图库的性感系、双人缠绵，以及上半身里的大胆分类。画面仍是结构线稿。打开之后，生图默认继续保持模特的服装，只借用姿势。"}
+              </p>
+            </Modal.Header>
+            <Modal.Footer>
+              <Button variant="outline" onPress={() => setAdultAsk(null)}>先不看</Button>
+              <Button onPress={() => {
+                if (adultAsk?.startsWith("costume:")) {
+                  setCostumeFocus(adultAsk.slice("costume:".length))
+                  setLibrary("costumes")
+                } else if (adultAsk) {
+                  setRequestedSystem(adultAsk)
+                }
+                updateSettings({ ...settings, showAdult: true })
+                setAdultAsk(null)
+              }}>{adultAsk?.startsWith("costume:") ? "显示成人向服装" : "显示成人向姿势"}</Button>
+            </Modal.Footer>
+          </Modal.Dialog>
+        </Modal.Container>
+      </Modal.Backdrop>
     </div>
   )
+
 }
 
 function GithubMark() {
