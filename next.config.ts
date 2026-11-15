@@ -1,6 +1,7 @@
 import type { NextConfig } from "next"
 
 const nextConfig: NextConfig = {
+  output: process.env.NEXT_OUTPUT === "standalone" ? "standalone" : undefined,
   serverExternalPackages: ["sharp"],
   outputFileTracingIncludes: {
     "/api/catalog": ["./data/catalog.json"],
@@ -26,10 +27,7 @@ const nextConfig: NextConfig = {
       "./public/muse/minimax-sheet.png",
       "./public/muse/qwen-sheet.png",
       "./node_modules/sharp/**/*",
-      "./node_modules/@img/sharp-linux-x64/**/*",
-      "./node_modules/@img/sharp-linuxmusl-x64/**/*",
-      "./node_modules/@img/sharp-libvips-linux-x64/**/*",
-      "./node_modules/@img/sharp-libvips-linuxmusl-x64/**/*",
+      "./node_modules/@img/sharp*-linux*/**/*",
     ],
   },
 }

@@ -3,6 +3,7 @@ import { dirname, join } from "node:path"
 import { fileURLToPath } from "node:url"
 import { beautifyPrompt } from "../shared/beautify.mjs"
 import { getCatalog, resolveView } from "../shared/catalog.mjs"
+import { applyEnvCredentials, serverProviderStatus } from "../shared/credentials.mjs"
 import { costumeFile, fetchCostumeBytes, getCostume, getCostumeCatalog } from "../shared/costumes.mjs"
 import { faceFile, fetchFaceBytes, getFace, getFaceCatalog } from "../shared/faces.mjs"
 import { assertBaseURL, defaultModel } from "../shared/generate.mjs"
@@ -11,6 +12,7 @@ import { statusForStudioError } from "../shared/http-status.mjs"
 import { generateStyledReference } from "../shared/style-refs.mjs"
 import { planRequest, promptCards, runGeneration } from "../shared/jobs.mjs"
 import { fetchPoseBytes, poseFileFor } from "../shared/poses.mjs"
+import { runProviderAction } from "../shared/provider-settings.mjs"
 import { replaceCustomLibrary, upsertCustomCostume, upsertCustomPose } from "../shared/registry.mjs"
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), "..")
@@ -77,16 +79,7 @@ export function createPoseHandler(getConfig, options = {}) {
         return
       }
       if (req.method === "GET" && path === "/api/status") {
-        const config = getConfig()
-        const fromEnv = process.env.POSE_MUSE_PROVIDER
-        const named = fromEnv || config.provider || ""
-        const provider = named === "seedream" || named === "openai" || named === "gemini" ? named : ""
-        return json(res, 200, {
-          keyConfigured: Boolean(process.env.POSE_MUSE_API_KEY || config.apiKey),
-          provider,
-          model: process.env.POSE_MUSE_MODEL?.trim() || config.model || "",
-          baseURL: process.env.POSE_MUSE_BASE_URL?.trim() || config.baseURL || "",
-        })
+        return json(res, 200, serverProviderStatus(getConfig()))
       }
       if (req.method === "GET" && path === "/api/pose-image") {
         const found = resolveView(url.searchParams.get("id") ?? "")
@@ -121,19 +114,19 @@ export function createPoseHandler(getConfig, options = {}) {
         else upsertCustomPose(body.item)
         return json(res, 200, { ok: true })
       }
+      if (req.method === "POST" && path === "/api/provider") {
+        const input = await readBody(req)
+        const result = await runProviderAction(input, { config: getConfig(input?.provider || undefined), signal: req.signal })
+        return json(res, 200, result)
+      }
       if (req.method === "POST" && (path === "/api/prompt" || path === "/api/generate" || path === "/api/beautify" || path === "/api/reference" || path === "/api/character-sheet")) {
-        const body = await readBody(req)
-        const config = getConfig()
-        if (body.engine === "comfyui") return json(res, 400, { error: "不再支持服务端执行 ComfyUI，请使用新版网页直接连接。" })
-        if (typeof body.apiKey === "string" && body.apiKey.trim()) {
-          rememberStudioCredentials?.(body)
+        const input = await readBody(req)
+        const config = getConfig(input.provider || undefined)
+        if (input.engine === "comfyui") return json(res, 400, { error: "不再支持服务端执行 ComfyUI，请使用新版网页直接连接。" })
+        if (typeof input.apiKey === "string" && input.apiKey.trim()) {
+          rememberStudioCredentials?.(input)
         }
-        if (typeof body.apiKey !== "string" || body.apiKey.trim() === "") {
-          body.apiKey = process.env.POSE_MUSE_API_KEY || config.apiKey || ""
-        }
-        if (!body.provider) body.provider = config.provider || "gemini"
-        if (!body.model) body.model = config.model || ""
-        if (!body.baseURL) body.baseURL = config.baseURL || ""
+        const body = applyEnvCredentials(input, { ...config, provider: config.provider || "gemini" })
         if (path === "/api/prompt") return json(res, 200, { prompts: promptCards(planRequest(body)) })
         if (path === "/api/beautify") {
           const kind = body.kind === "costume" ? "costume" : body.kind === "pose" ? "pose" : ""

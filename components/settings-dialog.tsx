@@ -1,15 +1,17 @@
 "use client"
 
-import { useEffect, useRef, useState, type ReactNode } from "react"
+import { useEffect, useId, useRef, useState, type ReactNode } from "react"
 import { ExternalLink } from "lucide-react"
 
+import { CloudModelSettings } from "@/components/cloud-model-settings"
 import { Button } from "@/components/ui/button"
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Switch } from "@/components/ui/switch"
-import { textModelFor } from "@/shared/beautify.mjs"
-import { baseURLFor, modelFor, type StudioSettings } from "@/lib/settings"
+import type { StudioSettings } from "@/lib/settings"
+import type { ServerProviderStatus } from "@/shared/credentials.mjs"
+import { defaultBaseURL } from "@/shared/generate.mjs"
 import { ASPECT_LABEL, ASPECT_RATIOS, type AspectRatio, type ProviderId } from "@/lib/types"
 import { checkComfyConnection } from "@/shared/comfyui-client.mjs"
 
@@ -17,13 +19,16 @@ export function SettingsDialog({
   open,
   onOpenChange,
   settings,
-  onChange,
+  server,
+  onChange: patch,
 }: {
   open: boolean
   onOpenChange: (open: boolean) => void
   settings: StudioSettings
-  onChange: (settings: StudioSettings) => void
+  server: ServerProviderStatus | null
+  onChange: (edits: Partial<StudioSettings>) => void
 }) {
+  const apiKeyId = useId()
   const [connection, setConnection] = useState("")
   const [checking, setChecking] = useState(false)
   const checkRef = useRef<AbortController | null>(null)
@@ -46,20 +51,8 @@ export function SettingsDialog({
       if (!controller.signal.aborted) setConnection(error instanceof Error ? error.message : "连接失败")
     } finally { if (!controller.signal.aborted) setChecking(false) }
   }
-  function patch(partial: Partial<StudioSettings>) {
-    onChange({ ...settings, ...partial })
-  }
-
   function chooseProvider(provider: ProviderId) {
-    const stock = settings.model === modelFor(settings.provider) || settings.model.trim() === ""
-    const previousBase = baseURLFor(settings.provider)
-    const baseIsDefault = settings.baseURL.trim() === "" || settings.baseURL === previousBase
-    patch({
-      engine: "cloud",
-      provider,
-      model: stock ? modelFor(provider) : settings.model,
-      baseURL: baseIsDefault ? baseURLFor(provider) : settings.baseURL,
-    })
+    patch({ provider, engine: "cloud" })
   }
 
   const local = settings.engine === "comfyui"
@@ -69,7 +62,7 @@ export function SettingsDialog({
       <DialogContent className="max-h-[min(85dvh,85%)] max-w-[min(32rem,calc(100%-2rem))] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>生图设置</DialogTitle>
-          <DialogDescription>云端密钥存在当前浏览器；ComfyUI 令牌仅保留在当前页面，不会写入历史或提示词。</DialogDescription>
+          <DialogDescription>各服务商的地址、密钥和模型分别保存在当前浏览器。ComfyUI 令牌仅保留在当前页面。</DialogDescription>
         </DialogHeader>
         <div className="grid gap-3">
           <div className="flex flex-wrap gap-2">
@@ -103,7 +96,7 @@ export function SettingsDialog({
           </p>
           <div className="grid gap-1.5 text-sm">
             <div className="flex items-center gap-1">
-              <span>API Key</span>
+              <label htmlFor={apiKeyId}>API Key</label>
               {settings.provider === "seedream" ? (
                 <a
                   href="https://exp.volcengine.com/ark/gen_image?model=doubao-seedream-5-0-flash-260915"
@@ -117,25 +110,16 @@ export function SettingsDialog({
                 </a>
               ) : null}
             </div>
-            <Input type="password" autoComplete="off" value={settings.apiKey} onChange={(event) => patch({ apiKey: event.target.value })} placeholder={settings.provider === "seedream" ? "填入火山方舟 API Key" : "填入 API Key"} />
+            <Input id={apiKeyId} type="password" autoComplete="off" value={settings.apiKey} onChange={(event) => patch({ apiKey: event.target.value })} placeholder={settings.provider === "seedream" ? "填入火山方舟 API Key" : "填入 API Key"} />
           </div>
           <Field label="接口根地址">
             <Input
               value={settings.baseURL}
               onChange={(event) => patch({ baseURL: event.target.value })}
-              placeholder={settings.provider === "seedream" ? "https://ark.cn-beijing.volces.com/api/v3" : settings.provider === "gemini" ? "https://generativelanguage.googleapis.com/v1beta" : "https://api.openai.com/v1"}
+              placeholder={(server?.provider === settings.provider && server.baseURL) || defaultBaseURL(settings.provider)}
             />
           </Field>
-          <Field label="生图模型">
-            <Input value={settings.model} onChange={(event) => patch({ model: event.target.value })} placeholder={modelFor(settings.provider)} />
-          </Field>
-          <Field label="文本模型（可选）" hint="只用于「扩写提示词」。留空则使用当前接口的默认文本模型。">
-            <Input
-              value={settings.textModel}
-              onChange={(event) => patch({ textModel: event.target.value })}
-              placeholder={textModelFor(settings.provider, "")}
-            />
-          </Field>
+          {open && <CloudModelSettings key={settings.provider} settings={settings} patch={patch} />}
             </>
           )}
           <div className="grid gap-2">

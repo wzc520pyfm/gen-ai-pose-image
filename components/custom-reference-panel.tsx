@@ -62,7 +62,7 @@ export function CustomReferencePanel({
   settings: StudioSettings
   hasKey: boolean
   syncWarning: string
-  onChangeSettings?: (settings: StudioSettings) => void
+  onChangeSettings?: (edits: Partial<StudioSettings>) => void
 }) {
   const { basePath } = useStudioEnv()
   const fileRef = useRef<HTMLInputElement>(null)
@@ -330,7 +330,7 @@ export function CustomReferencePanel({
               <Switch
                 checked={settings.sensitivePromptOptimize}
                 onCheckedChange={(value) => {
-                  onChangeSettings({ ...settings, sensitivePromptOptimize: value })
+                  onChangeSettings({ sensitivePromptOptimize: value })
                   if (mode !== "upload" && !editedRef.current) void fillPrompt(description, showAdult && adult, value)
                 }}
                 aria-label="违禁词优化"

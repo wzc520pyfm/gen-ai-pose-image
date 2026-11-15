@@ -47,13 +47,13 @@ var require_use_sync_external_store_shim_production = __commonJS({
       return x === y && (0 !== x || 1 / x === 1 / y) || x !== x && y !== y;
     }
     var objectIs = "function" === typeof Object.is ? Object.is : is;
-    var useState22 = React67.useState;
-    var useEffect18 = React67.useEffect;
-    var useLayoutEffect2 = React67.useLayoutEffect;
+    var useState23 = React67.useState;
+    var useEffect19 = React67.useEffect;
+    var useLayoutEffect3 = React67.useLayoutEffect;
     var useDebugValue2 = React67.useDebugValue;
     function useSyncExternalStore$2(subscribe, getSnapshot) {
-      var value = getSnapshot(), _useState = useState22({ inst: { value, getSnapshot } }), inst = _useState[0].inst, forceUpdate = _useState[1];
-      useLayoutEffect2(
+      var value = getSnapshot(), _useState = useState23({ inst: { value, getSnapshot } }), inst = _useState[0].inst, forceUpdate = _useState[1];
+      useLayoutEffect3(
         function() {
           inst.value = value;
           inst.getSnapshot = getSnapshot;
@@ -61,7 +61,7 @@ var require_use_sync_external_store_shim_production = __commonJS({
         },
         [subscribe, value, getSnapshot]
       );
-      useEffect18(
+      useEffect19(
         function() {
           checkIfSnapshotChanged(inst) && forceUpdate({ inst });
           return subscribe(function() {
@@ -114,12 +114,12 @@ var require_with_selector_production = __commonJS({
     }
     var objectIs = "function" === typeof Object.is ? Object.is : is;
     var useSyncExternalStore3 = shim.useSyncExternalStore;
-    var useRef29 = React67.useRef;
-    var useEffect18 = React67.useEffect;
+    var useRef30 = React67.useRef;
+    var useEffect19 = React67.useEffect;
     var useMemo18 = React67.useMemo;
     var useDebugValue2 = React67.useDebugValue;
     exports.useSyncExternalStoreWithSelector = function(subscribe, getSnapshot, getServerSnapshot, selector, isEqual) {
-      var instRef = useRef29(null);
+      var instRef = useRef30(null);
       if (null === instRef.current) {
         var inst = { hasValue: false, value: null };
         instRef.current = inst;
@@ -159,7 +159,7 @@ var require_with_selector_production = __commonJS({
         [getSnapshot, getServerSnapshot, selector, isEqual]
       );
       var value = useSyncExternalStore3(subscribe, instRef[0], instRef[1]);
-      useEffect18(
+      useEffect19(
         function() {
           inst.hasValue = true;
           inst.value = value;
@@ -192,11 +192,11 @@ __export(harness_entry_exports, {
   name: () => name
 });
 module.exports = __toCommonJS(harness_entry_exports);
-var import_react15 = require("react");
+var import_react16 = require("react");
 var import_react_dom = require("react-dom");
 
 // components/studio.tsx
-var import_react14 = require("react");
+var import_react15 = require("react");
 
 // node_modules/lucide-react/dist/esm/createLucideIcon.mjs
 var import_react3 = require("react");
@@ -470,8 +470,27 @@ var __iconData5 = {
 __iconData5.node;
 var ExternalLink = createLucideIcon(__iconData5);
 
-// node_modules/lucide-react/dist/esm/icons/image-plus.mjs
+// node_modules/lucide-react/dist/esm/icons/flask-conical.mjs
 var __iconData6 = {
+  name: "flask-conical",
+  size: 24,
+  node: [
+    [
+      "path",
+      {
+        d: "M14 2v6a2 2 0 0 0 .245.96l5.51 10.08A2 2 0 0 1 18 22H6a2 2 0 0 1-1.755-2.96l5.51-10.08A2 2 0 0 0 10 8V2",
+        key: "18mbvz"
+      }
+    ],
+    ["path", { d: "M6.453 15h11.094", key: "3shlmq" }],
+    ["path", { d: "M8.5 2h7", key: "csnxdl" }]
+  ]
+};
+__iconData6.node;
+var FlaskConical = createLucideIcon(__iconData6);
+
+// node_modules/lucide-react/dist/esm/icons/image-plus.mjs
+var __iconData7 = {
   name: "image-plus",
   size: 24,
   node: [
@@ -482,21 +501,56 @@ var __iconData6 = {
     ["circle", { cx: "9", cy: "9", r: "2", key: "af1f0g" }]
   ]
 };
-__iconData6.node;
-var ImagePlus = createLucideIcon(__iconData6);
+__iconData7.node;
+var ImagePlus = createLucideIcon(__iconData7);
+
+// node_modules/lucide-react/dist/esm/icons/list.mjs
+var __iconData8 = {
+  name: "list",
+  size: 24,
+  node: [
+    ["path", { d: "M3 5h.01", key: "18ugdj" }],
+    ["path", { d: "M3 12h.01", key: "nlz23k" }],
+    ["path", { d: "M3 19h.01", key: "noohij" }],
+    ["path", { d: "M8 5h13", key: "1pao27" }],
+    ["path", { d: "M8 12h13", key: "1za7za" }],
+    ["path", { d: "M8 19h13", key: "m83p4d" }]
+  ]
+};
+__iconData8.node;
+var List = createLucideIcon(__iconData8);
 
 // node_modules/lucide-react/dist/esm/icons/loader-circle.mjs
-var __iconData7 = {
+var __iconData9 = {
   name: "loader-circle",
   size: 24,
   node: [["path", { d: "M21 12a9 9 0 1 1-6.219-8.56", key: "13zald" }]],
   aliases: ["loader-2"]
 };
-__iconData7.node;
-var LoaderCircle = createLucideIcon(__iconData7);
+__iconData9.node;
+var LoaderCircle = createLucideIcon(__iconData9);
+
+// node_modules/lucide-react/dist/esm/icons/plug-zap.mjs
+var __iconData10 = {
+  name: "plug-zap",
+  size: 24,
+  node: [
+    [
+      "path",
+      { d: "M6.3 20.3a2.4 2.4 0 0 0 3.4 0L12 18l-6-6-2.3 2.3a2.4 2.4 0 0 0 0 3.4Z", key: "goz73y" }
+    ],
+    ["path", { d: "m2 22 3-3", key: "19mgm9" }],
+    ["path", { d: "M7.5 13.5 10 11", key: "7xgeeb" }],
+    ["path", { d: "M10.5 16.5 13 14", key: "10btkg" }],
+    ["path", { d: "m18 3-4 4h6l-4 4", key: "16psg9" }]
+  ],
+  aliases: ["plug-zap-2"]
+};
+__iconData10.node;
+var PlugZap = createLucideIcon(__iconData10);
 
 // node_modules/lucide-react/dist/esm/icons/rotate-ccw.mjs
-var __iconData8 = {
+var __iconData11 = {
   name: "rotate-ccw",
   size: 24,
   node: [
@@ -504,11 +558,11 @@ var __iconData8 = {
     ["path", { d: "M3 3v5h5", key: "1xhq8a" }]
   ]
 };
-__iconData8.node;
-var RotateCcw = createLucideIcon(__iconData8);
+__iconData11.node;
+var RotateCcw = createLucideIcon(__iconData11);
 
 // node_modules/lucide-react/dist/esm/icons/search.mjs
-var __iconData9 = {
+var __iconData12 = {
   name: "search",
   size: 24,
   node: [
@@ -516,11 +570,11 @@ var __iconData9 = {
     ["circle", { cx: "11", cy: "11", r: "8", key: "4ej97u" }]
   ]
 };
-__iconData9.node;
-var Search = createLucideIcon(__iconData9);
+__iconData12.node;
+var Search = createLucideIcon(__iconData12);
 
 // node_modules/lucide-react/dist/esm/icons/settings.mjs
-var __iconData10 = {
+var __iconData13 = {
   name: "settings",
   size: 24,
   node: [
@@ -534,11 +588,11 @@ var __iconData10 = {
     ["circle", { cx: "12", cy: "12", r: "3", key: "1v7zrd" }]
   ]
 };
-__iconData10.node;
-var Settings = createLucideIcon(__iconData10);
+__iconData13.node;
+var Settings = createLucideIcon(__iconData13);
 
 // node_modules/lucide-react/dist/esm/icons/sparkles.mjs
-var __iconData11 = {
+var __iconData14 = {
   name: "sparkles",
   size: 24,
   node: [
@@ -555,11 +609,11 @@ var __iconData11 = {
   ],
   aliases: ["stars"]
 };
-__iconData11.node;
-var Sparkles = createLucideIcon(__iconData11);
+__iconData14.node;
+var Sparkles = createLucideIcon(__iconData14);
 
 // node_modules/lucide-react/dist/esm/icons/x.mjs
-var __iconData12 = {
+var __iconData15 = {
   name: "x",
   size: 24,
   node: [
@@ -567,8 +621,8 @@ var __iconData12 = {
     ["path", { d: "m6 6 12 12", key: "d8bk6v" }]
   ]
 };
-__iconData12.node;
-var X = createLucideIcon(__iconData12);
+__iconData15.node;
+var X = createLucideIcon(__iconData15);
 
 // shared/workflows/local-tryon.api.json
 var local_tryon_api_default = {
@@ -1279,9 +1333,12 @@ async function buildLocalGraph({ files, pose, costume, face = null, aspectRatio,
   if (!costume) {
     const finalInputs = graph[m.finalPrompt[0]].inputs;
     delete finalInputs["images.image_4"];
-    if (pose?.system?.includes("半身")) {
-      finalInputs["images.image_1"] = [m.person[0], 0];
-      finalInputs["images.image_2"] = m.poseReference;
+    if (pose) {
+      finalInputs["images.image_1"] = [String(m.pose[0]), 0];
+      if (pose?.system?.includes("半身")) {
+        finalInputs["images.image_1"] = [m.person[0], 0];
+        finalInputs["images.image_2"] = [String(m.pose[0]), 0];
+      }
     }
   }
   for (const slot of m.seeds) set(slot, seed);
@@ -1503,6 +1560,35 @@ function isBuiltinModelId(id) {
 }
 function getBuiltinModel(id) {
   return BUILTIN_MODELS.find((model) => model.id === id) || null;
+}
+
+// shared/generate.mjs
+var BLOCKED_HOSTS = /* @__PURE__ */ new Set(["169.254.169.254", "metadata.google.internal"]);
+function defaultModel(provider) {
+  if (provider === "gemini") return "gemini-2.5-flash-image";
+  if (provider === "seedream") return "doubao-seedream-5-0-flash-260915";
+  return "gpt-image-1";
+}
+function defaultBaseURL(provider) {
+  if (provider === "gemini") return "https://generativelanguage.googleapis.com/v1beta";
+  if (provider === "seedream") return "https://ark.cn-beijing.volces.com/api/v3";
+  return "https://api.openai.com/v1";
+}
+function assertBaseURL(baseURL) {
+  const text = String(baseURL ?? "").trim();
+  if (!text) return "";
+  let url;
+  try {
+    url = new URL(text);
+  } catch {
+    throw new Error("接口地址无效");
+  }
+  if (url.protocol !== "http:" && url.protocol !== "https:") {
+    throw new Error("接口地址需以 http 或 https 开头");
+  }
+  const host = url.hostname.toLowerCase();
+  if (BLOCKED_HOSTS.has(host)) throw new Error("这个接口地址不能使用");
+  return url.toString().replace(/\/$/, "");
 }
 
 // shared/costume-prompt.mjs
@@ -7405,12 +7491,6 @@ function CharacterDock({
     ] })
   ] });
 }
-function cachedImage(src) {
-  if (!src || src.startsWith("data:") || typeof Image === "undefined") return true;
-  const probe = new Image();
-  probe.src = src;
-  return probe.complete && probe.naturalWidth > 0;
-}
 function ModelFigure({
   src,
   alt,
@@ -7421,16 +7501,16 @@ function ModelFigure({
   height,
   spinnerClassName = "text-white/80"
 }) {
-  const [current, setCurrent] = (0, import_react7.useState)(src);
-  const [pending, setPending] = (0, import_react7.useState)(() => !cachedImage(src));
-  if (current !== src) {
-    setCurrent(src);
-    setPending(!cachedImage(src));
-  }
+  const imageRef = (0, import_react7.useRef)(null);
+  const [pending, setPending] = (0, import_react7.useState)(false);
+  (0, import_react7.useLayoutEffect)(() => {
+    setPending(Boolean(src) && !src.startsWith("data:") && imageRef.current?.complete === false);
+  }, [src]);
   return /* @__PURE__ */ (0, import_jsx_runtime12.jsxs)("div", { className: boxClassName, children: [
     /* @__PURE__ */ (0, import_jsx_runtime12.jsx)(
       "img",
       {
+        ref: imageRef,
         src,
         alt: pending ? "" : alt,
         width,
@@ -11978,7 +12058,7 @@ function CustomReferencePanel({
           {
             checked: settings.sensitivePromptOptimize,
             onCheckedChange: (value) => {
-              onChangeSettings({ ...settings, sensitivePromptOptimize: value });
+              onChangeSettings({ sensitivePromptOptimize: value });
               if (mode !== "upload" && !editedRef.current) void fillPrompt(description, showAdult && adult, value);
             },
             "aria-label": "违禁词优化"
@@ -12808,12 +12888,176 @@ function PoseSkeleton() {
 }
 
 // components/settings-dialog.tsx
+var import_react14 = require("react");
+
+// components/cloud-model-settings.tsx
 var import_react13 = require("react");
 
-// components/ui/label.tsx
+// shared/beautify.mjs
+function textModelFor(provider, textModel) {
+  const name2 = String(textModel ?? "").trim();
+  if (name2) return name2;
+  if (provider === "gemini") return "gemini-2.5-flash";
+  if (provider === "openai") return "gpt-4o-mini";
+  return "doubao-seed-2-1-pro-260628";
+}
+
+// components/cloud-model-settings.tsx
 var import_jsx_runtime29 = require("react/jsx-runtime");
+var idle = { busy: false, data: null, error: "" };
+function useProviderRequest(input, read) {
+  const { basePath } = useStudioEnv();
+  const body = JSON.stringify(input);
+  const active = (0, import_react13.useRef)(null);
+  const [state, setState] = (0, import_react13.useState)(idle);
+  (0, import_react13.useEffect)(() => {
+    setState(idle);
+    return () => {
+      active.current?.abort();
+      active.current = null;
+    };
+  }, [basePath, body]);
+  async function run() {
+    if (active.current) return;
+    const controller = new AbortController();
+    active.current = controller;
+    setState((previous) => ({ ...previous, busy: true, error: "" }));
+    try {
+      const response = await fetch(studioUrl(basePath, "/api/provider"), {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body,
+        signal: controller.signal
+      });
+      const payload = await response.json().catch(() => null);
+      if (!response.ok || !payload || payload.error) {
+        throw new Error(payload?.error || `请求失败（HTTP ${response.status}），请重试。`);
+      }
+      const data = read(payload);
+      if (!controller.signal.aborted) setState({ busy: false, data, error: "" });
+    } catch (error) {
+      if (!controller.signal.aborted) {
+        setState({ busy: false, data: null, error: error instanceof Error ? error.message : "请求失败，请重试。" });
+      }
+    } finally {
+      if (active.current === controller) active.current = null;
+    }
+  }
+  return { ...state, run };
+}
+function CloudModelSettings({ settings, patch }) {
+  const { provider, apiKey, baseURL, model, textModel } = settings;
+  const connection = { provider, apiKey, baseURL };
+  const [directoryAction, setDirectoryAction] = (0, import_react13.useState)("check");
+  const check = useProviderRequest({ ...connection, action: "test-connection" }, (payload) => {
+    if (payload.connected !== true || typeof payload.latencyMs !== "number" || !Number.isFinite(payload.latencyMs)) {
+      throw new Error("接口未返回有效的连接检测结果。");
+    }
+    return payload.latencyMs;
+  });
+  const list = useProviderRequest({ ...connection, action: "list-models" }, (payload) => {
+    if (!Array.isArray(payload.models)) throw new Error("接口没有返回模型列表。");
+    return payload.models;
+  });
+  const test = useProviderRequest({ ...connection, model, action: "test-image" }, (payload) => {
+    if (!payload.model || !payload.previewBase64) throw new Error("模型没有返回测试图。");
+    return { model: payload.model, previewBase64: payload.previewBase64 };
+  });
+  const checking = directoryAction === "check";
+  const directory = checking ? check : list;
+  const directoryBusy = check.busy || list.busy;
+  let directoryStatus = directory.error || "测试连接仅读取模型目录。";
+  if (directory.busy) directoryStatus = checking ? "正在检测连接…" : "正在获取模型列表…";
+  else if (checking && check.data !== null) directoryStatus = `接口已连通，模型目录响应耗时 ${check.data} 毫秒。`;
+  else if (!checking && list.data) directoryStatus = list.data.length ? `已获取 ${list.data.length} 个模型` : "接口未列出可选模型，可手动填写。";
+  return /* @__PURE__ */ (0, import_jsx_runtime29.jsxs)(import_jsx_runtime29.Fragment, { children: [
+    /* @__PURE__ */ (0, import_jsx_runtime29.jsxs)("div", { className: "grid gap-1.5", children: [
+      /* @__PURE__ */ (0, import_jsx_runtime29.jsxs)("div", { className: "flex flex-wrap items-center gap-2", children: [
+        /* @__PURE__ */ (0, import_jsx_runtime29.jsxs)(Button3, { variant: "outline", disabled: directoryBusy, onClick: () => {
+          setDirectoryAction("check");
+          void check.run();
+        }, children: [
+          check.busy ? /* @__PURE__ */ (0, import_jsx_runtime29.jsx)(LoaderCircle, { className: "motion-safe:animate-spin" }) : /* @__PURE__ */ (0, import_jsx_runtime29.jsx)(PlugZap, {}),
+          "测试连接"
+        ] }),
+        /* @__PURE__ */ (0, import_jsx_runtime29.jsxs)(Button3, { variant: "outline", disabled: directoryBusy, onClick: () => {
+          setDirectoryAction("list");
+          void list.run();
+        }, children: [
+          list.busy ? /* @__PURE__ */ (0, import_jsx_runtime29.jsx)(LoaderCircle, { className: "motion-safe:animate-spin" }) : /* @__PURE__ */ (0, import_jsx_runtime29.jsx)(List, {}),
+          list.data ? "刷新模型列表" : "获取模型列表"
+        ] })
+      ] }),
+      /* @__PURE__ */ (0, import_jsx_runtime29.jsx)("span", { role: "status", className: `min-w-0 text-xs leading-5 [overflow-wrap:anywhere] ${directory.error ? "text-destructive" : "text-muted-foreground"}`, children: directoryStatus })
+    ] }),
+    /* @__PURE__ */ (0, import_jsx_runtime29.jsx)(ModelField, { label: "生图模型", kind: "image", value: model, fallback: defaultModel(provider), models: list.data, onChange: (value) => patch({ model: value }) }),
+    /* @__PURE__ */ (0, import_jsx_runtime29.jsxs)("div", { className: "grid gap-1.5", children: [
+      /* @__PURE__ */ (0, import_jsx_runtime29.jsxs)("div", { className: "flex flex-wrap items-center gap-x-3 gap-y-1", children: [
+        /* @__PURE__ */ (0, import_jsx_runtime29.jsxs)(Button3, { variant: "outline", disabled: test.busy, onClick: () => void test.run(), children: [
+          test.busy ? /* @__PURE__ */ (0, import_jsx_runtime29.jsx)(LoaderCircle, { className: "motion-safe:animate-spin" }) : /* @__PURE__ */ (0, import_jsx_runtime29.jsx)(FlaskConical, {}),
+          test.busy ? "测试中…" : "测试生图"
+        ] }),
+        /* @__PURE__ */ (0, import_jsx_runtime29.jsx)("span", { className: "text-xs text-muted-foreground", children: "生成 1 张测试图，可能消耗额度。" })
+      ] }),
+      /* @__PURE__ */ (0, import_jsx_runtime29.jsx)("div", { role: "status", className: "empty:hidden text-xs leading-5", children: test.busy ? "正在等待模型返回图片…" : test.error ? /* @__PURE__ */ (0, import_jsx_runtime29.jsxs)("p", { className: "text-destructive [overflow-wrap:anywhere]", children: [
+        "测试失败。",
+        test.error
+      ] }) : test.data ? /* @__PURE__ */ (0, import_jsx_runtime29.jsxs)("div", { className: "flex items-center gap-2", children: [
+        /* @__PURE__ */ (0, import_jsx_runtime29.jsx)("img", { src: `data:image/png;base64,${test.data.previewBase64}`, width: 48, height: 48, alt: "模型返回的测试图", className: "size-12 rounded-md border border-border object-contain" }),
+        /* @__PURE__ */ (0, import_jsx_runtime29.jsxs)("p", { className: "min-w-0 [overflow-wrap:anywhere]", children: [
+          "测试成功，",
+          test.data.model,
+          " 已返回图片。"
+        ] })
+      ] }) : null })
+    ] }),
+    /* @__PURE__ */ (0, import_jsx_runtime29.jsx)(ModelField, { label: "文本模型（可选）", kind: "text", value: textModel, fallback: textModelFor(provider, ""), models: list.data, onChange: (value) => patch({ textModel: value }) })
+  ] });
+}
+function ModelField({ label, kind, value, fallback: fallback2, models, onChange }) {
+  const id = (0, import_react13.useId)();
+  const [manual, setManual] = (0, import_react13.useState)(false);
+  const preferred = (model) => model.outputs?.includes(kind) || /image|seedream|dall-e/i.test(model.id) === (kind === "image");
+  const options = (models || []).filter((model) => !model.outputs || model.outputs.includes(kind)).sort((a, b) => Number(preferred(b)) - Number(preferred(a)));
+  const fromList = options.length > 0 && !manual;
+  return /* @__PURE__ */ (0, import_jsx_runtime29.jsxs)("div", { className: "grid min-w-0 gap-1.5 text-sm", children: [
+    /* @__PURE__ */ (0, import_jsx_runtime29.jsxs)("div", { className: "flex items-center justify-between gap-2", children: [
+      /* @__PURE__ */ (0, import_jsx_runtime29.jsx)("label", { htmlFor: id, children: label }),
+      options.length > 0 && /* @__PURE__ */ (0, import_jsx_runtime29.jsx)(Button3, { size: "xs", variant: "link", onClick: () => setManual(!manual), "aria-label": `${label}：${manual ? "从列表选择" : "手动填写"}`, children: manual ? "从列表选择" : "手动填写" })
+    ] }),
+    fromList ? /* @__PURE__ */ (0, import_jsx_runtime29.jsxs)("div", { className: "relative min-w-0", children: [
+      /* @__PURE__ */ (0, import_jsx_runtime29.jsxs)(
+        "select",
+        {
+          id,
+          value,
+          onChange: (event) => onChange(event.target.value),
+          className: "h-8 w-full min-w-0 appearance-none truncate rounded-lg border border-input bg-card pr-8 pl-2.5 text-sm outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50",
+          children: [
+            /* @__PURE__ */ (0, import_jsx_runtime29.jsxs)("option", { value: "", children: [
+              "使用默认模型（",
+              fallback2,
+              "）"
+            ] }),
+            value && !options.some((option) => option.id === value) && /* @__PURE__ */ (0, import_jsx_runtime29.jsxs)("option", { value, children: [
+              "当前设置 · ",
+              value
+            ] }),
+            options.map((model) => /* @__PURE__ */ (0, import_jsx_runtime29.jsx)("option", { value: model.id, children: model.id }, model.id))
+          ]
+        }
+      ),
+      /* @__PURE__ */ (0, import_jsx_runtime29.jsx)(ChevronDown, { className: "pointer-events-none absolute top-1/2 right-2.5 size-3.5 -translate-y-1/2 text-muted-foreground" })
+    ] }) : /* @__PURE__ */ (0, import_jsx_runtime29.jsx)(Input3, { id, value, onChange: (event) => onChange(event.target.value), placeholder: fallback2 }),
+    Boolean(models?.length) && !options.length && /* @__PURE__ */ (0, import_jsx_runtime29.jsx)("p", { className: "text-xs text-muted-foreground", children: "列表中没有此类型的模型，可手动填写。" }),
+    kind === "text" && /* @__PURE__ */ (0, import_jsx_runtime29.jsx)("p", { className: "text-xs leading-5 text-muted-foreground", children: "用于「扩写提示词」。留空使用默认文本模型。" })
+  ] });
+}
+
+// components/ui/label.tsx
+var import_jsx_runtime30 = require("react/jsx-runtime");
 function Label({ className, ...props }) {
-  return /* @__PURE__ */ (0, import_jsx_runtime29.jsx)(
+  return /* @__PURE__ */ (0, import_jsx_runtime30.jsx)(
     "label",
     {
       "data-slot": "label",
@@ -12826,87 +13070,20 @@ function Label({ className, ...props }) {
   );
 }
 
-// shared/beautify.mjs
-function textModelFor(provider, textModel) {
-  const name2 = String(textModel ?? "").trim();
-  if (name2) return name2;
-  if (provider === "gemini") return "gemini-2.5-flash";
-  if (provider === "openai") return "gpt-4o-mini";
-  return "doubao-seed-2-1-pro-260628";
-}
-
-// lib/settings.ts
-var DEFAULT_SETTINGS = {
-  engine: "cloud",
-  comfyuiURL: DEFAULT_COMFYUI_URL,
-  comfyuiToken: "",
-  provider: "gemini",
-  apiKey: "",
-  baseURL: "",
-  model: "gemini-2.5-flash-image",
-  textModel: "",
-  aspectRatio: "3:4",
-  keepOutfit: true,
-  mode: "each",
-  showAdult: false,
-  sensitivePromptOptimize: false
-};
-var KEY = "lanpose-settings-v1";
-function loadSettings() {
-  if (typeof window === "undefined") return DEFAULT_SETTINGS;
-  try {
-    const raw = window.localStorage.getItem(KEY);
-    if (!raw) return DEFAULT_SETTINGS;
-    const parsed = JSON.parse(raw);
-    const provider = parsed.provider === "openai" || parsed.provider === "seedream" ? parsed.provider : "gemini";
-    const aspect = parsed.aspectRatio;
-    const aspectRatio = aspect === "1:1" || aspect === "3:4" || aspect === "4:3" || aspect === "9:16" || aspect === "16:9" ? aspect : "3:4";
-    return {
-      engine: parsed.engine === "comfyui" ? "comfyui" : "cloud",
-      comfyuiURL: typeof parsed.comfyuiURL === "string" && parsed.comfyuiURL.trim() ? parsed.comfyuiURL : DEFAULT_COMFYUI_URL,
-      comfyuiToken: "",
-      provider,
-      apiKey: typeof parsed.apiKey === "string" ? parsed.apiKey : "",
-      baseURL: typeof parsed.baseURL === "string" ? parsed.baseURL : "",
-      model: typeof parsed.model === "string" && parsed.model.trim() ? parsed.model : DEFAULT_SETTINGS.model,
-      textModel: typeof parsed.textModel === "string" ? parsed.textModel : "",
-      aspectRatio,
-      keepOutfit: parsed.keepOutfit !== false,
-      mode: parsed.mode === "sheet" ? "sheet" : "each",
-      showAdult: parsed.showAdult === true,
-      sensitivePromptOptimize: parsed.sensitivePromptOptimize === true
-    };
-  } catch {
-    return DEFAULT_SETTINGS;
-  }
-}
-function saveSettings(settings) {
-  const stored = { ...settings, comfyuiToken: void 0 };
-  window.localStorage.setItem(KEY, JSON.stringify(stored));
-}
-function modelFor(provider) {
-  if (provider === "gemini") return "gemini-2.5-flash-image";
-  if (provider === "seedream") return "doubao-seedream-5-0-flash-260915";
-  return "gpt-image-1";
-}
-function baseURLFor(provider) {
-  if (provider === "seedream") return "https://ark.cn-beijing.volces.com/api/v3";
-  if (provider === "openai") return "https://api.openai.com/v1";
-  return "";
-}
-
 // components/settings-dialog.tsx
-var import_jsx_runtime30 = require("react/jsx-runtime");
+var import_jsx_runtime31 = require("react/jsx-runtime");
 function SettingsDialog({
   open: open3,
   onOpenChange,
   settings,
-  onChange
+  server,
+  onChange: patch
 }) {
-  const [connection, setConnection] = (0, import_react13.useState)("");
-  const [checking, setChecking] = (0, import_react13.useState)(false);
-  const checkRef = (0, import_react13.useRef)(null);
-  (0, import_react13.useEffect)(() => {
+  const apiKeyId = (0, import_react14.useId)();
+  const [connection, setConnection] = (0, import_react14.useState)("");
+  const [checking, setChecking] = (0, import_react14.useState)(false);
+  const checkRef = (0, import_react14.useRef)(null);
+  (0, import_react14.useEffect)(() => {
     setConnection("");
     setChecking(false);
     checkRef.current?.abort();
@@ -12927,50 +13104,39 @@ function SettingsDialog({
       if (!controller.signal.aborted) setChecking(false);
     }
   }
-  function patch(partial) {
-    onChange({ ...settings, ...partial });
-  }
   function chooseProvider(provider) {
-    const stock = settings.model === modelFor(settings.provider) || settings.model.trim() === "";
-    const previousBase = baseURLFor(settings.provider);
-    const baseIsDefault = settings.baseURL.trim() === "" || settings.baseURL === previousBase;
-    patch({
-      engine: "cloud",
-      provider,
-      model: stock ? modelFor(provider) : settings.model,
-      baseURL: baseIsDefault ? baseURLFor(provider) : settings.baseURL
-    });
+    patch({ provider, engine: "cloud" });
   }
   const local = settings.engine === "comfyui";
-  return /* @__PURE__ */ (0, import_jsx_runtime30.jsx)(Dialog, { open: open3, onOpenChange, children: /* @__PURE__ */ (0, import_jsx_runtime30.jsxs)(DialogContent, { className: "max-h-[min(85dvh,85%)] max-w-[min(32rem,calc(100%-2rem))] overflow-y-auto", children: [
-    /* @__PURE__ */ (0, import_jsx_runtime30.jsxs)(DialogHeader, { children: [
-      /* @__PURE__ */ (0, import_jsx_runtime30.jsx)(DialogTitle3, { children: "生图设置" }),
-      /* @__PURE__ */ (0, import_jsx_runtime30.jsx)(DialogDescription3, { children: "云端密钥存在当前浏览器；ComfyUI 令牌仅保留在当前页面，不会写入历史或提示词。" })
+  return /* @__PURE__ */ (0, import_jsx_runtime31.jsx)(Dialog, { open: open3, onOpenChange, children: /* @__PURE__ */ (0, import_jsx_runtime31.jsxs)(DialogContent, { className: "max-h-[min(85dvh,85%)] max-w-[min(32rem,calc(100%-2rem))] overflow-y-auto", children: [
+    /* @__PURE__ */ (0, import_jsx_runtime31.jsxs)(DialogHeader, { children: [
+      /* @__PURE__ */ (0, import_jsx_runtime31.jsx)(DialogTitle3, { children: "生图设置" }),
+      /* @__PURE__ */ (0, import_jsx_runtime31.jsx)(DialogDescription3, { children: "各服务商的地址、密钥和模型分别保存在当前浏览器。ComfyUI 令牌仅保留在当前页面。" })
     ] }),
-    /* @__PURE__ */ (0, import_jsx_runtime30.jsxs)("div", { className: "grid gap-3", children: [
-      /* @__PURE__ */ (0, import_jsx_runtime30.jsxs)("div", { className: "flex flex-wrap gap-2", children: [
-        /* @__PURE__ */ (0, import_jsx_runtime30.jsx)(Button3, { variant: !local && settings.provider === "seedream" ? "default" : "outline", onClick: () => chooseProvider("seedream"), children: "Seedream" }),
-        /* @__PURE__ */ (0, import_jsx_runtime30.jsx)(Button3, { variant: !local && settings.provider === "gemini" ? "default" : "outline", onClick: () => chooseProvider("gemini"), children: "Gemini" }),
-        /* @__PURE__ */ (0, import_jsx_runtime30.jsx)(Button3, { variant: !local && settings.provider === "openai" ? "default" : "outline", onClick: () => chooseProvider("openai"), children: "OpenAI" }),
-        /* @__PURE__ */ (0, import_jsx_runtime30.jsx)(Button3, { variant: local ? "default" : "outline", onClick: () => patch({ engine: "comfyui" }), children: "ComfyUI" })
+    /* @__PURE__ */ (0, import_jsx_runtime31.jsxs)("div", { className: "grid gap-3", children: [
+      /* @__PURE__ */ (0, import_jsx_runtime31.jsxs)("div", { className: "flex flex-wrap gap-2", children: [
+        /* @__PURE__ */ (0, import_jsx_runtime31.jsx)(Button3, { variant: !local && settings.provider === "seedream" ? "default" : "outline", onClick: () => chooseProvider("seedream"), children: "Seedream" }),
+        /* @__PURE__ */ (0, import_jsx_runtime31.jsx)(Button3, { variant: !local && settings.provider === "gemini" ? "default" : "outline", onClick: () => chooseProvider("gemini"), children: "Gemini" }),
+        /* @__PURE__ */ (0, import_jsx_runtime31.jsx)(Button3, { variant: !local && settings.provider === "openai" ? "default" : "outline", onClick: () => chooseProvider("openai"), children: "OpenAI" }),
+        /* @__PURE__ */ (0, import_jsx_runtime31.jsx)(Button3, { variant: local ? "default" : "outline", onClick: () => patch({ engine: "comfyui" }), children: "ComfyUI" })
       ] }),
-      local ? /* @__PURE__ */ (0, import_jsx_runtime30.jsxs)("div", { className: "grid gap-2 rounded-xl bg-muted p-3 text-sm", children: [
-        /* @__PURE__ */ (0, import_jsx_runtime30.jsx)("p", { children: "统一换装与姿势工作流：选择服装、姿势或两者，网页自动切换分支。拼图逐格生成后排版，无需生图 API Key。" }),
-        /* @__PURE__ */ (0, import_jsx_runtime30.jsx)(Field, { label: "ComfyUI 地址", children: /* @__PURE__ */ (0, import_jsx_runtime30.jsx)(Input3, { value: settings.comfyuiURL, onChange: (event) => patch({ comfyuiURL: event.target.value }), placeholder: "http://127.0.0.1:8188 或 https://comfy.example.com", autoComplete: "off" }) }),
-        /* @__PURE__ */ (0, import_jsx_runtime30.jsx)(Field, { label: "访问令牌（可选）", hint: "仅保留在当前页面，刷新后重新填写。远程入口必须实际校验此 Bearer 令牌。", children: /* @__PURE__ */ (0, import_jsx_runtime30.jsx)(Input3, { type: "password", value: settings.comfyuiToken, onChange: (event) => patch({ comfyuiToken: event.target.value }), autoComplete: "off" }) }),
-        /* @__PURE__ */ (0, import_jsx_runtime30.jsx)("p", { className: "text-xs leading-5 text-muted-foreground", children: "浏览器直接连接 ComfyUI，无需在电脑启动网站。同机使用回环地址；手机或其他电脑请填远程 HTTPS 地址。需允许当前网站跨域访问，并在浏览器询问时允许本地网络权限。图片会存入你的 ComfyUI input/output。" }),
-        /* @__PURE__ */ (0, import_jsx_runtime30.jsxs)("p", { className: "text-xs leading-5 text-muted-foreground", children: [
+      local ? /* @__PURE__ */ (0, import_jsx_runtime31.jsxs)("div", { className: "grid gap-2 rounded-xl bg-muted p-3 text-sm", children: [
+        /* @__PURE__ */ (0, import_jsx_runtime31.jsx)("p", { children: "统一换装与姿势工作流：选择服装、姿势或两者，网页自动切换分支。拼图逐格生成后排版，无需生图 API Key。" }),
+        /* @__PURE__ */ (0, import_jsx_runtime31.jsx)(Field, { label: "ComfyUI 地址", children: /* @__PURE__ */ (0, import_jsx_runtime31.jsx)(Input3, { value: settings.comfyuiURL, onChange: (event) => patch({ comfyuiURL: event.target.value }), placeholder: "http://127.0.0.1:8188 或 https://comfy.example.com", autoComplete: "off" }) }),
+        /* @__PURE__ */ (0, import_jsx_runtime31.jsx)(Field, { label: "访问令牌（可选）", hint: "仅保留在当前页面，刷新后重新填写。远程入口必须实际校验此 Bearer 令牌。", children: /* @__PURE__ */ (0, import_jsx_runtime31.jsx)(Input3, { type: "password", value: settings.comfyuiToken, onChange: (event) => patch({ comfyuiToken: event.target.value }), autoComplete: "off" }) }),
+        /* @__PURE__ */ (0, import_jsx_runtime31.jsx)("p", { className: "text-xs leading-5 text-muted-foreground", children: "浏览器直接连接 ComfyUI，无需在电脑启动网站。同机使用回环地址；手机或其他电脑请填远程 HTTPS 地址。需允许当前网站跨域访问，并在浏览器询问时允许本地网络权限。图片会存入你的 ComfyUI input/output。" }),
+        /* @__PURE__ */ (0, import_jsx_runtime31.jsxs)("p", { className: "text-xs leading-5 text-muted-foreground", children: [
           "已有本地模式现已改为浏览器直连，请重新测试连接。",
-          /* @__PURE__ */ (0, import_jsx_runtime30.jsx)("a", { className: "underline", href: "https://github.com/wzc520pyfm/gen-ai-pose-image/blob/main/docs/comfyui-local.md", target: "_blank", rel: "noreferrer", children: "连接配置说明" })
+          /* @__PURE__ */ (0, import_jsx_runtime31.jsx)("a", { className: "underline", href: "https://github.com/wzc520pyfm/gen-ai-pose-image/blob/main/docs/comfyui-local.md", target: "_blank", rel: "noreferrer", children: "连接配置说明" })
         ] }),
-        /* @__PURE__ */ (0, import_jsx_runtime30.jsx)(Button3, { variant: "outline", disabled: checking, onClick: () => void checkConnection(), children: checking ? "检查中…" : "测试连接" }),
-        connection ? /* @__PURE__ */ (0, import_jsx_runtime30.jsx)("p", { role: "status", className: "text-xs leading-5", children: connection }) : null
-      ] }) : /* @__PURE__ */ (0, import_jsx_runtime30.jsxs)(import_jsx_runtime30.Fragment, { children: [
-        /* @__PURE__ */ (0, import_jsx_runtime30.jsx)("p", { className: "text-xs leading-5 text-muted-foreground", children: settings.provider === "seedream" ? "火山方舟 Seedream。会把模特图和姿势线稿一起提交，默认生图模型 doubao-seedream-5-0-flash-260915。" : settings.provider === "gemini" ? "默认生图模型 gemini-2.5-flash-image。官方地址留空即可；中转站把根地址填进下面。" : "会先把模特图和姿势线稿交给 images/edits。接口不支持编辑时，自动改走文生图，并在结果上标明。" }),
-        /* @__PURE__ */ (0, import_jsx_runtime30.jsxs)("div", { className: "grid gap-1.5 text-sm", children: [
-          /* @__PURE__ */ (0, import_jsx_runtime30.jsxs)("div", { className: "flex items-center gap-1", children: [
-            /* @__PURE__ */ (0, import_jsx_runtime30.jsx)("span", { children: "API Key" }),
-            settings.provider === "seedream" ? /* @__PURE__ */ (0, import_jsx_runtime30.jsx)(
+        /* @__PURE__ */ (0, import_jsx_runtime31.jsx)(Button3, { variant: "outline", disabled: checking, onClick: () => void checkConnection(), children: checking ? "检查中…" : "测试连接" }),
+        connection ? /* @__PURE__ */ (0, import_jsx_runtime31.jsx)("p", { role: "status", className: "text-xs leading-5", children: connection }) : null
+      ] }) : /* @__PURE__ */ (0, import_jsx_runtime31.jsxs)(import_jsx_runtime31.Fragment, { children: [
+        /* @__PURE__ */ (0, import_jsx_runtime31.jsx)("p", { className: "text-xs leading-5 text-muted-foreground", children: settings.provider === "seedream" ? "火山方舟 Seedream。会把模特图和姿势线稿一起提交，默认生图模型 doubao-seedream-5-0-flash-260915。" : settings.provider === "gemini" ? "默认生图模型 gemini-2.5-flash-image。官方地址留空即可；中转站把根地址填进下面。" : "会先把模特图和姿势线稿交给 images/edits。接口不支持编辑时，自动改走文生图，并在结果上标明。" }),
+        /* @__PURE__ */ (0, import_jsx_runtime31.jsxs)("div", { className: "grid gap-1.5 text-sm", children: [
+          /* @__PURE__ */ (0, import_jsx_runtime31.jsxs)("div", { className: "flex items-center gap-1", children: [
+            /* @__PURE__ */ (0, import_jsx_runtime31.jsx)("label", { htmlFor: apiKeyId, children: "API Key" }),
+            settings.provider === "seedream" ? /* @__PURE__ */ (0, import_jsx_runtime31.jsx)(
               "a",
               {
                 href: "https://exp.volcengine.com/ark/gen_image?model=doubao-seedream-5-0-flash-260915",
@@ -12979,75 +13145,67 @@ function SettingsDialog({
                 "aria-label": "去申请 API Key",
                 title: "去申请 API Key",
                 className: "inline-flex size-5 items-center justify-center rounded-md text-muted-foreground hover:bg-muted hover:text-foreground",
-                children: /* @__PURE__ */ (0, import_jsx_runtime30.jsx)(ExternalLink, { className: "size-3.5" })
+                children: /* @__PURE__ */ (0, import_jsx_runtime31.jsx)(ExternalLink, { className: "size-3.5" })
               }
             ) : null
           ] }),
-          /* @__PURE__ */ (0, import_jsx_runtime30.jsx)(Input3, { type: "password", autoComplete: "off", value: settings.apiKey, onChange: (event) => patch({ apiKey: event.target.value }), placeholder: settings.provider === "seedream" ? "填入火山方舟 API Key" : "填入 API Key" })
+          /* @__PURE__ */ (0, import_jsx_runtime31.jsx)(Input3, { id: apiKeyId, type: "password", autoComplete: "off", value: settings.apiKey, onChange: (event) => patch({ apiKey: event.target.value }), placeholder: settings.provider === "seedream" ? "填入火山方舟 API Key" : "填入 API Key" })
         ] }),
-        /* @__PURE__ */ (0, import_jsx_runtime30.jsx)(Field, { label: "接口根地址", children: /* @__PURE__ */ (0, import_jsx_runtime30.jsx)(
+        /* @__PURE__ */ (0, import_jsx_runtime31.jsx)(Field, { label: "接口根地址", children: /* @__PURE__ */ (0, import_jsx_runtime31.jsx)(
           Input3,
           {
             value: settings.baseURL,
             onChange: (event) => patch({ baseURL: event.target.value }),
-            placeholder: settings.provider === "seedream" ? "https://ark.cn-beijing.volces.com/api/v3" : settings.provider === "gemini" ? "https://generativelanguage.googleapis.com/v1beta" : "https://api.openai.com/v1"
+            placeholder: server?.provider === settings.provider && server.baseURL || defaultBaseURL(settings.provider)
           }
         ) }),
-        /* @__PURE__ */ (0, import_jsx_runtime30.jsx)(Field, { label: "生图模型", children: /* @__PURE__ */ (0, import_jsx_runtime30.jsx)(Input3, { value: settings.model, onChange: (event) => patch({ model: event.target.value }), placeholder: modelFor(settings.provider) }) }),
-        /* @__PURE__ */ (0, import_jsx_runtime30.jsx)(Field, { label: "文本模型（可选）", hint: "只用于「扩写提示词」。留空则使用当前接口的默认文本模型。", children: /* @__PURE__ */ (0, import_jsx_runtime30.jsx)(
-          Input3,
-          {
-            value: settings.textModel,
-            onChange: (event) => patch({ textModel: event.target.value }),
-            placeholder: textModelFor(settings.provider, "")
-          }
-        ) })
+        open3 && /* @__PURE__ */ (0, import_jsx_runtime31.jsx)(CloudModelSettings, { settings, patch }, settings.provider)
       ] }),
-      /* @__PURE__ */ (0, import_jsx_runtime30.jsxs)("div", { className: "grid gap-2", children: [
-        /* @__PURE__ */ (0, import_jsx_runtime30.jsx)(Label, { children: "比例" }),
-        /* @__PURE__ */ (0, import_jsx_runtime30.jsx)("div", { className: "flex flex-wrap gap-1.5", children: ASPECT_RATIOS.map((ratio) => /* @__PURE__ */ (0, import_jsx_runtime30.jsx)(Button3, { size: "sm", variant: settings.aspectRatio === ratio ? "default" : "outline", onClick: () => patch({ aspectRatio: ratio }), children: ASPECT_LABEL[ratio] }, ratio)) })
+      /* @__PURE__ */ (0, import_jsx_runtime31.jsxs)("div", { className: "grid gap-2", children: [
+        /* @__PURE__ */ (0, import_jsx_runtime31.jsx)(Label, { children: "比例" }),
+        /* @__PURE__ */ (0, import_jsx_runtime31.jsx)("div", { className: "flex flex-wrap gap-1.5", children: ASPECT_RATIOS.map((ratio) => /* @__PURE__ */ (0, import_jsx_runtime31.jsx)(Button3, { size: "sm", variant: settings.aspectRatio === ratio ? "default" : "outline", onClick: () => patch({ aspectRatio: ratio }), children: ASPECT_LABEL[ratio] }, ratio)) })
       ] }),
-      /* @__PURE__ */ (0, import_jsx_runtime30.jsxs)("div", { className: "grid grid-cols-2 gap-2", children: [
-        /* @__PURE__ */ (0, import_jsx_runtime30.jsx)(Button3, { variant: settings.mode === "each" ? "default" : "outline", onClick: () => patch({ mode: "each" }), children: "逐张" }),
-        /* @__PURE__ */ (0, import_jsx_runtime30.jsx)(Button3, { variant: settings.mode === "sheet" ? "default" : "outline", onClick: () => patch({ mode: "sheet" }), children: "拼成一张" })
+      /* @__PURE__ */ (0, import_jsx_runtime31.jsxs)("div", { className: "grid grid-cols-2 gap-2", children: [
+        /* @__PURE__ */ (0, import_jsx_runtime31.jsx)(Button3, { variant: settings.mode === "each" ? "default" : "outline", onClick: () => patch({ mode: "each" }), children: "逐张" }),
+        /* @__PURE__ */ (0, import_jsx_runtime31.jsx)(Button3, { variant: settings.mode === "sheet" ? "default" : "outline", onClick: () => patch({ mode: "sheet" }), children: "拼成一张" })
       ] }),
-      /* @__PURE__ */ (0, import_jsx_runtime30.jsxs)("label", { className: "flex items-center justify-between gap-3 rounded-xl bg-muted px-3 py-3 text-sm", children: [
-        /* @__PURE__ */ (0, import_jsx_runtime30.jsxs)("span", { children: [
-          /* @__PURE__ */ (0, import_jsx_runtime30.jsx)("span", { className: "block font-medium", children: "违禁词优化" }),
-          /* @__PURE__ */ (0, import_jsx_runtime30.jsx)("span", { className: "mt-1 block text-xs leading-5 text-muted-foreground", children: "关闭时直接写不要头、不要腿、不要皮肤。打开后改成委婉说法，避开审核敏感词。" })
+      /* @__PURE__ */ (0, import_jsx_runtime31.jsxs)("label", { className: "flex items-center justify-between gap-3 rounded-xl bg-muted px-3 py-3 text-sm", children: [
+        /* @__PURE__ */ (0, import_jsx_runtime31.jsxs)("span", { children: [
+          /* @__PURE__ */ (0, import_jsx_runtime31.jsx)("span", { className: "block font-medium", children: "违禁词优化" }),
+          /* @__PURE__ */ (0, import_jsx_runtime31.jsx)("span", { className: "mt-1 block text-xs leading-5 text-muted-foreground", children: "关闭时直接写不要头、不要腿、不要皮肤。打开后改成委婉说法，避开审核敏感词。" })
         ] }),
-        /* @__PURE__ */ (0, import_jsx_runtime30.jsx)(Switch, { checked: settings.sensitivePromptOptimize, onCheckedChange: (value) => patch({ sensitivePromptOptimize: value }), "aria-label": "违禁词优化" })
+        /* @__PURE__ */ (0, import_jsx_runtime31.jsx)(Switch, { checked: settings.sensitivePromptOptimize, onCheckedChange: (value) => patch({ sensitivePromptOptimize: value }), "aria-label": "违禁词优化" })
       ] }),
-      /* @__PURE__ */ (0, import_jsx_runtime30.jsxs)("label", { className: "flex items-center justify-between gap-3 rounded-xl bg-muted px-3 py-3 text-sm", children: [
-        /* @__PURE__ */ (0, import_jsx_runtime30.jsxs)("span", { children: [
-          /* @__PURE__ */ (0, import_jsx_runtime30.jsx)("span", { className: "block font-medium", children: "显示成人向姿势" }),
-          /* @__PURE__ */ (0, import_jsx_runtime30.jsx)("span", { className: "mt-1 block text-xs leading-5 text-muted-foreground", children: "性感系、双人缠绵，以及上半身里的大胆分类。参考图仍是结构线稿，默认继续保持服装。" })
+      /* @__PURE__ */ (0, import_jsx_runtime31.jsxs)("label", { className: "flex items-center justify-between gap-3 rounded-xl bg-muted px-3 py-3 text-sm", children: [
+        /* @__PURE__ */ (0, import_jsx_runtime31.jsxs)("span", { children: [
+          /* @__PURE__ */ (0, import_jsx_runtime31.jsx)("span", { className: "block font-medium", children: "显示成人向姿势" }),
+          /* @__PURE__ */ (0, import_jsx_runtime31.jsx)("span", { className: "mt-1 block text-xs leading-5 text-muted-foreground", children: "性感系、双人缠绵，以及上半身里的大胆分类。参考图仍是结构线稿，默认继续保持服装。" })
         ] }),
-        /* @__PURE__ */ (0, import_jsx_runtime30.jsx)(Switch, { checked: settings.showAdult, onCheckedChange: (value) => patch({ showAdult: value }), "aria-label": "显示成人向姿势" })
+        /* @__PURE__ */ (0, import_jsx_runtime31.jsx)(Switch, { checked: settings.showAdult, onCheckedChange: (value) => patch({ showAdult: value }), "aria-label": "显示成人向姿势" })
       ] })
     ] })
   ] }) });
 }
 function Field({ label, hint, children }) {
-  return /* @__PURE__ */ (0, import_jsx_runtime30.jsxs)("label", { className: "grid gap-1.5 text-sm", children: [
-    /* @__PURE__ */ (0, import_jsx_runtime30.jsx)("span", { children: label }),
+  return /* @__PURE__ */ (0, import_jsx_runtime31.jsxs)("label", { className: "grid gap-1.5 text-sm", children: [
+    /* @__PURE__ */ (0, import_jsx_runtime31.jsx)("span", { children: label }),
     children,
-    hint ? /* @__PURE__ */ (0, import_jsx_runtime30.jsx)("span", { className: "text-xs leading-5 text-muted-foreground", children: hint }) : null
+    hint ? /* @__PURE__ */ (0, import_jsx_runtime31.jsx)("span", { className: "text-xs leading-5 text-muted-foreground", children: hint }) : null
   ] });
 }
 
 // components/ui/sheet.tsx
-var import_jsx_runtime31 = require("react/jsx-runtime");
+var import_jsx_runtime32 = require("react/jsx-runtime");
 function Sheet({ ...props }) {
-  return /* @__PURE__ */ (0, import_jsx_runtime31.jsx)(index_parts_exports3.Root, { "data-slot": "sheet", ...props });
+  return /* @__PURE__ */ (0, import_jsx_runtime32.jsx)(index_parts_exports3.Root, { "data-slot": "sheet", ...props });
 }
 function SheetPortal({ container, ...props }) {
   const { portalContainer } = useStudioEnv();
   const resolved = container !== void 0 ? container : portalContainer ?? void 0;
-  return /* @__PURE__ */ (0, import_jsx_runtime31.jsx)(index_parts_exports3.Portal, { "data-slot": "sheet-portal", container: resolved, ...props });
+  return /* @__PURE__ */ (0, import_jsx_runtime32.jsx)(index_parts_exports3.Portal, { "data-slot": "sheet-portal", container: resolved, ...props });
 }
 function SheetOverlay({ className, ...props }) {
-  return /* @__PURE__ */ (0, import_jsx_runtime31.jsx)(
+  return /* @__PURE__ */ (0, import_jsx_runtime32.jsx)(
     index_parts_exports3.Backdrop,
     {
       "data-slot": "sheet-overlay",
@@ -13066,9 +13224,9 @@ function SheetContent({
   showCloseButton = true,
   ...props
 }) {
-  return /* @__PURE__ */ (0, import_jsx_runtime31.jsxs)(SheetPortal, { children: [
-    /* @__PURE__ */ (0, import_jsx_runtime31.jsx)(SheetOverlay, {}),
-    /* @__PURE__ */ (0, import_jsx_runtime31.jsxs)(
+  return /* @__PURE__ */ (0, import_jsx_runtime32.jsxs)(SheetPortal, { children: [
+    /* @__PURE__ */ (0, import_jsx_runtime32.jsx)(SheetOverlay, {}),
+    /* @__PURE__ */ (0, import_jsx_runtime32.jsxs)(
       index_parts_exports3.Popup,
       {
         "data-slot": "sheet-content",
@@ -13080,11 +13238,11 @@ function SheetContent({
         ...props,
         children: [
           children,
-          showCloseButton && /* @__PURE__ */ (0, import_jsx_runtime31.jsxs)(
+          showCloseButton && /* @__PURE__ */ (0, import_jsx_runtime32.jsxs)(
             index_parts_exports3.Close,
             {
               "data-slot": "sheet-close",
-              render: /* @__PURE__ */ (0, import_jsx_runtime31.jsx)(
+              render: /* @__PURE__ */ (0, import_jsx_runtime32.jsx)(
                 Button3,
                 {
                   variant: "ghost",
@@ -13093,11 +13251,11 @@ function SheetContent({
                 }
               ),
               children: [
-                /* @__PURE__ */ (0, import_jsx_runtime31.jsx)(
+                /* @__PURE__ */ (0, import_jsx_runtime32.jsx)(
                   X,
                   {}
                 ),
-                /* @__PURE__ */ (0, import_jsx_runtime31.jsx)("span", { className: "sr-only", children: "Close" })
+                /* @__PURE__ */ (0, import_jsx_runtime32.jsx)("span", { className: "sr-only", children: "Close" })
               ]
             }
           )
@@ -13107,7 +13265,7 @@ function SheetContent({
   ] });
 }
 function SheetHeader({ className, ...props }) {
-  return /* @__PURE__ */ (0, import_jsx_runtime31.jsx)(
+  return /* @__PURE__ */ (0, import_jsx_runtime32.jsx)(
     "div",
     {
       "data-slot": "sheet-header",
@@ -13117,7 +13275,7 @@ function SheetHeader({ className, ...props }) {
   );
 }
 function SheetTitle({ className, ...props }) {
-  return /* @__PURE__ */ (0, import_jsx_runtime31.jsx)(
+  return /* @__PURE__ */ (0, import_jsx_runtime32.jsx)(
     index_parts_exports3.Title,
     {
       "data-slot": "sheet-title",
@@ -13131,19 +13289,19 @@ function SheetTitle({ className, ...props }) {
 }
 
 // components/whale-mark.tsx
-var import_jsx_runtime32 = require("react/jsx-runtime");
+var import_jsx_runtime33 = require("react/jsx-runtime");
 function WhaleMark({ className = "size-8" }) {
-  return /* @__PURE__ */ (0, import_jsx_runtime32.jsxs)("svg", { viewBox: "0 0 48 48", className, "aria-hidden": "true", children: [
-    /* @__PURE__ */ (0, import_jsx_runtime32.jsx)("rect", { width: "48", height: "48", rx: "12", fill: "#2563eb" }),
-    /* @__PURE__ */ (0, import_jsx_runtime32.jsx)(
+  return /* @__PURE__ */ (0, import_jsx_runtime33.jsxs)("svg", { viewBox: "0 0 48 48", className, "aria-hidden": "true", children: [
+    /* @__PURE__ */ (0, import_jsx_runtime33.jsx)("rect", { width: "48", height: "48", rx: "12", fill: "#2563eb" }),
+    /* @__PURE__ */ (0, import_jsx_runtime33.jsx)(
       "path",
       {
         fill: "#eff6ff",
         d: "M8 28c2-8 10-14 18-13 2-4 8-6 13-3-1 2-1 4 0 6 3 1 5 4 5 8-4 1-7 4-8 8-6 2-14 1-20-3-2 2-5 3-8 2 1-2 1-4 0-5Z"
       }
     ),
-    /* @__PURE__ */ (0, import_jsx_runtime32.jsx)("circle", { cx: "33", cy: "22", r: "1.3", fill: "#1e3a8a" }),
-    /* @__PURE__ */ (0, import_jsx_runtime32.jsx)("path", { d: "M14 20c2 1 3 3 2 5", stroke: "#1e3a8a", strokeWidth: "1.4", fill: "none", strokeLinecap: "round" })
+    /* @__PURE__ */ (0, import_jsx_runtime33.jsx)("circle", { cx: "33", cy: "22", r: "1.3", fill: "#1e3a8a" }),
+    /* @__PURE__ */ (0, import_jsx_runtime33.jsx)("path", { d: "M14 20c2 1 3 3 2 5", stroke: "#1e3a8a", strokeWidth: "1.4", fill: "none", strokeLinecap: "round" })
   ] });
 }
 
@@ -13277,66 +13435,220 @@ function pickRandomCombo({ poses = [], costumes = [], faces, showAdult = false, 
   };
 }
 
+// lib/settings.ts
+var DEFAULT_SETTINGS = {
+  engine: "cloud",
+  comfyuiURL: DEFAULT_COMFYUI_URL,
+  comfyuiToken: "",
+  provider: "gemini",
+  apiKey: "",
+  baseURL: defaultBaseURL("gemini"),
+  model: defaultModel("gemini"),
+  textModel: "",
+  aspectRatio: "3:4",
+  keepOutfit: true,
+  mode: "each",
+  showAdult: false,
+  sensitivePromptOptimize: false
+};
+var KEY = "lanpose-settings-v1";
+var SELECTION = `${KEY}:selection`;
+var COMMON_FIELDS = ["comfyuiURL", "aspectRatio", "keepOutfit", "mode", "showAdult", "sensitivePromptOptimize"];
+var CLOUD_FIELDS = ["apiKey", "baseURL", "model", "textModel"];
+function cloudKey(provider) {
+  return `lanpose-cloud-${provider}-v1`;
+}
+function isProvider(value) {
+  return value === "openai" || value === "gemini" || value === "seedream";
+}
+function readValue(key) {
+  if (typeof window === "undefined") return;
+  try {
+    const raw = window.localStorage.getItem(key);
+    return raw === null ? void 0 : JSON.parse(raw);
+  } catch {
+    return void 0;
+  }
+}
+function readStored(key) {
+  const value = readValue(key);
+  if (value && typeof value === "object" && !Array.isArray(value)) return value;
+}
+function readFields(scope, fields, saved) {
+  const values = { ...saved };
+  for (const field of fields) {
+    const value = readValue(`${scope}:${field}`);
+    if (value !== void 0) values[field] = value;
+  }
+  return values;
+}
+function legacyOwner(stored) {
+  if (!CLOUD_FIELDS.some((field) => Object.hasOwn(stored, field))) return;
+  const selected = isProvider(stored.provider) ? stored.provider : "gemini";
+  if (selected === "openai") return selected;
+  const root = typeof stored.baseURL === "string" ? stored.baseURL.trim().replace(/\/+$/, "") : "";
+  if (!root) return selected;
+  for (const provider of ["gemini", "seedream", "openai"]) {
+    if (root === defaultBaseURL(provider)) return provider;
+  }
+  if (/\/v1$/i.test(root) && typeof stored.model === "string" && /^(?:gpt-image|chatgpt-image|dall-e)(?:-|$)/i.test(stored.model.trim())) return "openai";
+  return selected;
+}
+function cloudProfile(provider, saved, server) {
+  const defaults = server?.provider === provider ? server : null;
+  return {
+    apiKey: typeof saved?.apiKey === "string" ? saved.apiKey : "",
+    baseURL: typeof saved?.baseURL === "string" ? saved.baseURL : defaults?.baseURL || defaultBaseURL(provider),
+    model: typeof saved?.model === "string" ? saved.model : defaults?.model || defaultModel(provider),
+    textModel: typeof saved?.textModel === "string" ? saved.textModel : ""
+  };
+}
+function loadCloudProfile(provider, stored, server) {
+  const scope = cloudKey(provider);
+  const saved = readStored(scope) ?? (legacyOwner(stored) === provider ? stored : void 0);
+  return cloudProfile(provider, readFields(scope, CLOUD_FIELDS, saved), server);
+}
+function loadSettings(server, tab) {
+  const legacy = readStored(KEY) ?? {};
+  const stored = readFields(KEY, COMMON_FIELDS, legacy);
+  const selection = tab ?? readStored(SELECTION) ?? legacy;
+  const fallback2 = isProvider(server?.provider) ? server.provider : DEFAULT_SETTINGS.provider;
+  const provider = isProvider(selection.provider) ? selection.provider : legacyOwner(legacy) ?? fallback2;
+  const aspect = stored.aspectRatio;
+  const comfyuiURL = typeof stored.comfyuiURL === "string" && stored.comfyuiURL.trim() ? stored.comfyuiURL : DEFAULT_COMFYUI_URL;
+  return {
+    engine: selection.engine === "comfyui" ? "comfyui" : "cloud",
+    comfyuiURL,
+    comfyuiToken: tab?.comfyuiURL === comfyuiURL ? tab.comfyuiToken : "",
+    provider,
+    ...loadCloudProfile(provider, legacy, server),
+    aspectRatio: aspect === "1:1" || aspect === "4:3" || aspect === "9:16" || aspect === "16:9" ? aspect : "3:4",
+    keepOutfit: stored.keepOutfit !== false,
+    mode: stored.mode === "sheet" ? "sheet" : "each",
+    showAdult: stored.showAdult === true,
+    sensitivePromptOptimize: stored.sensitivePromptOptimize === true
+  };
+}
+function isSharedSettingsEdit(key, provider) {
+  return key === null || COMMON_FIELDS.some((field) => key === `${KEY}:${field}`) || CLOUD_FIELDS.some((field) => key === `${cloudKey(provider)}:${field}`);
+}
+function selectCloudProvider(settings, provider, server) {
+  if (settings.provider === provider) return { ...settings, engine: "cloud" };
+  return { ...settings, engine: "cloud", provider, ...loadCloudProfile(provider, readStored(KEY) ?? {}, server) };
+}
+function discardReplacedKey(scope) {
+  const saved = readStored(scope);
+  if (saved && Object.hasOwn(saved, "apiKey") && readValue(`${scope}:apiKey`) !== void 0) {
+    delete saved.apiKey;
+    window.localStorage.setItem(scope, JSON.stringify(saved));
+  }
+}
+function migrateLegacySettings() {
+  const stored = readStored(KEY);
+  if (!stored) return;
+  const owner = legacyOwner(stored);
+  if (!owner && !Object.hasOwn(stored, "comfyuiToken")) return;
+  if (owner) {
+    const scope = cloudKey(owner);
+    if (!readStored(scope)) window.localStorage.setItem(scope, JSON.stringify(cloudProfile(owner, stored)));
+    discardReplacedKey(scope);
+    if (!isProvider(stored.provider)) stored.provider = owner;
+    for (const field of CLOUD_FIELDS) delete stored[field];
+  }
+  delete stored.comfyuiToken;
+  window.localStorage.setItem(KEY, JSON.stringify(stored));
+}
+function saveSettings(current, edits, server) {
+  const selected = edits.provider ? selectCloudProvider(current, edits.provider, server) : current;
+  const next = { ...selected, ...edits };
+  if (next.comfyuiURL !== current.comfyuiURL) next.comfyuiToken = edits.comfyuiToken ?? "";
+  migrateLegacySettings();
+  for (const field of COMMON_FIELDS) {
+    if (edits[field] !== void 0) window.localStorage.setItem(`${KEY}:${field}`, JSON.stringify(edits[field]));
+  }
+  const scope = cloudKey(next.provider);
+  for (const field of CLOUD_FIELDS) {
+    if (edits[field] !== void 0) window.localStorage.setItem(`${scope}:${field}`, JSON.stringify(edits[field]));
+  }
+  if (edits.apiKey !== void 0) discardReplacedKey(scope);
+  if (edits.provider !== void 0 || edits.engine !== void 0) {
+    window.localStorage.setItem(SELECTION, JSON.stringify({ provider: next.provider, engine: next.engine }));
+  }
+  return next;
+}
+
+// shared/credentials.mjs
+function sameProviderRoot(provider, first, second) {
+  try {
+    const canonical = (url) => assertBaseURL(url) || defaultBaseURL(provider);
+    return canonical(first) === canonical(second);
+  } catch {
+    return false;
+  }
+}
+
 // components/studio.tsx
-var import_jsx_runtime33 = require("react/jsx-runtime");
+var import_jsx_runtime34 = require("react/jsx-runtime");
 var REPOSITORY_URL = "https://github.com/wzc520pyfm/gen-ai-pose-image";
 function Studio({
   basePath = "",
   embedded = false,
   portalContainer = null
 }) {
-  return /* @__PURE__ */ (0, import_jsx_runtime33.jsx)(StudioEnvProvider, { basePath, portalContainer, children: /* @__PURE__ */ (0, import_jsx_runtime33.jsx)(StudioFrame, { embedded }) });
+  return /* @__PURE__ */ (0, import_jsx_runtime34.jsx)(StudioEnvProvider, { basePath, portalContainer, children: /* @__PURE__ */ (0, import_jsx_runtime34.jsx)(StudioFrame, { embedded }) });
 }
 function StudioFrame({ embedded }) {
   const { basePath } = useStudioEnv();
-  const [catalog, setCatalog] = (0, import_react14.useState)(null);
-  const [catalogError, setCatalogError] = (0, import_react14.useState)("");
-  const [costumeCatalog, setCostumeCatalog] = (0, import_react14.useState)([]);
-  const [costumeCatalogReady, setCostumeCatalogReady] = (0, import_react14.useState)(false);
-  const [costumeCatalogError, setCostumeCatalogError] = (0, import_react14.useState)("");
-  const [faceCatalog, setFaceCatalog] = (0, import_react14.useState)([]);
-  const [faceCatalogReady, setFaceCatalogReady] = (0, import_react14.useState)(false);
-  const [faceCatalogError, setFaceCatalogError] = (0, import_react14.useState)("");
-  const [loading, setLoading] = (0, import_react14.useState)(true);
-  const [settings, setSettings] = (0, import_react14.useState)(DEFAULT_SETTINGS);
-  const [settingsReady, setSettingsReady] = (0, import_react14.useState)(false);
-  const [library, setLibrary] = (0, import_react14.useState)("poses");
-  const [costume, setCostume] = (0, import_react14.useState)(null);
-  const [face, setFace] = (0, import_react14.useState)(null);
-  const [costumeFocus, setCostumeFocus] = (0, import_react14.useState)(null);
-  const [requestedSystem, setRequestedSystem] = (0, import_react14.useState)(null);
-  const [settingsOpen, setSettingsOpen] = (0, import_react14.useState)(false);
-  const [installOpen, setInstallOpen] = (0, import_react14.useState)(false);
-  const [adultAsk, setAdultAsk] = (0, import_react14.useState)(null);
-  const [characters, setCharacters] = (0, import_react14.useState)([]);
-  const [models, setModels] = (0, import_react14.useState)([]);
-  const [activeModelId, setActiveModelId] = (0, import_react14.useState)(DEFAULT_MODEL_ID);
-  const [builtinUsed, setBuiltinUsed] = (0, import_react14.useState)({});
-  const [sheetBusy, setSheetBusy] = (0, import_react14.useState)(false);
-  const [sheetError, setSheetError] = (0, import_react14.useState)("");
-  const [selected, setSelected] = (0, import_react14.useState)({});
-  const [extraPrompt, setExtraPrompt] = (0, import_react14.useState)("");
-  const [prompts, setPrompts] = (0, import_react14.useState)([]);
-  const [promptError, setPromptError] = (0, import_react14.useState)("");
-  const [results, setResults] = (0, import_react14.useState)([]);
-  const [running, setRunning] = (0, import_react14.useState)(false);
-  const [runError, setRunError] = (0, import_react14.useState)("");
-  const [limitNote, setLimitNote] = (0, import_react14.useState)("");
-  const [serverKey, setServerKey] = (0, import_react14.useState)(false);
-  const [sheetOpen, setSheetOpen] = (0, import_react14.useState)(false);
-  const [customPoses, setCustomPoses] = (0, import_react14.useState)([]);
-  const [customCostumes, setCustomCostumes] = (0, import_react14.useState)([]);
-  const [history, setHistory] = (0, import_react14.useState)([]);
-  const [storageHigh, setStorageHigh] = (0, import_react14.useState)(false);
-  const [syncWarning, setSyncWarning] = (0, import_react14.useState)("");
-  const [reuseNote, setReuseNote] = (0, import_react14.useState)("");
-  const libraryReady = (0, import_react14.useRef)(false);
-  const modelLoadGen = (0, import_react14.useRef)(0);
-  const clearRequestedSystem = (0, import_react14.useCallback)(() => setRequestedSystem(null), []);
-  const clearCostumeFocus = (0, import_react14.useCallback)(() => setCostumeFocus(null), []);
-  const abortRef = (0, import_react14.useRef)(null);
-  const settingsRevision = (0, import_react14.useRef)(0);
-  const loadCatalog = (0, import_react14.useCallback)(() => {
+  const [catalog, setCatalog] = (0, import_react15.useState)(null);
+  const [catalogError, setCatalogError] = (0, import_react15.useState)("");
+  const [costumeCatalog, setCostumeCatalog] = (0, import_react15.useState)([]);
+  const [costumeCatalogReady, setCostumeCatalogReady] = (0, import_react15.useState)(false);
+  const [costumeCatalogError, setCostumeCatalogError] = (0, import_react15.useState)("");
+  const [faceCatalog, setFaceCatalog] = (0, import_react15.useState)([]);
+  const [faceCatalogReady, setFaceCatalogReady] = (0, import_react15.useState)(false);
+  const [faceCatalogError, setFaceCatalogError] = (0, import_react15.useState)("");
+  const [loading, setLoading] = (0, import_react15.useState)(true);
+  const [settings, setSettings] = (0, import_react15.useState)(DEFAULT_SETTINGS);
+  const [settingsReady, setSettingsReady] = (0, import_react15.useState)(false);
+  const [library, setLibrary] = (0, import_react15.useState)("poses");
+  const [costume, setCostume] = (0, import_react15.useState)(null);
+  const [face, setFace] = (0, import_react15.useState)(null);
+  const [costumeFocus, setCostumeFocus] = (0, import_react15.useState)(null);
+  const [requestedSystem, setRequestedSystem] = (0, import_react15.useState)(null);
+  const [settingsOpen, setSettingsOpen] = (0, import_react15.useState)(false);
+  const [installOpen, setInstallOpen] = (0, import_react15.useState)(false);
+  const [adultAsk, setAdultAsk] = (0, import_react15.useState)(null);
+  const [characters, setCharacters] = (0, import_react15.useState)([]);
+  const [models, setModels] = (0, import_react15.useState)([]);
+  const [activeModelId, setActiveModelId] = (0, import_react15.useState)(DEFAULT_MODEL_ID);
+  const [builtinUsed, setBuiltinUsed] = (0, import_react15.useState)({});
+  const [sheetBusy, setSheetBusy] = (0, import_react15.useState)(false);
+  const [sheetError, setSheetError] = (0, import_react15.useState)("");
+  const [selected, setSelected] = (0, import_react15.useState)({});
+  const [extraPrompt, setExtraPrompt] = (0, import_react15.useState)("");
+  const [prompts, setPrompts] = (0, import_react15.useState)([]);
+  const [promptError, setPromptError] = (0, import_react15.useState)("");
+  const [results, setResults] = (0, import_react15.useState)([]);
+  const [running, setRunning] = (0, import_react15.useState)(false);
+  const [runError, setRunError] = (0, import_react15.useState)("");
+  const [limitNote, setLimitNote] = (0, import_react15.useState)("");
+  const [server, setServer] = (0, import_react15.useState)(null);
+  const serverKey = server?.keyConfigured && server.provider === settings.provider && sameProviderRoot(settings.provider, settings.baseURL || server.baseURL, server.baseURL);
+  const hasCloudKey = Boolean(settings.apiKey.trim() || serverKey);
+  const [sheetOpen, setSheetOpen] = (0, import_react15.useState)(false);
+  const [customPoses, setCustomPoses] = (0, import_react15.useState)([]);
+  const [customCostumes, setCustomCostumes] = (0, import_react15.useState)([]);
+  const [history, setHistory] = (0, import_react15.useState)([]);
+  const [storageHigh, setStorageHigh] = (0, import_react15.useState)(false);
+  const [syncWarning, setSyncWarning] = (0, import_react15.useState)("");
+  const [reuseNote, setReuseNote] = (0, import_react15.useState)("");
+  const libraryReady = (0, import_react15.useRef)(false);
+  const modelLoadGen = (0, import_react15.useRef)(0);
+  const clearRequestedSystem = (0, import_react15.useCallback)(() => setRequestedSystem(null), []);
+  const clearCostumeFocus = (0, import_react15.useCallback)(() => setCostumeFocus(null), []);
+  const abortRef = (0, import_react15.useRef)(null);
+  const settingsRevision = (0, import_react15.useRef)(0);
+  const loadCatalog = (0, import_react15.useCallback)(() => {
     setLoading(true);
     setCatalogError("");
     fetch(studioUrl(basePath, "/api/catalog")).then(async (response) => {
@@ -13344,10 +13656,10 @@ function StudioFrame({ embedded }) {
       return response.json();
     }).then(setCatalog).catch((error) => setCatalogError(error instanceof Error ? error.message : "姿势目录没有加载出来")).finally(() => setLoading(false));
   }, [basePath]);
-  (0, import_react14.useEffect)(() => {
+  (0, import_react15.useEffect)(() => {
     loadCatalog();
   }, [loadCatalog]);
-  (0, import_react14.useEffect)(() => {
+  (0, import_react15.useEffect)(() => {
     const controller = new AbortController();
     fetch(studioUrl(basePath, "/api/costumes"), { signal: controller.signal }).then(async (response) => {
       if (!response.ok) throw new Error("服装目录没有加载出来");
@@ -13363,7 +13675,7 @@ function StudioFrame({ embedded }) {
     });
     return () => controller.abort();
   }, [basePath]);
-  (0, import_react14.useEffect)(() => {
+  (0, import_react15.useEffect)(() => {
     const controller = new AbortController();
     fetch(studioUrl(basePath, "/api/faces"), { signal: controller.signal }).then(async (response) => {
       if (!response.ok) throw new Error("脸部目录没有加载出来");
@@ -13379,29 +13691,26 @@ function StudioFrame({ embedded }) {
     });
     return () => controller.abort();
   }, [basePath]);
-  (0, import_react14.useEffect)(() => {
+  (0, import_react15.useEffect)(() => {
     const local = loadSettings();
     setSettings(local);
     setSettingsReady(true);
     const revision = settingsRevision.current;
     fetch(studioUrl(basePath, "/api/status")).then((response) => response.json()).then((payload) => {
-      setServerKey(Boolean(payload.keyConfigured));
-      const untouched = local.provider === "gemini" && local.apiKey.trim() === "" && (local.model === modelFor("gemini") || local.model.trim() === "");
-      if (untouched && payload.provider === "seedream" && settingsRevision.current === revision) {
-        const next = {
-          ...local,
-          provider: "seedream",
-          model: payload.model || modelFor("seedream"),
-          baseURL: payload.baseURL || baseURLFor("seedream")
-        };
-        setSettings(next);
-        saveSettings(next);
-        return;
-      }
+      setServer(payload);
+      if (settingsRevision.current === revision) setSettings(loadSettings(payload));
     }).catch(() => {
     });
   }, [basePath]);
-  (0, import_react14.useEffect)(() => {
+  (0, import_react15.useEffect)(() => {
+    function syncSettings(event) {
+      if (event.storageArea !== window.localStorage) return;
+      setSettings((current) => isSharedSettingsEdit(event.key, current.provider) ? loadSettings(server, current) : current);
+    }
+    window.addEventListener("storage", syncSettings);
+    return () => window.removeEventListener("storage", syncSettings);
+  }, [server]);
+  (0, import_react15.useEffect)(() => {
     const gen = ++modelLoadGen.current;
     Promise.all([readStoredCharacters(), listSavedModels(), readActiveModelId()]).then(([images, saved, activeId]) => {
       if (modelLoadGen.current !== gen) return;
@@ -13422,7 +13731,7 @@ function StudioFrame({ embedded }) {
     }).catch(() => {
     });
   }, []);
-  (0, import_react14.useEffect)(() => {
+  (0, import_react15.useEffect)(() => {
     let cancelled = false;
     Promise.all([listCustomPoses(), listCustomCostumes(), listHistory(), readStoragePressure()]).then(([poses, costumes, entries, pressure]) => {
       if (cancelled) return;
@@ -13438,7 +13747,7 @@ function StudioFrame({ embedded }) {
       cancelled = true;
     };
   }, []);
-  (0, import_react14.useEffect)(() => {
+  (0, import_react15.useEffect)(() => {
     if (!libraryReady.current || !settingsReady || settings.engine === "comfyui") {
       setSyncWarning("");
       return;
@@ -13452,10 +13761,9 @@ function StudioFrame({ embedded }) {
       controller.abort();
     };
   }, [basePath, customPoses, customCostumes, settingsReady, settings.engine]);
-  function updateSettings(next) {
+  function updateSettings(edits) {
     settingsRevision.current += 1;
-    setSettings(next);
-    saveSettings(next);
+    setSettings(saveSettings(settings, edits, server));
   }
   function commitLibrary(nextImages, baseModels, baseActive) {
     modelLoadGen.current += 1;
@@ -13522,7 +13830,7 @@ function StudioFrame({ embedded }) {
     }
   }
   async function generateModelSheet() {
-    if (!settings.apiKey.trim() && !serverKey) {
+    if (!hasCloudKey) {
       setSettingsOpen(true);
       setSheetError("先在设置里填写 API Key。");
       return;
@@ -13562,7 +13870,7 @@ function StudioFrame({ embedded }) {
   const poseUrls = useBlobUrls(customPoses);
   const costumeUrls = useBlobUrls(customCostumes);
   const historyUrls = useBlobUrls(history);
-  const poseById = (0, import_react14.useMemo)(() => {
+  const poseById = (0, import_react15.useMemo)(() => {
     const map = /* @__PURE__ */ new Map();
     catalog?.poses.forEach((pose) => map.set(pose.id, pose));
     for (const asset of customPoses) {
@@ -13580,7 +13888,7 @@ function StudioFrame({ embedded }) {
     }
     return map;
   }, [catalog, customPoses]);
-  const chosen = (0, import_react14.useMemo)(() => {
+  const chosen = (0, import_react15.useMemo)(() => {
     return Object.entries(selected).flatMap(([poseId, viewId]) => {
       const pose = poseById.get(poseId);
       const view = pose?.views.find((item) => item.id === viewId);
@@ -13588,7 +13896,7 @@ function StudioFrame({ embedded }) {
       return [{ poseId, viewId, title: pose.name, angle: view.angle, thumbSrc: poseUrls[poseId] }];
     });
   }, [selected, poseById, poseUrls]);
-  const comfyItems = (0, import_react14.useCallback)((viewIds) => {
+  const comfyItems = (0, import_react15.useCallback)((viewIds) => {
     if (!viewIds.length && costume) return [{ viewId: "outfit", title: "仅换装", pose: null }];
     return viewIds.map((id) => {
       for (const pose of poseById.values()) {
@@ -13599,7 +13907,7 @@ function StudioFrame({ embedded }) {
     });
   }, [poseById, costume]);
   const selectionKey = chosen.map((item) => item.viewId).join("|");
-  (0, import_react14.useEffect)(() => {
+  (0, import_react15.useEffect)(() => {
     if (!selectionKey && !(settings.engine === "comfyui" && costume?.id)) {
       setPrompts([]);
       setPromptError("");
@@ -13726,7 +14034,7 @@ function StudioFrame({ embedded }) {
     });
   }
   async function generate() {
-    if (settings.engine !== "comfyui" && !settings.apiKey.trim() && !serverKey) {
+    if (settings.engine !== "comfyui" && !hasCloudKey) {
       setSettingsOpen(true);
       setRunError("先在设置里填写 API Key。");
       setSheetOpen(true);
@@ -13865,7 +14173,7 @@ function StudioFrame({ embedded }) {
     setCostume((current) => current?.id === id ? null : current);
   }
   function reuse(entry) {
-    updateSettings({ ...settings, engine: entry.provider === "comfyui" ? "comfyui" : "cloud" });
+    updateSettings({ engine: entry.provider === "comfyui" ? "comfyui" : "cloud" });
     const restored = reuseFromHistory(entry);
     const missingPose = entry.selection.some((item) => !poseById.has(item.poseId));
     const missingCostume = Boolean(restored.costume && isCustomCostumeId(restored.costume.id) && !customCostumes.some((item) => item.id === restored.costume?.id));
@@ -13906,7 +14214,7 @@ function StudioFrame({ embedded }) {
     adult: asset.adult,
     thumbUrl: costumeUrls[asset.id] || ""
   }));
-  const composer = /* @__PURE__ */ (0, import_jsx_runtime33.jsx)(
+  const composer = /* @__PURE__ */ (0, import_jsx_runtime34.jsx)(
     Composer,
     {
       selected: chosen,
@@ -13929,7 +14237,7 @@ function StudioFrame({ embedded }) {
       onClearCostume: () => setCostume(null),
       face,
       onClearFace: () => setFace(null),
-      hasKey: settings.engine === "comfyui" || Boolean(settings.apiKey.trim()) || serverKey,
+      hasKey: settings.engine === "comfyui" || hasCloudKey,
       running,
       runError,
       prompts,
@@ -13956,12 +14264,12 @@ function StudioFrame({ embedded }) {
       builtinSheet: getBuiltinModel(activeModelId)?.sheet || "/muse/dafeiyu-sheet.png"
     }
   );
-  return /* @__PURE__ */ (0, import_jsx_runtime33.jsxs)("div", { className: `@container/studio flex min-h-0 flex-col overflow-hidden bg-background text-foreground ${embedded ? "h-full" : "h-dvh"}`, children: [
-    /* @__PURE__ */ (0, import_jsx_runtime33.jsxs)("header", { className: "flex min-h-14 shrink-0 flex-wrap items-center gap-x-3 gap-y-2 border-b bg-white px-3 py-2 @min-[640px]/studio:px-4 @min-[768px]/studio:px-5", children: [
-      /* @__PURE__ */ (0, import_jsx_runtime33.jsx)(WhaleMark, { className: "size-8 shrink-0" }),
-      /* @__PURE__ */ (0, import_jsx_runtime33.jsx)("h1", { className: "shrink-0 text-base font-semibold", children: "澜姿" }),
-      /* @__PURE__ */ (0, import_jsx_runtime33.jsxs)("div", { className: "flex shrink-0 rounded-lg bg-muted p-1", role: "tablist", "aria-label": "图库", children: [
-        /* @__PURE__ */ (0, import_jsx_runtime33.jsx)(
+  return /* @__PURE__ */ (0, import_jsx_runtime34.jsxs)("div", { className: `@container/studio flex min-h-0 flex-col overflow-hidden bg-background text-foreground ${embedded ? "h-full" : "h-dvh"}`, children: [
+    /* @__PURE__ */ (0, import_jsx_runtime34.jsxs)("header", { className: "flex min-h-14 shrink-0 flex-wrap items-center gap-x-3 gap-y-2 border-b bg-white px-3 py-2 @min-[640px]/studio:px-4 @min-[768px]/studio:px-5", children: [
+      /* @__PURE__ */ (0, import_jsx_runtime34.jsx)(WhaleMark, { className: "size-8 shrink-0" }),
+      /* @__PURE__ */ (0, import_jsx_runtime34.jsx)("h1", { className: "shrink-0 text-base font-semibold", children: "澜姿" }),
+      /* @__PURE__ */ (0, import_jsx_runtime34.jsxs)("div", { className: "flex shrink-0 rounded-lg bg-muted p-1", role: "tablist", "aria-label": "图库", children: [
+        /* @__PURE__ */ (0, import_jsx_runtime34.jsx)(
           "button",
           {
             type: "button",
@@ -13972,7 +14280,7 @@ function StudioFrame({ embedded }) {
             children: "姿势"
           }
         ),
-        /* @__PURE__ */ (0, import_jsx_runtime33.jsx)(
+        /* @__PURE__ */ (0, import_jsx_runtime34.jsx)(
           "button",
           {
             type: "button",
@@ -13983,7 +14291,7 @@ function StudioFrame({ embedded }) {
             children: "服装"
           }
         ),
-        /* @__PURE__ */ (0, import_jsx_runtime33.jsx)(
+        /* @__PURE__ */ (0, import_jsx_runtime34.jsx)(
           "button",
           {
             type: "button",
@@ -13995,11 +14303,11 @@ function StudioFrame({ embedded }) {
           }
         )
       ] }),
-      face ? /* @__PURE__ */ (0, import_jsx_runtime33.jsx)("span", { className: "hidden min-w-0 truncate text-sm text-primary @min-[640px]/studio:inline", children: face.id }) : null,
-      costume ? /* @__PURE__ */ (0, import_jsx_runtime33.jsx)("span", { className: "hidden min-w-0 truncate text-sm text-primary @min-[640px]/studio:inline", children: costume.id }) : null,
-      /* @__PURE__ */ (0, import_jsx_runtime33.jsxs)("div", { className: "ml-auto flex shrink-0 items-center gap-2", children: [
-        /* @__PURE__ */ (0, import_jsx_runtime33.jsx)(Button3, { variant: "outline", size: "sm", className: "@max-[640px]/studio:hidden", onClick: () => setInstallOpen(true), children: "装进 Harness" }),
-        /* @__PURE__ */ (0, import_jsx_runtime33.jsx)(
+      face ? /* @__PURE__ */ (0, import_jsx_runtime34.jsx)("span", { className: "hidden min-w-0 truncate text-sm text-primary @min-[640px]/studio:inline", children: face.id }) : null,
+      costume ? /* @__PURE__ */ (0, import_jsx_runtime34.jsx)("span", { className: "hidden min-w-0 truncate text-sm text-primary @min-[640px]/studio:inline", children: costume.id }) : null,
+      /* @__PURE__ */ (0, import_jsx_runtime34.jsxs)("div", { className: "ml-auto flex shrink-0 items-center gap-2", children: [
+        /* @__PURE__ */ (0, import_jsx_runtime34.jsx)(Button3, { variant: "outline", size: "sm", className: "@max-[640px]/studio:hidden", onClick: () => setInstallOpen(true), children: "装进 Harness" }),
+        /* @__PURE__ */ (0, import_jsx_runtime34.jsx)(
           "a",
           {
             href: REPOSITORY_URL,
@@ -14007,24 +14315,24 @@ function StudioFrame({ embedded }) {
             rel: "noopener noreferrer",
             "aria-label": "打开 GitHub 仓库",
             className: buttonVariants({ variant: "outline", size: "icon" }),
-            children: /* @__PURE__ */ (0, import_jsx_runtime33.jsx)(GithubMark, {})
+            children: /* @__PURE__ */ (0, import_jsx_runtime34.jsx)(GithubMark, {})
           }
         ),
-        /* @__PURE__ */ (0, import_jsx_runtime33.jsx)(Button3, { variant: "outline", size: "icon", "aria-label": "生图设置", onClick: () => setSettingsOpen(true), children: /* @__PURE__ */ (0, import_jsx_runtime33.jsx)(Settings, {}) })
+        /* @__PURE__ */ (0, import_jsx_runtime34.jsx)(Button3, { variant: "outline", size: "icon", "aria-label": "生图设置", onClick: () => setSettingsOpen(true), children: /* @__PURE__ */ (0, import_jsx_runtime34.jsx)(Settings, {}) })
       ] })
     ] }),
-    storageHigh ? /* @__PURE__ */ (0, import_jsx_runtime33.jsxs)("p", { className: "shrink-0 border-b bg-amber-50 px-4 py-2 text-sm text-amber-950", children: [
+    storageHigh ? /* @__PURE__ */ (0, import_jsx_runtime34.jsxs)("p", { className: "shrink-0 border-b bg-amber-50 px-4 py-2 text-sm text-amber-950", children: [
       "本机存储快满了。可以删除历史或自定义参考图。",
-      /* @__PURE__ */ (0, import_jsx_runtime33.jsx)("button", { type: "button", className: "ml-2 underline", onClick: () => void clearHistory().then(() => setHistory([])).then(() => readStoragePressure()).then((pressure) => setStorageHigh(pressure.high)), children: "清空历史" })
+      /* @__PURE__ */ (0, import_jsx_runtime34.jsx)("button", { type: "button", className: "ml-2 underline", onClick: () => void clearHistory().then(() => setHistory([])).then(() => readStoragePressure()).then((pressure) => setStorageHigh(pressure.high)), children: "清空历史" })
     ] }) : null,
-    /* @__PURE__ */ (0, import_jsx_runtime33.jsxs)("div", { className: "flex min-h-0 flex-1 flex-col @min-[1024px]/studio:grid @min-[1024px]/studio:grid-cols-[300px_minmax(0,1fr)_340px] @min-[1024px]/studio:grid-rows-[minmax(0,1fr)]", children: [
-      /* @__PURE__ */ (0, import_jsx_runtime33.jsx)(
+    /* @__PURE__ */ (0, import_jsx_runtime34.jsxs)("div", { className: "flex min-h-0 flex-1 flex-col @min-[1024px]/studio:grid @min-[1024px]/studio:grid-cols-[300px_minmax(0,1fr)_340px] @min-[1024px]/studio:grid-rows-[minmax(0,1fr)]", children: [
+      /* @__PURE__ */ (0, import_jsx_runtime34.jsx)(
         CharacterDock,
         {
           images: characters,
           onChange: updateCharacters,
           keepOutfit: settings.keepOutfit,
-          onKeepOutfit: (keepOutfit) => updateSettings({ ...settings, keepOutfit }),
+          onKeepOutfit: (keepOutfit) => updateSettings({ keepOutfit }),
           outfitLocked: Boolean(costume),
           switchItems: switcherEntries({ models }).map((item) => {
             const saved = models.find((model) => model.id === item.id);
@@ -14044,14 +14352,14 @@ function StudioFrame({ embedded }) {
           onGenerateSheet: () => void generateModelSheet(),
           sheetBusy,
           sheetError,
-          hasKey: Boolean(settings.apiKey.trim()) || serverKey,
+          hasKey: hasCloudKey,
           onOpenSettings: () => {
             setSheetError(settings.engine === "comfyui" ? "多视角 sheet 要用云端生图。请先选 Seedream、Gemini 或 OpenAI，并填写 API Key。" : "先在设置里填写 API Key。");
             setSettingsOpen(true);
           }
         }
       ),
-      /* @__PURE__ */ (0, import_jsx_runtime33.jsx)("main", { className: "order-2 min-h-0 min-w-0 flex-1 overflow-y-auto @min-[1024px]/studio:order-none @min-[1024px]/studio:pb-8", children: library === "faces" ? /* @__PURE__ */ (0, import_jsx_runtime33.jsx)(
+      /* @__PURE__ */ (0, import_jsx_runtime34.jsx)("main", { className: "order-2 min-h-0 min-w-0 flex-1 overflow-y-auto @min-[1024px]/studio:order-none @min-[1024px]/studio:pb-8", children: library === "faces" ? /* @__PURE__ */ (0, import_jsx_runtime34.jsx)(
         FaceBrowser,
         {
           selectedId: face?.id ?? null,
@@ -14063,7 +14371,7 @@ function StudioFrame({ embedded }) {
             keywords: item.keywords
           })
         }
-      ) : library === "poses" ? /* @__PURE__ */ (0, import_jsx_runtime33.jsx)(
+      ) : library === "poses" ? /* @__PURE__ */ (0, import_jsx_runtime34.jsx)(
         PoseBrowser,
         {
           catalog,
@@ -14080,10 +14388,10 @@ function StudioFrame({ embedded }) {
           onSaveCustom: (draft) => saveCustom("pose", draft),
           onDeleteCustom: (id) => void removeCustomPose(id),
           settings,
-          hasKey: Boolean(settings.apiKey.trim()) || serverKey,
+          hasKey: hasCloudKey,
           syncWarning
         }
-      ) : /* @__PURE__ */ (0, import_jsx_runtime33.jsx)(
+      ) : /* @__PURE__ */ (0, import_jsx_runtime34.jsx)(
         CostumeBrowser,
         {
           showAdult: settings.showAdult,
@@ -14096,14 +14404,14 @@ function StudioFrame({ embedded }) {
           onSaveCustom: (draft) => saveCustom("costume", draft),
           onDeleteCustom: (id) => void removeCustomCostume(id),
           settings,
-          hasKey: Boolean(settings.apiKey.trim()) || serverKey,
+          hasKey: hasCloudKey,
           syncWarning,
           onChangeSettings: updateSettings
         }
       ) }),
-      /* @__PURE__ */ (0, import_jsx_runtime33.jsx)("aside", { className: "hidden min-h-0 border-l bg-white px-4 py-5 @min-[1024px]/studio:block @min-[1024px]/studio:overflow-y-auto", children: composer })
+      /* @__PURE__ */ (0, import_jsx_runtime34.jsx)("aside", { className: "hidden min-h-0 border-l bg-white px-4 py-5 @min-[1024px]/studio:block @min-[1024px]/studio:overflow-y-auto", children: composer })
     ] }),
-    /* @__PURE__ */ (0, import_jsx_runtime33.jsx)("div", { className: "shrink-0 border-t bg-white p-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] @min-[1024px]/studio:hidden", children: /* @__PURE__ */ (0, import_jsx_runtime33.jsxs)(Button3, { className: "h-11 w-full", onClick: () => setSheetOpen(true), children: [
+    /* @__PURE__ */ (0, import_jsx_runtime34.jsx)("div", { className: "shrink-0 border-t bg-white p-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] @min-[1024px]/studio:hidden", children: /* @__PURE__ */ (0, import_jsx_runtime34.jsxs)(Button3, { className: "h-11 w-full", onClick: () => setSheetOpen(true), children: [
       "已选 ",
       chosen.length,
       " 个姿势",
@@ -14111,36 +14419,36 @@ function StudioFrame({ embedded }) {
       costume ? ` · ${costume.id}` : "",
       " · 去生图"
     ] }) }),
-    /* @__PURE__ */ (0, import_jsx_runtime33.jsx)(Sheet, { open: sheetOpen, onOpenChange: setSheetOpen, children: /* @__PURE__ */ (0, import_jsx_runtime33.jsxs)(SheetContent, { side: "bottom", className: "max-h-[min(85dvh,85%)] overflow-y-auto rounded-t-3xl", children: [
-      /* @__PURE__ */ (0, import_jsx_runtime33.jsx)(SheetHeader, { children: /* @__PURE__ */ (0, import_jsx_runtime33.jsx)(SheetTitle, { children: "生图" }) }),
-      /* @__PURE__ */ (0, import_jsx_runtime33.jsx)("div", { className: "px-4 pb-6", children: composer })
+    /* @__PURE__ */ (0, import_jsx_runtime34.jsx)(Sheet, { open: sheetOpen, onOpenChange: setSheetOpen, children: /* @__PURE__ */ (0, import_jsx_runtime34.jsxs)(SheetContent, { side: "bottom", className: "max-h-[min(85dvh,85%)] overflow-y-auto rounded-t-3xl", children: [
+      /* @__PURE__ */ (0, import_jsx_runtime34.jsx)(SheetHeader, { children: /* @__PURE__ */ (0, import_jsx_runtime34.jsx)(SheetTitle, { children: "生图" }) }),
+      /* @__PURE__ */ (0, import_jsx_runtime34.jsx)("div", { className: "px-4 pb-6", children: composer })
     ] }) }),
-    /* @__PURE__ */ (0, import_jsx_runtime33.jsx)(SettingsDialog, { open: settingsOpen, onOpenChange: setSettingsOpen, settings, onChange: updateSettings }),
-    /* @__PURE__ */ (0, import_jsx_runtime33.jsx)(Dialog, { open: installOpen, onOpenChange: setInstallOpen, children: /* @__PURE__ */ (0, import_jsx_runtime33.jsxs)(DialogContent, { className: "max-w-[min(32rem,calc(100%-2rem))]", children: [
-      /* @__PURE__ */ (0, import_jsx_runtime33.jsxs)(DialogHeader, { children: [
-        /* @__PURE__ */ (0, import_jsx_runtime33.jsx)(DialogTitle3, { children: "装进 DeepSeek Harness" }),
-        /* @__PURE__ */ (0, import_jsx_runtime33.jsx)(DialogDescription3, { children: "澜姿发布在 npm，包名是 gen-ai-pose-image。在已经装好 Harness 的机器上执行下面的命令，重启后左侧栏会出现「澜姿 / 工作室」，Agent 也能直接调用姿势生图。" })
+    /* @__PURE__ */ (0, import_jsx_runtime34.jsx)(SettingsDialog, { open: settingsOpen, onOpenChange: setSettingsOpen, settings, server, onChange: updateSettings }),
+    /* @__PURE__ */ (0, import_jsx_runtime34.jsx)(Dialog, { open: installOpen, onOpenChange: setInstallOpen, children: /* @__PURE__ */ (0, import_jsx_runtime34.jsxs)(DialogContent, { className: "max-w-[min(32rem,calc(100%-2rem))]", children: [
+      /* @__PURE__ */ (0, import_jsx_runtime34.jsxs)(DialogHeader, { children: [
+        /* @__PURE__ */ (0, import_jsx_runtime34.jsx)(DialogTitle3, { children: "装进 DeepSeek Harness" }),
+        /* @__PURE__ */ (0, import_jsx_runtime34.jsx)(DialogDescription3, { children: "澜姿发布在 npm，包名是 gen-ai-pose-image。在已经装好 Harness 的机器上执行下面的命令，重启后左侧栏会出现「澜姿 / 工作室」，Agent 也能直接调用姿势生图。" })
       ] }),
-      /* @__PURE__ */ (0, import_jsx_runtime33.jsx)("pre", { className: "overflow-auto rounded-xl bg-muted p-3 text-xs leading-5", children: "dsh plugin --profile web add gen-ai-pose-image" }),
-      /* @__PURE__ */ (0, import_jsx_runtime33.jsx)("p", { className: "text-xs leading-5 text-muted-foreground", children: "网页工作室要在设置里填自己的 API Key。Harness 插件出图时，用启动环境里的 POSE_MUSE_API_KEY。" })
+      /* @__PURE__ */ (0, import_jsx_runtime34.jsx)("pre", { className: "overflow-auto rounded-xl bg-muted p-3 text-xs leading-5", children: "dsh plugin --profile web add gen-ai-pose-image" }),
+      /* @__PURE__ */ (0, import_jsx_runtime34.jsx)("p", { className: "text-xs leading-5 text-muted-foreground", children: "网页工作室要在设置里填自己的 API Key。Harness 插件出图时，用启动环境里的 POSE_MUSE_API_KEY。" })
     ] }) }),
-    /* @__PURE__ */ (0, import_jsx_runtime33.jsx)(Dialog, { open: adultAsk !== null, onOpenChange: (open3) => {
+    /* @__PURE__ */ (0, import_jsx_runtime34.jsx)(Dialog, { open: adultAsk !== null, onOpenChange: (open3) => {
       if (!open3) setAdultAsk(null);
-    }, children: /* @__PURE__ */ (0, import_jsx_runtime33.jsxs)(DialogContent, { className: "max-w-[min(28rem,calc(100%-2rem))]", children: [
-      /* @__PURE__ */ (0, import_jsx_runtime33.jsxs)(DialogHeader, { children: [
-        /* @__PURE__ */ (0, import_jsx_runtime33.jsx)(DialogTitle3, { children: adultAsk === "custom" || adultAsk === "costume:custom" ? "这些是成人向自定义参考" : adultAsk?.startsWith("costume:") ? "这些是成人向服装" : "这些是成人向姿势" }),
-        /* @__PURE__ */ (0, import_jsx_runtime33.jsx)(DialogDescription3, { children: adultAsk === "custom" || adultAsk === "costume:custom" ? "自定义参考里标成成人向的图默认不显示。打开之后才能点选。生图仍要求角色是成年人。" : adultAsk?.startsWith("costume:") ? "内衣、泳装和性感分类里的图仍然没有人物，只是衣服本身更暴露。打开之后可以点选。生图会换成这套衣服，并保留角色的脸、头发、鲸耳和鲸尾。" : "来自原图库的性感系、双人缠绵，以及上半身里的大胆分类。画面仍是结构线稿。打开之后，生图默认继续保持模特的服装，只借用姿势。" })
+    }, children: /* @__PURE__ */ (0, import_jsx_runtime34.jsxs)(DialogContent, { className: "max-w-[min(28rem,calc(100%-2rem))]", children: [
+      /* @__PURE__ */ (0, import_jsx_runtime34.jsxs)(DialogHeader, { children: [
+        /* @__PURE__ */ (0, import_jsx_runtime34.jsx)(DialogTitle3, { children: adultAsk === "custom" || adultAsk === "costume:custom" ? "这些是成人向自定义参考" : adultAsk?.startsWith("costume:") ? "这些是成人向服装" : "这些是成人向姿势" }),
+        /* @__PURE__ */ (0, import_jsx_runtime34.jsx)(DialogDescription3, { children: adultAsk === "custom" || adultAsk === "costume:custom" ? "自定义参考里标成成人向的图默认不显示。打开之后才能点选。生图仍要求角色是成年人。" : adultAsk?.startsWith("costume:") ? "内衣、泳装和性感分类里的图仍然没有人物，只是衣服本身更暴露。打开之后可以点选。生图会换成这套衣服，并保留角色的脸、头发、鲸耳和鲸尾。" : "来自原图库的性感系、双人缠绵，以及上半身里的大胆分类。画面仍是结构线稿。打开之后，生图默认继续保持模特的服装，只借用姿势。" })
       ] }),
-      /* @__PURE__ */ (0, import_jsx_runtime33.jsxs)("div", { className: "flex justify-end gap-2", children: [
-        /* @__PURE__ */ (0, import_jsx_runtime33.jsx)(Button3, { variant: "outline", onClick: () => setAdultAsk(null), children: "先不看" }),
-        /* @__PURE__ */ (0, import_jsx_runtime33.jsx)(Button3, { onClick: () => {
+      /* @__PURE__ */ (0, import_jsx_runtime34.jsxs)("div", { className: "flex justify-end gap-2", children: [
+        /* @__PURE__ */ (0, import_jsx_runtime34.jsx)(Button3, { variant: "outline", onClick: () => setAdultAsk(null), children: "先不看" }),
+        /* @__PURE__ */ (0, import_jsx_runtime34.jsx)(Button3, { onClick: () => {
           if (adultAsk?.startsWith("costume:")) {
             setCostumeFocus(adultAsk.slice("costume:".length));
             setLibrary("costumes");
           } else if (adultAsk) {
             setRequestedSystem(adultAsk);
           }
-          updateSettings({ ...settings, showAdult: true });
+          updateSettings({ showAdult: true });
           setAdultAsk(null);
         }, children: adultAsk?.startsWith("costume:") ? "显示成人向服装" : "显示成人向姿势" })
       ] })
@@ -14148,14 +14456,14 @@ function StudioFrame({ embedded }) {
   ] });
 }
 function GithubMark() {
-  return /* @__PURE__ */ (0, import_jsx_runtime33.jsxs)("svg", { viewBox: "0 0 24 24", fill: "none", stroke: "currentColor", strokeWidth: "2", strokeLinecap: "round", strokeLinejoin: "round", "aria-hidden": "true", children: [
-    /* @__PURE__ */ (0, import_jsx_runtime33.jsx)("path", { d: "M15 22v-4a4.8 4.8 0 0 0-1-3.5c3 0 6-2 6-5.5.08-1.25-.27-2.48-1-3.5.28-1.15.28-2.35 0-3.5 0 0-1 0-3 1.5-2.64-.5-5.36-.5-8 0C6 2 5 2 5 2c-.3 1.15-.3 2.35 0 3.5A5.403 5.403 0 0 0 4 9c0 3.5 3 5.5 6 5.5-.39.49-.68 1.05-.85 1.65-.17.6-.22 1.23-.15 1.85v4" }),
-    /* @__PURE__ */ (0, import_jsx_runtime33.jsx)("path", { d: "M9 18c-4.51 2-5-2-7-2" })
+  return /* @__PURE__ */ (0, import_jsx_runtime34.jsxs)("svg", { viewBox: "0 0 24 24", fill: "none", stroke: "currentColor", strokeWidth: "2", strokeLinecap: "round", strokeLinejoin: "round", "aria-hidden": "true", children: [
+    /* @__PURE__ */ (0, import_jsx_runtime34.jsx)("path", { d: "M15 22v-4a4.8 4.8 0 0 0-1-3.5c3 0 6-2 6-5.5.08-1.25-.27-2.48-1-3.5.28-1.15.28-2.35 0-3.5 0 0-1 0-3 1.5-2.64-.5-5.36-.5-8 0C6 2 5 2 5 2c-.3 1.15-.3 2.35 0 3.5A5.403 5.403 0 0 0 4 9c0 3.5 3 5.5 6 5.5-.39.49-.68 1.05-.85 1.65-.17.6-.22 1.23-.15 1.85v4" }),
+    /* @__PURE__ */ (0, import_jsx_runtime34.jsx)("path", { d: "M9 18c-4.51 2-5-2-7-2" })
   ] });
 }
 function useBlobUrls(items) {
-  const [urls, setUrls] = (0, import_react14.useState)({});
-  (0, import_react14.useEffect)(() => {
+  const [urls, setUrls] = (0, import_react15.useState)({});
+  (0, import_react15.useEffect)(() => {
     const created = {};
     for (const item of items) created[item.id] = URL.createObjectURL(item.image);
     setUrls(created);
@@ -14204,14 +14512,14 @@ function resultCards(results) {
 }
 
 // plugin/harness-entry.tsx
-var import_jsx_runtime34 = require("react/jsx-runtime");
+var import_jsx_runtime35 = require("react/jsx-runtime");
 var name = "gen-ai-pose-image";
 var inject = ["slots"];
 var SIDEBAR_LABEL = "澜姿 / 工作室";
 function PosePanelIcon({ size = 16 }) {
-  return /* @__PURE__ */ (0, import_jsx_runtime34.jsxs)("svg", { width: size, height: size, viewBox: "0 0 16 16", fill: "none", "aria-hidden": "true", children: [
-    /* @__PURE__ */ (0, import_jsx_runtime34.jsx)("circle", { cx: "8", cy: "3.1", r: "1.35", stroke: "currentColor", strokeWidth: "1.3" }),
-    /* @__PURE__ */ (0, import_jsx_runtime34.jsx)(
+  return /* @__PURE__ */ (0, import_jsx_runtime35.jsxs)("svg", { width: size, height: size, viewBox: "0 0 16 16", fill: "none", "aria-hidden": "true", children: [
+    /* @__PURE__ */ (0, import_jsx_runtime35.jsx)("circle", { cx: "8", cy: "3.1", r: "1.35", stroke: "currentColor", strokeWidth: "1.3" }),
+    /* @__PURE__ */ (0, import_jsx_runtime35.jsx)(
       "path",
       {
         d: "M8 4.7v3.4M5.1 7.1h5.8M6.1 13.4 8 8.1l1.9 5.3",
@@ -14224,10 +14532,10 @@ function PosePanelIcon({ size = 16 }) {
   ] });
 }
 function PoseStudio() {
-  const hostRef = (0, import_react15.useRef)(null);
-  const [mount, setMount] = (0, import_react15.useState)(null);
-  const [portalContainer, setPortalContainer] = (0, import_react15.useState)(null);
-  (0, import_react15.useEffect)(() => {
+  const hostRef = (0, import_react16.useRef)(null);
+  const [mount, setMount] = (0, import_react16.useState)(null);
+  const [portalContainer, setPortalContainer] = (0, import_react16.useState)(null);
+  (0, import_react16.useEffect)(() => {
     const host = hostRef.current;
     if (!host) return;
     const shadow = host.shadowRoot ?? host.attachShadow({ mode: "open" });
@@ -14669,6 +14977,10 @@ function PoseStudio() {
     width: calc(var(--spacing) * 9);
     height: calc(var(--spacing) * 9);
   }
+  .size-12 {
+    width: calc(var(--spacing) * 12);
+    height: calc(var(--spacing) * 12);
+  }
   .size-14 {
     width: calc(var(--spacing) * 14);
     height: calc(var(--spacing) * 14);
@@ -14901,6 +15213,9 @@ function PoseStudio() {
   }
   .gap-x-3 {
     column-gap: calc(var(--spacing) * 3);
+  }
+  .gap-y-1 {
+    row-gap: var(--spacing);
   }
   .gap-y-2 {
     row-gap: calc(var(--spacing) * 2);
@@ -15276,6 +15591,9 @@ function PoseStudio() {
     --tw-font-weight: var(--font-weight-semibold);
     font-weight: var(--font-weight-semibold);
   }
+  .\\[overflow-wrap\\:anywhere\\] {
+    overflow-wrap: anywhere;
+  }
   .whitespace-nowrap {
     white-space: nowrap;
   }
@@ -15586,6 +15904,9 @@ function PoseStudio() {
     content: var(--tw-content);
     width: calc(var(--spacing) * 0.5);
   }
+  .empty\\:hidden:empty {
+    display: none;
+  }
   @media (hover: hover) {
     .hover\\:border-primary\\/40:hover {
       border-color: var(--primary);
@@ -15883,6 +16204,11 @@ function PoseStudio() {
       --tw-backdrop-blur: blur(var(--blur-xs));
       -webkit-backdrop-filter: var(--tw-backdrop-blur,) var(--tw-backdrop-brightness,) var(--tw-backdrop-contrast,) var(--tw-backdrop-grayscale,) var(--tw-backdrop-hue-rotate,) var(--tw-backdrop-invert,) var(--tw-backdrop-opacity,) var(--tw-backdrop-saturate,) var(--tw-backdrop-sepia,);
       backdrop-filter: var(--tw-backdrop-blur,) var(--tw-backdrop-brightness,) var(--tw-backdrop-contrast,) var(--tw-backdrop-grayscale,) var(--tw-backdrop-hue-rotate,) var(--tw-backdrop-invert,) var(--tw-backdrop-opacity,) var(--tw-backdrop-saturate,) var(--tw-backdrop-sepia,);
+    }
+  }
+  @media (prefers-reduced-motion: no-preference) {
+    .motion-safe\\:animate-spin {
+      animation: var(--animate-spin);
     }
   }
   @media (width >= 40rem) {
@@ -16882,8 +17208,8 @@ function PoseStudio() {
     setPortalContainer(shadow);
     setMount(node);
   }, []);
-  return /* @__PURE__ */ (0, import_jsx_runtime34.jsx)("div", { ref: hostRef, "data-lanpose-host": "", style: { height: "100%", width: "100%", minHeight: 0, minWidth: 0, flex: "1 1 auto" }, children: mount && portalContainer ? (0, import_react_dom.createPortal)(
-    /* @__PURE__ */ (0, import_jsx_runtime34.jsx)(Studio, { embedded: true, basePath: "/dsh-pose-muse", portalContainer }),
+  return /* @__PURE__ */ (0, import_jsx_runtime35.jsx)("div", { ref: hostRef, "data-lanpose-host": "", style: { height: "100%", width: "100%", minHeight: 0, minWidth: 0, flex: "1 1 auto" }, children: mount && portalContainer ? (0, import_react_dom.createPortal)(
+    /* @__PURE__ */ (0, import_jsx_runtime35.jsx)(Studio, { embedded: true, basePath: "/dsh-pose-muse", portalContainer }),
     mount
   ) : null });
 }

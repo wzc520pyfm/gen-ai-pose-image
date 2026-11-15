@@ -44,6 +44,46 @@ Inside Harness, the sidebar item is 「澜姿 / 工作室」. Opening it shows t
 
 ## Local studio
 
+Choose either Docker or Node.js to run the same web studio. The service you select in Image settings generates the images.
+
+### Run with Docker Compose
+
+1. Start Docker with Compose installed. In the directory containing `compose.yaml`, run the command below to build the studio and start it in the background. You can skip the `.env` file when using the defaults.
+
+   ```bash
+   docker compose up -d --build
+   ```
+
+2. On that computer, open [http://127.0.0.1:43123](http://127.0.0.1:43123) in your browser. By default, only this computer can access the studio.
+3. To generate an image, open Image settings (生图设置) at the top right. For Gemini, OpenAI, or Seedream, select the provider and enter your API key. If you already run ComfyUI, select ComfyUI, enter its address, and click Test connection (测试连接). Your browser connects to ComfyUI directly. [ComfyUI connection guide](docs/comfyui-local.md)
+
+Run `docker compose logs -f web` to view logs. To stop the studio and free its port, run `docker compose down`.
+
+<details>
+  <summary>When do I need a .env file?</summary>
+  <p>Add the settings you need to a file named <code>.env</code> beside <code>compose.yaml</code>. After each change, run <code>docker compose up -d</code> from that directory to apply it.</p>
+  <p><strong>Use a different port.</strong> If the Node.js studio is already using <code>43123</code>, add the line below to open the Docker studio at <a href="http://127.0.0.1:43124">http://127.0.0.1:43124</a>. Your browser stores generation history and custom assets per site, including its port.</p>
+  <pre><code class="language-dotenv">POSE_MUSE_PORT=43124</code></pre>
+  <p><strong>Keep the image API key on the server.</strong> To use your Gemini key across browsers, for example, add these two lines and replace <code>your-gemini-api-key</code> with your key. When using the default Gemini API in the studio, you can leave the key field empty.</p>
+  <pre><code class="language-dotenv">POSE_MUSE_PROVIDER=gemini
+POSE_MUSE_API_KEY=your-gemini-api-key</code></pre>
+  <p>To specify a model or API base URL, set <code>POSE_MUSE_MODEL</code> or <code>POSE_MUSE_BASE_URL</code>, respectively. You can also pass these variables to Compose through your shell.</p>
+</details>
+
+<details>
+  <summary>Where do I enter the address of an OpenAI-compatible image API running on this computer?</summary>
+  <table>
+    <thead><tr><th>Where to enter it</th><th>Example address</th></tr></thead>
+    <tbody>
+      <tr><td>Browser address bar</td><td><code>http://127.0.0.1:43123</code> (default studio URL)</td></tr>
+      <tr><td>Image settings → OpenAI → API base URL (接口根地址)</td><td><code>http://localhost:8000/v1</code> (use your image API's actual address)</td></tr>
+    </tbody>
+  </table>
+  <p>The studio container routes requests for that local HTTP URL to the computer running Docker. On native Linux, the image API must listen on an address the Docker bridge can reach.</p>
+</details>
+
+### Run with Node.js
+
 Node.js 22.19 or newer.
 
 ```bash
@@ -51,28 +91,29 @@ npm install
 npm run dev
 ```
 
-Open [http://127.0.0.1:43123](http://127.0.0.1:43123).
+Open [http://127.0.0.1:43123](http://127.0.0.1:43123) in your browser.
+
+<details>
+  <summary>Start Node.js with a server-side key (Seedream example)</summary>
+  <pre><code class="language-bash">POSE_MUSE_PROVIDER=seedream \
+POSE_MUSE_MODEL=doubao-seedream-5-0-flash-260915 \
+POSE_MUSE_BASE_URL=https://ark.cn-beijing.volces.com/api/v3 \
+POSE_MUSE_API_KEY=your-key \
+npm run dev</code></pre>
+</details>
+
+### Use the studio
 
 1. Select poses in the middle. You can select more than one. Standard full-body is the default page. Sexy and couple poses stay hidden until you turn on “成人向”.
 2. Switch to Costumes to pick one outfit. Spring, summer, autumn, winter, and party are visible by default. Lingerie, swimwear, and sexy need “成人向”.
 3. Switch to 脸部 to pick one face reference. Filter by section and hair length, search ids and style names, or use 随机一张. Leave it empty to keep the character's own face.
 4. Import another model on the left, or keep Dafeiyu. After a costume is selected, “保持服装” steps aside for that outfit. After a face is selected, features, expression, and hairstyle follow that reference.
-5. Fill in a Gemini or OpenAI-compatible key under Image settings at the top right. In the standalone web app the key stays in this browser. Inside DeepSeek Harness, a key sent with a studio generation request is also written into process-readable plugin config so the agent tool path can use it.
+5. Enter a cloud provider key under Image settings at the top right, or leave the field empty if the server has a key for that API. The browser stores keys you enter here. Inside DeepSeek Harness, a generation request that includes a key also saves it in the plugin configuration for the agent tools.
 6. Without a key, the right side still writes a prompt for each image. Copy it into an installed `dsh-image-gen`. Reference order is character, optional face, optional outfit with no person, then pose sketch.
 7. Both the pose and costume pages have a Custom section. Upload a reference, or write a short description and let the current provider expand it into an image prompt before generating a reference. Pose references lean toward line art. Costume references are made by first generating a model wearing the outfit, then removing the person so only the clothes remain. With no key, or when the text API is unavailable, the prompt is expanded locally and can still be copied. Custom items stay in this browser.
 8. Successful images show up under History on the right and remain after refresh. Open one to see the parameters. Use again restores the poses, costume, face, and extra prompt so you can generate again. Delete one entry or clear them all. A warning appears when browser storage is nearly full.
 
 Seedream uses Volcengine Ark at `https://ark.cn-beijing.volces.com/api/v3`, default model `doubao-seedream-5-0-flash-260915`. It sends references in one order: the model image, the optional face original, the optional costume image, then the pose sketch. Gemini places that same list in `generateContent` inline data. An OpenAI-compatible API tries `images/edits` first and appends each `image` part in the same order. If the endpoint cannot edit, it falls back to text-to-image and says so on the result. Gemini defaults to `gemini-2.5-flash-image`.
-
-If the server already has a key, the browser can leave its key empty:
-
-```bash
-POSE_MUSE_PROVIDER=seedream \
-POSE_MUSE_MODEL=doubao-seedream-5-0-flash-260915 \
-POSE_MUSE_BASE_URL=https://ark.cn-beijing.volces.com/api/v3 \
-POSE_MUSE_API_KEY=your-key \
-npm run dev
-```
 
 ## Install into DeepSeek Harness
 

@@ -5,7 +5,7 @@ import { test } from "node:test"
 import { DEFAULT_CHARACTER } from "./character.mjs"
 import { getCatalog, resolveView, searchPoses } from "./catalog.mjs"
 import { getCostume, isSafeCostumePath, searchCostumes } from "./costumes.mjs"
-import { extractGeminiImage, extractOpenAIImage, openAISize, redact, seedreamSize } from "./generate.mjs"
+import { extractGeminiImage, extractOpenAIImage, generateImage, openAISize, redact, seedreamSize } from "./generate.mjs"
 import { modelImage, planRequest, promptCards } from "./jobs.mjs"
 import { fetchPoseBytes, isSafePosePath } from "./poses.mjs"
 import { composePrompt } from "./prompt.mjs"
@@ -137,6 +137,41 @@ test("webp costume references become jpeg before they are sent", async () => {
   assert.equal(converted.buffer[1], 0xd8)
   const png = Buffer.from([0x89, 0x50, 0x4e, 0x47])
   assert.equal((await modelImage({ mediaType: "image/png", buffer: png, role: "character" })).buffer, png)
+})
+
+test("Docker routes a local edit and its same-port image through the host gateway", async (t) => {
+  const previousHost = process.env.POSE_MUSE_DOCKER_HOST
+  process.env.POSE_MUSE_DOCKER_HOST = "host.docker.internal"
+  t.after(() => {
+    if (previousHost === undefined) delete process.env.POSE_MUSE_DOCKER_HOST
+    else process.env.POSE_MUSE_DOCKER_HOST = previousHost
+  })
+
+  const calls = []
+  let resultURL = "http://127.0.0.1:9000/result.png?signature=test"
+  t.mock.method(globalThis, "fetch", async (url, init) => {
+    calls.push(String(url))
+    if (init.method === "POST") return Response.json({ data: [{ url: resultURL }] })
+    return new Response("image")
+  })
+  const request = {
+    provider: "openai",
+    apiKey: "test-key",
+    images: [{ mediaType: "image/png", buffer: Buffer.alloc(64) }],
+    prompt: "test",
+  }
+  await generateImage({ ...request, baseURL: "http://localhost:9000/v1" })
+  resultURL = "https://cdn.example/result.png"
+  await generateImage({ ...request, baseURL: "http://localhost:9000/v1" })
+  await generateImage({ ...request, baseURL: "https://api.example/v1" })
+  assert.deepEqual(calls, [
+    "http://host.docker.internal:9000/v1/images/edits",
+    "http://host.docker.internal:9000/result.png?signature=test",
+    "http://host.docker.internal:9000/v1/images/edits",
+    resultURL,
+    "https://api.example/v1/images/edits",
+    resultURL,
+  ])
 })
 
 test("project license is MIT and names every outside source", () => {

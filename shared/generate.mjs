@@ -1,4 +1,21 @@
 const BLOCKED_HOSTS = new Set(["169.254.169.254", "metadata.google.internal"])
+const LOOPBACK_HOSTS = new Set(["localhost", "127.0.0.1", "[::1]"])
+
+export function providerFetch(baseURL) {
+  const gateway = process.env.POSE_MUSE_DOCKER_HOST
+  if (!gateway || !baseURL) return fetch
+  const base = URL.parse(baseURL)
+  if (base?.protocol !== "http:" || !LOOPBACK_HOSTS.has(base.hostname)) return fetch
+
+  // A local provider may also serve its generated images at a loopback URL.
+  return (input, options) => {
+    const url = new URL(input)
+    if (url.protocol === base.protocol && url.port === base.port && LOOPBACK_HOSTS.has(url.hostname)) {
+      url.hostname = gateway
+    }
+    return fetch(url, options)
+  }
+}
 
 export function defaultModel(provider) {
   if (provider === "gemini") return "gemini-2.5-flash-image"
@@ -81,10 +98,9 @@ export function extractOpenAIImage(payload) {
   throw new Error(payload?.error?.message || "模型没有返回图片")
 }
 
-function geminiEndpoint(baseURL, model) {
-  const base = (baseURL || defaultBaseURL("gemini")).replace(/\/$/, "")
-  const root = base.endsWith("/v1beta") ? base : `${base}/v1beta`
-  return `${root}/models/${encodeURIComponent(model)}:generateContent`
+export function geminiRoot(baseURL) {
+  const base = (String(baseURL || "").trim() || defaultBaseURL("gemini")).replace(/\/$/, "")
+  return base.endsWith("/v1beta") ? base : `${base}/v1beta`
 }
 
 async function readPayload(response, secret) {
@@ -101,14 +117,14 @@ function fail(payload, response, secret, fallback) {
   throw new Error(redact(`${message}（${response.status}）`, secret))
 }
 
-async function asBuffer(extracted, secret, signal) {
+async function asBuffer(extracted, secret, signal, fetchImpl) {
   if (extracted.base64) {
     return {
       mediaType: extracted.mediaType || "image/png",
       buffer: Buffer.from(extracted.base64, "base64"),
     }
   }
-  const response = await fetch(extracted.url, { signal })
+  const response = await fetchImpl(extracted.url, { signal })
   if (!response.ok) throw new Error(redact(`图片下载失败（${response.status}）`, secret))
   const buffer = Buffer.from(await response.arrayBuffer())
   const mediaType = response.headers.get("content-type")?.split(";")[0] || extracted.mediaType || "image/png"
@@ -136,7 +152,7 @@ export async function generateImage({
   images,
   aspectRatio,
   signal,
-  fetchImpl = fetch,
+  fetchImpl = providerFetch(baseURL),
   allowReferenceFallback = true,
   watermark = true,
   timeoutMs = 240000,
@@ -196,7 +212,7 @@ async function generateSeedream({ apiKey, baseURL, model, prompt, images, aspect
   }
   if (!response.ok) fail(payload, response, apiKey, "Seedream 生图失败")
   const extracted = extractOpenAIImage(payload)
-  const image = await asBuffer(extracted, apiKey, signal)
+  const image = await asBuffer(extracted, apiKey, signal, fetchImpl)
   return {
     ...image,
     referencesSent: usedReferences,
@@ -206,7 +222,7 @@ async function generateSeedream({ apiKey, baseURL, model, prompt, images, aspect
 }
 
 async function generateGemini({ apiKey, baseURL, model, prompt, images, aspectRatio, signal, fetchImpl }) {
-  const endpoint = geminiEndpoint(baseURL, model)
+  const endpoint = `${geminiRoot(baseURL)}/models/${encodeURIComponent(model)}:generateContent`
   const body = {
     contents: [{
       role: "user",
@@ -237,7 +253,7 @@ async function generateGemini({ apiKey, baseURL, model, prompt, images, aspectRa
   const payload = await readPayload(response, apiKey)
   if (!response.ok) fail(payload, response, apiKey, "Gemini 生图失败")
   const extracted = extractGeminiImage(payload)
-  const image = await asBuffer(extracted, apiKey, signal)
+  const image = await asBuffer(extracted, apiKey, signal, fetchImpl)
   return { ...image, referencesSent: images.length > 0, model }
 }
 
@@ -290,7 +306,7 @@ async function openAIEdits({ apiKey, root, model, prompt, images, size, signal, 
     throw error
   }
   const extracted = extractOpenAIImage(payload)
-  const image = await asBuffer(extracted, apiKey, signal)
+  const image = await asBuffer(extracted, apiKey, signal, fetchImpl)
   return { ...image, referencesSent: true, model }
 }
 
@@ -315,7 +331,7 @@ async function openAIGenerations({ apiKey, root, model, prompt, size, signal, fe
   if (formatRejected) ({ response, payload } = await send(false))
   if (!response.ok) fail(payload, response, apiKey, "文生图失败")
   const extracted = extractOpenAIImage(payload)
-  return asBuffer(extracted, apiKey, signal)
+  return asBuffer(extracted, apiKey, signal, fetchImpl)
 }
 
 function box4(value) {
@@ -357,7 +373,7 @@ export async function decomposeSeedreamImage({
   prompt,
   image,
   signal,
-  fetchImpl = fetch,
+  fetchImpl = providerFetch(baseURL),
   timeoutMs = 150000,
 } = {}) {
   if (!apiKey) throw new Error("还没有填写 API Key")
@@ -389,8 +405,7 @@ export async function decomposeSeedreamImage({
   if (!response.ok) fail(payload, response, apiKey, "图层拆分失败")
   const parsed = parseSeedreamLayers(payload)
   const load = async (item) => {
-    if (item.base64) return asBuffer({ mediaType: item.mediaType, base64: item.base64 }, apiKey, linked)
-    if (item.url) return asBuffer({ mediaType: item.mediaType, url: item.url }, apiKey, linked)
+    if (item.base64 || item.url) return asBuffer(item, apiKey, linked, fetchImpl)
     throw new Error("图层拆分有一张图没有内容")
   }
   try {

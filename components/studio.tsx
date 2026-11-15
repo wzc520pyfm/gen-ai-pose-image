@@ -40,7 +40,8 @@ import {
 import { deleteSavedModel, listSavedModels, putSavedModel, readActiveModelId, readBuiltinUsed, writeActiveModelId, writeBuiltinUsed, type SavedModel } from "@/lib/models"
 import { getBuiltinModel } from "@/shared/builtin-models.mjs"
 import { pickRandomCombo } from "@/shared/random-combo.mjs"
-import { baseURLFor, DEFAULT_SETTINGS, loadSettings, modelFor, saveSettings, type StudioSettings } from "@/lib/settings"
+import { DEFAULT_SETTINGS, isSharedSettingsEdit, loadSettings, saveSettings, type StudioSettings } from "@/lib/settings"
+import { sameProviderRoot, type ServerProviderStatus } from "@/shared/credentials.mjs"
 import { StudioEnvProvider, studioUrl, useStudioEnv, type StudioPortal } from "@/lib/studio-env"
 import { createCustomId, isCustomCostumeId, reuseFromHistory } from "@/shared/custom.mjs"
 import { messageForStatus } from "@/shared/http-status.mjs"
@@ -106,7 +107,9 @@ function StudioFrame({ embedded }: { embedded: boolean }) {
   const [running, setRunning] = useState(false)
   const [runError, setRunError] = useState("")
   const [limitNote, setLimitNote] = useState("")
-  const [serverKey, setServerKey] = useState(false)
+  const [server, setServer] = useState<ServerProviderStatus | null>(null)
+  const serverKey = server?.keyConfigured && server.provider === settings.provider && sameProviderRoot(settings.provider, settings.baseURL || server.baseURL, server.baseURL)
+  const hasCloudKey = Boolean(settings.apiKey.trim() || serverKey)
   const [sheetOpen, setSheetOpen] = useState(false)
   const [customPoses, setCustomPoses] = useState<CustomAsset[]>([])
   const [customCostumes, setCustomCostumes] = useState<CustomAsset[]>([])
@@ -180,23 +183,20 @@ function StudioFrame({ embedded }: { embedded: boolean }) {
     const revision = settingsRevision.current
     fetch(studioUrl(basePath, "/api/status"))
       .then((response) => response.json())
-      .then((payload: { keyConfigured?: boolean; provider?: string; model?: string; baseURL?: string }) => {
-        setServerKey(Boolean(payload.keyConfigured))
-        const untouched = local.provider === "gemini" && local.apiKey.trim() === "" && (local.model === modelFor("gemini") || local.model.trim() === "")
-        if (untouched && payload.provider === "seedream" && settingsRevision.current === revision) {
-          const next = {
-            ...local,
-            provider: "seedream" as const,
-            model: payload.model || modelFor("seedream"),
-            baseURL: payload.baseURL || baseURLFor("seedream"),
-          }
-          setSettings(next)
-          saveSettings(next)
-          return
-        }
+      .then((payload: ServerProviderStatus) => {
+        setServer(payload)
+        if (settingsRevision.current === revision) setSettings(loadSettings(payload))
       })
       .catch(() => {})
   }, [basePath])
+  useEffect(() => {
+    function syncSettings(event: StorageEvent) {
+      if (event.storageArea !== window.localStorage) return
+      setSettings(current => isSharedSettingsEdit(event.key, current.provider) ? loadSettings(server, current) : current)
+    }
+    window.addEventListener("storage", syncSettings)
+    return () => window.removeEventListener("storage", syncSettings)
+  }, [server])
   useEffect(() => {
     const gen = ++modelLoadGen.current
     Promise.all([readStoredCharacters(), listSavedModels(), readActiveModelId()])
@@ -251,10 +251,9 @@ function StudioFrame({ embedded }: { embedded: boolean }) {
     return () => { window.clearTimeout(timer); controller.abort() }
   }, [basePath, customPoses, customCostumes, settingsReady, settings.engine])
 
-  function updateSettings(next: StudioSettings) {
+  function updateSettings(edits: Partial<StudioSettings>) {
     settingsRevision.current += 1
-    setSettings(next)
-    saveSettings(next)
+    setSettings(saveSettings(settings, edits, server))
   }
 
   function commitLibrary(nextImages: StoredCharacter[], baseModels: SavedModel[], baseActive: string | null) {
@@ -328,7 +327,7 @@ function StudioFrame({ embedded }: { embedded: boolean }) {
   }
 
   async function generateModelSheet() {
-    if (!settings.apiKey.trim() && !serverKey) {
+    if (!hasCloudKey) {
       setSettingsOpen(true)
       setSheetError("先在设置里填写 API Key。")
       return
@@ -540,7 +539,7 @@ function StudioFrame({ embedded }: { embedded: boolean }) {
   }
 
   async function generate() {
-    if (settings.engine !== "comfyui" && !settings.apiKey.trim() && !serverKey) {
+    if (settings.engine !== "comfyui" && !hasCloudKey) {
       setSettingsOpen(true)
       setRunError("先在设置里填写 API Key。")
       setSheetOpen(true)
@@ -694,7 +693,7 @@ function StudioFrame({ embedded }: { embedded: boolean }) {
   }
 
   function reuse(entry: HistoryView) {
-    updateSettings({ ...settings, engine: entry.provider === "comfyui" ? "comfyui" : "cloud" })
+    updateSettings({ engine: entry.provider === "comfyui" ? "comfyui" : "cloud" })
     const restored = reuseFromHistory(entry)
     const missingPose = entry.selection.some((item) => !poseById.has(item.poseId))
     const missingCostume = Boolean(restored.costume && isCustomCostumeId(restored.costume.id) && !customCostumes.some((item) => item.id === restored.costume?.id))
@@ -761,7 +760,7 @@ function StudioFrame({ embedded }: { embedded: boolean }) {
       onClearCostume={() => setCostume(null)}
       face={face}
       onClearFace={() => setFace(null)}
-      hasKey={settings.engine === "comfyui" || Boolean(settings.apiKey.trim()) || serverKey}
+      hasKey={settings.engine === "comfyui" || hasCloudKey}
       running={running}
       runError={runError}
       prompts={prompts}
@@ -852,7 +851,7 @@ function StudioFrame({ embedded }: { embedded: boolean }) {
           images={characters}
           onChange={updateCharacters}
           keepOutfit={settings.keepOutfit}
-          onKeepOutfit={(keepOutfit) => updateSettings({ ...settings, keepOutfit })}
+          onKeepOutfit={(keepOutfit) => updateSettings({ keepOutfit })}
           outfitLocked={Boolean(costume)}
           switchItems={switcherEntries({ models }).map((item) => {
             const saved = models.find((model) => model.id === item.id)
@@ -874,7 +873,7 @@ function StudioFrame({ embedded }: { embedded: boolean }) {
           onGenerateSheet={() => void generateModelSheet()}
           sheetBusy={sheetBusy}
           sheetError={sheetError}
-          hasKey={Boolean(settings.apiKey.trim()) || serverKey}
+          hasKey={hasCloudKey}
           onOpenSettings={() => {
             setSheetError(settings.engine === "comfyui"
               ? "多视角 sheet 要用云端生图。请先选 Seedream、Gemini 或 OpenAI，并填写 API Key。"
@@ -910,7 +909,7 @@ function StudioFrame({ embedded }: { embedded: boolean }) {
               onSaveCustom={(draft) => saveCustom("pose", draft)}
               onDeleteCustom={(id) => void removeCustomPose(id)}
               settings={settings}
-              hasKey={Boolean(settings.apiKey.trim()) || serverKey}
+              hasKey={hasCloudKey}
               syncWarning={syncWarning}
             />
           ) : (
@@ -925,7 +924,7 @@ function StudioFrame({ embedded }: { embedded: boolean }) {
               onSaveCustom={(draft) => saveCustom("costume", draft)}
               onDeleteCustom={(id) => void removeCustomCostume(id)}
               settings={settings}
-              hasKey={Boolean(settings.apiKey.trim()) || serverKey}
+              hasKey={hasCloudKey}
               syncWarning={syncWarning}
               onChangeSettings={updateSettings}
             />
@@ -948,7 +947,7 @@ function StudioFrame({ embedded }: { embedded: boolean }) {
           <div className="px-4 pb-6">{composer}</div>
         </SheetContent>
       </Sheet>
-      <SettingsDialog open={settingsOpen} onOpenChange={setSettingsOpen} settings={settings} onChange={updateSettings} />
+      <SettingsDialog open={settingsOpen} onOpenChange={setSettingsOpen} settings={settings} server={server} onChange={updateSettings} />
       <Dialog open={installOpen} onOpenChange={setInstallOpen}>
         <DialogContent className="max-w-[min(32rem,calc(100%-2rem))]">
           <DialogHeader>
@@ -980,7 +979,7 @@ function StudioFrame({ embedded }: { embedded: boolean }) {
               } else if (adultAsk) {
                 setRequestedSystem(adultAsk)
               }
-              updateSettings({ ...settings, showAdult: true })
+              updateSettings({ showAdult: true })
               setAdultAsk(null)
             }}>{adultAsk?.startsWith("costume:") ? "显示成人向服装" : "显示成人向姿势"}</Button>
           </div>

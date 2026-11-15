@@ -3,6 +3,7 @@ import { join } from "node:path"
 import { createRequire } from "node:module"
 import { searchPoses } from "../shared/catalog.mjs"
 import { searchCostumes } from "../shared/costumes.mjs"
+import { applyEnvCredentials } from "../shared/credentials.mjs"
 import { searchFaces, toFaceSearchResult } from "../shared/faces.mjs"
 import { toCostumeSearchResult, toPoseSearchResult } from "../shared/custom.mjs"
 import { planRequest, promptCards, runGeneration } from "../shared/jobs.mjs"
@@ -35,10 +36,6 @@ function loadDefineTool() {
     // The host injects this package. Outside Harness the plain object still describes the tool.
   }
   return defineToolFallback
-}
-
-function apiKey(config) {
-  return process.env.POSE_MUSE_API_KEY || config.apiKey || ""
 }
 
 export function dropUndefined(value) {
@@ -120,50 +117,25 @@ async function persistImage(ctx, buffer, mediaType, title) {
 }
 
 export function apply(ctx, config = {}) {
-  const remembered = { apiKey: "", provider: "", model: "", baseURL: "" }
-  const current = () => ({
-    ...DEFAULTS,
-    ...config,
-    ...(remembered.apiKey ? { apiKey: remembered.apiKey } : {}),
-    ...(remembered.provider ? { provider: remembered.provider } : {}),
-    ...(remembered.model ? { model: remembered.model } : {}),
-    ...(remembered.baseURL ? { baseURL: remembered.baseURL } : {}),
+  const initial = { ...DEFAULTS, ...config }
+  const envDefaults = { provider: initial.provider, baseURL: initial.baseURL }
+  const profiles = new Map([[initial.provider, { apiKey: initial.apiKey, baseURL: initial.baseURL, model: initial.model }]])
+  let activeProvider = initial.provider
+  const current = (provider = activeProvider) => ({
+    ...DEFAULTS, ...config, apiKey: "", model: "", baseURL: "",
+    ...profiles.get(provider), provider, envDefaults,
   })
 
   function rememberStudioCredentials(body) {
-    if (!body || typeof body !== "object") return
-    const key = typeof body.apiKey === "string" ? body.apiKey.trim() : ""
-    if (key) {
-      remembered.apiKey = key
-      try {
-        if (config && typeof config === "object") config.apiKey = key
-      } catch {
-        // Profile config may be read-only; runtime remembered key still feeds tools.
-      }
-    }
-    if (body.provider === "seedream" || body.provider === "gemini" || body.provider === "openai") {
-      remembered.provider = body.provider
-      try {
-        if (config && typeof config === "object") config.provider = body.provider
-      } catch {
-        // ignore
-      }
-    }
-    if (typeof body.model === "string" && body.model.trim()) {
-      remembered.model = body.model.trim()
-      try {
-        if (config && typeof config === "object") config.model = remembered.model
-      } catch {
-        // ignore
-      }
-    }
-    if (typeof body.baseURL === "string" && body.baseURL.trim()) {
-      remembered.baseURL = body.baseURL.trim()
-      try {
-        if (config && typeof config === "object") config.baseURL = remembered.baseURL
-      } catch {
-        // ignore
-      }
+    if (typeof body?.apiKey !== "string" || !body.apiKey.trim()) return
+    const { provider, apiKey, model, baseURL } = applyEnvCredentials(body, current(body.provider || activeProvider))
+    if (!["seedream", "gemini", "openai"].includes(provider)) return
+    profiles.set(provider, { apiKey, model, baseURL })
+    activeProvider = provider
+    try {
+      Object.assign(config, { provider, apiKey, model, baseURL })
+    } catch {
+      // Read-only host configurations still use the remembered connection in this process.
     }
   }
 
@@ -297,12 +269,11 @@ export function apply(ctx, config = {}) {
       },
     },
     async execute(args) {
-      const config = current()
+      const provider = args.provider || applyEnvCredentials({}, current()).provider
+      const config = current(provider)
+      const cloud = applyEnvCredentials({ provider, model: args.model }, config)
       const input = {
-        provider: args.provider || config.provider || "gemini",
-        apiKey: apiKey(config),
-        baseURL: config.baseURL || "",
-        model: args.model || config.model || "",
+        ...cloud,
         aspectRatio: args.aspect_ratio || config.aspectRatio || "3:4",
         keepOutfit: args.keep_outfit !== false,
         mode: args.mode === "sheet" ? "sheet" : "each",

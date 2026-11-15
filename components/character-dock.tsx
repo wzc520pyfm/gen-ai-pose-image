@@ -2,7 +2,7 @@
 
 /* eslint-disable @next/next/no-img-element -- model photos are data URLs or the bundled muse file */
 
-import { useRef, useState } from "react"
+import { useLayoutEffect, useRef, useState } from "react"
 import { useElapsedSeconds, withElapsed } from "@/lib/elapsed"
 import { ChevronLeft, ChevronRight, ImagePlus, Loader2 } from "lucide-react"
 import { Button } from "@/components/ui/button"
@@ -328,13 +328,6 @@ export function CharacterDock({
   )
 }
 
-function cachedImage(src: string) {
-  if (!src || src.startsWith("data:") || typeof Image === "undefined") return true
-  const probe = new Image()
-  probe.src = src
-  return probe.complete && probe.naturalWidth > 0
-}
-
 function ModelFigure({
   src,
   alt,
@@ -354,15 +347,15 @@ function ModelFigure({
   height?: number
   spinnerClassName?: string
 }) {
-  const [current, setCurrent] = useState(src)
-  const [pending, setPending] = useState(() => !cachedImage(src))
-  if (current !== src) {
-    setCurrent(src)
-    setPending(!cachedImage(src))
-  }
+  const imageRef = useRef<HTMLImageElement>(null)
+  const [pending, setPending] = useState(false)
+  useLayoutEffect(() => {
+    setPending(Boolean(src) && !src.startsWith("data:") && imageRef.current?.complete === false)
+  }, [src])
   return (
     <div className={boxClassName}>
       <img
+        ref={imageRef}
         src={src}
         alt={pending ? "" : alt}
         width={width}

@@ -60,7 +60,7 @@ export function CostumeBrowser({
   settings: StudioSettings
   hasKey: boolean
   syncWarning: string
-  onChangeSettings: (settings: StudioSettings) => void
+  onChangeSettings: (edits: Partial<StudioSettings>) => void
 }) {
   const { basePath } = useStudioEnv()
   const [catalog, setCatalog] = useState<CostumeCatalog | null>(null)
