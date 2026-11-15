@@ -107,17 +107,21 @@ test("cancellation and timeout only delete this task, never globally interrupt",
 test("settings migrate old ComfyUI selection and never persist or restore its token", async () => {
   const compiled = await build({ entryPoints: ["lib/settings.ts"], bundle: true, platform: "browser", format: "esm", write: false })
   const settings = await import(`data:text/javascript;base64,${Buffer.from(compiled.outputFiles[0].text).toString("base64")}`)
-  let stored = JSON.stringify({ engine: "comfyui", apiKey: "old-cloud-key", comfyuiToken: "stale-token" })
-  globalThis.window = { localStorage: { getItem: () => stored, setItem: (_key, value) => { stored = value } } }
+  const storage = new Map([["lanpose-settings-v1", JSON.stringify({ engine: "comfyui", apiKey: "old-cloud-key", comfyuiToken: "stale-token" })]])
+  globalThis.window = { localStorage: { getItem: key => storage.get(key) ?? null, setItem: (key, value) => storage.set(key, value) } }
   try {
     const migrated = settings.loadSettings()
     assert.equal(migrated.engine, "comfyui")
     assert.equal(migrated.comfyuiURL, "http://127.0.0.1:8188")
     assert.equal(migrated.apiKey, "old-cloud-key")
     assert.equal(migrated.comfyuiToken, "")
-    settings.saveSettings({ ...migrated, comfyuiToken: "new-secret", comfyuiURL: "https://comfy.example/prefix" })
-    assert.ok(!stored.includes("new-secret"))
+    const tab = settings.saveSettings(migrated, { comfyuiToken: "new-secret", comfyuiURL: "https://comfy.example/prefix" })
+    assert.ok(![...storage.values()].some(value => value.includes("new-secret") || value.includes("stale-token")))
     assert.equal(settings.loadSettings().comfyuiURL, "https://comfy.example/prefix")
+    assert.equal(settings.loadSettings().comfyuiToken, "")
+    assert.equal(settings.loadSettings(null, tab).comfyuiToken, "new-secret")
+    settings.saveSettings(migrated, { comfyuiURL: "https://other.example" })
+    assert.equal(settings.loadSettings(null, tab).comfyuiToken, "")
   } finally { delete globalThis.window }
 })
 
@@ -129,5 +133,6 @@ test("Harness refuses legacy ComfyUI execution without entering cloud generation
   assert.equal(status, 400)
   assert.match(body.error, /不再支持服务端/)
   const source = await readFile(new URL("../app/api/generate/route.ts", import.meta.url), "utf8")
-  assert.ok(source.indexOf('body.engine === "comfyui"') < source.indexOf("process.env.POSE_MUSE_API_KEY"))
+  const rejectLocal = source.indexOf('body.engine === "comfyui"')
+  assert.ok(rejectLocal >= 0 && rejectLocal < source.indexOf("applyEnvCredentials(body)"))
 })

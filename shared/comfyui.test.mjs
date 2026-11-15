@@ -11,7 +11,7 @@ test("the unified graph prunes unused models and only retains selected samplers"
   for (const [hasOutfit, hasPose, expected] of [[true, false, 1], [false, true, 1], [true, true, 2]]) {
     const { graph } = await buildLocalGraph({ files: file, costume: hasOutfit, pose: hasPose && pose, aspectRatio: "3:4", seed: 123 })
     const types = Object.values(graph).map((n) => n.class_type)
-    assert.equal(types.includes("MOSSImageControl"), Boolean(hasPose))
+    assert.equal(types.includes("MOSSImageControl"), Boolean(hasPose && hasOutfit))
     assert.equal(types.filter((t) => t === "SamplerCustomAdvanced").length, expected)
     assert.ok(!types.includes("ComfySwitchNode"))
     for (const n of Object.values(graph)) for (const v of Object.values(n.inputs)) if (Array.isArray(v)) assert.ok(graph[v[0]])
@@ -21,6 +21,21 @@ test("the unified graph prunes unused models and only retains selected samplers"
   assert.equal(graph["207"].inputs["images.image_7"][0], "503")
   assert.equal(graph["114"].inputs.width, dimensions("16:9")[0])
   assert.equal(graph["501"].inputs.image, "two.png")
+})
+
+test("pose-only generations use the original sketch and retain character references", async () => {
+  for (const system of ["全身", "半身"]) {
+    const { graph } = await buildLocalGraph({ files: file, costume: false, pose: { ...pose, system }, aspectRatio: "3:4" })
+    const inputs = graph["207"].inputs
+    const poseSlot = system === "半身" ? "images.image_2" : "images.image_1"
+    const characterSlot = system === "半身" ? "images.image_1" : "images.image_2"
+    const poseSource = graph[inputs[poseSlot][0]]
+    assert.equal(poseSource.class_type, "LoadImage")
+    assert.equal(poseSource.inputs.image, file.pose)
+    assert.equal(graph[inputs[characterSlot][0]].inputs.image, file.characters[0])
+    assert.equal(graph[inputs["images.image_3"][0]].inputs.image, file.characters[0])
+    assert.ok(!Object.values(graph).some(node => node.class_type === "MOSSImageControl"))
+  }
 })
 
 test("graph cycles and broken mappings fail instead of recurring forever", () => {

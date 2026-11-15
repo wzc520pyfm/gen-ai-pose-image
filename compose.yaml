@@ -1,0 +1,12 @@
+services:
+  web:
+    build: .
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    ports:
+      - "127.0.0.1:${POSE_MUSE_PORT:-43123}:43123"
+    environment:
+      POSE_MUSE_PROVIDER: ${POSE_MUSE_PROVIDER:-}
+      POSE_MUSE_API_KEY: ${POSE_MUSE_API_KEY:-}
+      POSE_MUSE_MODEL: ${POSE_MUSE_MODEL:-}
+      POSE_MUSE_BASE_URL: ${POSE_MUSE_BASE_URL:-}

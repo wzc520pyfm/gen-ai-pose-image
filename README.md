@@ -44,6 +44,46 @@ DeepSeek Harness 插件，也是一个可以单独打开的姿势工作室。从
 
 ## 本地工作室
 
+Docker 和 Node.js 任选一种即可启动同一个网页版工作室。图片由你在「生图设置」里选择的服务生成。
+
+### 使用 Docker Compose
+
+1. 启动 Docker（需带 Compose），在 `compose.yaml` 所在目录运行下面的命令，构建并在后台启动工作室。使用默认设置时可以跳过 `.env`。
+
+   ```bash
+   docker compose up -d --build
+   ```
+
+2. 在这台电脑的浏览器里打开 [http://127.0.0.1:43123](http://127.0.0.1:43123)。默认只有本机能访问这个网页。
+3. 想出图时，点右上角「生图设置」。用 Gemini、OpenAI 或 Seedream 时，选对应服务商并填入密钥。已有 ComfyUI 的话，选「ComfyUI」，填它的地址，点「测试连接」。浏览器会直接连接 ComfyUI。[ComfyUI 连接说明](docs/comfyui-local.md)
+
+查看日志用 `docker compose logs -f web`。要停止工作室并释放端口，运行 `docker compose down`。
+
+<details>
+  <summary>什么时候需要配置 .env？</summary>
+  <p>把需要的设置写进 <code>compose.yaml</code> 同目录的 <code>.env</code>。每次修改后，在该目录运行 <code>docker compose up -d</code> 让配置生效。</p>
+  <p><strong>想换网页端口。</strong>比如 Node.js 版已占用 <code>43123</code>，写入下面这行就能用 <a href="http://127.0.0.1:43124">http://127.0.0.1:43124</a> 打开 Docker 版。浏览器按站点（包括端口）保存生成历史和自定义素材。</p>
+  <pre><code class="language-dotenv">POSE_MUSE_PORT=43124</code></pre>
+  <p><strong>想把生图密钥放在服务端。</strong>比如希望换个浏览器也能用自己的 Gemini 密钥，就写入下面两行，把 <code>your-gemini-api-key</code> 换成实际密钥。在网页选用 Gemini 默认接口时，密钥栏可以留空。</p>
+  <pre><code class="language-dotenv">POSE_MUSE_PROVIDER=gemini
+POSE_MUSE_API_KEY=your-gemini-api-key</code></pre>
+  <p>要指定模型或接口地址，可以加上 <code>POSE_MUSE_MODEL</code> 或 <code>POSE_MUSE_BASE_URL</code>。这些变量也可以通过 shell 传给 Compose。</p>
+</details>
+
+<details>
+  <summary>本机另有 OpenAI 兼容生图接口，地址填在哪里？</summary>
+  <table>
+    <thead><tr><th>填写位置</th><th>地址示例</th></tr></thead>
+    <tbody>
+      <tr><td>浏览器地址栏</td><td><code>http://127.0.0.1:43123</code>（工作室的默认网址）</td></tr>
+      <tr><td>工作室的「生图设置」→「OpenAI」→「接口根地址」</td><td><code>http://localhost:8000/v1</code>（按你的生图服务实际地址填写）</td></tr>
+    </tbody>
+  </table>
+  <p>容器会通过 Docker 网关访问这个本机 HTTP 接口。在原生 Linux 上，生图服务需要监听 Docker 网桥可达的地址。</p>
+</details>
+
+### 使用 Node.js
+
 需要 Node.js 22.19 或更新版本。
 
 ```bash
@@ -51,28 +91,29 @@ npm install
 npm run dev
 ```
 
-打开 [http://127.0.0.1:43123](http://127.0.0.1:43123)。
+启动后，在浏览器打开 [http://127.0.0.1:43123](http://127.0.0.1:43123)。
+
+<details>
+  <summary>用服务端密钥启动 Node.js（Seedream 示例）</summary>
+  <pre><code class="language-bash">POSE_MUSE_PROVIDER=seedream \
+POSE_MUSE_MODEL=doubao-seedream-5-0-flash-260915 \
+POSE_MUSE_BASE_URL=https://ark.cn-beijing.volces.com/api/v3 \
+POSE_MUSE_API_KEY=你的密钥 \
+npm run dev</code></pre>
+</details>
+
+### 使用工作室
 
 1. 在中间点选姿势，可以多选。标准全身是默认页；性感系和双人姿势需要明确打开「成人向」。
 2. 切到「服装」可以单选一套衣服。春夏秋冬和派对默认可见；内衣、泳装、性感需要打开「成人向」。
 3. 切到「脸部」可以单选一张脸部参考。可以按脸部特写或造型、发长筛选，也可以搜索编号和造型名，或点「随机一张」。不选则保持角色原来的脸。
 4. 左侧可以导入其他模特，或继续用大肥鱼。选了服装之后，「保持服装」会暂时让位给这套衣服。选了脸部之后，五官、表情和发型改用这张参考。
-5. 右上角「生图设置」里填写 Gemini 或 OpenAI 兼容接口的密钥。网页版里密钥只留在这台浏览器里；装进 DeepSeek Harness 后，工作室生图请求里带上的密钥会写入当前进程可读取的配置，供 agent 工具路径使用。
+5. 云端生图的密钥可以在右上角「生图设置」里填写。服务端已为该接口配置密钥时，网页的密钥栏可以留空。手动填写的密钥保存在当前浏览器。装进 DeepSeek Harness 后，生图请求带上的密钥也会写入插件配置，供 agent 工具使用。
 6. 没有密钥时，右侧仍会写出每一张图的提示词，可以复制到已安装的 `dsh-image-gen` 里生图。参考图顺序是角色、可选的脸部参考、可选的没有人物的衣服、姿势线稿。
 7. 姿势和服装页都有「自定义」。可以上传参考图，也可以写一句描述，让当前接口把描述扩写成提示词再生成参考图。姿势参考偏向线稿。服装参考会先生成一位穿着这套衣服的模特，再把人抠掉，只留下衣服。没有密钥或文本接口不可用时，会在本地扩写，提示词仍可复制。自定义内容只存在这台浏览器里。
 8. 出图成功后会出现在右侧「历史」。刷新后还在。点开可以看当时的参数，「再用」会恢复姿势、服装、脸部和补充描述，然后再出图。可以删除一条，或清空全部。存储快满时会提示清理。
 
 Seedream 走火山方舟 `https://ark.cn-beijing.volces.com/api/v3`，默认模型 `doubao-seedream-5-0-flash-260915`，会按同一顺序提交参考图：模特图、可选的脸部原图、可选的服装图、姿势线稿。Gemini 把同一组图放进 `generateContent` 的 inline data。OpenAI 兼容接口会先走 `images/edits`，按同样顺序附加 `image` 字段；接口不支持编辑时，会退回纯文生图，并在结果上说明参考图没有送出。Gemini 默认模型是 `gemini-2.5-flash-image`。
-
-服务器若已配置密钥，可以不把密钥放进浏览器：
-
-```bash
-POSE_MUSE_PROVIDER=seedream \
-POSE_MUSE_MODEL=doubao-seedream-5-0-flash-260915 \
-POSE_MUSE_BASE_URL=https://ark.cn-beijing.volces.com/api/v3 \
-POSE_MUSE_API_KEY=你的密钥 \
-npm run dev
-```
 
 ## 装进 DeepSeek Harness
 

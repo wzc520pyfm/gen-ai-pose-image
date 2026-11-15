@@ -1,4 +1,5 @@
 export function statusForStudioError(error) {
+  if (Number.isInteger(error?.status) && error.status >= 400 && error.status <= 599) return error.status
   const message = error instanceof Error ? error.message : String(error || "")
   if (/超时|timeout|aborted|AbortError|FUNCTION_INVOCATION_TIMEOUT/i.test(message)) return 504
   if (/暂时读不到|没有读到|没有连上|ECONN|ENOTFOUND|fetch failed|压缩失败/i.test(message)) return 502

@@ -1,6 +1,6 @@
 import { costumeBeautifyRole } from "./costume-prompt.mjs"
 import { POSE_STYLE_LOCK, expandReferencePrompt } from "./custom.mjs"
-import { defaultBaseURL, redact } from "./generate.mjs"
+import { defaultBaseURL, geminiRoot, providerFetch, redact } from "./generate.mjs"
 
 /** Empty uses the provider default. A filled id is sent as written, even if it looks like an image model. */
 export function textModelFor(provider, textModel) {
@@ -67,11 +67,6 @@ async function readJson(response, secret) {
   }
 }
 
-function geminiRoot(baseURL) {
-  const base = (String(baseURL || "").trim() || defaultBaseURL("gemini")).replace(/\/$/, "")
-  return base.endsWith("/v1beta") ? base : `${base}/v1beta`
-}
-
 async function geminiText({ apiKey, baseURL, model, instruction, fetchImpl, signal }) {
   const endpoint = `${geminiRoot(baseURL)}/models/${encodeURIComponent(model)}:generateContent`
   const response = await fetchImpl(endpoint, {
@@ -133,7 +128,7 @@ export async function beautifyPrompt({
   userPrompt = "",
   adult = false,
   sensitivePromptOptimize = false,
-  fetchImpl = fetch,
+  fetchImpl = providerFetch(baseURL),
   signal,
 } = {}) {
   const input = {

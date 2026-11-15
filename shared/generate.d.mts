@@ -1,5 +1,7 @@
 export function defaultModel(provider: "gemini" | "openai" | "seedream"): string
 export function defaultBaseURL(provider: "gemini" | "openai" | "seedream"): string
+export function providerFetch(baseURL?: string): typeof fetch
+export function geminiRoot(baseURL?: string): string
 export function openAISize(aspectRatio: string): string
 export function seedreamSize(aspectRatio: string): string
 export function assertBaseURL(baseURL: string): string
