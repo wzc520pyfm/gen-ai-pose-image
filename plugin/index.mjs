@@ -269,8 +269,9 @@ export function apply(ctx, config = {}) {
       },
     },
     async execute(args) {
-      const config = current(args.provider || activeProvider)
-      const cloud = applyEnvCredentials({ provider: args.provider || config.provider, model: args.model }, config)
+      const provider = args.provider || applyEnvCredentials({}, current()).provider
+      const config = current(provider)
+      const cloud = applyEnvCredentials({ provider, model: args.model }, config)
       const input = {
         ...cloud,
         aspectRatio: args.aspect_ratio || config.aspectRatio || "3:4",

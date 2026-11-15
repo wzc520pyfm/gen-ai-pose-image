@@ -165,6 +165,7 @@ function migrateLegacySettings() {
 export function saveSettings(current: StudioSettings, edits: Partial<StudioSettings>, server?: ServerProviderStatus | null): StudioSettings {
   const selected = edits.provider ? selectCloudProvider(current, edits.provider, server) : current
   const next = { ...selected, ...edits }
+  if (next.comfyuiURL !== current.comfyuiURL) next.comfyuiToken = edits.comfyuiToken ?? ""
   migrateLegacySettings()
   // A setItem per edited field keeps simultaneous updates in different tabs independent.
   for (const field of COMMON_FIELDS) {

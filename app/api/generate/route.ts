@@ -6,6 +6,10 @@ import { runGeneration } from "@/shared/jobs.mjs"
 export const maxDuration = 300
 
 export async function POST(request: Request) {
+  const mediaType = request.headers.get("content-type")?.split(";")[0].trim().toLowerCase()
+  if (mediaType !== "application/json") {
+    return NextResponse.json({ error: "请使用 JSON 提交生图请求。" }, { status: 415 })
+  }
   let body: Record<string, unknown>
   try {
     body = await request.json() as Record<string, unknown>

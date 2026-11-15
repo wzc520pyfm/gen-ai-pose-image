@@ -5,7 +5,8 @@ import { runProviderAction } from "@/shared/provider-settings.mjs"
 export const maxDuration = 300
 
 export async function POST(request: Request) {
-  if (!request.headers.get("content-type")?.includes("application/json")) {
+  const mediaType = request.headers.get("content-type")?.split(";")[0].trim().toLowerCase()
+  if (mediaType !== "application/json") {
     return NextResponse.json({ error: "请使用 JSON 提交设置。" }, { status: 415 })
   }
   let body: unknown

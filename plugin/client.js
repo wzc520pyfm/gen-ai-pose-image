@@ -13561,6 +13561,7 @@ function migrateLegacySettings() {
 function saveSettings(current, edits, server) {
   const selected = edits.provider ? selectCloudProvider(current, edits.provider, server) : current;
   const next = { ...selected, ...edits };
+  if (next.comfyuiURL !== current.comfyuiURL) next.comfyuiToken = edits.comfyuiToken ?? "";
   migrateLegacySettings();
   for (const field of COMMON_FIELDS) {
     if (edits[field] !== void 0) window.localStorage.setItem(`${KEY}:${field}`, JSON.stringify(edits[field]));

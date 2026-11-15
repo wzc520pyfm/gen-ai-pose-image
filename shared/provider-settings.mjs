@@ -11,7 +11,10 @@ async function readModelDirectory({ provider, baseURL, apiKey, fetchImpl, signal
   const started = performance.now()
   for (;;) {
     const response = await fetchImpl(url, { headers, signal, cache: "no-store" })
-    const payload = await response.json().catch(() => null)
+    const payload = await response.json().catch(error => {
+      if (error?.name !== "SyntaxError") throw error
+      return null
+    })
     if (!response.ok || payload?.error) {
       const detail = payload?.error?.message || (typeof payload?.error === "string" ? payload.error : "")
       const message = detail || (checkOnly ? "连接检测失败" : "获取模型列表失败")
